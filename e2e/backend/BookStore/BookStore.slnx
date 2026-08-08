@@ -1,0 +1,23 @@
+<Solution>
+    <Configurations>
+        <Platform Name="Any CPU" />
+    </Configurations>
+    <Folder Name="/src/">
+        <Project Path="src/BookStore.Domain/BookStore.Domain.csproj" />
+        <Project Path="src/BookStore.Application/BookStore.Application.csproj" />
+        <Project Path="src/BookStore.MongoDB/BookStore.MongoDB.csproj" />
+        <Project Path="src/BookStore.Domain.Shared/BookStore.Domain.Shared.csproj" />
+        <Project Path="src/BookStore.Application.Contracts/BookStore.Application.Contracts.csproj" />
+        <Project Path="src/BookStore.HttpApi/BookStore.HttpApi.csproj" />
+        <Project Path="src/BookStore.HttpApi.Client/BookStore.HttpApi.Client.csproj" />
+        <Project Path="src/BookStore.HttpApi.Host/BookStore.HttpApi.Host.csproj" />
+        <Project Path="src/BookStore.DbMigrator/BookStore.DbMigrator.csproj" />
+    </Folder>
+    <Folder Name="/test/">
+        <Project Path="test/BookStore.Application.Tests/BookStore.Application.Tests.csproj" />
+        <Project Path="test/BookStore.TestBase/BookStore.TestBase.csproj" />
+        <Project Path="test/BookStore.Domain.Tests/BookStore.Domain.Tests.csproj" />
+        <Project Path="test/BookStore.MongoDB.Tests/BookStore.MongoDB.Tests.csproj" />
+        <Project Path="test/BookStore.HttpApi.Client.ConsoleTestApp/BookStore.HttpApi.Client.ConsoleTestApp.csproj" />
+    </Folder>
+</Solution>

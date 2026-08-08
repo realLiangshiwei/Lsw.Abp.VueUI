@@ -1,0 +1,830 @@
+{
+    "localization": {
+        "values": {},
+        "resources": {},
+        "languages": [
+            {
+                "cultureName": "en",
+                "uiCultureName": "en",
+                "displayName": "English",
+                "twoLetterISOLanguageName": "en"
+            },
+            {
+                "cultureName": "ar",
+                "uiCultureName": "ar",
+                "displayName": "Arabic",
+                "twoLetterISOLanguageName": "ar"
+            },
+            {
+                "cultureName": "zh-Hans",
+                "uiCultureName": "zh-Hans",
+                "displayName": "Chinese (Simplified)",
+                "twoLetterISOLanguageName": "zh"
+            },
+            {
+                "cultureName": "zh-Hant",
+                "uiCultureName": "zh-Hant",
+                "displayName": "Chinese (Traditional)",
+                "twoLetterISOLanguageName": "zh"
+            },
+            {
+                "cultureName": "cs",
+                "uiCultureName": "cs",
+                "displayName": "Czech",
+                "twoLetterISOLanguageName": "cs"
+            },
+            {
+                "cultureName": "en-GB",
+                "uiCultureName": "en-GB",
+                "displayName": "English (UK)",
+                "twoLetterISOLanguageName": "en"
+            },
+            {
+                "cultureName": "fi",
+                "uiCultureName": "fi",
+                "displayName": "Finnish",
+                "twoLetterISOLanguageName": "fi"
+            },
+            {
+                "cultureName": "fr",
+                "uiCultureName": "fr",
+                "displayName": "French",
+                "twoLetterISOLanguageName": "fr"
+            },
+            {
+                "cultureName": "de-DE",
+                "uiCultureName": "de-DE",
+                "displayName": "German (Germany)",
+                "twoLetterISOLanguageName": "de"
+            },
+            {
+                "cultureName": "hi",
+                "uiCultureName": "hi",
+                "displayName": "Hindi ",
+                "twoLetterISOLanguageName": "hi"
+            },
+            {
+                "cultureName": "hu",
+                "uiCultureName": "hu",
+                "displayName": "Hungarian",
+                "twoLetterISOLanguageName": "hu"
+            },
+            {
+                "cultureName": "is",
+                "uiCultureName": "is",
+                "displayName": "Icelandic",
+                "twoLetterISOLanguageName": "is"
+            },
+            {
+                "cultureName": "it",
+                "uiCultureName": "it",
+                "displayName": "Italian",
+                "twoLetterISOLanguageName": "it"
+            },
+            {
+                "cultureName": "pt-BR",
+                "uiCultureName": "pt-BR",
+                "displayName": "Portuguese (Brazil)",
+                "twoLetterISOLanguageName": "pt"
+            },
+            {
+                "cultureName": "ro-RO",
+                "uiCultureName": "ro-RO",
+                "displayName": "Romanian (Romania)",
+                "twoLetterISOLanguageName": "ro"
+            },
+            {
+                "cultureName": "ru",
+                "uiCultureName": "ru",
+                "displayName": "Russian",
+                "twoLetterISOLanguageName": "ru"
+            },
+            {
+                "cultureName": "sk",
+                "uiCultureName": "sk",
+                "displayName": "Slovak",
+                "twoLetterISOLanguageName": "sk"
+            },
+            {
+                "cultureName": "es",
+                "uiCultureName": "es",
+                "displayName": "Spanish",
+                "twoLetterISOLanguageName": "es"
+            },
+            {
+                "cultureName": "sv",
+                "uiCultureName": "sv",
+                "displayName": "Swedish",
+                "twoLetterISOLanguageName": "sv"
+            },
+            {
+                "cultureName": "tr",
+                "uiCultureName": "tr",
+                "displayName": "Turkish",
+                "twoLetterISOLanguageName": "tr"
+            }
+        ],
+        "currentCulture": {
+            "displayName": "English",
+            "englishName": "English",
+            "threeLetterIsoLanguageName": "eng",
+            "twoLetterIsoLanguageName": "en",
+            "isRightToLeft": false,
+            "cultureName": "en",
+            "name": "en",
+            "nativeName": "English",
+            "dateTimeFormat": {
+                "calendarAlgorithmType": "SolarCalendar",
+                "dateTimeFormatLong": "dddd, MMMM d, yyyy",
+                "shortDatePattern": "M/d/yyyy",
+                "fullDateTimePattern": "dddd, MMMM d, yyyy h:mm:ss\u202ftt",
+                "dateSeparator": "/",
+                "shortTimePattern": "h:mm\u202ftt",
+                "longTimePattern": "h:mm:ss\u202ftt"
+            }
+        },
+        "defaultResourceName": "BookStore",
+        "languagesMap": {
+            "bootstrap-datepicker": [
+                {
+                    "name": "zh-Hans",
+                    "value": "zh-CN"
+                },
+                {
+                    "name": "zh-Hant",
+                    "value": "zh-TW"
+                }
+            ],
+            "moment": [
+                {
+                    "name": "zh-Hans",
+                    "value": "zh-cn"
+                },
+                {
+                    "name": "zh-Hant",
+                    "value": "zh-tw"
+                },
+                {
+                    "name": "de-DE",
+                    "value": "de"
+                }
+            ]
+        },
+        "languageFilesMap": {
+            "bootstrap-datepicker": [
+                {
+                    "name": "zh-Hans",
+                    "value": "zh-CN"
+                },
+                {
+                    "name": "zh-Hant",
+                    "value": "zh-TW"
+                }
+            ],
+            "moment": [
+                {
+                    "name": "zh-Hans",
+                    "value": "zh-cn"
+                },
+                {
+                    "name": "zh-Hant",
+                    "value": "zh-tw"
+                },
+                {
+                    "name": "de-DE",
+                    "value": "de"
+                }
+            ],
+            "jquery.timeago": [
+                {
+                    "name": "zh-Hans",
+                    "value": "zh-CN"
+                },
+                {
+                    "name": "zh-Hant",
+                    "value": "zh-TW"
+                }
+            ],
+            "jquery-validation": [
+                {
+                    "name": "zh-Hans",
+                    "value": "zh"
+                },
+                {
+                    "name": "zh-Hant",
+                    "value": "zh_TW"
+                }
+            ]
+        },
+        "useRouteBasedCulture": false
+    },
+    "auth": {
+        "grantedPolicies": {}
+    },
+    "setting": {
+        "values": {
+            "Abp.Localization.DefaultLanguage": "en",
+            "Abp.Timing.TimeZone": "",
+            "Abp.Identity.Password.RequiredLength": "6",
+            "Abp.Identity.Password.RequiredUniqueChars": "1",
+            "Abp.Identity.Password.RequireNonAlphanumeric": "False",
+            "Abp.Identity.Password.RequireLowercase": "False",
+            "Abp.Identity.Password.RequireUppercase": "False",
+            "Abp.Identity.Password.RequireDigit": "False",
+            "Abp.Identity.Password.ForceUsersToPeriodicallyChangePassword": "False",
+            "Abp.Identity.Password.PasswordChangePeriodDays": "0",
+            "Abp.Identity.Password.EnablePreventPasswordReuse": "False",
+            "Abp.Identity.Password.PreventPasswordReuseCount": "6",
+            "Abp.Identity.Lockout.AllowedForNewUsers": "True",
+            "Abp.Identity.Lockout.LockoutDuration": "300",
+            "Abp.Identity.Lockout.MaxFailedAccessAttempts": "5",
+            "Abp.Identity.SignIn.RequireConfirmedEmail": "False",
+            "Abp.Identity.SignIn.EnablePhoneNumberConfirmation": "True",
+            "Abp.Identity.SignIn.RequireEmailVerificationToRegister": "False",
+            "Abp.Identity.SignIn.RequireConfirmedPhoneNumber": "False",
+            "Abp.Identity.User.IsUserNameUpdateEnabled": "True",
+            "Abp.Identity.User.IsEmailUpdateEnabled": "True",
+            "Abp.Identity.OrganizationUnit.MaxUserMembershipCount": "2147483647",
+            "Abp.Account.IsSelfRegistrationEnabled": "true",
+            "Abp.Account.EnableLocalLogin": "true"
+        }
+    },
+    "currentUser": {
+        "isAuthenticated": false,
+        "id": null,
+        "tenantId": null,
+        "impersonatorUserId": null,
+        "impersonatorTenantId": null,
+        "impersonatorUserName": null,
+        "impersonatorTenantName": null,
+        "userName": null,
+        "name": null,
+        "surName": null,
+        "email": null,
+        "emailVerified": false,
+        "phoneNumber": null,
+        "phoneNumberVerified": false,
+        "roles": [],
+        "sessionId": null
+    },
+    "features": {
+        "values": {
+            "SettingManagement.Enable": "true",
+            "SettingManagement.AllowChangingEmailSettings": "false"
+        }
+    },
+    "globalFeatures": {
+        "enabledFeatures": []
+    },
+    "multiTenancy": {
+        "isEnabled": true,
+        "userSharingStrategy": 0
+    },
+    "currentTenant": {
+        "id": null,
+        "name": null,
+        "isAvailable": false
+    },
+    "timing": {
+        "timeZone": {
+            "iana": {
+                "timeZoneName": null
+            },
+            "windows": {
+                "timeZoneId": null
+            }
+        }
+    },
+    "clock": {
+        "kind": "Unspecified"
+    },
+    "objectExtensions": {
+        "modules": {
+            "Identity": {
+                "entities": {
+                    "User": {
+                        "properties": {
+                            "SocialSecurityNumber": {
+                                "type": "System.String",
+                                "typeSimple": "string",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": true
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "required",
+                                        "config": {
+                                            "allowEmptyStrings": false
+                                        }
+                                    },
+                                    {
+                                        "typeSimple": "stringLength",
+                                        "config": {
+                                            "maximumLength": 64,
+                                            "minimumLength": 4
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": null
+                            },
+                            "Age": {
+                                "type": "System.Int32",
+                                "typeSimple": "number",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": true
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "required",
+                                        "config": {
+                                            "allowEmptyStrings": false
+                                        }
+                                    },
+                                    {
+                                        "typeSimple": "range",
+                                        "config": {
+                                            "minimum": 0,
+                                            "maximum": 150,
+                                            "minimumIsExclusive": false,
+                                            "maximumIsExclusive": false,
+                                            "operandType": "number",
+                                            "parseLimitsInInvariantCulture": false,
+                                            "convertValueInInvariantCulture": false
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": 0
+                            },
+                            "IsExternal": {
+                                "type": "System.Boolean",
+                                "typeSimple": "boolean",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": true
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": false
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": false
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "required",
+                                        "config": {
+                                            "allowEmptyStrings": false
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": false
+                            },
+                            "HireDate": {
+                                "type": "System.DateTime?",
+                                "typeSimple": "datetime",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": false
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [],
+                                "configuration": {},
+                                "defaultValue": null
+                            },
+                            "Title": {
+                                "type": "BookStore.EmployeeTitle",
+                                "typeSimple": "enum",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": true
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "required",
+                                        "config": {
+                                            "allowEmptyStrings": false
+                                        }
+                                    },
+                                    {
+                                        "typeSimple": "enumDataType",
+                                        "config": {
+                                            "enumType": "enum",
+                                            "dataType": "Custom",
+                                            "customDataType": "Enumeration"
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": 0
+                            },
+                            "Website": {
+                                "type": "System.String",
+                                "typeSimple": "string",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": false
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": false
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "regularExpression",
+                                        "config": {
+                                            "matchTimeoutInMilliseconds": 2000,
+                                            "matchTimeout": "00:00:02",
+                                            "pattern": "^https?://.+"
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": null
+                            },
+                            "InternalNote": {
+                                "type": "System.String",
+                                "typeSimple": "string",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": false
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [
+                                            "AbpIdentity.Users.Update"
+                                        ],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "stringLength",
+                                        "config": {
+                                            "maximumLength": 256,
+                                            "minimumLength": 0
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": null
+                            }
+                        },
+                        "configuration": {}
+                    },
+                    "Role": {
+                        "properties": {
+                            "Department": {
+                                "type": "System.String",
+                                "typeSimple": "string",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": true
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "stringLength",
+                                        "config": {
+                                            "maximumLength": 128,
+                                            "minimumLength": 0
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": null
+                            }
+                        },
+                        "configuration": {}
+                    }
+                },
+                "configuration": {}
+            }
+        },
+        "enums": {
+            "BookStore.EmployeeTitle": {
+                "fields": [
+                    {
+                        "name": "Engineer",
+                        "value": 0
+                    },
+                    {
+                        "name": "Manager",
+                        "value": 1
+                    },
+                    {
+                        "name": "Director",
+                        "value": 2
+                    }
+                ],
+                "localizationResource": null
+            }
+        }
+    },
+    "extraProperties": {}
+}
