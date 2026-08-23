@@ -1,0 +1,7 @@
+[
+  {
+    "name": "@lsw-abpvue/utils",
+    "path": "packages/utils/dist/index.js",
+    "limit": "1 kB"
+  }
+]

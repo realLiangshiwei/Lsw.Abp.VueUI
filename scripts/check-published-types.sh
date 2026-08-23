@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# Type-checks the .d.ts we publish with an older TypeScript than we build with. Without
+# this we only find out a consumer on TS 5.9 cannot use us when they open an issue.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+declarations=(packages/*/dist/index.d.ts)
+
+if [ ! -e "${declarations[0]}" ]; then
+  echo "No built declarations found. Run 'pnpm build' first." >&2
+  exit 1
+fi
+
+tsc="node_modules/typescript-downstream/bin/tsc"
+version="$(node -p "require('./node_modules/typescript-downstream/package.json').version")"
+echo "Checking published declarations with TypeScript $version"
+
+node "$tsc" \
+  --noEmit \
+  --strict \
+  --target es2022 \
+  --module esnext \
+  --moduleResolution bundler \
+  --skipLibCheck \
+  "${declarations[@]}"
+
+echo "OK"
