@@ -38,6 +38,7 @@
     "globals": "^16.5.0",
     "happy-dom": "^20.11.6",
     "lefthook": "^2.1.10",
+    "pkg-pr-new": "^0.0.88",
     "prettier": "^3.9.6",
     "size-limit": "^12.1.0",
     "turbo": "^2.10.11",

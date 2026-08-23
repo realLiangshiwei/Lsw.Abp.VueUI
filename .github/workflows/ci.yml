@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   TURBO_TELEMETRY_DISABLED: 1
   DO_NOT_TRACK: 1
@@ -29,6 +32,13 @@ jobs:
       - run: pnpm test:coverage
       - run: pnpm build
       - run: pnpm size
+
+      # Preview builds for every commit and PR, installable straight from the URL
+      # pkg.pr.new prints. Nothing goes to npm; entries are purged after a month.
+      # TODO: drop continue-on-error once the pkg-pr-new GitHub App is installed on
+      # the repository and a preview URL has actually shown up.
+      - run: pnpm exec pkg-pr-new publish './packages/*' --pnpm
+        continue-on-error: true
 
   # The declarations we publish have to be readable by projects on an older TypeScript
   # than the one we build with. Kept separate so a failure here is unmistakable.
