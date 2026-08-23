@@ -1,8 +1,10 @@
 name: Release dev
 
+# Manual for now: nothing is published until the scope is claimed on npm and
+# NPM_TOKEN is in the repository secrets. Switch back to `push: branches: [main]`
+# once both are done — every merge is meant to go out as a dev build.
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: release-dev
