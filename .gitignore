@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+.DS_Store
+*.local
+.env.local
+.env.*.local
+
+# 后端产物：克隆后跑 abp install-libs 与 dotnet build 补回
+e2e/backend/**/bin/
+e2e/backend/**/obj/
+e2e/backend/**/wwwroot/libs/
