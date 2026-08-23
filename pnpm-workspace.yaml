@@ -1,0 +1,11 @@
+packages:
+  - packages/*
+  - playground
+  - templates/*
+
+# lefthook ships its binary as a platform-specific optional dependency, so the
+# postinstall it also carries has nothing left to do.
+allowBuilds:
+  # esbuild fetches its platform binary in a postinstall; size-limit needs it.
+  esbuild: true
+  lefthook: false
