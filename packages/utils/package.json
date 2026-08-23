@@ -1,0 +1,40 @@
+{
+  "name": "@lsw-abpvue/utils",
+  "version": "0.0.0",
+  "description": "Framework-agnostic helpers for the ABP Vue UI. No dependencies, not even Vue.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.json",
+    "typecheck": "vue-tsc -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realLiangshiwei/Lsw.Abp.VueUI.git",
+    "directory": "packages/utils"
+  },
+  "homepage": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI",
+  "bugs": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI/issues",
+  "keywords": [
+    "abp",
+    "vue",
+    "utils"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
