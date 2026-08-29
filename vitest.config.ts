@@ -25,9 +25,15 @@ export default defineConfig({
       include: ['packages/*/src/**/*.{ts,vue}'],
       exclude: ['**/*.spec.ts', '**/*.test-d.ts', '**/index.ts'],
       // Targets are core and components/extensible 80%, the DI kernel 95%, everything
-      // else 60% (testing rules). Held at zero through M0 and raised as each package
-      // lands, so the gate never blocks work that has no implementation yet.
-      thresholds: { lines: 0, functions: 0, branches: 0, statements: 0 },
+      // else 60% (testing rules). Raised as each package lands, so the gate never blocks
+      // work that has no implementation yet.
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+        'packages/core/src/di/**': { lines: 95, functions: 95, branches: 95, statements: 95 },
+      },
     },
   },
 });

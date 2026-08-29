@@ -3,5 +3,18 @@
     "name": "@lsw-abpvue/utils",
     "path": "packages/utils/dist/index.js",
     "limit": "1 kB"
+  },
+  {
+    "name": "@lsw-abpvue/core",
+    "path": "packages/core/dist/index.js",
+    "ignore": ["vue"],
+    "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/core (only defineToken)",
+    "path": "packages/core/dist/index.js",
+    "import": "{ defineToken }",
+    "ignore": ["vue"],
+    "limit": "200 B"
   }
 ]
