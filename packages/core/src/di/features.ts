@@ -19,6 +19,7 @@ export interface Feature<K extends string = string> {
  * @param options `repeatable` for features that add to a multi token and may be passed
  * more than once
  */
+/*#__NO_SIDE_EFFECTS__*/
 export function defineFeature<K extends string>(
   kind: K,
   providers: readonly Provider[],

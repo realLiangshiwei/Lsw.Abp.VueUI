@@ -28,6 +28,7 @@ export interface TokenOptions<T> {
  * @param options `multi` for collected tokens, `factory` for a root default, `hint` for
  * the "no provider" message
  */
+/*#__NO_SIDE_EFFECTS__*/
 export function defineToken<T>(
   description: string,
   options: TokenOptions<T> = {},
@@ -49,6 +50,7 @@ export function defineToken<T>(
  * @param factory Builds the service; runs at most once per root injector
  * @see https://angular.dev/api/core/Injectable
  */
+/*#__NO_SIDE_EFFECTS__*/
 export function defineService<T>(description: string, factory: () => T): InjectionToken<T> {
   return defineToken<T>(description, { factory });
 }
