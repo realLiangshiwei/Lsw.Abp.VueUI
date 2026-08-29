@@ -5,15 +5,15 @@ import vue from '@vitejs/plugin-vue';
 import { defineConfig, type UserConfig } from 'vite';
 
 export interface AbpLibOptions {
-  /** 包根目录，一律传调用方的 `import.meta.url` */
+  /** Package root, always the caller's `import.meta.url` */
   packageUrl: string;
   /**
-   * 入口表。键是产物在 `dist/` 下的相对路径（不含扩展名），
-   * 值是相对包根的源文件路径。二级入口照设计 03 的约定命名：
+   * The entry map. Keys are the output paths under `dist/` without an extension, values are
+   * relative to the package root. A secondary entry follows the convention of design 03:
    * `{ index: 'src/index.ts', 'config/index': 'config/src/index.ts' }`
    */
   entries: Record<string, string>;
-  /** 除框架与 `@lsw-abpvue/*` 之外还要 external 的依赖 */
+  /** What to keep external beyond the framework and `@lsw-abpvue/*` */
   external?: (string | RegExp)[];
 }
 
@@ -22,12 +22,12 @@ const WORKSPACE_EXTERNALS = [/^@lsw-abpvue\//];
 const NODE_EXTERNALS = [...builtinModules.map(m => new RegExp(`^${m}$`)), /^node:/];
 
 /**
- * 库模式的共享配置。产物只有 ESM——Vue 3.5 + Vite 8 时代没有 CJS 的必要，
- * 有人反馈需要再加。
+ * The shared library-mode configuration. ESM only -- in the age of Vue 3.5 and Vite 8 there
+ * is no call for CJS; if anyone asks, it can be added.
  *
- * 类型声明不在这里出：由 `vue-tsc -p tsconfig.build.json` 单独产出。
- * M0 实测过 vue-tsc 对 `.ts` 与 `.vue` 都能正确生成 `.d.ts`，
- * 少一个插件就少一处会在 Vite/TS 大版本上卡住的地方。
+ * Declarations are not emitted here: `vue-tsc -p tsconfig.build.json` produces them, and
+ * M0 measured vue-tsc emitting correct `.d.ts` for both `.ts` and `.vue`;
+ * one plugin fewer is one fewer thing to get stuck on across a major Vite or TS release.
  */
 export function defineAbpLibConfig(options: AbpLibOptions): UserConfig {
   const root = dirname(fileURLToPath(options.packageUrl));

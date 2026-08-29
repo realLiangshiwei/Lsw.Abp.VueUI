@@ -6,8 +6,8 @@ interface Environment {
   oAuthConfig: { clientId: string; scope: string[] };
 }
 
-describe('deepMerge 的类型', () => {
-  it('合并两个片段仍然得到完整类型', () => {
+describe('deepMerge types', () => {
+  it('merging two fragments still yields the complete type', () => {
     const merged = deepMerge<Environment>(
       { application: { name: 'BookStore' } },
       { application: { baseUrl: 'https://localhost:44384' } },
@@ -16,7 +16,7 @@ describe('deepMerge 的类型', () => {
     expectTypeOf(merged).toEqualTypeOf<Environment>();
   });
 
-  it('DeepPartial 逐层放宽，但不拆开数组', () => {
+  it('DeepPartial relaxes every level but leaves arrays alone', () => {
     expectTypeOf<DeepPartial<Environment>['application']>().toEqualTypeOf<
       { name?: string | undefined; baseUrl?: string | undefined } | undefined
     >();

@@ -8,15 +8,15 @@ const packagesRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../packag
 describe('workspaceAliases', () => {
   const aliases = workspaceAliases(packagesRoot);
 
-  it('把每个包的主入口指到源码', () => {
+  it('points the main entry of each package at its source', () => {
     expect(aliases['@lsw-abpvue/utils']).toBe(resolve(packagesRoot, 'utils/src/index.ts'));
   });
 
-  it('只收 exports 里声明过的入口', () => {
+  it('takes only the entry points the exports map declares', () => {
     expect(aliases).not.toHaveProperty('@lsw-abpvue/utils/package.json');
   });
 
-  it('二级入口排在主入口前面，否则 Vite 会按前缀先匹配到主入口', () => {
+  it('a secondary entry comes before the main one, or Vite would match the prefix first', () => {
     const keys = Object.keys(aliases);
 
     for (const key of keys) {

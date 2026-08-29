@@ -10,15 +10,15 @@ describe('LinkedList', () => {
 
   const fill = (...values: string[]) => values.forEach(value => list.addTail(value));
 
-  describe('空列表', () => {
-    it('没有首尾节点，长度为零', () => {
+  describe('an empty list', () => {
+    it('there is no head and no tail, and the length is zero', () => {
       expect(list.first).toBeNull();
       expect(list.last).toBeNull();
       expect(list.length).toBe(0);
       expect(list.toArray()).toEqual([]);
     });
 
-    it('删除操作返回 undefined', () => {
+    it('a removal returns undefined', () => {
       expect(list.dropHead()).toBeUndefined();
       expect(list.dropTail()).toBeUndefined();
       expect(list.dropByIndex(0)).toBeUndefined();
@@ -27,7 +27,7 @@ describe('LinkedList', () => {
   });
 
   describe('addHead / addTail', () => {
-    it('首个元素同时是首节点与尾节点', () => {
+    it('the first element is both the head and the tail', () => {
       const node = list.addHead('a');
 
       expect(list.first).toBe(node);
@@ -36,7 +36,7 @@ describe('LinkedList', () => {
       expect(node.next).toBeNull();
     });
 
-    it('addHead 往前插，addTail 往后插', () => {
+    it('addHead prepends, addTail appends', () => {
       list.addTail('b');
       list.addHead('a');
       list.addTail('c');
@@ -45,7 +45,7 @@ describe('LinkedList', () => {
       expect(list.length).toBe(3);
     });
 
-    it('维护双向链接', () => {
+    it('the links in both directions are maintained', () => {
       fill('a', 'b', 'c');
 
       expect(list.first?.next?.value).toBe('b');
@@ -62,13 +62,13 @@ describe('LinkedList', () => {
       [0, ['b', 'a', 'c']],
       [1, ['a', 'b', 'c']],
       [2, ['a', 'c', 'b']],
-    ])('插到位置 %i', (index, expected) => {
+    ])('inserts at index %i', (index, expected) => {
       list.addByIndex('b', index);
 
       expect(list.toArray()).toEqual(expected);
     });
 
-    it.each([-1, 3, 1.5, NaN])('位置 %s 越界时什么也不做', index => {
+    it.each([-1, 3, 1.5, NaN])('index %s out of range does nothing', index => {
       expect(list.addByIndex('b', index)).toBeUndefined();
       expect(list.toArray()).toEqual(['a', 'c']);
     });
@@ -77,50 +77,50 @@ describe('LinkedList', () => {
   describe('addBefore / addAfter', () => {
     beforeEach(() => fill('a', 'b'));
 
-    it('按值定位', () => {
+    it('locates by value', () => {
       list.addBefore('x', 'b');
       list.addAfter('y', 'b');
 
       expect(list.toArray()).toEqual(['a', 'x', 'b', 'y']);
     });
 
-    it('按谓词定位', () => {
+    it('locates by predicate', () => {
       list.addAfter('x', value => value === 'a');
 
       expect(list.toArray()).toEqual(['a', 'x', 'b']);
     });
 
-    it('插到首节点之前会成为新的首节点', () => {
+    it('inserting before the head makes a new head', () => {
       const node = list.addBefore('x', 'a');
 
       expect(list.first).toBe(node);
       expect(node?.previous).toBeNull();
     });
 
-    it('插到尾节点之后会成为新的尾节点', () => {
+    it('inserting after the tail makes a new tail', () => {
       const node = list.addAfter('x', 'b');
 
       expect(list.last).toBe(node);
       expect(node?.next).toBeNull();
     });
 
-    it('定位不到时什么也不做', () => {
+    it('does nothing when the locator finds nothing', () => {
       expect(list.addBefore('x', 'missing')).toBeUndefined();
       expect(list.addAfter('x', () => false)).toBeUndefined();
       expect(list.toArray()).toEqual(['a', 'b']);
     });
   });
 
-  describe('add() 链式定位', () => {
+  describe('add() with a chained locator', () => {
     beforeEach(() => fill('a', 'b'));
 
-    it('after(谓词) —— 贡献者最常用的写法', () => {
+    it('after(predicate), which is what a contributor writes most often', () => {
       list.add('x').after(value => value === 'a');
 
       expect(list.toArray()).toEqual(['a', 'x', 'b']);
     });
 
-    it('其余定位方式与直接调用等价', () => {
+    it('the other locators match the direct call', () => {
       list.add('head').head();
       list.add('tail').tail();
       list.add('byIndex').byIndex(1);
@@ -130,10 +130,10 @@ describe('LinkedList', () => {
     });
   });
 
-  describe('删除', () => {
+  describe('removing', () => {
     beforeEach(() => fill('a', 'b', 'c'));
 
-    it('dropHead 与 dropTail 返回被删掉的节点并断开它', () => {
+    it('dropHead and dropTail return the removed node, detached', () => {
       const head = list.dropHead();
 
       expect(head?.value).toBe('a');
@@ -148,7 +148,7 @@ describe('LinkedList', () => {
       expect(list.last?.next).toBeNull();
     });
 
-    it('dropByIndex 接上前后节点', () => {
+    it('dropByIndex links the neighbours back together', () => {
       list.dropByIndex(1);
 
       expect(list.toArray()).toEqual(['a', 'c']);
@@ -156,19 +156,19 @@ describe('LinkedList', () => {
       expect(list.last?.previous?.value).toBe('a');
     });
 
-    it.each([-1, 3, 0.5])('dropByIndex(%s) 越界时什么也不做', index => {
+    it.each([-1, 3, 0.5])('dropByIndex(%s) out of range does nothing', index => {
       expect(list.dropByIndex(index)).toBeUndefined();
       expect(list.length).toBe(3);
     });
 
-    it('dropByValue 只删第一个匹配', () => {
+    it('dropByValue removes only the first match', () => {
       list.addTail('b');
       list.dropByValue('b');
 
       expect(list.toArray()).toEqual(['a', 'c', 'b']);
     });
 
-    it('drop() 链式定位与直接调用等价', () => {
+    it('drop() with a chained locator matches the direct call', () => {
       list.drop().byValue('b');
       list.drop().head();
       list.drop().tail();
@@ -178,7 +178,7 @@ describe('LinkedList', () => {
       expect(list.last).toBeNull();
     });
 
-    it('删到空时首尾都归零', () => {
+    it('head and tail go back to null when the last one goes', () => {
       list.dropByValue('a');
       list.dropByValue('b');
       list.dropByValue('c');
@@ -189,20 +189,20 @@ describe('LinkedList', () => {
     });
   });
 
-  describe('查询与遍历', () => {
+  describe('querying and iterating', () => {
     beforeEach(() => fill('a', 'b', 'c'));
 
-    it('find 返回第一个满足谓词的节点', () => {
+    it('find returns the first node the predicate accepts', () => {
       expect(list.find(value => value > 'a')?.value).toBe('b');
       expect(list.find(() => false)).toBeNull();
     });
 
-    it('indexOf 找不到时返回 -1', () => {
+    it('indexOf returns -1 when there is no match', () => {
       expect(list.indexOf('c')).toBe(2);
       expect(list.indexOf('missing')).toBe(-1);
     });
 
-    it('forEach 依次给出值、节点与位置', () => {
+    it('forEach yields the value, the node and the index', () => {
       const seen: [string, string, number][] = [];
       list.forEach((value, node, index) => seen.push([value, node.value, index]));
 
@@ -213,7 +213,7 @@ describe('LinkedList', () => {
       ]);
     });
 
-    it('可迭代', () => {
+    it('is iterable', () => {
       expect([...list]).toEqual(['a', 'b', 'c']);
     });
   });

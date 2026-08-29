@@ -21,7 +21,7 @@ async function ruleIdsFor(path: string, code: string): Promise<string[]> {
 
 const anImport = (from: string) => `import { thing } from '${from}';\nexport const used = thing;\n`;
 
-describe('架构依赖规则', () => {
+describe('the layer dependency rule', () => {
   it.each([
     ['packages/utils/src/a.ts', 'vue'],
     ['packages/core/src/a.ts', '@lsw-abpvue/theme-shared'],
@@ -31,7 +31,7 @@ describe('架构依赖规则', () => {
     ['packages/components/src/a.ts', '@lsw-abpvue/theme-basic'],
     ['packages/identity/src/a.ts', '@lsw-abpvue/theme-basic'],
     ['packages/oauth/src/a.ts', '@lsw-abpvue/identity'],
-  ])('%s 不许 import %s', async (path, specifier) => {
+  ])('%s may not import %s', async (path, specifier) => {
     await expect(ruleIdsFor(path, anImport(specifier))).resolves.toContain('no-restricted-imports');
   });
 
@@ -44,13 +44,13 @@ describe('架构依赖规则', () => {
     ['packages/identity/src/a.ts', '@lsw-abpvue/permission-management'],
     ['packages/utils/src/a.ts', './sibling'],
     ['packages/utils/src/a.ts', '../parent'],
-  ])('%s 可以 import %s', async (path, specifier) => {
+  ])('%s may import %s', async (path, specifier) => {
     await expect(ruleIdsFor(path, anImport(specifier))).resolves.not.toContain(
       'no-restricted-imports',
     );
   });
 
-  it('测试文件额外放行测试工具链', async () => {
+  it('test files additionally allow the test tooling', async () => {
     await expect(
       ruleIdsFor('packages/theme-shared/src/a.spec.ts', anImport('@vue/test-utils')),
     ).resolves.not.toContain('no-restricted-imports');
@@ -61,22 +61,22 @@ describe('架构依赖规则', () => {
   });
 });
 
-describe('SSR 纪律', () => {
+describe('SSR discipline', () => {
   const readsTheDom = 'export const width = window.innerWidth;\n';
 
-  it('core 里碰 window 会被拦下', async () => {
+  it('reaching for window inside core is refused', async () => {
     await expect(ruleIdsFor('packages/core/src/a.ts', readsTheDom)).resolves.toContain(
       'no-restricted-globals',
     );
   });
 
-  it('平台服务是唯一的出口', async () => {
+  it('the platform services are the only way out', async () => {
     await expect(
       ruleIdsFor('packages/core/src/services/platform/window.service.ts', readsTheDom),
     ).resolves.not.toContain('no-restricted-globals');
   });
 
-  it('别的包不受这条规则约束', async () => {
+  it('another package is not bound by this rule', async () => {
     await expect(ruleIdsFor('packages/theme-basic/src/a.ts', readsTheDom)).resolves.not.toContain(
       'no-restricted-globals',
     );
