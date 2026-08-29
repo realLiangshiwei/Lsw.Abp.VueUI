@@ -1,7 +1,8 @@
-import { dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig, type ViteUserConfig } from 'vitest/config';
+import { workspaceAliases } from './workspace-aliases.ts';
 
 export interface AbpTestOptions {
   /** Package root, always the caller's `import.meta.url` */
@@ -23,6 +24,9 @@ export function defineAbpTestConfig(options: AbpTestOptions): ViteUserConfig {
 
   return defineConfig({
     plugins: [vue()],
+    // Siblings resolve to their source, so a test run needs no build step and a stack
+    // trace points at the file being edited.
+    resolve: { alias: workspaceAliases(resolve(root, '..')) },
     test: {
       root,
       environment: options.environment ?? 'node',

@@ -30,3 +30,32 @@ export { defineService, defineToken } from './di/token';
 export type { InjectionToken, ServiceOf, TokenOptions } from './di/token';
 export { createAbpApp, provideAbp } from './di/vue-bridge';
 export type { AbpApp, CreateAbpAppOptions } from './di/vue-bridge';
+
+export type {
+  ApiConfig,
+  Apis,
+  ApplicationInfo,
+  Environment,
+  OAuthConfig,
+  RemoteEnv,
+} from './models/environment';
+export type { AbpRootOptions, ResolvedRootOptions } from './models/root-options';
+
+export { provideAbpCore, withOptions } from './providers/core.provider';
+export type { CoreFeature } from './providers/core.provider';
+
+export { EnvironmentService, useEnvironment } from './services/environment.service';
+export { CookieService } from './services/platform/cookie.service';
+export type { CookieOptions } from './services/platform/cookie.service';
+export { DocumentService } from './services/platform/document.service';
+export { StorageService } from './services/platform/storage.service';
+export { WindowService } from './services/platform/window.service';
+
+export { ABP_ROOT_OPTIONS } from './tokens/root-options.token';
+
+export { InternalStore } from './utils/internal-store';
+export { useDebounceFn } from './utils/use-debounce-fn';
+export type { DebouncedFn } from './utils/use-debounce-fn';
+export { useLatest } from './utils/use-latest';
+export { useSubscriptions } from './utils/use-subscriptions';
+export type { Subscriptions } from './utils/use-subscriptions';

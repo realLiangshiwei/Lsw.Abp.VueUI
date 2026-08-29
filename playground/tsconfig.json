@@ -3,11 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "types": ["node", "vite/client"],
-    "paths": {
-      "@lsw-abpvue/core": ["../packages/core/src/index.ts"],
-      "@lsw-abpvue/utils": ["../packages/utils/src/index.ts"]
-    }
+    "types": ["node", "vite/client"]
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "vite.config.ts"]
 }

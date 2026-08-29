@@ -3,6 +3,7 @@ dist/
 coverage/
 .turbo/
 *.tsbuildinfo
+*.tgz
 
 .DS_Store
 *.local

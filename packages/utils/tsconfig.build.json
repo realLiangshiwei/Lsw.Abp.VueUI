@@ -4,6 +4,9 @@
     "noEmit": false,
     "emitDeclarationOnly": true,
     "rootDir": "src",
+    // Emitting declarations resolves siblings through node_modules, not the source paths
+    // of tsconfig.base: their .d.ts is what ends up referenced in ours.
+    "paths": {},
     "outDir": "dist"
   },
   "exclude": ["src/**/*.spec.ts", "src/**/*.test-d.ts"]

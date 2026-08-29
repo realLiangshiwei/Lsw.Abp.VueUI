@@ -51,3 +51,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm check:published-types
+      # One physical copy of each package in a consumer's tree, and declarations that
+      # work after a plain `pnpm add`. Neither can be proven from inside the workspace.
+      - run: pnpm check:external-install

@@ -10,17 +10,18 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "size": "size-limit",
+    "check:external-install": "./scripts/check-external-install.sh",
     "check:published-types": "./scripts/check-published-types.sh",
+    "clean": "turbo run clean",
     "dev": "turbo run dev",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "typecheck": "vue-tsc -p tsconfig.json && turbo run typecheck",
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --write .",
-    "clean": "turbo run clean",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "size": "size-limit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "vue-tsc -p tsconfig.json && turbo run typecheck"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.1",

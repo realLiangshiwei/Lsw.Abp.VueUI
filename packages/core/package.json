@@ -23,9 +23,11 @@
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "peerDependencies": {
+    "@lsw-abpvue/utils": "workspace:^",
     "vue": "^3.5.0"
   },
   "devDependencies": {
+    "@lsw-abpvue/utils": "workspace:*",
     "vue": "^3.5.41"
   },
   "repository": {

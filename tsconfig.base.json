@@ -23,6 +23,11 @@
     "declarationMap": true,
     "sourceMap": true,
     "jsx": "preserve",
-    "types": []
+    "types": [],
+
+    "paths": {
+      "@lsw-abpvue/core": ["./packages/core/src/index.ts"],
+      "@lsw-abpvue/utils": ["./packages/utils/src/index.ts"]
+    }
   }
 }
