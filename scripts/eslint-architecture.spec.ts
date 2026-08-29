@@ -82,3 +82,63 @@ describe('SSR discipline', () => {
     );
   });
 });
+
+describe('the injection context', () => {
+  const inAsyncFn = (body: string) => `export async function load() {\n  ${body}\n}\n`;
+
+  it('an inject after an await is refused', async () => {
+    await expect(
+      ruleIdsFor(
+        'packages/core/src/a.ts',
+        inAsyncFn('await Promise.resolve();\n  const svc = inject(RestService);\n  return svc;'),
+      ),
+    ).resolves.toContain('abp/no-inject-after-await');
+  });
+
+  it('an inject before an await is fine', async () => {
+    await expect(
+      ruleIdsFor(
+        'packages/core/src/a.ts',
+        inAsyncFn('const svc = inject(RestService);\n  await Promise.resolve();\n  return svc;'),
+      ),
+    ).resolves.not.toContain('abp/no-inject-after-await');
+  });
+
+  it('capturing the injector before the await is the recommended shape and is not reported', async () => {
+    await expect(
+      ruleIdsFor(
+        'packages/core/src/a.ts',
+        inAsyncFn(
+          'const injector = getCurrentInjector();\n  await Promise.resolve();\n  return injector.get(RestService);',
+        ),
+      ),
+    ).resolves.not.toContain('abp/no-inject-after-await');
+  });
+
+  it('a provideAbp after an await in the same function is refused too', async () => {
+    await expect(
+      ruleIdsFor(
+        'packages/core/src/a.ts',
+        inAsyncFn('await Promise.resolve();\n  provideAbp([]);'),
+      ),
+    ).resolves.toContain('abp/no-inject-after-await');
+  });
+
+  it('an inject in a nested function has nothing to do with the outer await', async () => {
+    await expect(
+      ruleIdsFor(
+        'packages/core/src/a.ts',
+        inAsyncFn('await Promise.resolve();\n  return () => inject(RestService);'),
+      ),
+    ).resolves.not.toContain('abp/no-inject-after-await');
+  });
+
+  it('a top-level await puts what follows out of bounds', async () => {
+    await expect(
+      ruleIdsFor(
+        'packages/core/src/a.ts',
+        'await Promise.resolve();\nexport const svc = inject(RestService);\n',
+      ),
+    ).resolves.toContain('abp/no-inject-after-await');
+  });
+});

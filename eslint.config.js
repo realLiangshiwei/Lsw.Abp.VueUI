@@ -3,6 +3,7 @@ import prettier from 'eslint-config-prettier/flat';
 import pluginVue from 'eslint-plugin-vue';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import abp from './scripts/eslint-rules/index.js';
 
 const FRAMEWORK = ['vue', 'vue-router'];
 const UTILS = '@lsw-abpvue/utils';
@@ -157,12 +158,22 @@ export default tseslint.config(
     },
   },
 
-  // TODO(#3): a custom rule banning `inject()` after `await` lands with the DI kernel in
-  // M1 — the injection context is gone by then and the failure is a confusing null.
+  {
+    // The injection context does not survive an await, and the runtime error it produces
+    // names the wrong place, so the mistake is caught here instead (design 02 §5).
+    files: ['packages/**/*.{ts,mts,vue}', 'playground/**/*.{ts,vue}'],
+    plugins: { abp },
+    rules: { 'abp/no-inject-after-await': 'error' },
+  },
 
   {
     files: ['**/*.spec.ts', '**/*.test-d.ts'],
-    rules: { '@typescript-eslint/no-explicit-any': 'off' },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      // A component test needs a handful of throwaway components around the one thing it
+      // is about; splitting them across files would hide what is being tested.
+      'vue/one-component-per-file': 'off',
+    },
   },
 
   {
