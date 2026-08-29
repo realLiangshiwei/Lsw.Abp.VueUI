@@ -1,5 +1,5 @@
 import { isPlainObject } from '@lsw-abpvue/utils';
-import { inject } from '../di/inject';
+import { getCurrentInjector, inject } from '../di/inject';
 import { defineService, type ServiceOf } from '../di/token';
 import {
   AbpHttpError,
@@ -100,7 +100,8 @@ async function readBody(response: Response, responseType: HttpRequestConfig['res
 
 export const HttpClient = defineService('HttpClient', () => {
   const send = inject(HTTP_FETCH);
-  const interceptors = inject(HTTP_INTERCEPTORS, { optional: true }) ?? [];
+  const injector = getCurrentInjector();
+  let chain: Handler | null = null;
 
   const transport: Handler = async request => {
     const url = withParams(request.url, request.params);
@@ -148,16 +149,28 @@ export const HttpClient = defineService('HttpClient', () => {
     };
   };
 
-  // Outermost first, so the order providers are registered in is the order a request
-  // passes through them and the reverse of the order a response comes back.
-  const chain = interceptors.reduceRight<Handler>(
-    (next, interceptor) => request => interceptor(request, next),
-    transport,
-  );
+  /**
+   * Built on the first request rather than while this service is: an interceptor that
+   * needs the configuration, the session or an access token would otherwise ask for a
+   * service that is itself still waiting for this one.
+   *
+   * Outermost first, so the order providers are registered in is the order a request
+   * passes through them and the reverse of the order a response comes back.
+   */
+  function chainOf(): Handler {
+    const interceptors = injector?.get(HTTP_INTERCEPTORS, [], { optional: true }) ?? [];
+
+    return interceptors.reduceRight<Handler>(
+      (next, interceptor) => request => interceptor(request, next),
+      transport,
+    );
+  }
 
   return {
-    request: <T>(request: HttpRequestConfig): Promise<HttpResponse<T>> =>
-      chain(request) as Promise<HttpResponse<T>>,
+    request: <T>(request: HttpRequestConfig): Promise<HttpResponse<T>> => {
+      chain ??= chainOf();
+      return chain(request) as Promise<HttpResponse<T>>;
+    },
   };
 });
 export type HttpClient = ServiceOf<typeof HttpClient>;

@@ -30,6 +30,11 @@ export interface RestConfig {
   skipAddingHeader?: boolean | undefined;
   /** `response` hands back status and headers instead of just the body. */
   observe?: 'body' | 'response' | undefined;
+  /**
+   * Cancels the request. Angular cancels by unsubscribing; a promise has nothing to
+   * unsubscribe from, so a caller that needs to abort passes a signal.
+   */
+  signal?: AbortSignal | undefined;
 }
 
 /**

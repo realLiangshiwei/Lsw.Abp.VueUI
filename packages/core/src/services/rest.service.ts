@@ -60,6 +60,7 @@ export const RestService = defineService('RestService', () => {
         url: removeDuplicateSlashes(base + request.url),
         params: filterParams(request.params),
         context: config,
+        ...(config.signal ? { signal: config.signal } : {}),
       });
     } catch (error) {
       if (error instanceof AbpHttpError && !config.skipHandleError)

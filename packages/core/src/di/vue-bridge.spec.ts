@@ -2,7 +2,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, type Component } from 'vue';
-import { provideAppInitializer } from './app-initializer';
+import { provideAppInitErrorHandler, provideAppInitializer } from './app-initializer';
 import { InjectorDestroyedError, OutsideInjectionContextError } from './errors';
 import { ABP_INJECTOR_KEY, inject } from './inject';
 import { createInjector, onServiceDestroy, type Injector } from './injector';
@@ -215,5 +215,41 @@ describe('createAbpApp', () => {
     app.app.unmount();
 
     expect(() => app.injector.get(Greeting)).toThrow(InjectorDestroyedError);
+  });
+});
+
+describe('a failed startup', () => {
+  it('with nobody handling it, a failed startup is a failed startup', async () => {
+    const Root = defineComponent({ name: 'FailingRoot', render: () => h('div') });
+
+    await expect(
+      createAbpApp(Root, {
+        providers: [
+          provideAppInitializer(() => {
+            throw new Error('backend is down');
+          }),
+        ],
+      }),
+    ).rejects.toThrow('backend is down');
+  });
+
+  it('startup continues when a handler is registered, and the later initializers still run', async () => {
+    const Root = defineComponent({ name: 'RecoveringRoot', render: () => h('div') });
+    const seen = vi.fn();
+    const later = vi.fn();
+
+    const app = await createAbpApp(Root, {
+      providers: [
+        provideAppInitErrorHandler(seen),
+        provideAppInitializer(() => {
+          throw new Error('backend is down');
+        }),
+        provideAppInitializer(later),
+      ],
+    });
+
+    expect(seen).toHaveBeenCalledOnce();
+    expect(later).toHaveBeenCalledOnce();
+    expect(app.injector).toBeDefined();
   });
 });

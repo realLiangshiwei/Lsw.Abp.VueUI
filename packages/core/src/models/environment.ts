@@ -6,24 +6,24 @@ export interface Environment {
   apis: Apis;
   application: ApplicationInfo;
   production: boolean;
-  hmr?: boolean;
-  test?: boolean;
-  localization?: { defaultResourceName?: string };
-  oAuthConfig?: OAuthConfig;
-  remoteEnv?: RemoteEnv;
+  hmr?: boolean | undefined;
+  test?: boolean | undefined;
+  localization?: { defaultResourceName?: string | undefined } | undefined;
+  oAuthConfig?: OAuthConfig | undefined;
+  remoteEnv?: RemoteEnv | undefined;
   /** Hosts put their own settings here; ABP itself never reads them. */
   [key: string]: unknown;
 }
 
 export interface ApplicationInfo {
   name: string;
-  baseUrl?: string;
-  logoUrl?: string;
+  baseUrl?: string | undefined;
+  logoUrl?: string | undefined;
 }
 
 export interface ApiConfig {
   url: string;
-  rootNamespace?: string;
+  rootNamespace?: string | undefined;
   /** Per-endpoint overrides, e.g. `{ Identity: 'https://identity.example.com' }`. */
   [key: string]: string | undefined;
 }
@@ -38,21 +38,23 @@ export interface Apis {
  * package owns the rest and reads it from here.
  */
 export interface OAuthConfig {
-  issuer?: string;
-  clientId?: string;
-  scope?: string;
-  responseType?: string;
-  redirectUri?: string;
-  postLogoutRedirectUri?: string;
-  dummyClientSecret?: string;
-  requireHttps?: boolean;
-  impersonation?: { tenantImpersonation?: boolean; userImpersonation?: boolean };
+  issuer?: string | undefined;
+  clientId?: string | undefined;
+  scope?: string | undefined;
+  responseType?: string | undefined;
+  redirectUri?: string | undefined;
+  postLogoutRedirectUri?: string | undefined;
+  dummyClientSecret?: string | undefined;
+  requireHttps?: boolean | undefined;
+  impersonation?:
+    | { tenantImpersonation?: boolean | undefined; userImpersonation?: boolean | undefined }
+    | undefined;
   [key: string]: unknown;
 }
 
 export interface RemoteEnv {
   url: string;
   mergeStrategy: 'deepmerge' | 'overwrite';
-  method?: string;
-  headers?: Record<string, string>;
+  method?: string | undefined;
+  headers?: Record<string, string> | undefined;
 }

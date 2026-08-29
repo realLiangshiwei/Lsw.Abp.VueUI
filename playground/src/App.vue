@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useGreeter } from './services/greeting';
+import ApplicationState from './components/ApplicationState.vue';
 import ScopedGreeting from './components/ScopedGreeting.vue';
 
 const apiUrl = import.meta.env.VITE_ABP_API_URL;
@@ -16,6 +17,8 @@ const greeting = computed(() => greeter.greet(name.value));
     <p class="backend">
       Backend: <code>{{ apiUrl }}</code>
     </p>
+
+    <ApplicationState />
 
     <label>
       Name

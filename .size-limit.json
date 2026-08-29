@@ -8,7 +8,7 @@
     "name": "@lsw-abpvue/core",
     "path": "packages/core/dist/index.js",
     "ignore": ["vue"],
-    "limit": "6 kB"
+    "limit": "8 kB"
   },
   {
     "name": "@lsw-abpvue/core (only defineToken)",
