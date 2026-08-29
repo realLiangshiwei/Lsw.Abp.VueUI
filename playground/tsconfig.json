@@ -5,6 +5,7 @@
     "allowImportingTsExtensions": true,
     "types": ["node", "vite/client"],
     "paths": {
+      "@lsw-abpvue/core": ["../packages/core/src/index.ts"],
       "@lsw-abpvue/utils": ["../packages/utils/src/index.ts"]
     }
   },

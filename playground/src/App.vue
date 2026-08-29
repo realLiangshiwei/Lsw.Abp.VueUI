@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { interpolate } from '@lsw-abpvue/utils';
+import { useGreeter } from './services/greeting';
+import ScopedGreeting from './components/ScopedGreeting.vue';
 
 const apiUrl = import.meta.env.VITE_ABP_API_URL;
 
-const template = ref("Welcome to {0}, running against '{1}'.");
-const params = ref('Lsw.Abp.VueUI, BookStore');
-
-const result = computed(() =>
-  interpolate(
-    template.value,
-    params.value.split(',').map(p => p.trim()),
-  ),
-);
+const name = ref('ABP');
+const greeter = useGreeter();
+const greeting = computed(() => greeter.greet(name.value));
 </script>
 
 <template>
@@ -22,18 +17,17 @@ const result = computed(() =>
       Backend: <code>{{ apiUrl }}</code>
     </p>
 
+    <label>
+      Name
+      <input v-model="name" />
+    </label>
+
     <section>
-      <h2>@lsw-abpvue/utils &mdash; interpolate</h2>
-      <label>
-        Template
-        <input v-model="template" />
-      </label>
-      <label>
-        Parameters (comma separated)
-        <input v-model="params" />
-      </label>
-      <output>{{ result }}</output>
+      <h2>Root injector</h2>
+      <output>{{ greeting }}</output>
     </section>
+
+    <ScopedGreeting :name="name" />
 
     <p class="hint">
       Packages are aliased to their <code>src</code>, so editing one hot-reloads this page.
@@ -41,7 +35,8 @@ const result = computed(() =>
   </main>
 </template>
 
-<style scoped>
+<!-- Not scoped: the demo components below share these styles. -->
+<style>
 main {
   font-family: system-ui, sans-serif;
   max-width: 42rem;
@@ -64,9 +59,15 @@ input {
 
 output {
   display: block;
+  margin-bottom: 0.5rem;
   padding: 0.75rem;
   border: 1px solid currentColor;
   border-radius: 4px;
+}
+
+button {
+  font: inherit;
+  padding: 0.35rem 0.75rem;
 }
 
 .backend,

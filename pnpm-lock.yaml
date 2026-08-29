@@ -90,10 +90,19 @@ importers:
         specifier: ^3.3.9
         version: 3.3.11(typescript@6.0.3)
 
+  packages/core:
+    devDependencies:
+      vue:
+        specifier: ^3.5.41
+        version: 3.5.41(typescript@6.0.3)
+
   packages/utils: {}
 
   playground:
     dependencies:
+      '@lsw-abpvue/core':
+        specifier: workspace:*
+        version: link:../packages/core
       '@lsw-abpvue/utils':
         specifier: workspace:*
         version: link:../packages/utils
