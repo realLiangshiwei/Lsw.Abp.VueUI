@@ -37,6 +37,7 @@ export { APP_SETUP_HOOKS, createAbpApp, provideAbp, provideAppSetup } from './di
 export type { AbpApp, AppSetupHook, CreateAbpAppOptions } from './di/vue-bridge';
 
 export { default as AbpPermission } from './components/AbpPermission.vue';
+export { default as AbpReplaceable } from './components/AbpReplaceable.vue';
 
 export { languageInterceptor } from './interceptors/language.interceptor';
 export { tenantInterceptor } from './interceptors/tenant.interceptor';
@@ -65,10 +66,13 @@ export type {
   LocalizationParam,
   LocalizationWithDefault,
 } from './models/localization';
+export { LayoutType } from './models/nav';
+export type { AbpNavItem, AbpRoute, RouteGroup, TreeNode } from './models/nav';
 export type { AbpRootOptions, ResolvedRootOptions } from './models/root-options';
 
 export {
   provideAbpCore,
+  withCompareFunc,
   withLocalizations,
   withOptions,
   withRegisterLocale,
@@ -134,7 +138,13 @@ export type { CookieOptions } from './services/platform/cookie.service';
 export { DocumentService } from './services/platform/document.service';
 export { StorageService } from './services/platform/storage.service';
 export { WindowService } from './services/platform/window.service';
+export {
+  ReplaceableComponentsService,
+  useReplaceableComponents,
+} from './services/replaceable-components.service';
+export type { ReplaceableComponent } from './services/replaceable-components.service';
 export { RestService, useRest } from './services/rest.service';
+export { RoutesService, useRoutes } from './services/routes.service';
 export { SessionStateService, useSessionState } from './services/session-state.service';
 export type { SessionState } from './services/session-state.service';
 export { SettingService, useSetting } from './services/setting.service';
@@ -142,10 +152,13 @@ export { SettingService, useSetting } from './services/setting.service';
 export { HTTP_FETCH, HTTP_INTERCEPTORS } from './tokens/http.token';
 export type { FetchLike } from './tokens/http.token';
 export { LOCALIZATIONS, REGISTER_LOCALE } from './tokens/localization.token';
+export { NAV_COMPARE_FN } from './tokens/nav.token';
 export { ABP_ROOT_OPTIONS } from './tokens/root-options.token';
 export { TENANT_KEY } from './tokens/tenant-key.token';
 
 export { InternalStore } from './utils/internal-store';
+export { createNavTree } from './utils/nav-tree';
+export type { NavTree, NavTreeOptions } from './utils/nav-tree';
 export { useDebounceFn } from './utils/use-debounce-fn';
 export type { DebouncedFn } from './utils/use-debounce-fn';
 export { useLatest } from './utils/use-latest';

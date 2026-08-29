@@ -9,12 +9,16 @@ import { xsrfInterceptor } from '../interceptors/xsrf.interceptor';
 import type { AbpLocalization } from '../models/localization';
 import { resolveRootOptions, type AbpRootOptions } from '../models/root-options';
 import { LocalizationService } from '../services/localization.service';
+import type { AbpNavItem } from '../models/nav';
 import { HTTP_INTERCEPTORS } from '../tokens/http.token';
+import { NAV_COMPARE_FN } from '../tokens/nav.token';
 import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token';
 import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
 import { getInitialData } from './initial-data';
 
-export type CoreFeature = Feature<'withOptions' | 'withLocalizations' | 'withRegisterLocale'>;
+export type CoreFeature = Feature<
+  'withOptions' | 'withLocalizations' | 'withRegisterLocale' | 'withCompareFunc'
+>;
 
 /**
  * The interceptors every ABP request goes through, in the order they wrap it. The
@@ -72,6 +76,15 @@ export function withLocalizations(localizations: AbpLocalization[]): CoreFeature
     })),
     { repeatable: true },
   );
+}
+
+/**
+ * Orders siblings in every ABP tree — the menu, settings tabs, toolbar actions. The
+ * default compares `order`.
+ * @param fn Comparator over two nav items
+ */
+export function withCompareFunc(fn: (a: AbpNavItem, b: AbpNavItem) => number): CoreFeature {
+  return defineFeature('withCompareFunc', [{ provide: NAV_COMPARE_FN, useValue: fn }]);
 }
 
 /**
