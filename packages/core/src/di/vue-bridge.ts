@@ -10,7 +10,22 @@ import { runInitializers } from './app-initializer';
 import { OutsideInjectionContextError } from './errors';
 import { ABP_INJECTOR_KEY, getCurrentInjector, setComponentInjector } from './inject';
 import { createInjector, type Injector } from './injector';
-import type { ProviderInput } from './provider';
+import type { Provider, ProviderInput } from './provider';
+import { defineToken } from './token';
+
+/** Runs against the Vue application itself: global properties, plugins, components. */
+export type AppSetupHook = (app: App, injector: Injector) => void;
+
+export const APP_SETUP_HOOKS = defineToken<AppSetupHook[]>('APP_SETUP_HOOKS', { multi: true });
+
+/**
+ * Registers something to do to the Vue application once it exists -- the hook `$t` is
+ * installed through, and how a theme registers its global components.
+ * @param fn Receives the application and the root injector
+ */
+export function provideAppSetup(fn: AppSetupHook): Provider<AppSetupHook[]> {
+  return { provide: APP_SETUP_HOOKS, multi: true, useValue: fn };
+}
 
 /**
  * Adds an injector for this component and everything below it, overriding what the
@@ -66,6 +81,8 @@ export async function createAbpApp(
     unmount();
     injector.destroy();
   };
+
+  for (const hook of injector.get(APP_SETUP_HOOKS, [], { optional: true })) hook(app, injector);
 
   await options.setup?.(app, injector);
   await runInitializers(injector);

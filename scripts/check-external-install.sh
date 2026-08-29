@@ -41,7 +41,7 @@ cat > package.json <<'JSON'
 JSON
 
 cat > app.ts <<'TS'
-import { createInjector, defineService, inject, InternalStore } from '@lsw-abpvue/core';
+import { AbpPermission, createInjector, defineService, inject, InternalStore } from '@lsw-abpvue/core';
 import { interpolate } from '@lsw-abpvue/utils';
 
 const Greeter = defineService('Greeter', () => {
@@ -51,6 +51,11 @@ const Greeter = defineService('Greeter', () => {
 
 export const greeting: string = createInjector([]).get(Greeter).greet('ABP');
 export const injected = () => inject(Greeter);
+
+// A component compiled from an .vue file has to arrive as a real type, not `any`
+// (milestone V6): `any` would make every misuse in a consumer's template compile.
+type IsAny<T> = 0 extends 1 & T ? true : false;
+export const componentIsTyped: IsAny<typeof AbpPermission> extends false ? true : never = true;
 TS
 
 cat > tsconfig.json <<'JSON'

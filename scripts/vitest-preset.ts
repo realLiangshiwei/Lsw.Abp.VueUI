@@ -35,6 +35,9 @@ export function defineAbpTestConfig(options: AbpTestOptions): ViteUserConfig {
         enabled: true,
         include: ['src/**/*.test-d.ts'],
         tsconfig: 'tsconfig.json',
+        // Plain `tsc` cannot resolve a `.vue` import, and every package above `core`
+        // has components.
+        checker: 'vue-tsc',
       },
     },
   });
