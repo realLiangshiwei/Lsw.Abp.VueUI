@@ -4,6 +4,8 @@ export interface StorageService {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
+  /** Every key currently stored, for a consumer that has to find its own among them. */
+  keys(): string[];
   /**
    * Reports writes made by another tab to the same origin.
    * @param callback Receives the key and its new value; `null` for a cleared store
@@ -12,14 +14,27 @@ export interface StorageService {
   onChange(callback: (key: string | null, value: string | null) => void): () => void;
 }
 
+type Fallback = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> & Pick<StorageService, 'keys'>;
+
 /** Storage is unavailable in a server renderer, and throws in Safari's private mode. */
-function memoryStorage(): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> {
+function memoryStorage(): Fallback {
   const values = new Map<string, string>();
 
   return {
     getItem: key => values.get(key) ?? null,
     setItem: (key, value) => void values.set(key, value),
     removeItem: key => void values.delete(key),
+    keys: () => [...values.keys()],
+  };
+}
+
+/** `localStorage` exposes its keys as own properties, which is the only way to list them. */
+function nativeStorage(native: Storage): Fallback {
+  return {
+    getItem: key => native.getItem(key),
+    setItem: (key, value) => native.setItem(key, value),
+    removeItem: key => native.removeItem(key),
+    keys: () => Object.keys(native),
   };
 }
 
@@ -40,12 +55,10 @@ function available(): boolean {
 export const StorageService: InjectionToken<StorageService> = defineService(
   'StorageService',
   (): StorageService => {
-    const storage = available() ? window.localStorage : memoryStorage();
+    const storage = available() ? nativeStorage(window.localStorage) : memoryStorage();
 
     return {
-      getItem: key => storage.getItem(key),
-      setItem: (key, value) => storage.setItem(key, value),
-      removeItem: key => storage.removeItem(key),
+      ...storage,
       onChange: callback => {
         if (typeof window === 'undefined') return () => {};
 

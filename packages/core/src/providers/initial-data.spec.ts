@@ -8,6 +8,7 @@ import type { ApplicationConfigurationDto } from '../proxy/models';
 import { ConfigStateService } from '../services/config-state.service';
 import { WindowService } from '../services/platform/window.service';
 import { SessionStateService } from '../services/session-state.service';
+import { AuthService, CHECK_AUTHENTICATION_STATE_FN } from '../tokens/auth.token';
 import { HTTP_FETCH, type FetchLike } from '../tokens/http.token';
 import { provideAbpCore, withOptions } from './core.provider';
 import { getInitialData } from './initial-data';
@@ -112,6 +113,65 @@ describe('the startup sequence', () => {
     expect(injector.get(ConfigStateService).snapshot().localization.values.BookStore).toEqual({
       Menu: 'Menu',
     });
+  });
+
+  it('the authentication package starts before the configuration request, so the token is on the first one', async () => {
+    const order: string[] = [];
+    const { injector: base } = startup();
+    const send = base.get(HTTP_FETCH);
+    const record: FetchLike = (url, init) => {
+      order.push(String(url).split('/api/abp/')[1]?.split('?')[0] ?? String(url));
+      return send(url, init);
+    };
+    const injector = createInjector([
+      provideAbpCore(withOptions({ environment })),
+      { provide: HTTP_FETCH, useValue: record },
+      { provide: WindowService, useValue: base.get(WindowService) },
+      {
+        provide: AuthService,
+        useValue: {
+          init: () => {
+            order.push('auth.init');
+            return Promise.resolve();
+          },
+        } as unknown as AuthService,
+      },
+    ]);
+
+    await runInInjectionContext(injector, getInitialData);
+
+    expect(order).toEqual(['auth.init', 'application-configuration', 'application-localization']);
+  });
+
+  it('skipInitAuthService leaves the authentication package alone', async () => {
+    const init = vi.fn(() => Promise.resolve());
+    const injector = createInjector([
+      provideAbpCore(
+        withOptions({ environment, skipInitAuthService: true, skipGetAppConfiguration: true }),
+      ),
+      { provide: HTTP_FETCH, useValue: () => Promise.resolve(new Response('{}')) },
+      { provide: WindowService, useValue: { nativeWindow: undefined, open: () => {} } },
+      { provide: AuthService, useValue: { init } as unknown as AuthService },
+    ]);
+
+    await runInInjectionContext(injector, getInitialData);
+
+    expect(init).not.toHaveBeenCalled();
+  });
+
+  it('the authentication state is checked once the configuration is back, which is where a disowned token shows', async () => {
+    const checked = vi.fn();
+    const { injector: base } = startup();
+    const injector = createInjector([
+      { provide: HTTP_FETCH, useValue: base.get(HTTP_FETCH) },
+      { provide: WindowService, useValue: base.get(WindowService) },
+      provideAbpCore(withOptions({ environment })),
+      { provide: CHECK_AUTHENTICATION_STATE_FN, useValue: checked },
+    ]);
+
+    await runInInjectionContext(injector, getInitialData);
+
+    expect(checked).toHaveBeenCalledOnce();
   });
 
   it('stops after the tenant when the host fetches the configuration itself', async () => {

@@ -31,6 +31,14 @@ describe('with no browser', () => {
     expect(storage.getItem('lang')).toBe('fi');
   });
 
+  it('the in-memory storage lists its keys too', () => {
+    const storage = injector().get(StorageService);
+
+    storage.setItem('lang', 'fi');
+
+    expect(storage.keys()).toEqual(['lang']);
+  });
+
   it('unsubscribing from the cross-tab notification does not throw', () => {
     const stop = injector().get(StorageService).onChange(vi.fn());
 
@@ -71,6 +79,8 @@ describe('loading the whole package under Node', () => {
       services.get(core.SettingService);
       services.get(core.FeatureService);
       services.get(core.ReplaceableComponentsService);
+      services.get(core.AuthErrorFilterService);
+      services.get(core.TokenStorage);
     }).not.toThrow();
   });
 

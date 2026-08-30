@@ -59,6 +59,14 @@ describe('StorageService', () => {
     expect(storage.getItem('lang')).toBeNull();
   });
 
+  it('lists the keys it holds, which is how the authentication package finds its own', () => {
+    const storage = injector().get(StorageService);
+
+    storage.setItem('access_token', 'abc');
+
+    expect(storage.keys()).toContain('access_token');
+  });
+
   it('a write from another tab is reported', () => {
     const storage = injector().get(StorageService);
     const seen = vi.fn();

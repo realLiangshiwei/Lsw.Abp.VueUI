@@ -28,6 +28,11 @@ export interface RestConfig {
   skipHandleError?: boolean | undefined;
   /** Skips the tenant, language and timezone headers. */
   skipAddingHeader?: boolean | undefined;
+  /**
+   * Keeps the authentication package out of this request: no bearer token, and no
+   * refresh-and-replay on a 401. The token endpoint itself is the reason it exists.
+   */
+  skipAuthorization?: boolean | undefined;
   /** `response` hands back status and headers instead of just the body. */
   observe?: 'body' | 'response' | undefined;
   /**

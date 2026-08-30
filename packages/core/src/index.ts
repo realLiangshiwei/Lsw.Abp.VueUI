@@ -44,6 +44,13 @@ export { tenantInterceptor } from './interceptors/tenant.interceptor';
 export { timezoneInterceptor } from './interceptors/timezone.interceptor';
 export { xsrfInterceptor } from './interceptors/xsrf.interceptor';
 
+export { AuthError, TwoFactorRequiredError } from './models/auth';
+export type {
+  AuthErrorFilter,
+  CheckAuthenticationStateFn,
+  LoginParams,
+  PipeToLoginFn,
+} from './models/auth';
 export type {
   ApiConfig,
   Apis,
@@ -127,6 +134,7 @@ export type {
   WindowsTimeZone,
 } from './proxy/models';
 
+export { AuthErrorFilterService, useAuthErrorFilter } from './services/auth-error-filter.service';
 export { ConfigStateService, useConfigState } from './services/config-state.service';
 export { CurrentUserService, useCurrentUser } from './services/current-user.service';
 export { EnvironmentService, useEnvironment } from './services/environment.service';
@@ -155,8 +163,19 @@ export { RoutesService, useRoutes } from './services/routes.service';
 export { SessionStateService, useSessionState } from './services/session-state.service';
 export type { SessionState } from './services/session-state.service';
 export { SettingService, useSetting } from './services/setting.service';
+export {
+  BrowserTokenStorage,
+  MemoryTokenStorage,
+  ServerTokenStorage,
+} from './services/token-storage.service';
 
-export { AuthService } from './tokens/auth.token';
+export {
+  AuthService,
+  CHECK_AUTHENTICATION_STATE_FN,
+  NAVIGATE_TO_MANAGE_PROFILE,
+  PIPE_TO_LOGIN_FN,
+  TokenStorage,
+} from './tokens/auth.token';
 export { HTTP_FETCH, HTTP_INTERCEPTORS } from './tokens/http.token';
 export type { FetchLike } from './tokens/http.token';
 export { LOCALIZATIONS, REGISTER_LOCALE } from './tokens/localization.token';
