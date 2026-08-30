@@ -1,5 +1,6 @@
 import {
   getCurrentInstance,
+  hasInjectionContext,
   inject as vueInject,
   type ComponentInternalInstance,
   type InjectionKey,
@@ -58,11 +59,16 @@ export function getCurrentInjector(): Injector | null {
   const explicit = contexts.at(-1);
   if (explicit) return explicit;
 
-  // Vue's inject() warns when there is no component being set up, so ask first.
   const instance = getCurrentInstance();
-  if (!instance) return null;
+  if (instance) {
+    const own = componentInjectors.get(instance);
+    if (own) return own;
+  }
 
-  return componentInjectors.get(instance) ?? vueInject(ABP_INJECTOR_KEY, null) ?? null;
+  // True inside a component's setup, inside `app.runWithContext`, and inside a
+  // vue-router navigation guard, which vue-router runs in the application's context.
+  // Asking first is what keeps Vue from warning everywhere else.
+  return hasInjectionContext() ? (vueInject(ABP_INJECTOR_KEY, null) ?? null) : null;
 }
 
 /**

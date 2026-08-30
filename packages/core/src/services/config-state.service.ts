@@ -132,15 +132,18 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
      */
     refreshLocalization: async (cultureName: string): Promise<void> => {
       const localization = await appLocalization.get({ cultureName, onlyDynamics: false });
+      // Defensive about the shape: a gateway answering 200 with something else must not
+      // take startup down, and the texts are recoverable on the next language change.
+      const resources = localization.resources ?? {};
       const values = Object.fromEntries(
-        Object.entries(localization.resources).map(([name, resource]) => [name, resource.texts]),
+        Object.entries(resources).map(([name, resource]) => [name, resource.texts]),
       );
 
       store.deepPatch({
         localization: {
-          resources: localization.resources,
-          currentCulture: localization.currentCulture,
+          resources,
           values,
+          ...(localization.currentCulture ? { currentCulture: localization.currentCulture } : {}),
         },
       });
     },

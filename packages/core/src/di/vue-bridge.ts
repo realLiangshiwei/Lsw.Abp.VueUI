@@ -13,8 +13,12 @@ import { createInjector, type Injector } from './injector';
 import type { Provider, ProviderInput } from './provider';
 import { defineToken } from './token';
 
-/** Runs against the Vue application itself: global properties, plugins, components. */
-export type AppSetupHook = (app: App, injector: Injector) => void;
+/**
+ * Runs against the Vue application itself: global properties, plugins, components.
+ * Hooks run after the app initializers and just before mounting, so a router installed
+ * here navigates for the first time with the configuration already loaded.
+ */
+export type AppSetupHook = (app: App, injector: Injector) => void | Promise<void>;
 
 export const APP_SETUP_HOOKS = defineToken<AppSetupHook[]>('APP_SETUP_HOOKS', { multi: true });
 
@@ -82,10 +86,12 @@ export async function createAbpApp(
     injector.destroy();
   };
 
-  for (const hook of injector.get(APP_SETUP_HOOKS, [], { optional: true })) hook(app, injector);
-
   await options.setup?.(app, injector);
   await runInitializers(injector);
+
+  for (const hook of injector.get(APP_SETUP_HOOKS, [], { optional: true })) {
+    await hook(app, injector);
+  }
 
   return {
     app,

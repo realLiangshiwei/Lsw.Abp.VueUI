@@ -142,3 +142,17 @@ describe('the injection context', () => {
     ).resolves.toContain('abp/no-inject-after-await');
   });
 });
+
+describe('secondary entry points', () => {
+  it('a package may import its own main entry by package name', async () => {
+    await expect(
+      ruleIdsFor('packages/core/router/src/a.ts', anImport('@lsw-abpvue/core')),
+    ).resolves.not.toContain('no-restricted-imports');
+  });
+
+  it('but another package is still held to the rule', async () => {
+    await expect(
+      ruleIdsFor('packages/core/router/src/a.ts', anImport('@lsw-abpvue/theme-shared')),
+    ).resolves.toContain('no-restricted-imports');
+  });
+});

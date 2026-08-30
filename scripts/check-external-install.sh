@@ -36,12 +36,13 @@ cat > package.json <<'JSON'
   "name": "external-consumer",
   "private": true,
   "type": "module",
-  "dependencies": { "vue": "^3.5.41" }
+  "dependencies": { "vue": "^3.5.41", "vue-router": "^4.5.1" }
 }
 JSON
 
 cat > app.ts <<'TS'
 import { AbpPermission, createInjector, defineService, inject, InternalStore } from '@lsw-abpvue/core';
+import { AbpDynamicLayout, lazyRoutes, provideAbpRouter } from '@lsw-abpvue/core/router';
 import { interpolate } from '@lsw-abpvue/utils';
 
 const Greeter = defineService('Greeter', () => {
@@ -56,6 +57,12 @@ export const injected = () => inject(Greeter);
 // (milestone V6): `any` would make every misuse in a consumer's template compile.
 type IsAny<T> = 0 extends 1 & T ? true : false;
 export const componentIsTyped: IsAny<typeof AbpPermission> extends false ? true : never = true;
+
+// The secondary entry point resolves, and the main one it imports is the same instance.
+export const routing = provideAbpRouter([
+  lazyRoutes('/identity', () => import('@lsw-abpvue/core').then(() => [])),
+]);
+export const layoutIsTyped: IsAny<typeof AbpDynamicLayout> extends false ? true : never = true;
 TS
 
 cat > tsconfig.json <<'JSON'

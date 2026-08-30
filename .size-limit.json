@@ -16,5 +16,11 @@
     "import": "{ defineToken }",
     "ignore": ["vue"],
     "limit": "200 B"
+  },
+  {
+    "name": "@lsw-abpvue/core/router",
+    "path": "packages/core/dist/router/index.js",
+    "ignore": ["vue", "vue-router", "@lsw-abpvue/core"],
+    "limit": "3 kB"
   }
 ]

@@ -1,0 +1,14 @@
+{
+  // One declaration build per entry point: each has its own rootDir, and the secondary
+  // entry reaches the main one by package name, so it never enters this program.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "rootDir": "router/src",
+    "paths": {},
+    "outDir": "dist/router"
+  },
+  "include": ["router/src/**/*.ts", "router/src/**/*.vue"],
+  "exclude": ["router/src/**/*.spec.ts", "router/src/**/*.test-d.ts"]
+}

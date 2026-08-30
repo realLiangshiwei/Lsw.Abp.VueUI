@@ -91,11 +91,15 @@ function layerRule(pkg, allowed, files) {
   };
 }
 
+/**
+ * A secondary entry point reaches the package's main entry by package name, because it
+ * is built and typed on its own (design 03 §2). That is not a layer crossing.
+ */
 const layerRules = Object.entries(ALLOWED_IMPORTS).flatMap(([pkg, allowed]) => [
-  layerRule(pkg, allowed, [`packages/${pkg}/**/*.{ts,mts,vue}`]),
+  layerRule(pkg, [...allowed, `@lsw-abpvue/${pkg}`], [`packages/${pkg}/**/*.{ts,mts,vue}`]),
   layerRule(
     pkg,
-    [...allowed, ...TEST_TOOLS],
+    [...allowed, `@lsw-abpvue/${pkg}`, ...TEST_TOOLS],
     [`packages/${pkg}/**/*.spec.ts`, `packages/${pkg}/**/*.test-d.ts`],
   ),
 ]);

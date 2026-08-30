@@ -30,10 +30,11 @@ export function defineAbpTestConfig(options: AbpTestOptions): ViteUserConfig {
     test: {
       root,
       environment: options.environment ?? 'node',
-      include: ['src/**/*.spec.ts'],
+      // `*/src/**` covers secondary entry points such as `router/src` (design 03 §2).
+      include: ['src/**/*.spec.ts', '*/src/**/*.spec.ts'],
       typecheck: {
         enabled: true,
-        include: ['src/**/*.test-d.ts'],
+        include: ['src/**/*.test-d.ts', '*/src/**/*.test-d.ts'],
         tsconfig: 'tsconfig.json',
         // Plain `tsc` cannot resolve a `.vue` import, and every package above `core`
         // has components.
