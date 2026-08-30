@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useConfigState, useHttpWait } from '@lsw-abpvue/core';
 import { computed } from 'vue';
-import { startupError } from '../startup';
-
 const configState = useConfigState();
 const { loading } = useHttpWait();
 
@@ -29,8 +27,6 @@ const rows = computed(() => [
   <section>
     <h2>Application configuration</h2>
 
-    <p v-if="startupError" class="error">{{ startupError }}</p>
-
     <table>
       <tbody>
         <tr v-for="[name, value] in rows" :key="name">
@@ -47,24 +43,3 @@ const rows = computed(() => [
     </p>
   </section>
 </template>
-
-<style>
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th[scope='row'] {
-  text-align: left;
-  font-weight: normal;
-  opacity: 0.7;
-  padding: 0.2rem 1rem 0.2rem 0;
-  white-space: nowrap;
-}
-
-.error {
-  padding: 0.75rem;
-  border: 1px solid currentColor;
-  border-radius: 4px;
-}
-</style>

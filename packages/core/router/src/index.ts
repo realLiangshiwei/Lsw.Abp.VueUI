@@ -15,5 +15,5 @@ export { lazyRoutes } from './lazy-routes';
 export { provideAbpRouter, useAbpRouter, withRouterHistory, withTitleStrategy } from './provider';
 export { collectRoutes, registerRoutes } from './routes-handler';
 export { TITLE_STRATEGY } from './title-strategy';
-export { ABP_ROUTER, DYNAMIC_LAYOUTS, ROUTER_HISTORY } from './tokens';
+export { ABP_ROUTER, DYNAMIC_LAYOUTS, FORBIDDEN_ROUTE, ROUTER_HISTORY } from './tokens';
 export type { ReplaceableRoute, TitleStrategy } from './tokens';

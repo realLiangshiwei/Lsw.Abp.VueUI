@@ -66,7 +66,8 @@ export function provideAbpRouter(
       app.use(router);
       registerRoutes(router, injector.get(RoutesService));
 
-      await router.isReady();
+      // A first navigation that a guard turns down is not a reason to refuse to start.
+      await router.isReady().catch(() => undefined);
     }),
     ...collectFeatures('provideAbpRouter()', features),
   ]);

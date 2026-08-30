@@ -1,6 +1,6 @@
 import { defineToken, LayoutType } from '@lsw-abpvue/core';
 import type { Component } from 'vue';
-import type { Router, RouterHistory } from 'vue-router';
+import type { RouteLocationRaw, Router, RouterHistory } from 'vue-router';
 
 /** The application's router, so a service can reach it outside a component. */
 export const ABP_ROUTER = defineToken<Router>('ABP_ROUTER', {
@@ -21,6 +21,14 @@ export const DYNAMIC_LAYOUTS = defineToken<Map<LayoutType, string>>('DYNAMIC_LAY
       [LayoutType.account, 'Theme.AccountLayoutComponent'],
       [LayoutType.empty, 'Theme.EmptyLayoutComponent'],
     ]),
+});
+
+/**
+ * Where a visitor lands when a route's policy is not granted. A redirect rather than a
+ * refusal, because refusing the *first* navigation of a cold load leaves a blank page.
+ */
+export const FORBIDDEN_ROUTE = defineToken<RouteLocationRaw>('FORBIDDEN_ROUTE', {
+  factory: () => '/',
 });
 
 export interface TitleStrategy {

@@ -6,6 +6,7 @@ import {
   runInInjectionContext,
 } from '@lsw-abpvue/core';
 import type { NavigationGuard } from 'vue-router';
+import { FORBIDDEN_ROUTE } from './tokens';
 
 /**
  * Sends anonymous visitors to the login page. Reads `meta.requiresAuthentication`, so a
@@ -36,7 +37,11 @@ export const permissionGuard: NavigationGuard = to => {
   if (policies.length === 0) return true;
 
   const permission = inject(PermissionService);
-  return policies.every(policy => permission.isGranted(policy));
+  if (policies.every(policy => permission.isGranted(policy))) return true;
+
+  const forbidden = inject(FORBIDDEN_ROUTE);
+  // Redirecting to a route that is itself refused would loop, so that one is refused.
+  return to.fullPath === forbidden ? false : forbidden;
 };
 
 /**

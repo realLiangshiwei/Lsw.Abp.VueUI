@@ -1,51 +1,52 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useGreeter } from './services/greeting';
-import ApplicationState from './components/ApplicationState.vue';
-import ScopedGreeting from './components/ScopedGreeting.vue';
+import { RouterView } from 'vue-router';
+import AppMenu from './components/AppMenu.vue';
+import LanguagePicker from './components/LanguagePicker.vue';
+import PermissionSwitch from './components/PermissionSwitch.vue';
+import { startupError } from './startup';
 
 const apiUrl = import.meta.env.VITE_ABP_API_URL;
-
-const name = ref('ABP');
-const greeter = useGreeter();
-const greeting = computed(() => greeter.greet(name.value));
 </script>
 
 <template>
-  <main>
-    <h1>Lsw.Abp.VueUI playground</h1>
-    <p class="backend">
-      Backend: <code>{{ apiUrl }}</code>
-    </p>
+  <div class="shell">
+    <aside>
+      <h1>Lsw.Abp.VueUI</h1>
+      <p class="hint">
+        Backend: <code>{{ apiUrl }}</code>
+      </p>
 
-    <ApplicationState />
+      <AppMenu />
+      <LanguagePicker />
+      <PermissionSwitch />
+    </aside>
 
-    <label>
-      Name
-      <input v-model="name" />
-    </label>
-
-    <section>
-      <h2>Root injector</h2>
-      <output>{{ greeting }}</output>
-    </section>
-
-    <ScopedGreeting :name="name" />
-
-    <p class="hint">
-      Packages are aliased to their <code>src</code>, so editing one hot-reloads this page.
-    </p>
-  </main>
+    <main>
+      <p v-if="startupError" class="error">{{ startupError }}</p>
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <!-- Not scoped: the demo components below share these styles. -->
 <style>
-main {
+body {
+  margin: 0;
   font-family: system-ui, sans-serif;
-  max-width: 42rem;
-  margin: 3rem auto;
-  padding: 0 1rem;
   line-height: 1.6;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 16rem 1fr;
+  gap: 2rem;
+  max-width: 64rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+aside h1 {
+  font-size: 1.1rem;
 }
 
 label {
@@ -53,7 +54,9 @@ label {
   margin-bottom: 0.75rem;
 }
 
-input {
+input[type='text'],
+input:not([type]),
+select {
   display: block;
   width: 100%;
   padding: 0.4rem 0.5rem;
@@ -73,7 +76,25 @@ button {
   padding: 0.35rem 0.75rem;
 }
 
-.backend,
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th[scope='row'] {
+  text-align: left;
+  font-weight: normal;
+  opacity: 0.7;
+  padding: 0.2rem 1rem 0.2rem 0;
+  white-space: nowrap;
+}
+
+.error {
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+
 .hint {
   opacity: 0.7;
 }
