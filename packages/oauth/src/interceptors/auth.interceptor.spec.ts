@@ -107,13 +107,16 @@ describe('the authentication interceptor', () => {
     });
   });
 
-  it('does not force an empty Authorization when there is no token', async () => {
+  it('does not force an empty Authorization when there is no token, but still says this is an API call', async () => {
     const { exchanges, injector, protectedCall } = api();
     injector.get(AuthStateService).persist(null);
 
     await protectedCall();
 
     expect(users(exchanges)[0]?.headers.Authorization).toBeUndefined();
+    // Without it ABP redirects an anonymous API call to its login page, and the answer
+    // is a 200 full of HTML instead of the 401 the caller can act on.
+    expect(users(exchanges)[0]?.headers['X-Requested-With']).toBe('XMLHttpRequest');
   });
 
   it('the token endpoint carries no bearer of its own, or a failed login would set off a renewal', async () => {

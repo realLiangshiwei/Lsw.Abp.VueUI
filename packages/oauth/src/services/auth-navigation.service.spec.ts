@@ -9,6 +9,7 @@ const page = { template: '<p>page</p>' };
 
 function navigation(withRouter: boolean) {
   const visited: string[] = [];
+  let built = 0;
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -18,7 +19,17 @@ function navigation(withRouter: boolean) {
   });
 
   const injector = createInjector([
-    ...(withRouter ? [{ provide: ABP_ROUTER, useValue: router }] : []),
+    ...(withRouter
+      ? [
+          {
+            provide: ABP_ROUTER,
+            useFactory: () => {
+              built += 1;
+              return router;
+            },
+          },
+        ]
+      : []),
     {
       provide: WindowService,
       useValue: {
@@ -31,7 +42,7 @@ function navigation(withRouter: boolean) {
     },
   ]);
 
-  return { router, visited, service: injector.get(AuthNavigationService) };
+  return { router, visited, built: () => built, service: injector.get(AuthNavigationService) };
 }
 
 describe('navigation on behalf of authentication', () => {
@@ -58,6 +69,16 @@ describe('navigation on behalf of authentication', () => {
     service.replaceUrl('/books?page=2');
 
     expect(window.location.pathname + window.location.search).toBe('/books?page=2');
+  });
+
+  it('does not build the router until something is really navigated -- building it makes vue-router read a callback URL that is not cleaned yet', async () => {
+    const { built, service } = navigation(true);
+
+    expect(built()).toBe(0);
+
+    await service.go('/account/login');
+
+    expect(built()).toBe(1);
   });
 
   it('reads the current URL', () => {

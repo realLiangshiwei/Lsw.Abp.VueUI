@@ -7,14 +7,15 @@ import {
 } from '@lsw-abpvue/core';
 import { AbpOAuthService } from '../services/abp-oauth.service';
 
-function withBearer(request: HttpRequestConfig, token: string): HttpRequestConfig {
+function identified(request: HttpRequestConfig, token: string | null): HttpRequestConfig {
   return {
     ...request,
     headers: {
-      Authorization: `Bearer ${token}`,
-      // Tells ABP this is an API call, so an unauthenticated one is answered with a 401
-      // rather than a redirect to the backend's own login page.
+      // Whether or not there is a token: it tells ABP this is an API call, and an
+      // unauthenticated one is then answered with a 401 rather than a redirect to the
+      // backend's own login page -- which arrives as a 200 full of HTML.
       'X-Requested-With': 'XMLHttpRequest',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...request.headers,
     },
   };
@@ -38,10 +39,7 @@ export function authInterceptor(): HttpInterceptor {
   return async (request, next) => {
     if (request.context?.skipAuthorization) return next(request);
 
-    const send = () => {
-      const token = oauth.getAccessToken();
-      return next(token ? withBearer(request, token) : request);
-    };
+    const send = () => next(identified(request, oauth.getAccessToken()));
 
     try {
       return await send();

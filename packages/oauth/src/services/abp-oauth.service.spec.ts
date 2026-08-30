@@ -12,6 +12,7 @@ import {
   type FetchLike,
 } from '@lsw-abpvue/core';
 import { describe, expect, it } from 'vitest';
+import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
 import { provideAbpOAuth } from '../providers/oauth.provider';
 import { AbpOAuthService } from './abp-oauth.service';
 import { AuthStateService } from './auth-state.service';
@@ -48,6 +49,9 @@ function app(options: { offline?: boolean } = {}) {
     }
     if (href.includes('identity/users')) {
       return Promise.resolve(new Response('{}', { status: 401, statusText: 'Unauthorized' }));
+    }
+    if (href.includes('application-configuration')) {
+      return Promise.resolve(new Response(JSON.stringify(configurationFixture)));
     }
 
     return Promise.resolve(new Response('{}'));

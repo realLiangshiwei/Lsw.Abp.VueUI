@@ -61,7 +61,11 @@ export function provideAbpRouter(
 
       router.beforeEach(inContextOf(injector, authGuard));
       router.beforeEach(inContextOf(injector, permissionGuard));
-      router.afterEach(to => titleStrategy.setTitle(to.meta.title));
+      // vue-router runs `afterEach` for a refused navigation too, with the failure as
+      // its third argument. Retitling then would name a page nobody is looking at.
+      router.afterEach((to, _from, failure) => {
+        if (!failure) titleStrategy.setTitle(to.meta.title);
+      });
 
       app.use(router);
       registerRoutes(router, injector.get(RoutesService));

@@ -3,6 +3,7 @@ import {
   createInjector,
   HTTP_FETCH,
   provideAbpCore,
+  SessionStateService,
   TwoFactorRequiredError,
   withOptions,
   type Environment,
@@ -34,6 +35,7 @@ const discovery = {
 interface Exchange {
   url: string;
   body: Record<string, string>;
+  headers: Record<string, string>;
 }
 
 /**
@@ -46,7 +48,11 @@ function endpoint(answer: (url: string) => Response = () => new Response(null, {
 
   const send: FetchLike = (url, init) => {
     const body = init?.body instanceof URLSearchParams ? Object.fromEntries(init.body) : {};
-    exchanges.push({ url: String(url), body });
+    exchanges.push({
+      url: String(url),
+      body,
+      headers: (init?.headers ?? {}) as Record<string, string>,
+    });
 
     if (String(url).includes('.well-known')) {
       return Promise.resolve(new Response(JSON.stringify(discovery)));
@@ -60,7 +66,7 @@ function endpoint(answer: (url: string) => Response = () => new Response(null, {
     { provide: HTTP_FETCH, useValue: send },
   ]);
 
-  return { exchanges, service: injector.get(TokenEndpointService) };
+  return { exchanges, injector, service: injector.get(TokenEndpointService) };
 }
 
 const ok = () =>
@@ -99,6 +105,15 @@ describe('the token endpoint', () => {
       scope: 'offline_access BookStore',
       client_id: 'BookStore_App',
     });
+  });
+
+  it('a login carries the tenant, or it would sign in to the host', async () => {
+    const { exchanges, injector, service } = endpoint(ok);
+    injector.get(SessionStateService).setTenant({ id: 'id-of-acme', isAvailable: true });
+
+    await service.password({ username: 'admin', password: '1q2w3E*' });
+
+    expect(exchanges[1]?.headers).toMatchObject({ __tenant: 'id-of-acme' });
   });
 
   it('sends the two-factor parameters under the names ABP reads', async () => {

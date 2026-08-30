@@ -4,7 +4,10 @@ import { inject } from '../di/inject';
 import { defineService, type ServiceOf } from '../di/token';
 import { AbpApplicationConfigurationService } from '../proxy/abp-application-configuration.service';
 import { AbpApplicationLocalizationService } from '../proxy/abp-application-localization.service';
-import type { ApplicationConfigurationDto } from '../proxy/models';
+import type {
+  ApplicationConfigurationDto,
+  ApplicationLocalizationConfigurationDto,
+} from '../proxy/models';
 import { InternalStore } from '../utils/internal-store';
 import { useLatest } from '../utils/use-latest';
 
@@ -69,6 +72,28 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
   const store = new InternalStore<ApplicationConfigurationDto>(emptyConfiguration());
   const latest = useLatest<ApplicationConfigurationDto>();
 
+  /**
+   * The texts of one culture, in the shape the store keeps them.
+   *
+   * Defensive about what comes back: a gateway answering 200 with something else must
+   * not take startup down, and the texts are recoverable on the next language change.
+   */
+  async function textsOf(
+    cultureName: string,
+    config?: { signal?: AbortSignal | undefined },
+  ): Promise<Partial<ApplicationLocalizationConfigurationDto>> {
+    const localization = await appLocalization.get({ cultureName, onlyDynamics: false }, config);
+    const resources = localization.resources ?? {};
+
+    return {
+      resources,
+      values: Object.fromEntries(
+        Object.entries(resources).map(([name, resource]) => [name, resource.texts]),
+      ),
+      ...(localization.currentCulture ? { currentCulture: localization.currentCulture } : {}),
+    };
+  }
+
   return {
     getAll: (): ComputedRef<ApplicationConfigurationDto> => store.slice(state => state),
 
@@ -112,40 +137,42 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
       store.onUpdate(state => state, callback),
 
     /**
-     * Reloads the configuration. Overlapping calls -- two tenant switches in a row, a
-     * login while a refresh is in flight -- resolve to the newest one; the abandoned
-     * request is aborted and its answer never reaches the store.
+     * Reloads the configuration, texts included. Overlapping calls -- two tenant switches
+     * in a row, a login while a refresh is in flight -- resolve to the newest one; the
+     * abandoned request is aborted and its answer never reaches the store.
+     *
+     * The texts are fetched separately because the configuration is asked to leave them
+     * out, and they are put back before the store is replaced: a refresh that dropped
+     * them would blank every label in the UI, and a login triggers one.
      */
     refreshAppState: async (): Promise<ApplicationConfigurationDto> => {
-      const configuration = await latest.run(signal =>
-        appConfiguration.get({ includeLocalizationResources: false }, { signal }),
-      );
+      const configuration = await latest.run(async signal => {
+        const application = await appConfiguration.get(
+          { includeLocalizationResources: false },
+          { signal },
+        );
+        // Optional chaining against a required field: a gateway answering 200 with
+        // something else must not take the application down.
+        const culture = application.localization?.currentCulture?.cultureName?.split(';')[0];
+        if (!culture) return application;
+
+        return {
+          ...application,
+          localization: { ...application.localization, ...(await textsOf(culture, { signal })) },
+        };
+      });
 
       if (configuration) store.set(configuration);
       return store.state.value;
     },
 
     /**
-     * Loads the localization texts of one culture, which the configuration endpoint is
-     * asked to leave out because they are by far the largest part of it.
+     * Loads the texts of one culture without touching the rest of the configuration,
+     * which is what a language change needs.
      * @param cultureName Culture to load, e.g. `tr` or `en-GB`
      */
     refreshLocalization: async (cultureName: string): Promise<void> => {
-      const localization = await appLocalization.get({ cultureName, onlyDynamics: false });
-      // Defensive about the shape: a gateway answering 200 with something else must not
-      // take startup down, and the texts are recoverable on the next language change.
-      const resources = localization.resources ?? {};
-      const values = Object.fromEntries(
-        Object.entries(resources).map(([name, resource]) => [name, resource.texts]),
-      );
-
-      store.deepPatch({
-        localization: {
-          resources,
-          values,
-          ...(localization.currentCulture ? { currentCulture: localization.currentCulture } : {}),
-        },
-      });
+      store.deepPatch({ localization: await textsOf(cultureName) });
     },
   };
 });

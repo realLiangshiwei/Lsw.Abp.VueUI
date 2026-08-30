@@ -35,10 +35,8 @@ export async function getInitialData(): Promise<void> {
   session.setTenant(configuration.currentTenant.id ? configuration.currentTenant : null);
 
   // The backend answers with the culture it actually applied, which is the normalised
-  // form of what we asked for -- `tr;q=0.9` comes back as `tr`.
+  // form of what we asked for -- `tr;q=0.9` comes back as `tr`. Its texts came with the
+  // refresh; only the session has to be told.
   const culture = configuration.localization.currentCulture.cultureName?.split(';')[0];
-  if (culture) {
-    session.setLanguage(culture);
-    await configState.refreshLocalization(culture);
-  }
+  if (culture) session.setLanguage(culture);
 }

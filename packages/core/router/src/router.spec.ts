@@ -148,6 +148,35 @@ describe('provideAbpRouter', () => {
 
     expect(titles.at(-1)).toBe('Books | BookStore');
   });
+
+  it('a navigation the guard refused does not change the title -- what is on screen is still the old page', async () => {
+    const titles: string[] = [];
+    const app = await start(
+      [
+        { path: '/', component: Page('home'), meta: { title: 'Home' } },
+        { path: '/books', component: Page('books'), meta: { title: 'Books' } },
+      ],
+      {
+        providers: [
+          {
+            provide: DocumentService,
+            useValue: {
+              nativeDocument: undefined,
+              setTitle: (title: string) => void titles.push(title),
+              setDir: () => {},
+              getBaseUrl: () => '/',
+            },
+          },
+        ],
+      },
+    );
+    const router = app.injector.get(ABP_ROUTER);
+    router.beforeEach(to => to.path !== '/books');
+
+    await router.push('/books');
+
+    expect(titles.at(-1)).toBe('Home | BookStore');
+  });
 });
 
 describe('the permission guard', () => {

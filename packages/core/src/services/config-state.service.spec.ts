@@ -25,6 +25,65 @@ describe('before the configuration arrives', () => {
   });
 });
 
+describe('refreshing the configuration', () => {
+  /** The configuration is asked to leave the texts out; they come from their own endpoint. */
+  function backend() {
+    const urls: string[] = [];
+    const send: FetchLike = url => {
+      urls.push(String(url));
+
+      return Promise.resolve(
+        String(url).includes('application-localization')
+          ? json({
+              resources: { BookStore: { texts: { Menu: 'Menu' }, baseResources: [] } },
+              currentCulture: fixture.localization.currentCulture,
+            })
+          : json(fixture),
+      );
+    };
+
+    return { urls, state: configState(send) };
+  }
+
+  it('the texts come into the store along with the configuration', async () => {
+    const { state } = backend();
+
+    await state.refreshAppState();
+
+    expect(state.snapshot().localization.values.BookStore).toEqual({ Menu: 'Menu' });
+  });
+
+  it('a second refresh does not wipe the texts -- a login, a logout and a tenant switch each cause one', async () => {
+    const { state } = backend();
+    await state.refreshAppState();
+
+    await state.refreshAppState();
+
+    expect(state.snapshot().localization.values.BookStore).toEqual({ Menu: 'Menu' });
+  });
+
+  it('asks for no texts when the backend did not say which culture it used', async () => {
+    const urls: string[] = [];
+    const send: FetchLike = url => {
+      urls.push(String(url));
+
+      return Promise.resolve(
+        json({
+          ...fixture,
+          localization: {
+            ...fixture.localization,
+            currentCulture: { isRightToLeft: false, dateTimeFormat: {} },
+          },
+        }),
+      );
+    };
+
+    await configState(send).refreshAppState();
+
+    expect(urls.filter(url => url.includes('application-localization'))).toEqual([]);
+  });
+});
+
 describe('reading the configuration', () => {
   it('reads a top-level key', async () => {
     const state = configState();
@@ -111,7 +170,9 @@ describe('refreshing the configuration', () => {
       { ...fixture, extraProperties: { round: 'second' } },
     ];
     let call = 0;
-    const state = configState(async (_url, init) => {
+    const state = configState(async (url, init) => {
+      if (String(url).includes('application-localization')) return json({ resources: {} });
+
       const body = bodies[call++];
       await new Promise(resolve => setTimeout(resolve, call === 1 ? 20 : 0));
       if (init?.signal?.aborted) throw new DOMException('aborted', 'AbortError');
