@@ -1,5 +1,6 @@
 import {
   createAbpApp,
+  loadRuntimeConfig,
   provideAbpCore,
   provideAppInitErrorHandler,
   withOptions,
@@ -7,8 +8,12 @@ import {
 import { provideAbpRouter } from '@lsw-abpvue/core/router';
 import App from './App.vue';
 import { routes } from './routes';
+import { defaultEnvironment, describeStartupError, startupError } from './startup';
 import { GREETING_TEMPLATE } from './services/greeting';
-import { describeStartupError, environment, startupError } from './startup';
+
+// Resolved at runtime, not baked in: `public/dynamic-env.json` wins, then `VITE_API_URL`
+// and friends, then the defaults below (decision D11).
+const environment = await loadRuntimeConfig({ defaults: defaultEnvironment });
 
 const { mount } = await createAbpApp(App, {
   providers: [

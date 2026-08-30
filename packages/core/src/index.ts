@@ -169,6 +169,8 @@ export { createNavTree } from './utils/nav-tree';
 export type { NavTree, NavTreeOptions } from './utils/nav-tree';
 export { useDebounceFn } from './utils/use-debounce-fn';
 export type { DebouncedFn } from './utils/use-debounce-fn';
+export { loadRuntimeConfig } from './utils/load-runtime-config';
+export type { RuntimeConfigOptions } from './utils/load-runtime-config';
 export { useLatest } from './utils/use-latest';
 export { useListService } from './utils/use-list-service';
 export type { ListService, ListServiceOptions, ListSource } from './utils/use-list-service';

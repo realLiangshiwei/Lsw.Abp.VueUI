@@ -1,11 +1,15 @@
-import { AbpHttpError, type Environment } from '@lsw-abpvue/core';
+import { AbpHttpError } from '@lsw-abpvue/core';
 import { ref } from 'vue';
 
 /** Filled in by the startup error handler, before any component exists to hold it. */
 export const startupError = ref<string | null>(null);
 
-export const environment: Environment = {
-  apis: { default: { url: import.meta.env.VITE_ABP_API_URL } },
+/**
+ * The last of the three levels `loadRuntimeConfig` walks: what this build was born with.
+ * A deployment overrides it with `public/dynamic-env.json`, or with `VITE_API_URL`.
+ */
+export const defaultEnvironment = {
+  apis: { default: { url: 'https://localhost:44384' } },
   application: { name: 'BookStore' },
   production: false,
 };

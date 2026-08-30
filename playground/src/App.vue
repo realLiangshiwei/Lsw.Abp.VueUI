@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { useEnvironment } from '@lsw-abpvue/core';
 import { RouterView } from 'vue-router';
 import AppMenu from './components/AppMenu.vue';
 import LanguagePicker from './components/LanguagePicker.vue';
 import PermissionSwitch from './components/PermissionSwitch.vue';
 import { startupError } from './startup';
 
-const apiUrl = import.meta.env.VITE_ABP_API_URL;
+// Whatever the three levels resolved to, not what this build was compiled with.
+const apiUrl = useEnvironment().getApiUrl();
 </script>
 
 <template>
