@@ -22,7 +22,9 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text-summary', 'lcov'],
-      include: ['packages/*/src/**/*.{ts,vue}'],
+      // The second pattern is the secondary entry points (`core/router/src`), which the
+      // first one silently missed — a whole entry point outside the gate.
+      include: ['packages/*/src/**/*.{ts,vue}', 'packages/*/*/src/**/*.{ts,vue}'],
       exclude: ['**/*.spec.ts', '**/*.test-d.ts', '**/index.ts'],
       // Targets are core and components/extensible 80%, the DI kernel 95%, everything
       // else 60% (testing rules). Raised as each package lands, so the gate never blocks
