@@ -22,5 +22,11 @@
     "path": "packages/core/dist/router/index.js",
     "ignore": ["vue", "vue-router", "@lsw-abpvue/core"],
     "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/oauth",
+    "path": "packages/oauth/dist/index.js",
+    "ignore": ["vue", "vue-router", "@lsw-abpvue/core", "oidc-client-ts"],
+    "limit": "6 kB"
   }
 ]

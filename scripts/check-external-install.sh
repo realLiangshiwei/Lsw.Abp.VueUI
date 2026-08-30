@@ -41,8 +41,9 @@ cat > package.json <<'JSON'
 JSON
 
 cat > app.ts <<'TS'
-import { AbpPermission, createInjector, defineService, inject, InternalStore } from '@lsw-abpvue/core';
+import { AbpPermission, createInjector, defineService, inject, InternalStore, MemoryTokenStorage } from '@lsw-abpvue/core';
 import { AbpDynamicLayout, lazyRoutes, provideAbpRouter } from '@lsw-abpvue/core/router';
+import { provideAbpOAuth, withTokenStorage } from '@lsw-abpvue/oauth';
 import { interpolate } from '@lsw-abpvue/utils';
 
 const Greeter = defineService('Greeter', () => {
@@ -63,6 +64,10 @@ export const routing = provideAbpRouter([
   lazyRoutes('/identity', () => import('@lsw-abpvue/core').then(() => [])),
 ]);
 export const layoutIsTyped: IsAny<typeof AbpDynamicLayout> extends false ? true : never = true;
+
+// The authentication package resolves the same `core` as the app does, which is what
+// makes `withTokenStorage` accept a token defined over there.
+export const authentication = provideAbpOAuth(withTokenStorage(MemoryTokenStorage));
 TS
 
 cat > tsconfig.json <<'JSON'
