@@ -9,8 +9,9 @@ injection this package provides.
 pnpm add @lsw-abpvue/core
 ```
 
-> Milestone M1 is in progress: the DI kernel is in place, the application state,
-> localization and routing services land next.
+> Milestone M1 is complete: dependency injection, application state, HTTP,
+> localization, permissions, the session, multi-tenancy, the route tree and the
+> `/router` entry point. Authentication arrives with `@lsw-abpvue/oauth` in M2.
 
 ## Dependency injection
 
@@ -56,6 +57,18 @@ const onClick = () => injector.get(GreeterService).greet('a click handler');
 
 `inject()` is synchronous, exactly as in Angular: the context ends at the first `await`.
 Capture the injector before awaiting, or resolve everything up front.
+
+## What else is in it
+
+| | |
+|---|---|
+| `ConfigStateService` | Everything `/api/abp/application-configuration` returns, as reactive state. Refreshed after a login, a logout or a tenant switch, which is what makes menus and permission checks recompute on their own. |
+| `RestService` / `HttpClient` | fetch with an interceptor onion. Failures arrive as one `AbpHttpError` carrying ABP's error envelope. |
+| `LocalizationService` / `$t` | `Resource::Key` resolution with ABP's rules, plus texts shipped with the application. A language change re-renders what used it; nothing is remounted. |
+| `PermissionService` | `A && B`, `A \|\| C` and — unlike the Angular UI — the two mixed with parentheses. |
+| `RoutesService` | The menu, built from what routes declare in `meta.routes` and filtered by the granted policies. |
+| `useListService` | Paging, sorting and debounced filtering for a table, with the answer to a superseded request dropped. |
+| `@lsw-abpvue/core/router` | `provideAbpRouter`, the auth and permission guards, `lazyRoutes`, the title strategy, `AbpDynamicLayout`. |
 
 ## How it lines up with the Angular UI
 
