@@ -44,3 +44,41 @@ describe('with no browser', () => {
     expect(cookies.get('lang')).toBeUndefined();
   });
 });
+
+/**
+ * V5 of the milestone: importing the package and building its services must not touch a
+ * browser. This file runs under Node, so an accidental `window` at module scope or in a
+ * factory fails here rather than in someone's server renderer.
+ */
+describe('loading the whole package under Node', () => {
+  it('importing the barrel touches no browser', async () => {
+    await expect(import('../../index')).resolves.toBeDefined();
+  });
+
+  it('building every service touches no browser', async () => {
+    const core = await import('../../index');
+    const services = createInjector([]);
+
+    expect(() => {
+      services.get(core.ConfigStateService);
+      services.get(core.LocalizationService);
+      services.get(core.PermissionService);
+      services.get(core.RoutesService);
+      services.get(core.SessionStateService);
+      services.get(core.MultiTenancyService);
+      services.get(core.RestService);
+      services.get(core.CurrentUserService);
+      services.get(core.SettingService);
+      services.get(core.FeatureService);
+      services.get(core.ReplaceableComponentsService);
+    }).not.toThrow();
+  });
+
+  it('session state initialises with no storage at all', async () => {
+    const core = await import('../../index');
+    const session = createInjector([]).get(core.SessionStateService);
+
+    expect(() => session.init()).not.toThrow();
+    expect(session.getLanguage()).toBeNull();
+  });
+});

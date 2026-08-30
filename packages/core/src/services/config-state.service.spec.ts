@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { computed } from 'vue';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
 import { createInjector } from '../di/injector';
 import type { ApplicationConfigurationDto } from '../proxy/models';
@@ -140,5 +141,46 @@ describe('refreshing the configuration', () => {
 
     expect(state.snapshot().localization.values.BookStore).toEqual({ Menu: 'Menu' });
     expect(state.snapshot().localization.resources.BookStore?.baseResources).toEqual([]);
+  });
+});
+
+/**
+ * V3 of the milestone: what a `computed` over a deep field of a large configuration
+ * costs. Nothing is deep-compared — the configuration is replaced whole, so a slice's
+ * cost is one selector run per refresh, and downstream work only happens when the
+ * selected value itself changed.
+ */
+describe('recomputation cost on a large configuration', () => {
+  it('one refresh runs each slice selector once, whatever the size of the configuration', async () => {
+    const state = configState();
+    await state.refreshAppState();
+    const selector = vi.fn((configuration: ApplicationConfigurationDto) => configuration.setting);
+    const slice = state.getAll();
+    void slice.value;
+
+    const watched = computed(() => selector(state.getAll().value));
+    void watched.value;
+
+    state.setState({ ...state.snapshot() });
+    void watched.value;
+    void watched.value;
+    void watched.value;
+
+    expect(selector).toHaveBeenCalledTimes(2);
+  });
+
+  it('a field whose value did not change does not disturb what reads it', async () => {
+    const state = configState();
+    await state.refreshAppState();
+    const culture = state.getDeep<string>('localization.currentCulture.cultureName');
+    const derived = vi.fn(() => culture.value.toUpperCase());
+    const upper = computed(derived);
+    expect(upper.value).toBe('EN');
+
+    // A refresh allocates a whole new configuration object, as the real one does.
+    state.setState(structuredClone(state.snapshot()));
+
+    expect(upper.value).toBe('EN');
+    expect(derived).toHaveBeenCalledOnce();
   });
 });
