@@ -128,6 +128,9 @@ importers:
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@lsw-abpvue/oauth':
+        specifier: workspace:*
+        version: link:../packages/oauth
       '@lsw-abpvue/utils':
         specifier: workspace:*
         version: link:../packages/utils

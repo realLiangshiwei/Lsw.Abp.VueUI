@@ -6,6 +6,7 @@ import {
   withOptions,
 } from '@lsw-abpvue/core';
 import { provideAbpRouter } from '@lsw-abpvue/core/router';
+import { provideAbpOAuth } from '@lsw-abpvue/oauth';
 import App from './App.vue';
 import { routes } from './routes';
 import { defaultEnvironment, describeStartupError, startupError } from './startup';
@@ -19,6 +20,9 @@ const { mount } = await createAbpApp(App, {
   providers: [
     provideAbpCore(withOptions({ environment })),
     provideAbpRouter(routes),
+    // Fills in the AuthService core declares. Which flow runs is read from
+    // `environment.oAuthConfig.responseType`, not chosen here.
+    provideAbpOAuth(),
     // Without one of these an unreachable backend would leave a blank page.
     provideAppInitErrorHandler(error => {
       startupError.value = describeStartupError(error);

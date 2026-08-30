@@ -9,9 +9,9 @@ injection this package provides.
 pnpm add @lsw-abpvue/core
 ```
 
-> Milestone M1 is complete: dependency injection, application state, HTTP,
-> localization, permissions, the session, multi-tenancy, the route tree and the
-> `/router` entry point. Authentication arrives with `@lsw-abpvue/oauth` in M2.
+> Milestones M1 and M2 are complete: dependency injection, application state, HTTP,
+> localization, permissions, the session, multi-tenancy, the route tree, the `/router`
+> entry point, and the authentication contract that `@lsw-abpvue/oauth` fills in.
 
 ## Dependency injection
 
@@ -68,6 +68,7 @@ Capture the injector before awaiting, or resolve everything up front.
 | `PermissionService` | `A && B`, `A \|\| C` and — unlike the Angular UI — the two mixed with parentheses. |
 | `RoutesService` | The menu, built from what routes declare in `meta.routes` and filtered by the granted policies. |
 | `useListService` | Paging, sorting and debounced filtering for a table, with the answer to a superseded request dropped. |
+| `AuthService` / `TokenStorage` | The authentication contract, with nothing behind it: `@lsw-abpvue/oauth` provides the OIDC implementation, and a host with its own scheme provides another. |
 | `@lsw-abpvue/core/router` | `provideAbpRouter`, the auth and permission guards, `lazyRoutes`, the title strategy, `AbpDynamicLayout`. |
 
 ## How it lines up with the Angular UI

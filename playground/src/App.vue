@@ -3,7 +3,7 @@ import { useEnvironment } from '@lsw-abpvue/core';
 import { RouterView } from 'vue-router';
 import AppMenu from './components/AppMenu.vue';
 import LanguagePicker from './components/LanguagePicker.vue';
-import PermissionSwitch from './components/PermissionSwitch.vue';
+import SignInPanel from './components/SignInPanel.vue';
 import { startupError } from './startup';
 
 // Whatever the three levels resolved to, not what this build was compiled with.
@@ -18,9 +18,9 @@ const apiUrl = useEnvironment().getApiUrl();
         Backend: <code>{{ apiUrl }}</code>
       </p>
 
+      <SignInPanel />
       <AppMenu />
       <LanguagePicker />
-      <PermissionSwitch />
     </aside>
 
     <main>

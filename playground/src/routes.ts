@@ -1,5 +1,7 @@
+import { LayoutType } from '@lsw-abpvue/core';
 import type { RouteRecordRaw } from 'vue-router';
 import HomePage from './pages/HomePage.vue';
+import LoginPage from './pages/LoginPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
 
 /**
@@ -24,10 +26,20 @@ export const routes: RouteRecordRaw[] = [
     },
   },
   {
+    // No menu entry: the login page is where the auth guard sends people, not somewhere
+    // they navigate to. The account layout is the one a theme renders without a shell.
+    path: '/account/login',
+    component: LoginPage,
+    meta: { title: 'AbpAccount::Login', layout: LayoutType.account },
+  },
+  {
     path: '/identity/users',
     component: PlaceholderPage,
     meta: {
       title: 'AbpIdentity::Users',
+      // Both guards apply: anonymous visitors are sent to log in, and a signed-in user
+      // without the policy is turned away.
+      requiresAuthentication: true,
       requiredPolicy: 'AbpIdentity.Users',
       routes: {
         name: 'AbpIdentity::Users',
