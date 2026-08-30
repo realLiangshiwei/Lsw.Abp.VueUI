@@ -9,6 +9,8 @@ import {
   makeEnvironmentProviders,
   NAVIGATE_TO_MANAGE_PROFILE,
   PIPE_TO_LOGIN_FN,
+  provideAppInitializer,
+  SessionStateService,
   TokenStorage,
   WindowService,
   AuthService,
@@ -22,6 +24,10 @@ import { authInterceptor } from '../interceptors/auth.interceptor';
 import { AbpOAuthService } from '../services/abp-oauth.service';
 import { AuthNavigationService } from '../services/auth-navigation.service';
 import { AuthStateService } from '../services/auth-state.service';
+import { decodeJwt } from '../utils/jwt';
+
+/** ABP puts the tenant a token was issued for in this claim; a host token has none. */
+const TENANT_CLAIM = 'tenantid';
 
 export type OAuthFeature = Feature<'withTokenStorage'>;
 
@@ -71,6 +77,29 @@ function navigateToManageProfile(): () => void {
 }
 
 /**
+ * A token belongs to one tenant. Switching tenants -- here, or in another tab -- makes
+ * the one being held the wrong token, so it goes and the backend is asked again who the
+ * visitor now is. The claim is what decides, not the moment: at startup the stored token
+ * and the resolved tenant agree, and nothing happens.
+ */
+function dropTokenOfAnotherTenant(): void {
+  const session = inject(SessionStateService);
+  const state = inject(AuthStateService);
+  const configState = inject(ConfigStateService);
+
+  session.onTenantChange(tenant => {
+    const token = state.getAccessToken();
+    if (!token) return;
+
+    const issuedFor = decodeJwt(token)?.[TENANT_CLAIM] ?? null;
+    if (issuedFor === (tenant?.id ?? null)) return;
+
+    state.persist(null);
+    void configState.refreshAppState();
+  });
+}
+
+/**
  * Everything `@lsw-abpvue/oauth` puts in the root injector: the `AuthService` the
  * framework asks for, and the interceptor that carries its token.
  * @param features `withXxx()` results
@@ -84,6 +113,7 @@ export function provideAbpOAuth(...features: OAuthFeature[]): EnvironmentProvide
     { provide: PIPE_TO_LOGIN_FN, useFactory: pipeToLogin },
     { provide: CHECK_AUTHENTICATION_STATE_FN, useFactory: checkAccessToken },
     { provide: NAVIGATE_TO_MANAGE_PROFILE, useFactory: navigateToManageProfile },
+    provideAppInitializer(dropTokenOfAnotherTenant),
     ...collectFeatures('provideAbpOAuth()', features),
   ]);
 }

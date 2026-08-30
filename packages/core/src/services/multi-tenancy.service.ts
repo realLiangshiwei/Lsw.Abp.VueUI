@@ -2,9 +2,11 @@ import type { ComputedRef } from 'vue';
 import { inject } from '../di/inject';
 import { defineService, type ServiceOf } from '../di/token';
 import type { Environment } from '../models/environment';
+import { TenantNotFoundError } from '../models/tenant';
 import { AbpTenantService } from '../proxy/abp-tenant.service';
 import type { CurrentTenantDto, FindTenantResultDto } from '../proxy/models';
 import { TENANT_KEY } from '../tokens/tenant-key.token';
+import { TENANT_NOT_FOUND_BY_NAME } from '../tokens/tenant-not-found.token';
 import { InternalStore } from '../utils/internal-store';
 import { ConfigStateService } from './config-state.service';
 import { EnvironmentService } from './environment.service';
@@ -73,6 +75,7 @@ export const MultiTenancyService = defineService('MultiTenancyService', () => {
   const tenants = inject(AbpTenantService);
   const windowService = inject(WindowService);
   const tenantKey = inject(TENANT_KEY);
+  const reportNotFound = inject(TENANT_NOT_FOUND_BY_NAME, { optional: true });
   const domain = new InternalStore<{ tenant: CurrentTenantDto | null }>({ tenant: null });
 
   async function setTenant(
@@ -81,6 +84,17 @@ export const MultiTenancyService = defineService('MultiTenancyService', () => {
     const tenant = toCurrentTenant(await find());
     session.setTenant(tenant);
     return tenant;
+  }
+
+  /**
+   * A tenant in the host name that does not resolve stops the application. ABP answers
+   * both with a 200 saying `success: false` and, behind some gateways, with a 404, so
+   * both count.
+   */
+  function notFound(tenancyName: string, cause?: unknown): TenantNotFoundError {
+    const error = new TenantNotFoundError(tenancyName, { cause });
+    reportNotFound?.(error);
+    return error;
   }
 
   return {
@@ -111,7 +125,13 @@ export const MultiTenancyService = defineService('MultiTenancyService', () => {
         // The placeholder has to go before anything is requested: the tenant lookup
         // itself would otherwise be sent to a host called `{0}`.
         environmentService.setState(withTenancyName(environment, name, PLACEHOLDER));
-        domain.patch({ tenant: await setTenant(() => tenants.findTenantByName(name)) });
+
+        const tenant = await setTenant(() => tenants.findTenantByName(name)).catch(cause => {
+          throw notFound(name, cause);
+        });
+        if (!tenant) throw notFound(name);
+
+        domain.patch({ tenant });
         return;
       }
 

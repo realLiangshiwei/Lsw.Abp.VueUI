@@ -3,8 +3,10 @@ import { createInjector } from '../di/injector';
 import type { ProviderInput } from '../di/provider';
 import type { Environment } from '../models/environment';
 import { resolveRootOptions } from '../models/root-options';
+import { TenantNotFoundError } from '../models/tenant';
 import { HTTP_FETCH, type FetchLike } from '../tokens/http.token';
 import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
+import { TENANT_NOT_FOUND_BY_NAME } from '../tokens/tenant-not-found.token';
 import { EnvironmentService } from './environment.service';
 import { MultiTenancyService, tenancyNameFromUrl } from './multi-tenancy.service';
 import { WindowService } from './platform/window.service';
@@ -104,13 +106,56 @@ describe('resolveFromUrl', () => {
     expect(injector.get(SessionStateService).getTenant()?.id).toBe('kept');
   });
 
-  it('clears the tenant the backend does not know rather than keeping a made-up one', async () => {
-    const injector = context('https://acme.abp.io/', () =>
+  it('a tenant in the query string that does not exist falls back to the host without stopping startup', async () => {
+    const injector = context('https://abp.io/books?__tenant=id-42', () =>
       Promise.resolve(new Response(JSON.stringify({ success: false, isActive: false }))),
     );
 
     await injector.get(MultiTenancyService).resolveFromUrl();
 
     expect(injector.get(MultiTenancyService).currentTenant.value).toBeNull();
+  });
+});
+
+describe('when the host name names a tenant that does not exist', () => {
+  const missing = () =>
+    Promise.resolve(new Response(JSON.stringify({ success: false, isActive: false })));
+
+  it('does not carry on as the host, which would show data that belongs to somebody else', async () => {
+    const injector = context('https://acme.abp.io/', missing);
+
+    await expect(injector.get(MultiTenancyService).resolveFromUrl()).rejects.toBeInstanceOf(
+      TenantNotFoundError,
+    );
+    expect(injector.get(MultiTenancyService).currentTenant.value).toBeNull();
+  });
+
+  it('hands it to the registered handler to tell the user', async () => {
+    const reported: TenantNotFoundError[] = [];
+    const injector = context('https://acme.abp.io/', missing, [
+      {
+        provide: TENANT_NOT_FOUND_BY_NAME,
+        useValue: (error: TenantNotFoundError) => reported.push(error),
+      },
+    ]);
+
+    await expect(injector.get(MultiTenancyService).resolveFromUrl()).rejects.toBeDefined();
+
+    expect(reported[0]?.tenancyName).toBe('acme');
+    expect(String(reported[0]?.message)).toContain('baseUrl');
+  });
+
+  it('a failed request counts as not found too, with the reason in cause', async () => {
+    const injector = context('https://acme.abp.io/', () =>
+      Promise.resolve(new Response('{}', { status: 404, statusText: 'Not Found' })),
+    );
+
+    const failure = await injector
+      .get(MultiTenancyService)
+      .resolveFromUrl()
+      .catch((error: unknown) => error);
+
+    expect(failure).toBeInstanceOf(TenantNotFoundError);
+    expect((failure as TenantNotFoundError).cause).toMatchObject({ status: 404 });
   });
 });

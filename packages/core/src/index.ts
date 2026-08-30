@@ -83,6 +83,7 @@ export type {
 export { LayoutType } from './models/nav';
 export type { AbpNavItem, AbpRoute, RouteGroup, TreeNode } from './models/nav';
 export type { AbpRootOptions, ResolvedRootOptions } from './models/root-options';
+export { TenantNotFoundError } from './models/tenant';
 
 export {
   provideAbpCore,
@@ -182,6 +183,7 @@ export { LOCALIZATIONS, REGISTER_LOCALE } from './tokens/localization.token';
 export { NAV_COMPARE_FN } from './tokens/nav.token';
 export { ABP_ROOT_OPTIONS } from './tokens/root-options.token';
 export { TENANT_KEY } from './tokens/tenant-key.token';
+export { TENANT_NOT_FOUND_BY_NAME } from './tokens/tenant-not-found.token';
 
 export { InternalStore } from './utils/internal-store';
 export { createNavTree } from './utils/nav-tree';

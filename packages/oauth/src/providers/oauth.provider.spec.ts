@@ -1,4 +1,5 @@
 import {
+  APP_INITIALIZERS,
   AuthService,
   CHECK_AUTHENTICATION_STATE_FN,
   ConfigStateService,
@@ -8,6 +9,8 @@ import {
   MemoryTokenStorage,
   NAVIGATE_TO_MANAGE_PROFILE,
   provideAbpCore,
+  runInInjectionContext,
+  SessionStateService,
   StorageService,
   TokenStorage,
   withOptions,
@@ -36,7 +39,12 @@ const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
 
 function app(...extra: Parameters<typeof createInjector>[0]) {
   const opened: string[] = [];
-  const send: FetchLike = () => Promise.resolve(new Response('{}'));
+  const send: FetchLike = url =>
+    Promise.resolve(
+      new Response(
+        String(url).includes('application-configuration') ? JSON.stringify(fixture) : '{}',
+      ),
+    );
 
   return createInjector([
     provideAbpCore(withOptions({ environment })),
@@ -144,6 +152,65 @@ describe('opening the backend profile page', () => {
     ]);
 
     expect(() => injector.get(NAVIGATE_TO_MANAGE_PROFILE)()).not.toThrow();
+  });
+});
+
+/** ABP names the tenant a token was issued for in the `tenantid` claim. */
+function tokenFor(tenantId?: string): string {
+  const claims = tenantId ? { tenantid: tenantId } : {};
+  const payload = btoa(JSON.stringify(claims)).replace(/=+$/, '');
+
+  return `header.${payload}.signature`;
+}
+
+describe('switching tenants', () => {
+  /** The whole startup, so the listener is registered the way an application registers it. */
+  async function session(tenantId?: string) {
+    const injector = app();
+    for (const initializer of injector.get(APP_INITIALIZERS)) {
+      await runInInjectionContext(injector, initializer);
+    }
+
+    if (tenantId) injector.get(SessionStateService).setTenant({ id: tenantId, isAvailable: true });
+    injector.get(AuthStateService).persist({
+      accessToken: tokenFor(tenantId),
+      refreshToken: 'r-token',
+      expiresAt: Infinity,
+    });
+
+    return injector;
+  }
+
+  it('a token issued for the previous tenant is dropped when it changes', async () => {
+    const injector = await session('id-of-acme');
+
+    injector.get(SessionStateService).setTenant({ id: 'id-of-other', isAvailable: true });
+
+    expect(injector.get(AuthStateService).getAccessToken()).toBeNull();
+  });
+
+  it('a tenant token is invalidated by going back to the host', async () => {
+    const injector = await session('id-of-acme');
+
+    injector.get(SessionStateService).setTenant(null);
+
+    expect(injector.get(AuthStateService).getAccessToken()).toBeNull();
+  });
+
+  it('a host token is invalidated by switching to a tenant', async () => {
+    const injector = await session();
+
+    injector.get(SessionStateService).setTenant({ id: 'id-of-acme', isAvailable: true });
+
+    expect(injector.get(AuthStateService).getAccessToken()).toBeNull();
+  });
+
+  it('the token stays while the tenant stays the same -- the two writes at startup should not sign anybody out', async () => {
+    const injector = await session('id-of-acme');
+
+    injector.get(SessionStateService).setTenant({ id: 'id-of-acme', isAvailable: true });
+
+    expect(injector.get(AuthStateService).getAccessToken()).not.toBeNull();
   });
 });
 
