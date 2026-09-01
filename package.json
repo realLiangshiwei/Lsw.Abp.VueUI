@@ -12,6 +12,7 @@
     "build": "turbo run build",
     "check:external-install": "./scripts/check-external-install.sh",
     "check:published-types": "./scripts/check-published-types.sh",
+    "check:resolution": "./scripts/check-resolution.sh",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "lint": "eslint . && prettier --check .",
@@ -24,6 +25,7 @@
     "typecheck": "vue-tsc -p tsconfig.json && turbo run typecheck"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^2.31.1",
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
@@ -41,6 +43,7 @@
     "lefthook": "^2.1.10",
     "pkg-pr-new": "^0.0.88",
     "prettier": "^3.9.6",
+    "publint": "^0.3.24",
     "size-limit": "^12.1.0",
     "turbo": "^2.10.11",
     "typescript": "6.0.3",
