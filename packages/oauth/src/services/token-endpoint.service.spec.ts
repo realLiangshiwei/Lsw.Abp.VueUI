@@ -93,6 +93,31 @@ describe('the token endpoint', () => {
     expect(exchanges.filter(exchange => exchange.url.includes('.well-known'))).toHaveLength(1);
   });
 
+  it('a failed metadata lookup is not remembered -- the next attempt tries again', async () => {
+    let down = true;
+    const exchanges: string[] = [];
+    const send: FetchLike = url => {
+      exchanges.push(String(url));
+
+      if (String(url).includes('.well-known')) {
+        return Promise.resolve(
+          down ? new Response(null, { status: 503 }) : new Response(JSON.stringify(discovery)),
+        );
+      }
+      return Promise.resolve(ok());
+    };
+    const service = createInjector([
+      provideAbpCore(withOptions({ environment })),
+      { provide: HTTP_FETCH, useValue: send },
+    ]).get(TokenEndpointService);
+
+    await expect(service.password({ username: 'a', password: 'b' })).rejects.toBeDefined();
+    down = false;
+    await expect(service.password({ username: 'a', password: 'b' })).resolves.toBeDefined();
+
+    expect(exchanges.filter(url => url.includes('.well-known'))).toHaveLength(2);
+  });
+
   it('the password grant carries the client and the scope', async () => {
     const { exchanges, service } = endpoint(ok);
 

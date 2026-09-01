@@ -42,6 +42,28 @@ describe('token state', () => {
     expect(service.isAuthenticated.value).toBe(true);
   });
 
+  it('an expiry that cannot be read counts as expired rather than never', () => {
+    const { storage, service } = state();
+    storage.setItem('access_token', 'abc');
+    storage.setItem('expires_at', 'not-a-number');
+
+    expect(service.restore()?.expiresAt).toBe(0);
+  });
+
+  it('a token with no expiry counts as expired too -- not knowing means fetching a new one', () => {
+    const { storage, service } = state();
+    storage.setItem('access_token', 'abc');
+
+    expect(service.restore()?.expiresAt).toBe(0);
+  });
+
+  it('a stored never-expires, which is what a backend that gave no lifetime produces, reads back', () => {
+    const { service } = state();
+    service.persist({ accessToken: 'abc', refreshToken: undefined, expiresAt: Infinity });
+
+    expect(service.restore()?.expiresAt).toBe(Infinity);
+  });
+
   it('reads back null when nothing was ever stored', () => {
     expect(state().service.restore()).toBeNull();
   });

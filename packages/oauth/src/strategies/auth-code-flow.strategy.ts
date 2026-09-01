@@ -1,4 +1,5 @@
 import {
+  ConfigStateService,
   defineService,
   defineToken,
   EnvironmentService,
@@ -71,6 +72,7 @@ export function buildSettings(
 export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): AuthFlowStrategy => {
   const environment = inject(EnvironmentService);
   const session = inject(SessionStateService);
+  const configState = inject(ConfigStateService);
   const state = inject(AuthStateService);
   const storage = inject(TokenStorage);
   const rememberMe = inject(RememberMeService);
@@ -106,7 +108,12 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
   }
 
   async function handleCallback(url: URL): Promise<void> {
-    const user = await userManager().signinCallback(url.href);
+    // A code that has already been redeemed -- someone reloaded the callback page -- is
+    // an anonymous visitor, not a blank screen. The address bar is cleaned either way,
+    // so the reload after this one is an ordinary one.
+    const user = await userManager()
+      .signinCallback(url.href)
+      .catch(() => undefined);
 
     const culture = cultureFromCallback(url);
     if (culture) session.setLanguage(culture);
@@ -174,8 +181,14 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
       // A host that only wants the local session gone -- an impersonation ending, say --
       // would otherwise be bounced through the identity server and back.
       if (queryParams?.noRedirectToLogoutUrl) {
-        await userManager().revokeTokens();
+        // Same as the password flow: a refused revocation does not keep the user in.
+        await userManager()
+          .revokeTokens()
+          .catch(() => undefined);
         await userManager().removeUser();
+        // Nothing navigates away here, so the configuration has to be asked again; the
+        // menu would otherwise keep the shape it had while somebody was signed in.
+        await configState.refreshAppState();
         return;
       }
 

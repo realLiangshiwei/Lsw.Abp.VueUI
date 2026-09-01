@@ -95,7 +95,9 @@ function dropTokenOfAnotherTenant(): void {
     if (issuedFor === (tenant?.id ?? null)) return;
 
     state.persist(null);
-    void configState.refreshAppState();
+    // A listener has no caller to hand a failure to, and `RestService` has already
+    // reported it; what mattered here -- the wrong token going -- has happened.
+    void configState.refreshAppState().catch(() => undefined);
   });
 }
 

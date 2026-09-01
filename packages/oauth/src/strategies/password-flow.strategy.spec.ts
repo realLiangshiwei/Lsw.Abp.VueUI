@@ -132,6 +132,19 @@ describe('the password flow', () => {
     expect(visited).toEqual(['/account/login?returnUrl=%2Fidentity%2Fusers']);
   });
 
+  it('signs out even when revocation fails -- an offline logout should not keep the user in', async () => {
+    const responses: (Response | undefined)[] = [issued()];
+    const { auth, state, storage } = flow(
+      () => responses.shift() ?? new Response(null, { status: 503 }),
+    );
+    await auth.login({ username: 'admin', password: '1q2w3E*' });
+
+    await auth.logout();
+
+    expect(state.getAccessToken()).toBeNull();
+    expect(storage.keys()).toEqual([]);
+  });
+
   it('a logout revokes the tokens, clears the storage and reloads the configuration', async () => {
     const { auth, urls, state, storage } = flow(() => issued());
     await auth.login({ username: 'admin', password: '1q2w3E*' });
@@ -166,6 +179,20 @@ describe('the password flow at startup', () => {
     expect(state.getAccessToken()).toBeNull();
   });
 
+  it('a stored session that cannot be renewed leaves an anonymous visitor, not a failed startup', async () => {
+    const { auth, injector, state } = flow(
+      () => new Response(JSON.stringify({ error: 'invalid_grant' }), { status: 400 }),
+    );
+    injector.get(StorageService).setItem('remember_me', 'true');
+    injector.get(TokenStorage).setItem('access_token', 'a-token');
+    injector.get(TokenStorage).setItem('refresh_token', 'r-token');
+    injector.get(TokenStorage).setItem('expires_at', String(Date.now() - 1));
+
+    await expect(auth.init()).resolves.toBeUndefined();
+
+    expect(state.getAccessToken()).toBeNull();
+  });
+
   it('an expired session that asked to be remembered gets a new token', async () => {
     const { auth, injector, state } = flow(
       () => new Response(JSON.stringify({ access_token: 'fresh', expires_in: 3600 })),
@@ -196,6 +223,22 @@ describe('renewal in the password flow', () => {
     await vi.advanceTimersByTimeAsync(3600_000 - 60_000);
 
     expect(state.getAccessToken()).toBe('fresh');
+  });
+
+  it('a renewal the identity server refuses ends the session and sends the user to log in again', async () => {
+    const responses: (Response | undefined)[] = [issued(3600)];
+    const { auth, state, visited, storage } = flow(
+      () =>
+        responses.shift() ??
+        new Response(JSON.stringify({ error: 'invalid_grant' }), { status: 400 }),
+    );
+    await auth.login({ username: 'admin', password: '1q2w3E*' });
+
+    await vi.advanceTimersByTimeAsync(3600_000 - 60_000);
+
+    expect(state.getAccessToken()).toBeNull();
+    expect(storage.keys()).toEqual([]);
+    expect(visited).toEqual(['/account/login']);
   });
 
   it('without a refresh_token the session is over when the time comes', async () => {

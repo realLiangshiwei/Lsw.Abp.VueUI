@@ -55,10 +55,15 @@ function toAuthError(error: unknown): unknown {
  * `ErrorResponse` drops every field of the error body that is not in the RFC, which is
  * exactly where ABP puts `userId` and `twoFactorToken`.
  */
+interface Discovery {
+  issuer: string;
+  document: Promise<DiscoveryDocument>;
+}
+
 export const TokenEndpointService = defineService('TokenEndpointService', () => {
   const http = inject(HttpClient);
   const environment = inject(EnvironmentService);
-  let discovered: { issuer: string; document: Promise<DiscoveryDocument> } | null = null;
+  let discovered: Discovery | null = null;
 
   const config = () => environment.getEnvironment().oAuthConfig ?? {};
 
@@ -67,7 +72,7 @@ export const TokenEndpointService = defineService('TokenEndpointService', () => 
     const issuer = withoutTrailingSlash(config().issuer ?? '');
 
     if (discovered?.issuer !== issuer) {
-      discovered = {
+      const entry: Discovery = {
         issuer,
         document: http
           .request<DiscoveryDocument>({
@@ -77,6 +82,13 @@ export const TokenEndpointService = defineService('TokenEndpointService', () => 
           })
           .then(response => response.body),
       };
+
+      // A provider that was unreachable once is not unreachable forever, so a failed
+      // lookup is forgotten rather than cached as the answer.
+      entry.document.catch(() => {
+        if (discovered === entry) discovered = null;
+      });
+      discovered = entry;
     }
 
     return discovered.document;

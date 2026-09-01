@@ -86,7 +86,11 @@ function flow(
 ) {
   const fake = options.manager ?? fakeUserManager(options.stored ?? null);
   const replaced: string[] = [];
-  const send: FetchLike = () => Promise.resolve(new Response('{}'));
+  const requests: string[] = [];
+  const send: FetchLike = url => {
+    requests.push(String(url));
+    return Promise.resolve(new Response('{}'));
+  };
 
   const injector = createInjector([
     provideAbpCore(withOptions({ environment })),
@@ -106,7 +110,7 @@ function flow(
     },
   ]);
 
-  return { fake, replaced, injector, auth: injector.get(AuthService) };
+  return { fake, replaced, requests, injector, auth: injector.get(AuthService) };
 }
 
 const called = (calls: { name: string; args: unknown[] }[], name: string) =>
@@ -173,6 +177,20 @@ describe('the authorization code flow', () => {
     expect(injector.get(AuthStateService).getAccessToken()).toBe('a-token');
     expect(replaced).toEqual(['/identity/users']);
     expect(called(fake.calls, 'signinCallback')).toHaveLength(1);
+  });
+
+  it('a callback it cannot deal with leaves an anonymous visitor -- reloading the callback page should not blank the screen', async () => {
+    const fake = fakeUserManager(user());
+    fake.manager.signinCallback = () => Promise.reject(new Error('code already redeemed'));
+    const { replaced, auth, injector } = flow({
+      href: 'https://app.abp.io/books?code=stale&state=xyz&page=2',
+      manager: fake,
+    });
+
+    await expect(auth.init()).resolves.toBeUndefined();
+
+    expect(injector.get(AuthStateService).isAuthenticated.value).toBe(false);
+    expect(replaced).toEqual(['/books?page=2']);
   });
 
   it('carries on in the culture the backend says its login page used', async () => {
@@ -288,13 +306,15 @@ describe('the authorization code flow', () => {
     expect(called(fake.calls, 'signoutRedirect')).toHaveLength(1);
   });
 
-  it('ends the local session without a trip through the identity server', async () => {
-    const { fake, auth } = flow({ stored: user() });
+  it('ends the local session without a trip through the identity server, but reloads the configuration', async () => {
+    const { fake, requests, auth } = flow({ stored: user() });
 
     await auth.logout({ noRedirectToLogoutUrl: 'true' });
 
     expect(called(fake.calls, 'signoutRedirect')).toHaveLength(0);
     expect(called(fake.calls, 'revokeTokens')).toHaveLength(1);
     expect(called(fake.calls, 'removeUser')).toHaveLength(1);
+    // Nothing navigates away here, so without it the menu would keep the signed-in shape.
+    expect(requests.filter(url => url.includes('application-configuration'))).toHaveLength(1);
   });
 });

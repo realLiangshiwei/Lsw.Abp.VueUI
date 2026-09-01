@@ -24,6 +24,14 @@ const RENEW_MARGIN_MS = 60_000;
 /** `setTimeout` truncates past this, which would fire the renewal immediately. */
 const MAX_TIMEOUT_MS = 2_147_483_647;
 
+/** The stored session cannot be renewed, so there is nothing to renew it with. */
+class NoRefreshTokenError extends Error {
+  constructor() {
+    super('The session has expired and there is no refresh token to renew it with.');
+    this.name = 'NoRefreshTokenError';
+  }
+}
+
 /**
  * ABP's password grant: the application collects the credentials itself and exchanges
  * them at the token endpoint.
@@ -56,21 +64,39 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
     if (expiresAt === null || !Number.isFinite(expiresAt)) return;
 
     const delay = Math.min(Math.max(expiresAt - Date.now() - RENEW_MARGIN_MS, 0), MAX_TIMEOUT_MS);
-    renewal = setTimeout(() => {
-      void renew();
-    }, delay);
+    // A timer has no caller to hand a failure to, and a renewal that cannot happen is
+    // the session ending -- which is something to do, not something to report.
+    renewal = setTimeout(() => void renew().catch(endSession), delay);
   }
 
   async function renew(): Promise<void> {
     const refreshToken = state.getRefreshToken();
-    if (!refreshToken) {
-      forget();
-      await configState.refreshAppState();
-      return;
-    }
+    if (!refreshToken) throw new NoRefreshTokenError();
 
     state.persist(toTokens(await tokenEndpoint.refresh(refreshToken)));
     scheduleRenewal();
+  }
+
+  async function navigateToLogin(returnUrl?: string): Promise<void> {
+    const query = returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : '';
+    await navigation.go(`${loginRoute}${query}`);
+  }
+
+  /**
+   * Nothing is left of the session: drop the tokens, let the backend describe an
+   * anonymous visitor, and go where a new session can be started. Whatever fails in here
+   * has no caller left to reach and was already reported by `RestService`; the one thing
+   * that matters -- the tokens going -- has happened by then.
+   */
+  async function endSession(): Promise<void> {
+    forget();
+
+    try {
+      await configState.refreshAppState();
+      await navigateToLogin();
+    } catch {
+      // Nothing further to try.
+    }
   }
 
   return {
@@ -87,14 +113,13 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
         return;
       }
 
-      if (expired) await renew();
+      // A stored session that cannot be renewed leaves an anonymous visitor, not a
+      // failed startup -- the configuration request right after this one settles it.
+      if (expired) await renew().catch(() => forget());
       else scheduleRenewal();
     },
 
-    navigateToLogin: async (returnUrl?: string): Promise<void> => {
-      const query = returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : '';
-      await navigation.go(`${loginRoute}${query}`);
-    },
+    navigateToLogin,
 
     login: async (params: LoginParams): Promise<void> => {
       const response = await tokenEndpoint.password(params);
@@ -110,9 +135,15 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
       const refreshToken = state.getRefreshToken();
       const accessToken = state.getAccessToken();
 
-      // Revoked before the local copy goes, because revoking needs the token itself.
-      if (refreshToken) await tokenEndpoint.revoke(refreshToken, 'refresh_token');
-      if (accessToken) await tokenEndpoint.revoke(accessToken, 'access_token');
+      // Revoked before the local copy goes, because revoking needs the token itself --
+      // but a server that will not take it back is no reason to keep the user signed in.
+      // The tokens go regardless; the next request would be refused anyway.
+      try {
+        if (refreshToken) await tokenEndpoint.revoke(refreshToken, 'refresh_token');
+        if (accessToken) await tokenEndpoint.revoke(accessToken, 'access_token');
+      } catch {
+        // Reported by `RestService`; logging out locally is what the user asked for.
+      }
 
       forget();
       await configState.refreshAppState();

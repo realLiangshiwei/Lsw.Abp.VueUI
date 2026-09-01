@@ -57,11 +57,15 @@ export const AuthStateService = defineService('AuthStateService', () => {
       const accessToken = storage.getItem(ACCESS_TOKEN);
       if (!accessToken) return null;
 
-      const expiresAt = Number(storage.getItem(EXPIRES_AT));
+      // `Number('Infinity')` is `Infinity`, which is how a token the endpoint gave no
+      // lifetime for comes back. Anything unreadable counts as expired: not knowing when
+      // a token lapses is a reason to renew it, not to trust it forever.
+      const stored = storage.getItem(EXPIRES_AT);
+      const expiresAt = stored === null ? Number.NaN : Number(stored);
       const restored: AuthTokens = {
         accessToken,
         refreshToken: storage.getItem(REFRESH_TOKEN) ?? undefined,
-        expiresAt: Number.isFinite(expiresAt) ? expiresAt : Infinity,
+        expiresAt: Number.isNaN(expiresAt) ? 0 : expiresAt,
       };
 
       tokens.value = restored;
