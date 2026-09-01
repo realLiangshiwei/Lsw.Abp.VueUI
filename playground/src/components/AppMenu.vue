@@ -31,7 +31,7 @@ nav h3 {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  opacity: 0.6;
+  color: var(--muted);
   margin-bottom: 0.25rem;
 }
 
