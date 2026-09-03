@@ -1,6 +1,6 @@
-import { inject } from '../di/inject';
-import type { HttpInterceptor } from '../models/http';
-import { SessionStateService } from '../services/session-state.service';
+import { inject } from '../di/inject.js';
+import type { HttpInterceptor } from '../models/http.js';
+import { SessionStateService } from '../services/session-state.service.js';
 
 /** Asks the backend for the language the user picked, so its texts match the UI's. */
 export function languageInterceptor(): HttpInterceptor {

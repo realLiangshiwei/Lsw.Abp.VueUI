@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
-import { createInjector, type Injector } from '../di/injector';
-import type { HttpInterceptor, RestConfig } from '../models/http';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { ConfigStateService } from '../services/config-state.service';
-import { RestService } from '../services/rest.service';
-import { SessionStateService } from '../services/session-state.service';
-import { HTTP_FETCH, HTTP_INTERCEPTORS, type FetchLike } from '../tokens/http.token';
-import { languageInterceptor } from './language.interceptor';
-import { tenantInterceptor } from './tenant.interceptor';
-import { timezoneInterceptor } from './timezone.interceptor';
+import { createInjector, type Injector } from '../di/injector.js';
+import type { HttpInterceptor, RestConfig } from '../models/http.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from '../services/config-state.service.js';
+import { RestService } from '../services/rest.service.js';
+import { SessionStateService } from '../services/session-state.service.js';
+import { HTTP_FETCH, HTTP_INTERCEPTORS, type FetchLike } from '../tokens/http.token.js';
+import { languageInterceptor } from './language.interceptor.js';
+import { tenantInterceptor } from './tenant.interceptor.js';
+import { timezoneInterceptor } from './timezone.interceptor.js';
 
 const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
 

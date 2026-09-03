@@ -1,7 +1,7 @@
-import { inject } from '../di/inject';
-import type { HttpInterceptor } from '../models/http';
-import { SessionStateService } from '../services/session-state.service';
-import { TENANT_KEY } from '../tokens/tenant-key.token';
+import { inject } from '../di/inject.js';
+import type { HttpInterceptor } from '../models/http.js';
+import { SessionStateService } from '../services/session-state.service.js';
+import { TENANT_KEY } from '../tokens/tenant-key.token.js';
 
 /** Tells the backend which tenant the user is acting in. */
 export function tenantInterceptor(): HttpInterceptor {

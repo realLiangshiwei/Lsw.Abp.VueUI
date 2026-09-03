@@ -1,5 +1,5 @@
 import { computed, shallowRef, type ComputedRef } from 'vue';
-import type { AbpNavItem, RouteGroup, TreeNode } from '../models/nav';
+import type { AbpNavItem, RouteGroup, TreeNode } from '../models/nav.js';
 
 export interface NavTreeOptions<T extends AbpNavItem> {
   /** Keeps an item out of `visible`, along with everything under it. */

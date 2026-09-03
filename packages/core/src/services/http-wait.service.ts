@@ -1,6 +1,6 @@
 import { computed, shallowRef, type ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
 
 /** Counts requests in flight so a theme can show one loading bar for all of them. */
 export const HttpWaitService = defineService('HttpWaitService', () => {

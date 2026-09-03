@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector } from '../di/injector';
-import type { ProviderInput } from '../di/provider';
-import { AbpHttpError, type HttpInterceptor } from '../models/http';
-import { HTTP_FETCH, HTTP_INTERCEPTORS, type FetchLike } from '../tokens/http.token';
-import { HttpClient } from './http-client.service';
+import { createInjector } from '../di/injector.js';
+import type { ProviderInput } from '../di/provider.js';
+import { AbpHttpError, type HttpInterceptor } from '../models/http.js';
+import { HTTP_FETCH, HTTP_INTERCEPTORS, type FetchLike } from '../tokens/http.token.js';
+import { HttpClient } from './http-client.service.js';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });

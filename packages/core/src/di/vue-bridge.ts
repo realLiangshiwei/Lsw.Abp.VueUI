@@ -6,12 +6,12 @@ import {
   type App,
   type Component,
 } from 'vue';
-import { runInitializers } from './app-initializer';
-import { OutsideInjectionContextError } from './errors';
-import { ABP_INJECTOR_KEY, getCurrentInjector, setComponentInjector } from './inject';
-import { createInjector, type Injector } from './injector';
-import type { Provider, ProviderInput } from './provider';
-import { defineToken } from './token';
+import { runInitializers } from './app-initializer.js';
+import { OutsideInjectionContextError } from './errors.js';
+import { ABP_INJECTOR_KEY, getCurrentInjector, setComponentInjector } from './inject.js';
+import { createInjector, type Injector } from './injector.js';
+import type { Provider, ProviderInput } from './provider.js';
+import { defineToken } from './token.js';
 
 /**
  * Runs against the Vue application itself: global properties, plugins, components.

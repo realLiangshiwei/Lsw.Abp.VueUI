@@ -7,7 +7,7 @@ import {
 } from '@lsw-abpvue/core';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { DYNAMIC_LAYOUTS } from '../tokens';
+import { DYNAMIC_LAYOUTS } from '../tokens.js';
 
 const props = defineProps<{ defaultLayout?: LayoutType | undefined }>();
 

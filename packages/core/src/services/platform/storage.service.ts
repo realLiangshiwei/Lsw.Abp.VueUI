@@ -1,4 +1,4 @@
-import { defineService, type InjectionToken } from '../../di/token';
+import { defineService, type InjectionToken } from '../../di/token.js';
 
 export interface StorageService {
   getItem(key: string): string | null;

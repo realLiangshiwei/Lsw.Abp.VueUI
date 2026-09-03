@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DuplicateFeatureError } from './errors';
-import { collectFeatures, defineFeature } from './features';
-import { createInjector } from './injector';
-import { defineToken } from './token';
+import { DuplicateFeatureError } from './errors.js';
+import { collectFeatures, defineFeature } from './features.js';
+import { createInjector } from './injector.js';
+import { defineToken } from './token.js';
 
 const Greeting = defineToken<string>('Greeting');
 const Interceptors = defineToken<string[]>('Interceptors', { multi: true });

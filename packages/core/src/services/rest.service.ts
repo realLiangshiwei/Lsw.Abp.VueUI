@@ -1,16 +1,16 @@
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
 import {
   AbpHttpError,
   type HttpRequestConfig,
   type HttpResponse,
   type RestConfig,
-} from '../models/http';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { EnvironmentService } from './environment.service';
-import { HttpClient } from './http-client.service';
-import { HttpErrorReporterService } from './http-error-reporter.service';
-import { HttpWaitService } from './http-wait.service';
+} from '../models/http.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { EnvironmentService } from './environment.service.js';
+import { HttpClient } from './http-client.service.js';
+import { HttpErrorReporterService } from './http-error-reporter.service.js';
+import { HttpWaitService } from './http-wait.service.js';
 
 /** `https://host//api//x` → `https://host/api/x`, leaving the protocol alone. */
 function removeDuplicateSlashes(url: string): string {

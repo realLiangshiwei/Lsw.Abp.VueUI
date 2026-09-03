@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { FetchLike } from '../tokens/http.token';
-import { loadRuntimeConfig } from './load-runtime-config';
+import type { FetchLike } from '../tokens/http.token.js';
+import { loadRuntimeConfig } from './load-runtime-config.js';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });

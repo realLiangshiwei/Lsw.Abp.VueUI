@@ -1,6 +1,6 @@
 import { defineService, inject, TokenStorage, type ServiceOf } from '@lsw-abpvue/core';
 import { computed, shallowRef, type ComputedRef } from 'vue';
-import type { AuthTokens, TokenResponse } from '../models/oauth';
+import type { AuthTokens, TokenResponse } from '../models/oauth.js';
 
 // The key names `angular-oauth2-oidc` uses, so a solution that switches UIs on the same
 // origin keeps its session -- the same reason `SessionStateService` keeps `abpSession`.

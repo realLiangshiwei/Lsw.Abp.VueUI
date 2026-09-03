@@ -1,4 +1,4 @@
-import type { InjectionToken } from './token';
+import type { InjectionToken } from './token.js';
 
 /**
  * The element type of a multi token: `InjectionToken<Interceptor[]>` is provided one

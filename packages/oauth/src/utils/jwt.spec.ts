@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeJwt } from './jwt';
+import { decodeJwt } from './jwt.js';
 
 /** A JWT is three base64url segments; only the middle one carries claims. */
 function jwt(claims: Record<string, unknown>): string {

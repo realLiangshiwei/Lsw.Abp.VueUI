@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { effectScope } from 'vue';
-import { useDebounceFn } from './use-debounce-fn';
-import { useLatest } from './use-latest';
-import { useSubscriptions } from './use-subscriptions';
+import { useDebounceFn } from './use-debounce-fn.js';
+import { useLatest } from './use-latest.js';
+import { useSubscriptions } from './use-subscriptions.js';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

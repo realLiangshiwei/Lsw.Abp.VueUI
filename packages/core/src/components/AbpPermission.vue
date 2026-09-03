@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePermission } from '../services/permission.service';
+import { usePermission } from '../services/permission.service.js';
 
 const props = defineProps<{ policy?: string | undefined }>();
 

@@ -1,5 +1,5 @@
 import type { AbpRoute, LayoutType } from '@lsw-abpvue/core';
-import type { ReplaceableRoute } from './tokens';
+import type { ReplaceableRoute } from './tokens.js';
 
 declare module 'vue-router' {
   interface RouteMeta {

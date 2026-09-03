@@ -2,9 +2,9 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h } from 'vue';
-import { ABP_INJECTOR_KEY } from '../di/inject';
-import { createInjector } from '../di/injector';
-import { ReplaceableComponentsService } from '../services/replaceable-components.service';
+import { ABP_INJECTOR_KEY } from '../di/inject.js';
+import { createInjector } from '../di/injector.js';
+import { ReplaceableComponentsService } from '../services/replaceable-components.service.js';
 import AbpReplaceable from './AbpReplaceable.vue';
 
 const Replacement = defineComponent({

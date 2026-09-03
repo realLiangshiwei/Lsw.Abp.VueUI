@@ -1,5 +1,5 @@
-import { defineToken } from '../di/token';
-import type { TenantNotFoundError } from '../models/tenant';
+import { defineToken } from '../di/token.js';
+import type { TenantNotFoundError } from '../models/tenant.js';
 
 /**
  * Shows the visitor that the address named a tenant nobody has heard of. Nothing

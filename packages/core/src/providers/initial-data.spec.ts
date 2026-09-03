@@ -1,17 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
-import { APP_INITIALIZERS } from '../di/app-initializer';
-import { runInInjectionContext } from '../di/inject';
-import { createInjector } from '../di/injector';
-import type { Environment } from '../models/environment';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { ConfigStateService } from '../services/config-state.service';
-import { WindowService } from '../services/platform/window.service';
-import { SessionStateService } from '../services/session-state.service';
-import { AuthService, CHECK_AUTHENTICATION_STATE_FN } from '../tokens/auth.token';
-import { HTTP_FETCH, type FetchLike } from '../tokens/http.token';
-import { provideAbpCore, withOptions } from './core.provider';
-import { getInitialData } from './initial-data';
+import { APP_INITIALIZERS } from '../di/app-initializer.js';
+import { runInInjectionContext } from '../di/inject.js';
+import { createInjector } from '../di/injector.js';
+import type { Environment } from '../models/environment.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from '../services/config-state.service.js';
+import { WindowService } from '../services/platform/window.service.js';
+import { SessionStateService } from '../services/session-state.service.js';
+import { AuthService, CHECK_AUTHENTICATION_STATE_FN } from '../tokens/auth.token.js';
+import { HTTP_FETCH, type FetchLike } from '../tokens/http.token.js';
+import { provideAbpCore, withOptions } from './core.provider.js';
+import { getInitialData } from './initial-data.js';
 
 const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
 

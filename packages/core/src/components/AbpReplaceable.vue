@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useReplaceableComponents } from '../services/replaceable-components.service';
+import { useReplaceableComponents } from '../services/replaceable-components.service.js';
 
 const props = defineProps<{ replaceableKey: string }>();
 

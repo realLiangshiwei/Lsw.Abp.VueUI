@@ -1,7 +1,7 @@
 import { deepMerge, isPlainObject, type DeepPartial } from '@lsw-abpvue/utils';
-import type { Environment } from '../models/environment';
-import { DEFAULT_ENVIRONMENT } from '../models/root-options';
-import type { FetchLike } from '../tokens/http.token';
+import type { Environment } from '../models/environment.js';
+import { DEFAULT_ENVIRONMENT } from '../models/root-options.js';
+import type { FetchLike } from '../tokens/http.token.js';
 
 export interface RuntimeConfigOptions {
   /** Where the deployed configuration lives. */

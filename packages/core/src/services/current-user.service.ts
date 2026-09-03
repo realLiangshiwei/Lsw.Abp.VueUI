@@ -1,8 +1,8 @@
 import { computed, type ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import type { CurrentUserDto } from '../proxy/models';
-import { ConfigStateService } from './config-state.service';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { CurrentUserDto } from '../proxy/models.js';
+import { ConfigStateService } from './config-state.service.js';
 
 export const CurrentUserService = defineService('CurrentUserService', () => {
   const user = inject(ConfigStateService).getOne('currentUser');

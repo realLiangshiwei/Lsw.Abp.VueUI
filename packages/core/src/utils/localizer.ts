@@ -1,9 +1,9 @@
 import { interpolate } from '@lsw-abpvue/utils';
-import type { LocalizationParam } from '../models/localization';
+import type { LocalizationParam } from '../models/localization.js';
 import type {
   ApplicationLocalizationConfigurationDto,
   ApplicationLocalizationResourceDto,
-} from '../proxy/models';
+} from '../proxy/models.js';
 
 export type ResourceTexts = Record<string, Record<string, string>>;
 

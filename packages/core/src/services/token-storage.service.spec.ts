@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { createInjector } from '../di/injector';
-import { TokenStorage } from '../tokens/auth.token';
-import { StorageService } from './platform/storage.service';
+import { createInjector } from '../di/injector.js';
+import { TokenStorage } from '../tokens/auth.token.js';
+import { StorageService } from './platform/storage.service.js';
 import {
   BrowserTokenStorage,
   MemoryTokenStorage,
   ServerTokenStorage,
-} from './token-storage.service';
+} from './token-storage.service.js';
 
 describe('token storage', () => {
   it('the default one is the browser storage', () => {

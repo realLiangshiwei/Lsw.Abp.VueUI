@@ -2,12 +2,12 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, type Component } from 'vue';
-import { provideAppInitErrorHandler, provideAppInitializer } from './app-initializer';
-import { InjectorDestroyedError, OutsideInjectionContextError } from './errors';
-import { ABP_INJECTOR_KEY, inject } from './inject';
-import { createInjector, onServiceDestroy, type Injector } from './injector';
-import { defineToken } from './token';
-import { createAbpApp, provideAbp } from './vue-bridge';
+import { provideAppInitErrorHandler, provideAppInitializer } from './app-initializer.js';
+import { InjectorDestroyedError, OutsideInjectionContextError } from './errors.js';
+import { ABP_INJECTOR_KEY, inject } from './inject.js';
+import { createInjector, onServiceDestroy, type Injector } from './injector.js';
+import { defineToken } from './token.js';
+import { createAbpApp, provideAbp } from './vue-bridge.js';
 
 const Greeting = defineToken<string>('Greeting');
 

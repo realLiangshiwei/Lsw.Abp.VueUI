@@ -1,6 +1,6 @@
 import { createInjector, MemoryTokenStorage } from '@lsw-abpvue/core';
 import { describe, expect, it } from 'vitest';
-import { TokenStateStore } from './token-state-store';
+import { TokenStateStore } from './token-state-store.js';
 
 function store(prefix = 'oidc.') {
   const storage = createInjector([]).get(MemoryTokenStorage);

@@ -1,6 +1,6 @@
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import type { AbpHttpError } from '../models/http';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { AbpHttpError } from '../models/http.js';
 
 /**
  * Where failed requests are announced, so the theme can show a modal, a toast or a

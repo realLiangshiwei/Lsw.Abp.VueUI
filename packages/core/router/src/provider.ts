@@ -19,10 +19,10 @@ import {
   type Router,
   type RouterHistory,
 } from 'vue-router';
-import { authGuard, permissionGuard } from './guards';
-import { registerRoutes } from './routes-handler';
-import { TITLE_STRATEGY } from './title-strategy';
-import { ABP_ROUTER, ROUTER_HISTORY, type TitleStrategy } from './tokens';
+import { authGuard, permissionGuard } from './guards.js';
+import { registerRoutes } from './routes-handler.js';
+import { TITLE_STRATEGY } from './title-strategy.js';
+import { ABP_ROUTER, ROUTER_HISTORY, type TitleStrategy } from './tokens.js';
 
 export type RouterFeature = Feature<'withRouterHistory' | 'withTitleStrategy'>;
 

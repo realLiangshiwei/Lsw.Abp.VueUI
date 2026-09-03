@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector, type Injector } from '../di/injector';
-import type { ProviderInput } from '../di/provider';
-import { resolveRootOptions, type AbpRootOptions } from '../models/root-options';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { HTTP_FETCH, type FetchLike } from '../tokens/http.token';
-import { LOCALIZATIONS } from '../tokens/localization.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { ConfigStateService } from './config-state.service';
-import { LocalizationService } from './localization.service';
-import { SessionStateService } from './session-state.service';
+import { createInjector, type Injector } from '../di/injector.js';
+import type { ProviderInput } from '../di/provider.js';
+import { resolveRootOptions, type AbpRootOptions } from '../models/root-options.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { HTTP_FETCH, type FetchLike } from '../tokens/http.token.js';
+import { LOCALIZATIONS } from '../tokens/localization.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { ConfigStateService } from './config-state.service.js';
+import { LocalizationService } from './localization.service.js';
+import { SessionStateService } from './session-state.service.js';
 
 const environment = {
   apis: { default: { url: '' } },

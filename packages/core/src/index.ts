@@ -3,8 +3,8 @@ export {
   APP_INITIALIZERS,
   provideAppInitErrorHandler,
   provideAppInitializer,
-} from './di/app-initializer';
-export type { AppInitErrorHandler, AppInitializer } from './di/app-initializer';
+} from './di/app-initializer.js';
+export type { AppInitErrorHandler, AppInitializer } from './di/app-initializer.js';
 export {
   AbpDiError,
   CircularDependencyError,
@@ -14,13 +14,18 @@ export {
   MultiProviderMismatchError,
   NullInjectorError,
   OutsideInjectionContextError,
-} from './di/errors';
-export { collectFeatures, defineFeature } from './di/features';
-export type { Feature } from './di/features';
-export { ABP_INJECTOR_KEY, getCurrentInjector, inject, runInInjectionContext } from './di/inject';
-export { createInjector, onServiceDestroy } from './di/injector';
-export type { InjectOptions, Injector } from './di/injector';
-export { makeEnvironmentProviders } from './di/provider';
+} from './di/errors.js';
+export { collectFeatures, defineFeature } from './di/features.js';
+export type { Feature } from './di/features.js';
+export {
+  ABP_INJECTOR_KEY,
+  getCurrentInjector,
+  inject,
+  runInInjectionContext,
+} from './di/inject.js';
+export { createInjector, onServiceDestroy } from './di/injector.js';
+export type { InjectOptions, Injector } from './di/injector.js';
+export { makeEnvironmentProviders } from './di/provider.js';
 export type {
   ClassProvider,
   EnvironmentProviders,
@@ -30,27 +35,27 @@ export type {
   Provider,
   ProviderInput,
   ValueProvider,
-} from './di/provider';
-export { defineService, defineToken } from './di/token';
-export type { InjectionToken, ServiceOf, TokenOptions } from './di/token';
-export { APP_SETUP_HOOKS, createAbpApp, provideAbp, provideAppSetup } from './di/vue-bridge';
-export type { AbpApp, AppSetupHook, CreateAbpAppOptions } from './di/vue-bridge';
+} from './di/provider.js';
+export { defineService, defineToken } from './di/token.js';
+export type { InjectionToken, ServiceOf, TokenOptions } from './di/token.js';
+export { APP_SETUP_HOOKS, createAbpApp, provideAbp, provideAppSetup } from './di/vue-bridge.js';
+export type { AbpApp, AppSetupHook, CreateAbpAppOptions } from './di/vue-bridge.js';
 
 export { default as AbpPermission } from './components/AbpPermission.vue';
 export { default as AbpReplaceable } from './components/AbpReplaceable.vue';
 
-export { languageInterceptor } from './interceptors/language.interceptor';
-export { tenantInterceptor } from './interceptors/tenant.interceptor';
-export { timezoneInterceptor } from './interceptors/timezone.interceptor';
-export { xsrfInterceptor } from './interceptors/xsrf.interceptor';
+export { languageInterceptor } from './interceptors/language.interceptor.js';
+export { tenantInterceptor } from './interceptors/tenant.interceptor.js';
+export { timezoneInterceptor } from './interceptors/timezone.interceptor.js';
+export { xsrfInterceptor } from './interceptors/xsrf.interceptor.js';
 
-export { AuthError, TwoFactorRequiredError } from './models/auth';
+export { AuthError, TwoFactorRequiredError } from './models/auth.js';
 export type {
   AuthErrorFilter,
   CheckAuthenticationStateFn,
   LoginParams,
   PipeToLoginFn,
-} from './models/auth';
+} from './models/auth.js';
 export type {
   ApiConfig,
   Apis,
@@ -58,8 +63,8 @@ export type {
   Environment,
   OAuthConfig,
   RemoteEnv,
-} from './models/environment';
-export { AbpHttpError } from './models/http';
+} from './models/environment.js';
+export { AbpHttpError } from './models/http.js';
 export type {
   AbpErrorEnvelope,
   AbpHttpErrorInit,
@@ -67,23 +72,23 @@ export type {
   HttpRequestConfig,
   HttpResponse,
   RestConfig,
-} from './models/http';
+} from './models/http.js';
 export type {
   ListResultDto,
   PageQueryParams,
   PagedResultDto,
   RequestStatus,
   SortOrder,
-} from './models/list';
+} from './models/list.js';
 export type {
   AbpLocalization,
   LocalizationParam,
   LocalizationWithDefault,
-} from './models/localization';
-export { LayoutType } from './models/nav';
-export type { AbpNavItem, AbpRoute, RouteGroup, TreeNode } from './models/nav';
-export type { AbpRootOptions, ResolvedRootOptions } from './models/root-options';
-export { TenantNotFoundError } from './models/tenant';
+} from './models/localization.js';
+export { LayoutType } from './models/nav.js';
+export type { AbpNavItem, AbpRoute, RouteGroup, TreeNode } from './models/nav.js';
+export type { AbpRootOptions, ResolvedRootOptions } from './models/root-options.js';
+export { TenantNotFoundError } from './models/tenant.js';
 
 export {
   provideAbpCore,
@@ -91,13 +96,13 @@ export {
   withLocalizations,
   withOptions,
   withRegisterLocale,
-} from './providers/core.provider';
-export type { CoreFeature } from './providers/core.provider';
-export { getInitialData } from './providers/initial-data';
+} from './providers/core.provider.js';
+export type { CoreFeature } from './providers/core.provider.js';
+export { getInitialData } from './providers/initial-data.js';
 
-export { AbpApplicationConfigurationService } from './proxy/abp-application-configuration.service';
-export { AbpApplicationLocalizationService } from './proxy/abp-application-localization.service';
-export { AbpTenantService } from './proxy/abp-tenant.service';
+export { AbpApplicationConfigurationService } from './proxy/abp-application-configuration.service.js';
+export { AbpApplicationLocalizationService } from './proxy/abp-application-localization.service.js';
+export { AbpTenantService } from './proxy/abp-tenant.service.js';
 export type {
   ApplicationAuthConfigurationDto,
   ApplicationConfigurationDto,
@@ -133,42 +138,45 @@ export type {
   TimeZone,
   TimingDto,
   WindowsTimeZone,
-} from './proxy/models';
+} from './proxy/models.js';
 
-export { AuthErrorFilterService, useAuthErrorFilter } from './services/auth-error-filter.service';
-export { ConfigStateService, useConfigState } from './services/config-state.service';
-export { CurrentUserService, useCurrentUser } from './services/current-user.service';
-export { EnvironmentService, useEnvironment } from './services/environment.service';
-export { HttpClient } from './services/http-client.service';
+export {
+  AuthErrorFilterService,
+  useAuthErrorFilter,
+} from './services/auth-error-filter.service.js';
+export { ConfigStateService, useConfigState } from './services/config-state.service.js';
+export { CurrentUserService, useCurrentUser } from './services/current-user.service.js';
+export { EnvironmentService, useEnvironment } from './services/environment.service.js';
+export { HttpClient } from './services/http-client.service.js';
 export {
   HttpErrorReporterService,
   useHttpErrorReporter,
-} from './services/http-error-reporter.service';
-export { FeatureService, useFeature } from './services/feature.service';
-export { HttpWaitService, useHttpWait } from './services/http-wait.service';
-export { LocalizationService, useLocalization } from './services/localization.service';
-export { MultiTenancyService, useMultiTenancy } from './services/multi-tenancy.service';
-export { PermissionService, usePermission } from './services/permission.service';
-export { CookieService } from './services/platform/cookie.service';
-export type { CookieOptions } from './services/platform/cookie.service';
-export { DocumentService } from './services/platform/document.service';
-export { StorageService } from './services/platform/storage.service';
-export { WindowService } from './services/platform/window.service';
+} from './services/http-error-reporter.service.js';
+export { FeatureService, useFeature } from './services/feature.service.js';
+export { HttpWaitService, useHttpWait } from './services/http-wait.service.js';
+export { LocalizationService, useLocalization } from './services/localization.service.js';
+export { MultiTenancyService, useMultiTenancy } from './services/multi-tenancy.service.js';
+export { PermissionService, usePermission } from './services/permission.service.js';
+export { CookieService } from './services/platform/cookie.service.js';
+export type { CookieOptions } from './services/platform/cookie.service.js';
+export { DocumentService } from './services/platform/document.service.js';
+export { StorageService } from './services/platform/storage.service.js';
+export { WindowService } from './services/platform/window.service.js';
 export {
   ReplaceableComponentsService,
   useReplaceableComponents,
-} from './services/replaceable-components.service';
-export type { ReplaceableComponent } from './services/replaceable-components.service';
-export { RestService, useRest } from './services/rest.service';
-export { RoutesService, useRoutes } from './services/routes.service';
-export { SessionStateService, useSessionState } from './services/session-state.service';
-export type { SessionState } from './services/session-state.service';
-export { SettingService, useSetting } from './services/setting.service';
+} from './services/replaceable-components.service.js';
+export type { ReplaceableComponent } from './services/replaceable-components.service.js';
+export { RestService, useRest } from './services/rest.service.js';
+export { RoutesService, useRoutes } from './services/routes.service.js';
+export { SessionStateService, useSessionState } from './services/session-state.service.js';
+export type { SessionState } from './services/session-state.service.js';
+export { SettingService, useSetting } from './services/setting.service.js';
 export {
   BrowserTokenStorage,
   MemoryTokenStorage,
   ServerTokenStorage,
-} from './services/token-storage.service';
+} from './services/token-storage.service.js';
 
 export {
   AuthService,
@@ -176,24 +184,24 @@ export {
   NAVIGATE_TO_MANAGE_PROFILE,
   PIPE_TO_LOGIN_FN,
   TokenStorage,
-} from './tokens/auth.token';
-export { HTTP_FETCH, HTTP_INTERCEPTORS } from './tokens/http.token';
-export type { FetchLike } from './tokens/http.token';
-export { LOCALIZATIONS, REGISTER_LOCALE } from './tokens/localization.token';
-export { NAV_COMPARE_FN } from './tokens/nav.token';
-export { ABP_ROOT_OPTIONS } from './tokens/root-options.token';
-export { TENANT_KEY } from './tokens/tenant-key.token';
-export { TENANT_NOT_FOUND_BY_NAME } from './tokens/tenant-not-found.token';
+} from './tokens/auth.token.js';
+export { HTTP_FETCH, HTTP_INTERCEPTORS } from './tokens/http.token.js';
+export type { FetchLike } from './tokens/http.token.js';
+export { LOCALIZATIONS, REGISTER_LOCALE } from './tokens/localization.token.js';
+export { NAV_COMPARE_FN } from './tokens/nav.token.js';
+export { ABP_ROOT_OPTIONS } from './tokens/root-options.token.js';
+export { TENANT_KEY } from './tokens/tenant-key.token.js';
+export { TENANT_NOT_FOUND_BY_NAME } from './tokens/tenant-not-found.token.js';
 
-export { InternalStore } from './utils/internal-store';
-export { createNavTree } from './utils/nav-tree';
-export type { NavTree, NavTreeOptions } from './utils/nav-tree';
-export { useDebounceFn } from './utils/use-debounce-fn';
-export type { DebouncedFn } from './utils/use-debounce-fn';
-export { loadRuntimeConfig } from './utils/load-runtime-config';
-export type { RuntimeConfigOptions } from './utils/load-runtime-config';
-export { useLatest } from './utils/use-latest';
-export { useListService } from './utils/use-list-service';
-export type { ListService, ListServiceOptions, ListSource } from './utils/use-list-service';
-export { useSubscriptions } from './utils/use-subscriptions';
-export type { Subscriptions } from './utils/use-subscriptions';
+export { InternalStore } from './utils/internal-store.js';
+export { createNavTree } from './utils/nav-tree.js';
+export type { NavTree, NavTreeOptions } from './utils/nav-tree.js';
+export { useDebounceFn } from './utils/use-debounce-fn.js';
+export type { DebouncedFn } from './utils/use-debounce-fn.js';
+export { loadRuntimeConfig } from './utils/load-runtime-config.js';
+export type { RuntimeConfigOptions } from './utils/load-runtime-config.js';
+export { useLatest } from './utils/use-latest.js';
+export { useListService } from './utils/use-list-service.js';
+export type { ListService, ListServiceOptions, ListSource } from './utils/use-list-service.js';
+export { useSubscriptions } from './utils/use-subscriptions.js';
+export type { Subscriptions } from './utils/use-subscriptions.js';

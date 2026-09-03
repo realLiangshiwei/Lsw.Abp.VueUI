@@ -8,11 +8,11 @@ import {
   type LoginParams,
   type ServiceOf,
 } from '@lsw-abpvue/core';
-import { AuthNavigationService } from '../services/auth-navigation.service';
-import { AuthStateService, toTokens } from '../services/auth-state.service';
-import { RememberMeService } from '../services/remember-me.service';
-import { TokenEndpointService } from '../services/token-endpoint.service';
-import type { AuthFlowStrategy } from './strategy';
+import { AuthNavigationService } from '../services/auth-navigation.service.js';
+import { AuthStateService, toTokens } from '../services/auth-state.service.js';
+import { RememberMeService } from '../services/remember-me.service.js';
+import { TokenEndpointService } from '../services/token-endpoint.service.js';
+import type { AuthFlowStrategy } from './strategy.js';
 
 /** Where an anonymous visitor is sent. The account module owns this route. */
 export const LOGIN_ROUTE = defineToken<string>('LOGIN_ROUTE', {

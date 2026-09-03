@@ -21,10 +21,10 @@ import {
 } from '@lsw-abpvue/core';
 import { describe, expect, it } from 'vitest';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
-import { AbpOAuthService } from '../services/abp-oauth.service';
-import { AuthStateService } from '../services/auth-state.service';
-import { RememberMeService } from '../services/remember-me.service';
-import { provideAbpOAuth, withTokenStorage } from './oauth.provider';
+import { AbpOAuthService } from '../services/abp-oauth.service.js';
+import { AuthStateService } from '../services/auth-state.service.js';
+import { RememberMeService } from '../services/remember-me.service.js';
+import { provideAbpOAuth, withTokenStorage } from './oauth.provider.js';
 
 const ISSUER = 'https://localhost:44384';
 

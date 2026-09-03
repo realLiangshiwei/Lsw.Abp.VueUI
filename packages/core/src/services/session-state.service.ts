@@ -1,9 +1,9 @@
 import type { ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import type { CurrentTenantDto } from '../proxy/models';
-import { InternalStore } from '../utils/internal-store';
-import { StorageService } from './platform/storage.service';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { CurrentTenantDto } from '../proxy/models.js';
+import { InternalStore } from '../utils/internal-store.js';
+import { StorageService } from './platform/storage.service.js';
 
 /** The key ABP's Angular UI uses, so a solution can switch UIs without logging out. */
 const SESSION_KEY = 'abpSession';

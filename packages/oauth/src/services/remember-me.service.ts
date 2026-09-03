@@ -1,5 +1,5 @@
 import { defineService, inject, StorageService, type ServiceOf } from '@lsw-abpvue/core';
-import { decodeJwt } from '../utils/jwt';
+import { decodeJwt } from '../utils/jwt.js';
 
 const REMEMBER_ME = 'remember_me';
 

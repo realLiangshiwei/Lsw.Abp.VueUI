@@ -1,9 +1,9 @@
-import { defineToken } from '../di/token';
+import { defineToken } from '../di/token.js';
 import {
   DEFAULT_ENVIRONMENT,
   resolveRootOptions,
   type ResolvedRootOptions,
-} from '../models/root-options';
+} from '../models/root-options.js';
 
 /**
  * The host's root options with every default applied. Without `withOptions()` the API

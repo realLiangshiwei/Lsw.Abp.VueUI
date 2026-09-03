@@ -1,20 +1,24 @@
-import { provideAppInitializer } from '../di/app-initializer';
-import { collectFeatures, defineFeature, type Feature } from '../di/features';
-import { makeEnvironmentProviders, type EnvironmentProviders, type Provider } from '../di/provider';
-import { provideAppSetup } from '../di/vue-bridge';
-import { languageInterceptor } from '../interceptors/language.interceptor';
-import { tenantInterceptor } from '../interceptors/tenant.interceptor';
-import { timezoneInterceptor } from '../interceptors/timezone.interceptor';
-import { xsrfInterceptor } from '../interceptors/xsrf.interceptor';
-import type { AbpLocalization } from '../models/localization';
-import { resolveRootOptions, type AbpRootOptions } from '../models/root-options';
-import { LocalizationService } from '../services/localization.service';
-import type { AbpNavItem } from '../models/nav';
-import { HTTP_INTERCEPTORS } from '../tokens/http.token';
-import { NAV_COMPARE_FN } from '../tokens/nav.token';
-import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { getInitialData } from './initial-data';
+import { provideAppInitializer } from '../di/app-initializer.js';
+import { collectFeatures, defineFeature, type Feature } from '../di/features.js';
+import {
+  makeEnvironmentProviders,
+  type EnvironmentProviders,
+  type Provider,
+} from '../di/provider.js';
+import { provideAppSetup } from '../di/vue-bridge.js';
+import { languageInterceptor } from '../interceptors/language.interceptor.js';
+import { tenantInterceptor } from '../interceptors/tenant.interceptor.js';
+import { timezoneInterceptor } from '../interceptors/timezone.interceptor.js';
+import { xsrfInterceptor } from '../interceptors/xsrf.interceptor.js';
+import type { AbpLocalization } from '../models/localization.js';
+import { resolveRootOptions, type AbpRootOptions } from '../models/root-options.js';
+import { LocalizationService } from '../services/localization.service.js';
+import type { AbpNavItem } from '../models/nav.js';
+import { HTTP_INTERCEPTORS } from '../tokens/http.token.js';
+import { NAV_COMPARE_FN } from '../tokens/nav.token.js';
+import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { getInitialData } from './initial-data.js';
 
 export type CoreFeature = Feature<
   'withOptions' | 'withLocalizations' | 'withRegisterLocale' | 'withCompareFunc'

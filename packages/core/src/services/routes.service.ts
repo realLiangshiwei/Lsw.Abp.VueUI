@@ -1,10 +1,10 @@
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import type { AbpRoute } from '../models/nav';
-import { NAV_COMPARE_FN } from '../tokens/nav.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { createNavTree } from '../utils/nav-tree';
-import { PermissionService } from './permission.service';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { AbpRoute } from '../models/nav.js';
+import { NAV_COMPARE_FN } from '../tokens/nav.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { createNavTree } from '../utils/nav-tree.js';
+import { PermissionService } from './permission.service.js';
 
 /**
  * The application's routes as a tree, which is what the menu is rendered from. Modules

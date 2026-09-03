@@ -8,8 +8,8 @@ import {
   type Environment,
 } from '@lsw-abpvue/core';
 import { afterAll, describe, expect, it } from 'vitest';
-import { provideAbpOAuth } from './providers/oauth.provider';
-import { AuthStateService } from './services/auth-state.service';
+import { provideAbpOAuth } from './providers/oauth.provider.js';
+import { AuthStateService } from './services/auth-state.service.js';
 
 /**
  * The package compiles with `types: []` so that nothing in it can reach for a node

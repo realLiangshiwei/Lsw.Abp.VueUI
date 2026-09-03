@@ -1,9 +1,9 @@
 import { computed, toValue, type ComputedRef, type MaybeRefOrGetter } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import { isDevMode } from '../utils/dev-mode';
-import { evaluatePolicy, parsePolicy, type PolicyExpression } from '../utils/policy-expression';
-import { ConfigStateService } from './config-state.service';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import { isDevMode } from '../utils/dev-mode.js';
+import { evaluatePolicy, parsePolicy, type PolicyExpression } from '../utils/policy-expression.js';
+import { ConfigStateService } from './config-state.service.js';
 
 export const PermissionService = defineService('PermissionService', () => {
   const configState = inject(ConfigStateService);

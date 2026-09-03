@@ -7,7 +7,7 @@ import {
   type TokenStorage,
 } from '@lsw-abpvue/core';
 import { describe, expectTypeOf, it } from 'vitest';
-import { provideAbpOAuth, withTokenStorage, type OAuthFeature } from './oauth.provider';
+import { provideAbpOAuth, withTokenStorage, type OAuthFeature } from './oauth.provider.js';
 
 /** A host's own implementation, reached through a token of its own. */
 const WorkerTokenStorage = defineToken<TokenStorage>('WorkerTokenStorage');

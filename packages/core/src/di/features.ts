@@ -1,5 +1,5 @@
-import { DuplicateFeatureError } from './errors';
-import type { Provider } from './provider';
+import { DuplicateFeatureError } from './errors.js';
+import type { Provider } from './provider.js';
 
 /**
  * One `withXxx()` option of a `provideXxx()` call. Features are values rather than

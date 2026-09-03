@@ -14,10 +14,10 @@ import {
 } from '@lsw-abpvue/core';
 import type { User, UserManager } from 'oidc-client-ts';
 import { describe, expect, it, vi } from 'vitest';
-import { provideAbpOAuth } from '../providers/oauth.provider';
-import { AbpOAuthService } from '../services/abp-oauth.service';
-import { AuthStateService } from '../services/auth-state.service';
-import { buildSettings, USER_MANAGER_FACTORY } from './auth-code-flow.strategy';
+import { provideAbpOAuth } from '../providers/oauth.provider.js';
+import { AbpOAuthService } from '../services/abp-oauth.service.js';
+import { AuthStateService } from '../services/auth-state.service.js';
+import { buildSettings, USER_MANAGER_FACTORY } from './auth-code-flow.strategy.js';
 
 const ISSUER = 'https://localhost:44384';
 

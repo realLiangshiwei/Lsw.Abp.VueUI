@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defineComponent } from 'vue';
-import { createInjector } from '../di/injector';
-import { ReplaceableComponentsService } from './replaceable-components.service';
+import { createInjector } from '../di/injector.js';
+import { ReplaceableComponentsService } from './replaceable-components.service.js';
 
 const Custom = defineComponent({ name: 'CustomUsers', render: () => null });
 const Other = defineComponent({ name: 'OtherUsers', render: () => null });

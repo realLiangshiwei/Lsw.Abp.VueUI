@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deepMerge, isPlainObject } from './object-utils';
+import { deepMerge, isPlainObject } from './object-utils.js';
 
 describe('isPlainObject', () => {
   it.each([

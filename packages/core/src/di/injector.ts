@@ -5,10 +5,10 @@ import {
   MultiProviderMismatchError,
   NullInjectorError,
   OutsideInjectionContextError,
-} from './errors';
-import { getCurrentInjector, runInInjectionContext } from './inject';
-import { flattenProviders, type Provider, type ProviderInput } from './provider';
-import type { InjectionToken } from './token';
+} from './errors.js';
+import { getCurrentInjector, runInInjectionContext } from './inject.js';
+import { flattenProviders, type Provider, type ProviderInput } from './provider.js';
+import type { InjectionToken } from './token.js';
 
 export interface InjectOptions {
   optional?: boolean | undefined;

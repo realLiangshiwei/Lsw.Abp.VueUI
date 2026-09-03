@@ -10,8 +10,8 @@ import {
   type ServiceOf,
 } from '@lsw-abpvue/core';
 import { isPlainObject } from '@lsw-abpvue/utils';
-import { OAuthEndpointMissingError } from '../models/errors';
-import type { DiscoveryDocument, TokenResponse } from '../models/oauth';
+import { OAuthEndpointMissingError } from '../models/errors.js';
+import type { DiscoveryDocument, TokenResponse } from '../models/oauth.js';
 
 /** ABP's own name for "the password was right, now prove the second factor". */
 const REQUIRES_TWO_FACTOR = 'RequiresTwoFactor';

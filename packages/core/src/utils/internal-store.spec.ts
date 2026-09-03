@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { computed } from 'vue';
-import { InternalStore } from './internal-store';
+import { InternalStore } from './internal-store.js';
 
 interface State {
   name: string;

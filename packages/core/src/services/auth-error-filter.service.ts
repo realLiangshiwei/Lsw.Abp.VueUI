@@ -1,7 +1,7 @@
-import { defineService, type ServiceOf } from '../di/token';
-import { inject } from '../di/inject';
-import type { AuthErrorFilter } from '../models/auth';
-import type { AbpHttpError } from '../models/http';
+import { defineService, type ServiceOf } from '../di/token.js';
+import { inject } from '../di/inject.js';
+import type { AuthErrorFilter } from '../models/auth.js';
+import type { AbpHttpError } from '../models/http.js';
 
 /**
  * The rules that decide whether a failed request means the session is over. An

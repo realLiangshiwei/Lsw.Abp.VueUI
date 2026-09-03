@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { createInjector } from '../di/injector';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { ConfigStateService } from './config-state.service';
-import { RoutesService } from './routes.service';
+import { createInjector } from '../di/injector.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from './config-state.service.js';
+import { RoutesService } from './routes.service.js';
 
 function context() {
   const injector = createInjector([]);

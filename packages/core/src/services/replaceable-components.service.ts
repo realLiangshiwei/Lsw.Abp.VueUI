@@ -1,6 +1,6 @@
 import { computed, shallowRef, type Component, type ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
 
 export interface ReplaceableComponent {
   key: string;

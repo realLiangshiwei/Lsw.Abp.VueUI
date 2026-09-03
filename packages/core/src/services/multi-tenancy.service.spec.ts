@@ -1,16 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector } from '../di/injector';
-import type { ProviderInput } from '../di/provider';
-import type { Environment } from '../models/environment';
-import { resolveRootOptions } from '../models/root-options';
-import { TenantNotFoundError } from '../models/tenant';
-import { HTTP_FETCH, type FetchLike } from '../tokens/http.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { TENANT_NOT_FOUND_BY_NAME } from '../tokens/tenant-not-found.token';
-import { EnvironmentService } from './environment.service';
-import { MultiTenancyService, tenancyNameFromUrl } from './multi-tenancy.service';
-import { WindowService } from './platform/window.service';
-import { SessionStateService } from './session-state.service';
+import { createInjector } from '../di/injector.js';
+import type { ProviderInput } from '../di/provider.js';
+import type { Environment } from '../models/environment.js';
+import { resolveRootOptions } from '../models/root-options.js';
+import { TenantNotFoundError } from '../models/tenant.js';
+import { HTTP_FETCH, type FetchLike } from '../tokens/http.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { TENANT_NOT_FOUND_BY_NAME } from '../tokens/tenant-not-found.token.js';
+import { EnvironmentService } from './environment.service.js';
+import { MultiTenancyService, tenancyNameFromUrl } from './multi-tenancy.service.js';
+import { WindowService } from './platform/window.service.js';
+import { SessionStateService } from './session-state.service.js';
 
 const environment: Environment = {
   apis: { default: { url: 'https://{0}.api.abp.io' } },

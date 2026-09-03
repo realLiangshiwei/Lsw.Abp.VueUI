@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector } from '../di/injector';
-import type { ProviderInput } from '../di/provider';
-import type { Environment } from '../models/environment';
-import { AbpHttpError } from '../models/http';
-import { resolveRootOptions, type AbpRootOptions } from '../models/root-options';
-import { HTTP_FETCH, type FetchLike } from '../tokens/http.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { HttpErrorReporterService } from './http-error-reporter.service';
-import { HttpWaitService } from './http-wait.service';
-import { RestService } from './rest.service';
+import { createInjector } from '../di/injector.js';
+import type { ProviderInput } from '../di/provider.js';
+import type { Environment } from '../models/environment.js';
+import { AbpHttpError } from '../models/http.js';
+import { resolveRootOptions, type AbpRootOptions } from '../models/root-options.js';
+import { HTTP_FETCH, type FetchLike } from '../tokens/http.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { HttpErrorReporterService } from './http-error-reporter.service.js';
+import { HttpWaitService } from './http-wait.service.js';
+import { RestService } from './rest.service.js';
 
 const environment: Environment = {
   apis: {

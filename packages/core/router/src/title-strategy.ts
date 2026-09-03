@@ -5,7 +5,7 @@ import {
   inject,
   LocalizationService,
 } from '@lsw-abpvue/core';
-import type { TitleStrategy } from './tokens';
+import type { TitleStrategy } from './tokens.js';
 
 /**
  * `Users | BookStore`, with both halves localized. A route without a title leaves the

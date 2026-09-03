@@ -20,11 +20,11 @@ import {
   type InjectionToken,
   type PipeToLoginFn,
 } from '@lsw-abpvue/core';
-import { authInterceptor } from '../interceptors/auth.interceptor';
-import { AbpOAuthService } from '../services/abp-oauth.service';
-import { AuthNavigationService } from '../services/auth-navigation.service';
-import { AuthStateService } from '../services/auth-state.service';
-import { decodeJwt } from '../utils/jwt';
+import { authInterceptor } from '../interceptors/auth.interceptor.js';
+import { AbpOAuthService } from '../services/abp-oauth.service.js';
+import { AuthNavigationService } from '../services/auth-navigation.service.js';
+import { AuthStateService } from '../services/auth-state.service.js';
+import { decodeJwt } from '../utils/jwt.js';
 
 /** ABP puts the tenant a token was issued for in this claim; a host token has none. */
 const TENANT_CLAIM = 'tenantid';

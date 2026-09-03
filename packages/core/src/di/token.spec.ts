@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createInjector } from './injector';
-import { defineService, defineToken } from './token';
+import { createInjector } from './injector.js';
+import { defineService, defineToken } from './token.js';
 
 describe('defineToken', () => {
   it('two tokens of the same name are two identities', () => {

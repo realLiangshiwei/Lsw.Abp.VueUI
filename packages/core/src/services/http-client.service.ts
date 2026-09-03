@@ -1,13 +1,13 @@
 import { isPlainObject } from '@lsw-abpvue/utils';
-import { getCurrentInjector, inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
+import { getCurrentInjector, inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
 import {
   AbpHttpError,
   type AbpErrorEnvelope,
   type HttpRequestConfig,
   type HttpResponse,
-} from '../models/http';
-import { HTTP_FETCH, HTTP_INTERCEPTORS } from '../tokens/http.token';
+} from '../models/http.js';
+import { HTTP_FETCH, HTTP_INTERCEPTORS } from '../tokens/http.token.js';
 
 type Handler = (request: HttpRequestConfig) => Promise<HttpResponse>;
 

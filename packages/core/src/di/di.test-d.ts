@@ -1,8 +1,8 @@
 import { describe, expectTypeOf, it } from 'vitest';
-import { inject } from './inject';
-import { createInjector } from './injector';
-import type { Provider } from './provider';
-import { defineService, defineToken, type ServiceOf } from './token';
+import { inject } from './inject.js';
+import { createInjector } from './injector.js';
+import type { Provider } from './provider.js';
+import { defineService, defineToken, type ServiceOf } from './token.js';
 
 interface Greeter {
   say(name: string): string;

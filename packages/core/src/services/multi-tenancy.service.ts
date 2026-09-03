@@ -1,17 +1,17 @@
 import type { ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import type { Environment } from '../models/environment';
-import { TenantNotFoundError } from '../models/tenant';
-import { AbpTenantService } from '../proxy/abp-tenant.service';
-import type { CurrentTenantDto, FindTenantResultDto } from '../proxy/models';
-import { TENANT_KEY } from '../tokens/tenant-key.token';
-import { TENANT_NOT_FOUND_BY_NAME } from '../tokens/tenant-not-found.token';
-import { InternalStore } from '../utils/internal-store';
-import { ConfigStateService } from './config-state.service';
-import { EnvironmentService } from './environment.service';
-import { WindowService } from './platform/window.service';
-import { SessionStateService } from './session-state.service';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { Environment } from '../models/environment.js';
+import { TenantNotFoundError } from '../models/tenant.js';
+import { AbpTenantService } from '../proxy/abp-tenant.service.js';
+import type { CurrentTenantDto, FindTenantResultDto } from '../proxy/models.js';
+import { TENANT_KEY } from '../tokens/tenant-key.token.js';
+import { TENANT_NOT_FOUND_BY_NAME } from '../tokens/tenant-not-found.token.js';
+import { InternalStore } from '../utils/internal-store.js';
+import { ConfigStateService } from './config-state.service.js';
+import { EnvironmentService } from './environment.service.js';
+import { WindowService } from './platform/window.service.js';
+import { SessionStateService } from './session-state.service.js';
 
 const PLACEHOLDER = '{0}';
 

@@ -1,7 +1,7 @@
-import { inject } from '../di/inject';
-import { defineService, type InjectionToken } from '../di/token';
-import type { TokenStorage } from '../tokens/auth.token';
-import { StorageService } from './platform/storage.service';
+import { inject } from '../di/inject.js';
+import { defineService, type InjectionToken } from '../di/token.js';
+import type { TokenStorage } from '../tokens/auth.token.js';
+import { StorageService } from './platform/storage.service.js';
 
 /**
  * Tokens in local storage: they survive a reload, and every tab of the application sees

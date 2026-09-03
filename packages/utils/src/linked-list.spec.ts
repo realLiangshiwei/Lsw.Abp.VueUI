@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { LinkedList } from './linked-list';
+import { LinkedList } from './linked-list.js';
 
 describe('LinkedList', () => {
   let list: LinkedList<string>;

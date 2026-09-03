@@ -11,17 +11,17 @@ import {
   type ServiceOf,
 } from '@lsw-abpvue/core';
 import { UserManager, type User, type UserManagerSettings } from 'oidc-client-ts';
-import { AuthNavigationService } from '../services/auth-navigation.service';
-import { AuthStateService } from '../services/auth-state.service';
-import { RememberMeService } from '../services/remember-me.service';
-import { TokenStateStore } from '../services/token-state-store';
+import { AuthNavigationService } from '../services/auth-navigation.service.js';
+import { AuthStateService } from '../services/auth-state.service.js';
+import { RememberMeService } from '../services/remember-me.service.js';
+import { TokenStateStore } from '../services/token-state-store.js';
 import {
   cultureFromCallback,
   cultureParams,
   isAuthorizationCallback,
   withoutCallbackParams,
-} from '../utils/callback-url';
-import type { AuthFlowStrategy } from './strategy';
+} from '../utils/callback-url.js';
+import type { AuthFlowStrategy } from './strategy.js';
 
 /**
  * Where the library itself is built. A token for the same reason `HTTP_FETCH` is one:

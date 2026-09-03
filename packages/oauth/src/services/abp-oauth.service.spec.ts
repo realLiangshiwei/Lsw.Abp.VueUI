@@ -13,9 +13,9 @@ import {
 } from '@lsw-abpvue/core';
 import { describe, expect, it } from 'vitest';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
-import { provideAbpOAuth } from '../providers/oauth.provider';
-import { AbpOAuthService } from './abp-oauth.service';
-import { AuthStateService } from './auth-state.service';
+import { provideAbpOAuth } from '../providers/oauth.provider.js';
+import { AbpOAuthService } from './abp-oauth.service.js';
+import { AuthStateService } from './auth-state.service.js';
 
 const ISSUER = 'https://localhost:44384';
 

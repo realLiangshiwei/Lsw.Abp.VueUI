@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { createInjector } from '../di/injector';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { ConfigStateService } from './config-state.service';
-import { CurrentUserService } from './current-user.service';
-import { FeatureService } from './feature.service';
-import { SettingService } from './setting.service';
+import { createInjector } from '../di/injector.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from './config-state.service.js';
+import { CurrentUserService } from './current-user.service.js';
+import { FeatureService } from './feature.service.js';
+import { SettingService } from './setting.service.js';
 
 function context(overrides: Partial<ApplicationConfigurationDto>) {
   const injector = createInjector([]);

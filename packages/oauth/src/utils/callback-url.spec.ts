@@ -4,7 +4,7 @@ import {
   cultureParams,
   isAuthorizationCallback,
   withoutCallbackParams,
-} from './callback-url';
+} from './callback-url.js';
 
 const url = (href: string) => new URL(href, 'https://app.abp.io');
 

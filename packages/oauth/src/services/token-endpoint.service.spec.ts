@@ -10,8 +10,8 @@ import {
   type FetchLike,
 } from '@lsw-abpvue/core';
 import { describe, expect, it } from 'vitest';
-import { OAuthEndpointMissingError } from '../models/errors';
-import { TokenEndpointService } from './token-endpoint.service';
+import { OAuthEndpointMissingError } from '../models/errors.js';
+import { TokenEndpointService } from './token-endpoint.service.js';
 
 const ISSUER = 'https://localhost:44384';
 

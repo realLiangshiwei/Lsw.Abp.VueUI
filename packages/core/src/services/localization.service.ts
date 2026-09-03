@@ -1,21 +1,21 @@
 import { computed, shallowRef, type ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { onServiceDestroy } from '../di/injector';
-import { defineService, type ServiceOf } from '../di/token';
-import type { AbpLocalization, LocalizationParam } from '../models/localization';
-import type { LanguageInfo } from '../proxy/models';
-import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { isDevMode } from '../utils/dev-mode';
+import { inject } from '../di/inject.js';
+import { onServiceDestroy } from '../di/injector.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { AbpLocalization, LocalizationParam } from '../models/localization.js';
+import type { LanguageInfo } from '../proxy/models.js';
+import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { isDevMode } from '../utils/dev-mode.js';
 import {
   createLocalizer,
   flattenResources,
   mergeTexts,
   type ResourceTexts,
-} from '../utils/localizer';
-import { ConfigStateService } from './config-state.service';
-import { HttpClient } from './http-client.service';
-import { SessionStateService } from './session-state.service';
+} from '../utils/localizer.js';
+import { ConfigStateService } from './config-state.service.js';
+import { HttpClient } from './http-client.service.js';
+import { SessionStateService } from './session-state.service.js';
 
 const DEFAULT_UI_LOCALIZATION_PATH = '/assets/localization';
 

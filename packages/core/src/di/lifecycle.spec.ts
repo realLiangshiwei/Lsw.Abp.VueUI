@@ -2,10 +2,10 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, KeepAlive, ref, Suspense } from 'vue';
-import { ABP_INJECTOR_KEY, inject } from './inject';
-import { createInjector, onServiceDestroy, type Injector } from './injector';
-import { defineToken } from './token';
-import { provideAbp } from './vue-bridge';
+import { ABP_INJECTOR_KEY, inject } from './inject.js';
+import { createInjector, onServiceDestroy, type Injector } from './injector.js';
+import { defineToken } from './token.js';
+import { provideAbp } from './vue-bridge.js';
 
 const Greeting = defineToken<string>('Greeting');
 

@@ -6,7 +6,7 @@ import {
   runInInjectionContext,
 } from '@lsw-abpvue/core';
 import type { NavigationGuard } from 'vue-router';
-import { FORBIDDEN_ROUTE } from './tokens';
+import { FORBIDDEN_ROUTE } from './tokens.js';
 
 /**
  * Sends anonymous visitors to the login page. Reads `meta.requiresAuthentication`, so a

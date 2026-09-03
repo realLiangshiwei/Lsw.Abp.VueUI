@@ -1,4 +1,4 @@
-import { defineService, type InjectionToken } from '../../di/token';
+import { defineService, type InjectionToken } from '../../di/token.js';
 
 export interface WindowService {
   /** `undefined` when there is no browser, which is how callers detect the server. */

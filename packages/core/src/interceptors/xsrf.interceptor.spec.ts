@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector } from '../di/injector';
-import { HttpClient } from '../services/http-client.service';
-import { CookieService } from '../services/platform/cookie.service';
-import { HTTP_FETCH, HTTP_INTERCEPTORS, type FetchLike } from '../tokens/http.token';
-import { xsrfInterceptor } from './xsrf.interceptor';
+import { createInjector } from '../di/injector.js';
+import { HttpClient } from '../services/http-client.service.js';
+import { CookieService } from '../services/platform/cookie.service.js';
+import { HTTP_FETCH, HTTP_INTERCEPTORS, type FetchLike } from '../tokens/http.token.js';
+import { xsrfInterceptor } from './xsrf.interceptor.js';
 
 function client(send: FetchLike) {
   return createInjector([

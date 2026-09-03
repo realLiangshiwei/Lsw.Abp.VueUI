@@ -1,4 +1,4 @@
-import type { AbpHttpError } from './http';
+import type { AbpHttpError } from './http.js';
 
 /** What a login form hands to `AuthService.login()`; the password flow's request body. */
 export interface LoginParams {

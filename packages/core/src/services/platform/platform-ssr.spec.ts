@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector } from '../../di/injector';
-import { CookieService } from './cookie.service';
-import { DocumentService } from './document.service';
-import { StorageService } from './storage.service';
-import { WindowService } from './window.service';
+import { createInjector } from '../../di/injector.js';
+import { CookieService } from './cookie.service.js';
+import { DocumentService } from './document.service.js';
+import { StorageService } from './storage.service.js';
+import { WindowService } from './window.service.js';
 
 // The default test environment is Node, so this file runs with no browser at all — the
 // same conditions a server renderer imposes (SSR constraint S2).
@@ -60,11 +60,11 @@ describe('with no browser', () => {
  */
 describe('loading the whole package under Node', () => {
   it('importing the barrel touches no browser', async () => {
-    await expect(import('../../index')).resolves.toBeDefined();
+    await expect(import('../../index.js')).resolves.toBeDefined();
   });
 
   it('building every service touches no browser', async () => {
-    const core = await import('../../index');
+    const core = await import('../../index.js');
     const services = createInjector([]);
 
     expect(() => {
@@ -85,7 +85,7 @@ describe('loading the whole package under Node', () => {
   });
 
   it('session state initialises with no storage at all', async () => {
-    const core = await import('../../index');
+    const core = await import('../../index.js');
     const session = createInjector([]).get(core.SessionStateService);
 
     expect(() => session.init()).not.toThrow();

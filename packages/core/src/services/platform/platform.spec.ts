@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector } from '../../di/injector';
-import { CookieService } from './cookie.service';
-import { DocumentService } from './document.service';
-import { StorageService } from './storage.service';
-import { WindowService } from './window.service';
+import { createInjector } from '../../di/injector.js';
+import { CookieService } from './cookie.service.js';
+import { DocumentService } from './document.service.js';
+import { StorageService } from './storage.service.js';
+import { WindowService } from './window.service.js';
 
 const injector = () => createInjector([]);
 

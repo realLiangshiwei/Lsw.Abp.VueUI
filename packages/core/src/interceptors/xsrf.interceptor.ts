@@ -1,6 +1,6 @@
-import { inject } from '../di/inject';
-import type { HttpInterceptor } from '../models/http';
-import { CookieService } from '../services/platform/cookie.service';
+import { inject } from '../di/inject.js';
+import type { HttpInterceptor } from '../models/http.js';
+import { CookieService } from '../services/platform/cookie.service.js';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE']);
 

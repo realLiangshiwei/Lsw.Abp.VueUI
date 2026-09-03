@@ -1,15 +1,15 @@
 import { isPlainObject } from '@lsw-abpvue/utils';
 import type { ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import { AbpApplicationConfigurationService } from '../proxy/abp-application-configuration.service';
-import { AbpApplicationLocalizationService } from '../proxy/abp-application-localization.service';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import { AbpApplicationConfigurationService } from '../proxy/abp-application-configuration.service.js';
+import { AbpApplicationLocalizationService } from '../proxy/abp-application-localization.service.js';
 import type {
   ApplicationConfigurationDto,
   ApplicationLocalizationConfigurationDto,
-} from '../proxy/models';
-import { InternalStore } from '../utils/internal-store';
-import { useLatest } from '../utils/use-latest';
+} from '../proxy/models.js';
+import { InternalStore } from '../utils/internal-store.js';
+import { useLatest } from '../utils/use-latest.js';
 
 /**
  * A complete but empty configuration, so everything reading it works before the first

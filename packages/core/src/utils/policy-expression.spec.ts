@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { evaluatePolicy, parsePolicy } from './policy-expression';
+import { evaluatePolicy, parsePolicy } from './policy-expression.js';
 
 const granted = new Set(['A', 'B']);
 const evaluate = (policy: string) => {

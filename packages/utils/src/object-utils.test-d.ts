@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest';
-import { deepMerge, type DeepPartial } from './object-utils';
+import { deepMerge, type DeepPartial } from './object-utils.js';
 
 interface Environment {
   application: { name: string; baseUrl: string };

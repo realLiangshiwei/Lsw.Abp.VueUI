@@ -1,6 +1,6 @@
-import { inject } from '../di/inject';
-import type { HttpInterceptor } from '../models/http';
-import { ConfigStateService } from '../services/config-state.service';
+import { inject } from '../di/inject.js';
+import type { HttpInterceptor } from '../models/http.js';
+import { ConfigStateService } from '../services/config-state.service.js';
 
 function browserTimezone(): string | undefined {
   try {

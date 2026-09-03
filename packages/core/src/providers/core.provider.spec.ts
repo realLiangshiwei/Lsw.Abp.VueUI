@@ -1,20 +1,20 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DuplicateFeatureError } from '../di/errors';
-import { createInjector, type Injector } from '../di/injector';
-import type { Environment } from '../models/environment';
-import { LocalizationService } from '../services/localization.service';
-import { RoutesService } from '../services/routes.service';
-import { SessionStateService } from '../services/session-state.service';
-import { HTTP_INTERCEPTORS } from '../tokens/http.token';
-import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
+import { DuplicateFeatureError } from '../di/errors.js';
+import { createInjector, type Injector } from '../di/injector.js';
+import type { Environment } from '../models/environment.js';
+import { LocalizationService } from '../services/localization.service.js';
+import { RoutesService } from '../services/routes.service.js';
+import { SessionStateService } from '../services/session-state.service.js';
+import { HTTP_INTERCEPTORS } from '../tokens/http.token.js';
+import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
 import {
   provideAbpCore,
   withCompareFunc,
   withLocalizations,
   withOptions,
   withRegisterLocale,
-} from './core.provider';
+} from './core.provider.js';
 
 const environment: Environment = {
   apis: { default: { url: 'https://backend' } },

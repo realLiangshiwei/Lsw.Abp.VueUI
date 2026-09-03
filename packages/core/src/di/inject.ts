@@ -5,9 +5,9 @@ import {
   type ComponentInternalInstance,
   type InjectionKey,
 } from 'vue';
-import { OutsideInjectionContextError } from './errors';
-import type { Injector } from './injector';
-import type { InjectionToken } from './token';
+import { OutsideInjectionContextError } from './errors.js';
+import type { Injector } from './injector.js';
+import type { InjectionToken } from './token.js';
 
 /** Where the Vue component tree carries the injector that covers it. */
 export const ABP_INJECTOR_KEY: InjectionKey<Injector> = Symbol('abp.injector');

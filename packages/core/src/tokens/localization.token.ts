@@ -1,5 +1,5 @@
-import { defineToken } from '../di/token';
-import type { AbpLocalization } from '../models/localization';
+import { defineToken } from '../di/token.js';
+import type { AbpLocalization } from '../models/localization.js';
 
 /** Texts shipped with the application, contributed by any package. */
 export const LOCALIZATIONS = defineToken<AbpLocalization[]>('LOCALIZATIONS', { multi: true });

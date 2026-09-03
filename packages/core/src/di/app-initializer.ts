@@ -1,7 +1,7 @@
-import { runInInjectionContext } from './inject';
-import type { Injector } from './injector';
-import type { Provider } from './provider';
-import { defineToken } from './token';
+import { runInInjectionContext } from './inject.js';
+import type { Injector } from './injector.js';
+import type { Provider } from './provider.js';
+import { defineToken } from './token.js';
 
 /** Runs once during startup, before the application is mounted. */
 export type AppInitializer = () => void | Promise<void>;

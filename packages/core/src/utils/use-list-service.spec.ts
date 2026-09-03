@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { PageQueryParams, PagedResultDto } from '../models/list';
-import { useListService } from './use-list-service';
+import type { PageQueryParams, PagedResultDto } from '../models/list.js';
+import { useListService } from './use-list-service.js';
 
 const page = <R>(items: R[], totalCount = items.length): PagedResultDto<R> => ({
   items,

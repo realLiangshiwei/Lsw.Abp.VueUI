@@ -5,7 +5,7 @@ import {
   type HttpInterceptor,
   type HttpRequestConfig,
 } from '@lsw-abpvue/core';
-import { AbpOAuthService } from '../services/abp-oauth.service';
+import { AbpOAuthService } from '../services/abp-oauth.service.js';
 
 function identified(request: HttpRequestConfig, token: string | null): HttpRequestConfig {
   return {

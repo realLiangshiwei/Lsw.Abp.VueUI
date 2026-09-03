@@ -7,7 +7,7 @@ import {
   MultiProviderMismatchError,
   NullInjectorError,
   OutsideInjectionContextError,
-} from './errors';
+} from './errors.js';
 
 const text = (error: Error) => `${error.name}: ${error.message}`;
 

@@ -1,8 +1,8 @@
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import type { RestConfig } from '../models/http';
-import { RestService } from '../services/rest.service';
-import type { FindTenantResultDto } from './models';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { RestConfig } from '../models/http.js';
+import { RestService } from '../services/rest.service.js';
+import type { FindTenantResultDto } from './models.js';
 
 export const AbpTenantService = defineService('AbpTenantService', () => {
   const rest = inject(RestService);

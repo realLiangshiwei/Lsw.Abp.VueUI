@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { computed } from 'vue';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
-import { createInjector } from '../di/injector';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { HTTP_FETCH, type FetchLike } from '../tokens/http.token';
-import { ConfigStateService } from './config-state.service';
+import { createInjector } from '../di/injector.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { HTTP_FETCH, type FetchLike } from '../tokens/http.token.js';
+import { ConfigStateService } from './config-state.service.js';
 
 /** The real answer of a running ABP backend, captured by `scripts/capture-fixtures.sh`. */
 const fixture = configurationFixture as unknown as ApplicationConfigurationDto;

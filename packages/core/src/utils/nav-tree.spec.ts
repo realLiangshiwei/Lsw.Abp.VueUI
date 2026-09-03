@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { AbpRoute } from '../models/nav';
-import { createNavTree } from './nav-tree';
+import type { AbpRoute } from '../models/nav.js';
+import { createNavTree } from './nav-tree.js';
 
 const route = (name: string, extra: Partial<AbpRoute> = {}): AbpRoute => ({ name, ...extra });
 

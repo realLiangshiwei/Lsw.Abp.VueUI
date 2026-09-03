@@ -9,10 +9,10 @@ import {
   type LoginParams,
   type ServiceOf,
 } from '@lsw-abpvue/core';
-import { AuthCodeFlowStrategy } from '../strategies/auth-code-flow.strategy';
-import { PasswordFlowStrategy } from '../strategies/password-flow.strategy';
-import type { AuthFlowStrategy } from '../strategies/strategy';
-import { AuthStateService } from './auth-state.service';
+import { AuthCodeFlowStrategy } from '../strategies/auth-code-flow.strategy.js';
+import { PasswordFlowStrategy } from '../strategies/password-flow.strategy.js';
+import type { AuthFlowStrategy } from '../strategies/strategy.js';
+import { AuthStateService } from './auth-state.service.js';
 
 /**
  * The `AuthService` `@lsw-abpvue/core` declares. Which flow answers is decided by the

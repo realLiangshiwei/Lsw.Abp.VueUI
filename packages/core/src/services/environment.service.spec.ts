@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createInjector } from '../di/injector';
-import type { Environment } from '../models/environment';
-import { resolveRootOptions } from '../models/root-options';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { EnvironmentService } from './environment.service';
+import { createInjector } from '../di/injector.js';
+import type { Environment } from '../models/environment.js';
+import { resolveRootOptions } from '../models/root-options.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { EnvironmentService } from './environment.service.js';
 
 const environment: Environment = {
   apis: {

@@ -1,9 +1,9 @@
-import { inject } from '../di/inject';
-import { ConfigStateService } from '../services/config-state.service';
-import { MultiTenancyService } from '../services/multi-tenancy.service';
-import { SessionStateService } from '../services/session-state.service';
-import { AuthService, CHECK_AUTHENTICATION_STATE_FN } from '../tokens/auth.token';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
+import { inject } from '../di/inject.js';
+import { ConfigStateService } from '../services/config-state.service.js';
+import { MultiTenancyService } from '../services/multi-tenancy.service.js';
+import { SessionStateService } from '../services/session-state.service.js';
+import { AuthService, CHECK_AUTHENTICATION_STATE_FN } from '../tokens/auth.token.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
 
 /**
  * What has to happen before the application is shown, in the order ABP defines it:

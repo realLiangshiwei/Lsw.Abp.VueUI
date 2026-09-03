@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createInjector } from '../di/injector';
-import { StorageService } from './platform/storage.service';
-import { SessionStateService } from './session-state.service';
+import { createInjector } from '../di/injector.js';
+import { StorageService } from './platform/storage.service.js';
+import { SessionStateService } from './session-state.service.js';
 
 /**
  * A storage that can be poked from the outside, standing in for another tab. The real

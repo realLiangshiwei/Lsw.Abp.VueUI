@@ -6,11 +6,11 @@ import {
   MultiProviderMismatchError,
   NullInjectorError,
   OutsideInjectionContextError,
-} from './errors';
-import { inject } from './inject';
-import { createInjector, onServiceDestroy } from './injector';
-import { makeEnvironmentProviders, type Provider } from './provider';
-import { defineService, defineToken, type InjectionToken } from './token';
+} from './errors.js';
+import { inject } from './inject.js';
+import { createInjector, onServiceDestroy } from './injector.js';
+import { makeEnvironmentProviders, type Provider } from './provider.js';
+import { defineService, defineToken, type InjectionToken } from './token.js';
 
 const Greeting = defineToken<string>('Greeting');
 const Interceptors = defineToken<string[]>('Interceptors', { multi: true });

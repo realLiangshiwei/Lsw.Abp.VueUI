@@ -1,8 +1,8 @@
 import type { ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineToken } from '../di/token';
-import type { CheckAuthenticationStateFn, LoginParams, PipeToLoginFn } from '../models/auth';
-import { BrowserTokenStorage } from '../services/token-storage.service';
+import { inject } from '../di/inject.js';
+import { defineToken } from '../di/token.js';
+import type { CheckAuthenticationStateFn, LoginParams, PipeToLoginFn } from '../models/auth.js';
+import { BrowserTokenStorage } from '../services/token-storage.service.js';
 
 /**
  * What the rest of the framework needs from authentication. `core` never implements it:

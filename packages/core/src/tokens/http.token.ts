@@ -1,5 +1,5 @@
-import { defineToken } from '../di/token';
-import type { HttpInterceptor } from '../models/http';
+import { defineToken } from '../di/token.js';
+import type { HttpInterceptor } from '../models/http.js';
 
 /**
  * How the transport actually sends a request.

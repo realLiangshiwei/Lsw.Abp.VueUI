@@ -1,6 +1,6 @@
 import { inject } from '@lsw-abpvue/core';
 import type { RouteRecordRaw } from 'vue-router';
-import { ABP_ROUTER } from './tokens';
+import { ABP_ROUTER } from './tokens.js';
 
 /**
  * A placeholder that swaps itself for a module's real routes the first time anyone

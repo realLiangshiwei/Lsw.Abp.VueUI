@@ -1,4 +1,4 @@
-import type { Environment } from './environment';
+import type { Environment } from './environment.js';
 
 /** Everything a host can configure at the root, passed through `withOptions()`. */
 export interface AbpRootOptions {

@@ -15,9 +15,9 @@ import { HTTP_FETCH, type FetchLike } from '@lsw-abpvue/core';
 import { describe, expect, it, vi } from 'vitest';
 import { computed, defineComponent, h } from 'vue';
 import { createMemoryHistory, RouterView, type RouteRecordRaw } from 'vue-router';
-import { lazyRoutes } from './lazy-routes';
-import { provideAbpRouter, withRouterHistory } from './provider';
-import { ABP_ROUTER } from './tokens';
+import { lazyRoutes } from './lazy-routes.js';
+import { provideAbpRouter, withRouterHistory } from './provider.js';
+import { ABP_ROUTER } from './tokens.js';
 
 const environment: Environment = {
   apis: { default: { url: 'https://backend' } },

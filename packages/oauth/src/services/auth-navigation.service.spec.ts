@@ -3,7 +3,7 @@ import { createInjector, WindowService } from '@lsw-abpvue/core';
 import { ABP_ROUTER } from '@lsw-abpvue/core/router';
 import { describe, expect, it } from 'vitest';
 import { createMemoryHistory, createRouter } from 'vue-router';
-import { AuthNavigationService } from './auth-navigation.service';
+import { AuthNavigationService } from './auth-navigation.service.js';
 
 const page = { template: '<p>page</p>' };
 

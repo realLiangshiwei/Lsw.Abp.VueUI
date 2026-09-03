@@ -2,13 +2,13 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h } from 'vue';
-import { ConfigStateService } from '../services/config-state.service';
-import { LocalizationService } from '../services/localization.service';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { HTTP_FETCH } from '../tokens/http.token';
-import { provideAbpCore, withOptions } from '../providers/core.provider';
-import type { Environment } from '../models/environment';
-import { createAbpApp } from './vue-bridge';
+import { ConfigStateService } from '../services/config-state.service.js';
+import { LocalizationService } from '../services/localization.service.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { HTTP_FETCH } from '../tokens/http.token.js';
+import { provideAbpCore, withOptions } from '../providers/core.provider.js';
+import type { Environment } from '../models/environment.js';
+import { createAbpApp } from './vue-bridge.js';
 
 const environment: Environment = {
   apis: { default: { url: '' } },

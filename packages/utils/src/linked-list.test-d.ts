@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from 'vitest';
-import { LinkedList, type AddLocator, type ListNode } from './linked-list';
+import { LinkedList, type AddLocator, type ListNode } from './linked-list.js';
 
 describe('LinkedList types', () => {
   const list = new LinkedList<string>();

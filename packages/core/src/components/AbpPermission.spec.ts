@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { ABP_INJECTOR_KEY } from '../di/inject';
-import { createInjector, type Injector } from '../di/injector';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { ConfigStateService } from '../services/config-state.service';
+import { ABP_INJECTOR_KEY } from '../di/inject.js';
+import { createInjector, type Injector } from '../di/injector.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from '../services/config-state.service.js';
 import AbpPermission from './AbpPermission.vue';
 
 function withPolicies(policies: Record<string, boolean>): Injector {

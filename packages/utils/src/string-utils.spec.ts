@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { interpolate } from './string-utils';
+import { interpolate } from './string-utils.js';
 
 describe('interpolate', () => {
   it.each([

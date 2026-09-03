@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import { ConfigStateService } from './config-state.service';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import { ConfigStateService } from './config-state.service.js';
 
 export const FeatureService = defineService('FeatureService', () => {
   const configState = inject(ConfigStateService);

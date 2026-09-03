@@ -22,7 +22,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "vite build && vue-tsc -p tsconfig.build.json && vue-tsc -p tsconfig.build.router.json",
+    "build": "vite build && vue-tsc -p tsconfig.build.json && vue-tsc -p tsconfig.build.router.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
     "typecheck": "vue-tsc -p tsconfig.json",
     "test": "vitest run",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"

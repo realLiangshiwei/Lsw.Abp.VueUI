@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { OutsideInjectionContextError } from './errors';
-import { getCurrentInjector, inject, runInInjectionContext } from './inject';
-import { createInjector } from './injector';
-import { defineService, defineToken } from './token';
+import { OutsideInjectionContextError } from './errors.js';
+import { getCurrentInjector, inject, runInInjectionContext } from './inject.js';
+import { createInjector } from './injector.js';
+import { defineService, defineToken } from './token.js';
 
 const Greeting = defineToken<string>('Greeting');
 

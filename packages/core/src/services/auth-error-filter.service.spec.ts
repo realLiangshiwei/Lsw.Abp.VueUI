@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createInjector } from '../di/injector';
-import { AbpHttpError } from '../models/http';
-import { AuthErrorFilterService } from './auth-error-filter.service';
+import { createInjector } from '../di/injector.js';
+import { AbpHttpError } from '../models/http.js';
+import { AuthErrorFilterService } from './auth-error-filter.service.js';
 
 const unauthorized = (url = '/api/identity/users') =>
   new AbpHttpError({ status: 401, statusText: 'Unauthorized', method: 'GET', url });

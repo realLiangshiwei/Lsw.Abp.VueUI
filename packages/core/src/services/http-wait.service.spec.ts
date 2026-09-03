@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createInjector } from '../di/injector';
-import { HttpWaitService } from './http-wait.service';
+import { createInjector } from '../di/injector.js';
+import { HttpWaitService } from './http-wait.service.js';
 
 const wait = () => createInjector([]).get(HttpWaitService);
 

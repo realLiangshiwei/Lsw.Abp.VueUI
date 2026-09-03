@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
-import { createInjector } from '../di/injector';
-import type { ApplicationConfigurationDto } from '../proxy/models';
-import { ConfigStateService } from './config-state.service';
-import { PermissionService } from './permission.service';
+import { createInjector } from '../di/injector.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from './config-state.service.js';
+import { PermissionService } from './permission.service.js';
 
 function permissions(policies: Record<string, boolean>) {
   const injector = createInjector([]);

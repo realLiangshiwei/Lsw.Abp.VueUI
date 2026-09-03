@@ -1,7 +1,7 @@
 import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
-import type { PageQueryParams, PagedResultDto, RequestStatus, SortOrder } from '../models/list';
-import { useDebounceFn } from './use-debounce-fn';
-import { useLatest } from './use-latest';
+import type { PageQueryParams, PagedResultDto, RequestStatus, SortOrder } from '../models/list.js';
+import { useDebounceFn } from './use-debounce-fn.js';
+import { useLatest } from './use-latest.js';
 
 export interface ListServiceOptions {
   /** Quiet period before a changed filter is sent. */

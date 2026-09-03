@@ -1,6 +1,6 @@
 import { createInjector, MemoryTokenStorage, TokenStorage } from '@lsw-abpvue/core';
 import { describe, expect, it } from 'vitest';
-import { AuthStateService, toTokens } from './auth-state.service';
+import { AuthStateService, toTokens } from './auth-state.service.js';
 
 function state() {
   const injector = createInjector([{ provide: TokenStorage, useExisting: MemoryTokenStorage }]);

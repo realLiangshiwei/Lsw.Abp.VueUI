@@ -1,9 +1,9 @@
 import type { ComputedRef } from 'vue';
-import { inject } from '../di/inject';
-import { defineService, type ServiceOf } from '../di/token';
-import type { Environment } from '../models/environment';
-import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token';
-import { InternalStore } from '../utils/internal-store';
+import { inject } from '../di/inject.js';
+import { defineService, type ServiceOf } from '../di/token.js';
+import type { Environment } from '../models/environment.js';
+import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
+import { InternalStore } from '../utils/internal-store.js';
 
 export const EnvironmentService = defineService('EnvironmentService', () => {
   const store = new InternalStore<Environment>(inject(ABP_ROOT_OPTIONS).environment);
