@@ -1,0 +1,50 @@
+{
+  "name": "@lsw-abpvue/theme-shared",
+  "version": "0.0.0",
+  "description": "The theme contract of the ABP Vue UI: twelve component interfaces, the state services behind them, and no UI library of its own.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
+    "typecheck": "vue-tsc -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "peerDependencies": {
+    "@lsw-abpvue/core": "workspace:^",
+    "@lsw-abpvue/utils": "workspace:^",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/utils": "workspace:*",
+    "vue": "^3.5.41"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realLiangshiwei/Lsw.Abp.VueUI.git",
+    "directory": "packages/theme-shared"
+  },
+  "homepage": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI",
+  "bugs": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI/issues",
+  "keywords": [
+    "abp",
+    "vue",
+    "theme"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
