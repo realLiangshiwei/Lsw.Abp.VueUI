@@ -1,6 +1,14 @@
 import { provideThemeComponents, type AbpOption } from '@lsw-abpvue/theme-shared';
 import { computed, defineComponent, h, useId, type PropType, type VNodeChild } from 'vue';
 import type { ThemeUnderTest } from './harness.js';
+import {
+  PlainConfirmHost,
+  PlainDatePicker,
+  PlainModal,
+  PlainSelect,
+  PlainToastHost,
+  PlainTypeahead,
+} from './plain-overlays.fixture.js';
 
 /**
  * The contracts implemented with nothing but native elements. It exists to keep the
@@ -255,6 +263,12 @@ export const plainTheme: ThemeUnderTest = {
       AbpInput: PlainInput,
       AbpToggle: PlainToggle,
       AbpPagination: PlainPagination,
+      AbpModal: PlainModal,
+      AbpToastHost: PlainToastHost,
+      AbpConfirmHost: PlainConfirmHost,
+      AbpSelect: PlainSelect,
+      AbpDatePicker: PlainDatePicker,
+      AbpTypeahead: PlainTypeahead,
     }),
   ],
 };

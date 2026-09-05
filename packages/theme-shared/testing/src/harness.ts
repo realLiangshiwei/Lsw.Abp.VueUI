@@ -5,6 +5,8 @@ import {
   type ProviderInput,
 } from '@lsw-abpvue/core';
 import { mount, type VueWrapper } from '@vue/test-utils';
+import axe from 'axe-core';
+import { expect } from 'vitest';
 import type { Component } from 'vue';
 
 export interface ThemeUnderTest {
@@ -75,7 +77,61 @@ export function renderContract(
   return { wrapper, injector, emitted: event => recorded.get(event) ?? [] };
 }
 
+/**
+ * Picks an option, whichever pattern the theme chose: a native `select` is set, a
+ * listbox is opened and clicked.
+ * @param theme The theme under test
+ * @param rendered What `renderContract` returned
+ * @param option The option to pick, by label and value
+ */
+export async function chooseOption(
+  theme: ThemeUnderTest,
+  rendered: RenderedContract,
+  option: { label: string; value: string },
+): Promise<void> {
+  const { wrapper } = rendered;
+  const native = wrapper.find('select');
+
+  if (native.exists()) {
+    await native.setValue(option.value);
+    return;
+  }
+
+  await openOverlay(theme, wrapper);
+  const item = wrapper.findAll('[role="option"]').find(entry => entry.text() === option.label);
+  await item?.trigger('click');
+}
+
+/** Opens an overlay control the way its ARIA pattern says it opens. */
+export async function openOverlay(theme: ThemeUnderTest, wrapper: VueWrapper): Promise<void> {
+  if (theme.open) {
+    await theme.open(wrapper);
+    return;
+  }
+
+  await wrapper.find('[aria-expanded]').trigger('click');
+}
+
 /** The accessible name a screen reader would announce, near enough for a test. */
 export function accessibleName(element: Element): string {
   return (element.getAttribute('aria-label') ?? element.textContent ?? '').trim();
+}
+
+/**
+ * Fails on anything axe rates serious or critical. Moderate and minor findings are left
+ * out on purpose: they are worth fixing and not worth a red build on every theme.
+ * @param element The mounted component
+ */
+export async function expectAccessible(element: Element): Promise<void> {
+  const results = await axe.run(element, {
+    // A component is not a page. Landmark and heading rules are about the page it will
+    // be mounted into, and the playground is where they are checked.
+    rules: { region: { enabled: false }, 'page-has-heading-one': { enabled: false } },
+  });
+
+  const serious = results.violations.filter(
+    violation => violation.impact === 'serious' || violation.impact === 'critical',
+  );
+
+  expect(serious.map(violation => `${violation.id}: ${violation.help}`)).toEqual([]);
 }

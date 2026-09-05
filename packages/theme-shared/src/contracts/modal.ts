@@ -6,6 +6,11 @@ export interface AbpModalProps {
   centered?: boolean | undefined;
   /** Lets an unsaved form close without the "are you sure" step. */
   suppressUnsavedChangesWarning?: boolean | undefined;
+  /**
+   * Names the dialog when there is no header to name it. A dialog with neither is one
+   * a screen reader announces as nothing at all.
+   */
+  ariaLabel?: string | undefined;
 }
 
 export interface AbpModalEmits {
