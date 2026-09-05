@@ -29,6 +29,7 @@
       "@lsw-abpvue/core": ["./packages/core/src/index.ts"],
       "@lsw-abpvue/core/router": ["./packages/core/router/src/index.ts"],
       "@lsw-abpvue/oauth": ["./packages/oauth/src/index.ts"],
+      "@lsw-abpvue/theme-basic": ["./packages/theme-basic/src/index.ts"],
       "@lsw-abpvue/theme-shared": ["./packages/theme-shared/src/index.ts"],
       "@lsw-abpvue/utils": ["./packages/utils/src/index.ts"]
     }

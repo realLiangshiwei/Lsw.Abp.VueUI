@@ -14,6 +14,10 @@ cd "$(dirname "$0")/.."
 # CJS half of node16 are not failures but the decision. `--profile esm-only` says so.
 PROFILE=esm-only
 
+# A stylesheet entry point resolves to CSS, which is what a bundler wants and what attw
+# has no opinion worth hearing about.
+EXCLUDE_ENTRYPOINTS="style.css"
+
 status=0
 
 for manifest in packages/*/package.json; do
@@ -23,7 +27,9 @@ for manifest in packages/*/package.json; do
 
   echo "── $name"
   (cd "$package" && "../../node_modules/.bin/publint") || status=1
-  (cd "$package" && "../../node_modules/.bin/attw" --pack . --profile "$PROFILE") || status=1
+  (cd "$package" &&
+    "../../node_modules/.bin/attw" --pack . --profile "$PROFILE" \
+      --exclude-entrypoints "$EXCLUDE_ENTRYPOINTS") || status=1
 done
 
 exit $status

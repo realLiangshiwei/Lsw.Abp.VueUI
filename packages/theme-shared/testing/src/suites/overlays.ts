@@ -2,7 +2,14 @@ import { ConfirmationService, ToasterService } from '@lsw-abpvue/theme-shared';
 import { AbpConfirmHost, AbpModal, AbpToastHost } from '@lsw-abpvue/theme-shared';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h, ref } from 'vue';
-import { renderContract, type ThemeUnderTest } from '../harness.js';
+import {
+  findAllRendered,
+  findRendered,
+  renderContract,
+  settle,
+  type RenderedContract,
+  type ThemeUnderTest,
+} from '../harness.js';
 
 export function testModal(theme: ThemeUnderTest): void {
   /** A trigger and a dialog, which is the only way to test what focus does. */
@@ -33,25 +40,26 @@ export function testModal(theme: ThemeUnderTest): void {
     });
 
   describe('AbpModal', () => {
-    it('renders nothing until it is visible', () => {
-      const { wrapper } = renderContract(theme, AbpModal, { props: { visible: false } });
+    it('renders nothing until it is visible', async () => {
+      const rendered = renderContract(theme, AbpModal, { props: { visible: false } });
+      await settle(rendered);
 
-      expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+      expect(findRendered(rendered, '[role="dialog"]')).toBeNull();
     });
 
-    it('is a modal dialog when it is visible', () => {
-      const { wrapper } = renderContract(theme, AbpModal, {
+    it('is a modal dialog when it is visible', async () => {
+      const rendered = renderContract(theme, AbpModal, {
         props: { visible: true },
         slots: { default: '<p>Are you sure?</p>' },
       });
-      const dialog = wrapper.find('[role="dialog"]');
+      await settle(rendered);
+      const dialog = findRendered(rendered, '[role="dialog"]');
 
-      expect(dialog.exists()).toBe(true);
-      expect(dialog.attributes('aria-modal')).toBe('true');
-      expect(wrapper.text()).toContain('Are you sure?');
+      expect(dialog?.attributes('aria-modal')).toBe('true');
+      expect(dialog?.text()).toContain('Are you sure?');
     });
 
-    it('has an accessible name, from its header or from ariaLabel', () => {
+    it('has an accessible name, from its header or from ariaLabel', async () => {
       const titled = renderContract(theme, AbpModal, {
         props: { visible: true },
         slots: { header: '<h2>Delete user</h2>' },
@@ -60,53 +68,61 @@ export function testModal(theme: ThemeUnderTest): void {
         props: { visible: true, ariaLabel: 'Delete user' },
       });
 
-      for (const { wrapper } of [titled, named]) {
-        const dialog = wrapper.find('[role="dialog"]');
-        const labelledBy = dialog.attributes('aria-labelledby');
+      await settle(titled);
+      await settle(named);
+
+      for (const rendered of [titled, named]) {
+        const dialog = findRendered(rendered, '[role="dialog"]');
+        const labelledBy = dialog?.attributes('aria-labelledby');
         const name = labelledBy
-          ? (wrapper.element.querySelector(`#${labelledBy}`)?.textContent ?? '')
-          : (dialog.attributes('aria-label') ?? '');
+          ? (document.getElementById(labelledBy)?.textContent ?? '')
+          : (dialog?.attributes('aria-label') ?? '');
 
         expect(name).toContain('Delete user');
       }
     });
 
     it('asks to be closed when Escape is pressed', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpModal, {
+      const rendered = renderContract(theme, AbpModal, {
         props: { visible: true },
         events: ['update:visible'],
       });
+      await settle(rendered);
 
-      await wrapper.find('[role="dialog"]').trigger('keydown', { key: 'Escape' });
+      await findRendered(rendered, '[role="dialog"]')?.trigger('keydown', { key: 'Escape' });
 
-      expect(emitted('update:visible').at(-1)).toEqual([false]);
+      expect(rendered.emitted('update:visible').at(-1)).toEqual([false]);
     });
 
     it('stays put on Escape while it is busy', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpModal, {
+      const rendered = renderContract(theme, AbpModal, {
         props: { visible: true, busy: true },
         events: ['update:visible'],
       });
+      await settle(rendered);
 
-      await wrapper.find('[role="dialog"]').trigger('keydown', { key: 'Escape' });
+      await findRendered(rendered, '[role="dialog"]')?.trigger('keydown', { key: 'Escape' });
 
-      expect(emitted('update:visible')).toHaveLength(0);
-      expect(wrapper.find('[role="dialog"]').attributes('aria-busy')).toBe('true');
+      expect(rendered.emitted('update:visible')).toHaveLength(0);
+      expect(findRendered(rendered, '[role="dialog"]')?.attributes('aria-busy')).toBe('true');
     });
 
     it('moves focus into itself and gives it back to whatever opened it', async () => {
-      const { wrapper } = renderContract(theme, page(), {});
+      const rendered = renderContract(theme, page(), {});
+      const { wrapper } = rendered;
       const trigger = wrapper.find('button').element as HTMLElement;
 
       trigger.focus();
       await wrapper.find('button').trigger('click');
-      await wrapper.vm.$nextTick();
+      await settle(rendered);
+      await settle(rendered);
 
-      const dialog = wrapper.find('[role="dialog"]').element;
-      expect(dialog.contains(document.activeElement)).toBe(true);
+      const dialog = findRendered(rendered, '[role="dialog"]');
+      expect(dialog?.element.contains(document.activeElement)).toBe(true);
 
-      await wrapper.find('[role="dialog"]').trigger('keydown', { key: 'Escape' });
-      await wrapper.vm.$nextTick();
+      await dialog?.trigger('keydown', { key: 'Escape' });
+      await settle(rendered);
+      await settle(rendered);
 
       expect(document.activeElement).toBe(trigger);
     });
@@ -120,6 +136,7 @@ export function testModal(theme: ThemeUnderTest): void {
       await wrapper.setProps({ visible: true });
       await wrapper.vm.$nextTick();
       expect(emitted('init')).toHaveLength(1);
+      await wrapper.vm.$nextTick();
       expect(emitted('appear')).toHaveLength(1);
 
       await wrapper.setProps({ visible: false });
@@ -155,23 +172,22 @@ export function testToastHost(theme: ThemeUnderTest): void {
     });
 
     it('announces an error rather than leaving it to be noticed', async () => {
-      const { wrapper, injector } = renderContract(theme, AbpToastHost, {});
+      const rendered = renderContract(theme, AbpToastHost, {});
 
-      injector.get(ToasterService).error('That did not work.');
-      await wrapper.vm.$nextTick();
+      rendered.injector.get(ToasterService).error('That did not work.');
+      await settle(rendered);
 
-      const live = wrapper.find('[role="alert"], [aria-live="assertive"]');
-      expect(live.exists()).toBe(true);
+      expect(findRendered(rendered, '[role="alert"], [aria-live="assertive"]')).not.toBeNull();
     });
 
     it('takes a toast away when it is dismissed', async () => {
-      const { wrapper, injector } = renderContract(theme, AbpToastHost, {});
-      const toaster = injector.get(ToasterService);
+      const rendered = renderContract(theme, AbpToastHost, {});
+      const toaster = rendered.injector.get(ToasterService);
 
       toaster.info('Saved.');
-      await wrapper.vm.$nextTick();
+      await settle(rendered);
 
-      await wrapper.find('button').trigger('click');
+      await findAllRendered(rendered, 'button').at(-1)?.trigger('click');
 
       expect(toaster.toasts.value).toHaveLength(0);
     });
@@ -187,52 +203,54 @@ export function testConfirmHost(theme: ThemeUnderTest): void {
       cancelText: 'No thanks',
       ...options,
     });
-    await rendered.wrapper.vm.$nextTick();
+    await settle(rendered);
 
     return { ...rendered, confirmation, answer };
   };
 
-  const button = (wrapper: ReturnType<typeof renderContract>['wrapper'], text: string) =>
-    wrapper.findAll('button').find(item => item.text() === text);
+  const button = (rendered: RenderedContract, text: string) =>
+    findAllRendered(rendered, 'button').find(item => item.text() === text);
 
   describe('AbpConfirmHost', () => {
-    it('renders nothing while nothing has been asked', () => {
-      const { wrapper } = renderContract(theme, AbpConfirmHost, {});
+    it('renders nothing while nothing has been asked', async () => {
+      const rendered = renderContract(theme, AbpConfirmHost, {});
+      await settle(rendered);
 
-      expect(wrapper.text()).toBe('');
+      expect(findRendered(rendered, '[role="alertdialog"]')).toBeNull();
     });
 
     it('shows the question that was asked', async () => {
-      const { wrapper } = await ask();
+      const rendered = await ask();
+      const dialog = findRendered(rendered, '[role="alertdialog"]');
 
-      expect(wrapper.text()).toContain('Delete this user?');
-      expect(wrapper.text()).toContain('Are you sure?');
-      expect(wrapper.find('[role="alertdialog"]').exists()).toBe(true);
+      expect(dialog?.text()).toContain('Delete this user?');
+      expect(dialog?.text()).toContain('Are you sure?');
+      rendered.confirmation.clear();
     });
 
     it('answers confirm and reject', async () => {
       const confirmed = await ask();
-      await button(confirmed.wrapper, 'Yes please')?.trigger('click');
+      await button(confirmed, 'Yes please')?.trigger('click');
       await expect(confirmed.answer).resolves.toBe('confirm');
 
       const rejected = await ask();
-      await button(rejected.wrapper, 'No thanks')?.trigger('click');
+      await button(rejected, 'No thanks')?.trigger('click');
       await expect(rejected.answer).resolves.toBe('reject');
     });
 
     it('leaves out the cancel button when it was told to', async () => {
-      const { wrapper, confirmation } = await ask({ hideCancelBtn: true });
+      const rendered = await ask({ hideCancelBtn: true });
 
-      expect(button(wrapper, 'No thanks')).toBeUndefined();
-      confirmation.clear();
+      expect(button(rendered, 'No thanks')).toBeUndefined();
+      rendered.confirmation.clear();
     });
 
     it('dismisses on Escape when it is dismissible', async () => {
-      const { wrapper, answer } = await ask();
+      const rendered = await ask();
 
-      await wrapper.find('[role="alertdialog"]').trigger('keydown', { key: 'Escape' });
+      await findRendered(rendered, '[role="alertdialog"]')?.trigger('keydown', { key: 'Escape' });
 
-      await expect(answer).resolves.toBe('dismiss');
+      await expect(rendered.answer).resolves.toBe('dismiss');
     });
   });
 }

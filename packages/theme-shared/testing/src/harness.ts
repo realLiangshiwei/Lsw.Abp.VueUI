@@ -1,13 +1,15 @@
 import {
   ABP_INJECTOR_KEY,
   createInjector,
+  LocalizationService,
   type Injector,
+  type LocalizationParam,
   type ProviderInput,
 } from '@lsw-abpvue/core';
-import { mount, type VueWrapper } from '@vue/test-utils';
+import { DOMWrapper, mount, type VueWrapper } from '@vue/test-utils';
 import axe from 'axe-core';
 import { expect } from 'vitest';
-import type { Component } from 'vue';
+import { nextTick, type Component } from 'vue';
 
 export interface ThemeUnderTest {
   /** Shown in the test names, so a failure says which theme failed. */
@@ -71,10 +73,57 @@ export function renderContract(
     props: { ...options.props, ...handlers },
     slots: options.slots as Record<string, string>,
     attachTo: document.body,
-    global: { provide: { [ABP_INJECTOR_KEY]: injector } },
+    global: {
+      provide: { [ABP_INJECTOR_KEY]: injector },
+      // Not a stand-in: `$t` is a global property every ABP application has, installed
+      // by core's setup hook, and a theme's templates are written expecting it.
+      mocks: {
+        $t: (key: LocalizationParam, ...params: unknown[]) =>
+          injector.get(LocalizationService).t(key, ...params),
+      },
+    },
   });
 
   return { wrapper, injector, emitted: event => recorded.get(event) ?? [] };
+}
+
+/**
+ * Waits for what a theme renders asynchronously. An overlay is usually teleported and
+ * mounted a tick later, so looking for it in the same turn finds nothing.
+ * @param rendered What `renderContract` returned
+ */
+export async function settle(rendered: RenderedContract): Promise<void> {
+  await rendered.wrapper.vm.$nextTick();
+  await rendered.wrapper.vm.$nextTick();
+}
+
+/**
+ * Finds a rendered element whether the theme left it in place or teleported it. An
+ * overlay usually is teleported, and where it ends up in the document is a theme's
+ * business rather than a contract.
+ * @param rendered What `renderContract` returned
+ * @param selector CSS selector, normally a role
+ */
+export function findRendered(
+  rendered: RenderedContract,
+  selector: string,
+): DOMWrapper<Element> | null {
+  const root = rendered.wrapper.element as Partial<Element>;
+  const found = root.querySelector?.(selector) ?? document.querySelector(selector);
+
+  return found ? new DOMWrapper(found) : null;
+}
+
+/** Every match, in the wrapper or in the document. @see findRendered */
+export function findAllRendered(
+  rendered: RenderedContract,
+  selector: string,
+): DOMWrapper<Element>[] {
+  const root = rendered.wrapper.element as Partial<Element>;
+  const inside = [...(root.querySelectorAll?.(selector) ?? [])];
+  const found = inside.length > 0 ? inside : [...document.querySelectorAll(selector)];
+
+  return found.map(element => new DOMWrapper(element));
 }
 
 /**
@@ -89,17 +138,43 @@ export async function chooseOption(
   rendered: RenderedContract,
   option: { label: string; value: string },
 ): Promise<void> {
-  const { wrapper } = rendered;
-  const native = wrapper.find('select');
+  const native = rendered.wrapper.find('select');
 
   if (native.exists()) {
     await native.setValue(option.value);
     return;
   }
 
-  await openOverlay(theme, wrapper);
-  const item = wrapper.findAll('[role="option"]').find(entry => entry.text() === option.label);
-  await item?.trigger('click');
+  await openOverlay(theme, rendered.wrapper);
+  const item = findAllRendered(rendered, '[role="option"]').find(
+    entry => entry.text() === option.label,
+  );
+
+  // A listbox commits on pointer up, but only for an item the pointer has moved onto:
+  // the gesture that opened it must not select whatever is underneath. A plain button
+  // commits on click. Doing all three is what a real pointer does anyway.
+  if (item) {
+    await pointer(item.element, 'pointermove');
+    await pointer(item.element, 'pointerup');
+    await item.trigger('click');
+  }
+  await settle(rendered);
+}
+
+/**
+ * Dispatches a real pointer event. `trigger()` builds a plain `Event` for a type it does
+ * not know, and a widget that listens for pointer events does not react to one.
+ * @param element What the user would be pointing at
+ * @param type `pointerdown`, `pointerup`
+ */
+export async function pointer(element: Element, type: string): Promise<void> {
+  const Constructor =
+    (globalThis as { PointerEvent?: typeof MouseEvent }).PointerEvent ?? MouseEvent;
+
+  // Not cancelable: a widget that guards on `defaultPrevented` would otherwise skip the
+  // gesture, because something else in its own overlay machinery got there first.
+  element.dispatchEvent(new Constructor(type, { bubbles: true, button: 0 }));
+  await nextTick();
 }
 
 /** Opens an overlay control the way its ARIA pattern says it opens. */
@@ -109,7 +184,37 @@ export async function openOverlay(theme: ThemeUnderTest, wrapper: VueWrapper): P
     return;
   }
 
-  await wrapper.find('[aria-expanded]').trigger('click');
+  const trigger = wrapper.find('[aria-expanded]');
+  // A listbox trigger usually opens on pointer down rather than on click.
+  await pointer(trigger.element, 'pointerdown');
+  if (trigger.attributes('aria-expanded') !== 'true') await trigger.trigger('click');
+  await wrapper.vm.$nextTick();
+  await wrapper.vm.$nextTick();
+}
+
+/**
+ * Flips a checkbox, a switch or one option of a radio group, whether the theme built it
+ * out of a native input or out of an element with the matching role.
+ * @param rendered What `renderContract` returned
+ * @param label The option to pick, for a radio group
+ */
+export async function activateToggle(rendered: RenderedContract, label?: string): Promise<void> {
+  const selector =
+    'input[type="checkbox"], input[type="radio"], [role="checkbox"], [role="switch"], [role="radio"]';
+  const controls = findAllRendered(rendered, selector);
+  const control = label
+    ? controls.find(item => item.attributes('value') === label || item.text() === label)
+    : controls[0];
+
+  if (!control) return;
+
+  const element = control.element as HTMLInputElement;
+  if (element.tagName === 'INPUT') {
+    await control.setValue(element.type === 'radio' ? true : !element.checked);
+    return;
+  }
+
+  await control.trigger('click');
 }
 
 /** The accessible name a screen reader would announce, near enough for a test. */

@@ -35,11 +35,14 @@ export function testPagination(theme: ThemeUnderTest): void {
       expect(emitted('update:page').at(-1)).toEqual([2]);
     });
 
-    it('offers one page per page of results and no more', () => {
-      const { wrapper } = paged({ total: 35, pageSize: 10 });
+    it('can reach the first page and the last', () => {
+      const { wrapper } = paged({ page: 0, total: 350, pageSize: 10 });
       const pages = wrapper.findAll('nav button, nav a').filter(item => /^\d+$/.test(item.text()));
 
-      expect(pages.map(item => item.text())).toEqual(['1', '2', '3', '4']);
+      // What sits between them is the theme's business -- how many siblings, where the
+      // ellipsis goes -- but a pager that cannot reach the end is not a pager.
+      expect(pages.at(0)?.text()).toBe('1');
+      expect(pages.at(-1)?.text()).toBe('35');
     });
 
     it('reports a change of page size', async () => {

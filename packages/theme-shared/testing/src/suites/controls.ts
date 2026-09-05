@@ -1,6 +1,13 @@
 import { AbpButton, AbpFormField, AbpInput, AbpSpinner, AbpToggle } from '@lsw-abpvue/theme-shared';
 import { describe, expect, it } from 'vitest';
-import { accessibleName, renderContract, type ThemeUnderTest } from '../harness.js';
+import {
+  accessibleName,
+  activateToggle,
+  findAllRendered,
+  findRendered,
+  renderContract,
+  type ThemeUnderTest,
+} from '../harness.js';
 
 export function testButton(theme: ThemeUnderTest): void {
   describe('AbpButton', () => {
@@ -181,30 +188,30 @@ export function testInput(theme: ThemeUnderTest): void {
 export function testToggle(theme: ThemeUnderTest): void {
   describe('AbpToggle', () => {
     it('checks and unchecks, and reports each change', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpToggle, {
+      const rendered = renderContract(theme, AbpToggle, {
         props: { modelValue: false, label: 'Active' },
         events: ['update:modelValue'],
       });
 
-      await wrapper.find('input').setValue(true);
+      await activateToggle(rendered);
 
-      expect(emitted('update:modelValue').at(-1)).toEqual([true]);
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual([true]);
     });
 
     it('renders a switch that assistive technology can tell from a checkbox', () => {
-      const { wrapper } = renderContract(theme, AbpToggle, {
+      const rendered = renderContract(theme, AbpToggle, {
         props: { variant: 'switch', modelValue: true, label: 'Active' },
       });
-      const control = wrapper.find('input, [role="switch"]');
 
+      const control = findRendered(rendered, '[role="switch"], input[type="checkbox"]');
+      expect(control).not.toBeNull();
       expect(
-        control.attributes('role') === 'switch' || control.attributes('type') === 'checkbox',
+        control?.attributes('role') === 'switch' || control?.attributes('type') === 'checkbox',
       ).toBe(true);
-      expect(wrapper.element.getAttribute('role') === 'switch' || control.exists()).toBe(true);
     });
 
     it('picks one of the options in a radio group', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpToggle, {
+      const rendered = renderContract(theme, AbpToggle, {
         props: {
           variant: 'radio',
           modelValue: 'a',
@@ -216,18 +223,32 @@ export function testToggle(theme: ThemeUnderTest): void {
         events: ['update:modelValue'],
       });
 
-      const second = wrapper.findAll('input[type="radio"]')[1];
-      await second?.setValue(true);
+      const second = findAllRendered(rendered, 'input[type="radio"], [role="radio"]')[1];
+      await (second?.element.tagName === 'INPUT'
+        ? second.setValue(true)
+        : second?.trigger('click'));
 
-      expect(emitted('update:modelValue').at(-1)).toEqual(['b']);
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual(['b']);
     });
 
-    it('cannot be changed when disabled', () => {
-      const { wrapper } = renderContract(theme, AbpToggle, {
+    it('cannot be changed when disabled', async () => {
+      const rendered = renderContract(theme, AbpToggle, {
         props: { modelValue: false, disabled: true, label: 'Active' },
+        events: ['update:modelValue'],
       });
+      const control = findRendered(
+        rendered,
+        'input[type="checkbox"], [role="checkbox"], [role="switch"]',
+      );
 
-      expect(wrapper.find('input').attributes('disabled')).toBeDefined();
+      expect(
+        control?.attributes('disabled') !== undefined ||
+          control?.attributes('aria-disabled') === 'true' ||
+          control?.attributes('data-disabled') !== undefined,
+      ).toBe(true);
+
+      await activateToggle(rendered);
+      expect(rendered.emitted('update:modelValue')).toHaveLength(0);
     });
   });
 }

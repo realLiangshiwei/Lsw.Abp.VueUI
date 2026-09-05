@@ -1,0 +1,70 @@
+{
+  "name": "@lsw-abpvue/theme-basic",
+  "version": "0.0.0",
+  "description": "The default theme of the ABP Vue UI: the twelve contracts on reka-ui, the three layouts, and Bootstrap 5 for looks.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
+    "typecheck": "vue-tsc -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "reka-ui": "^2.10.4"
+  },
+  "peerDependencies": {
+    "@lsw-abpvue/core": "workspace:^",
+    "@lsw-abpvue/theme-shared": "workspace:^",
+    "@lsw-abpvue/utils": "workspace:^",
+    "bootstrap": "^5.3.0",
+    "bootstrap-icons": "^1.13.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "peerDependenciesMeta": {
+    "vue-router": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/theme-shared": "workspace:*",
+    "@lsw-abpvue/utils": "workspace:*",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "vue": "^3.5.41",
+    "vue-router": "^4.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realLiangshiwei/Lsw.Abp.VueUI.git",
+    "directory": "packages/theme-basic"
+  },
+  "homepage": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI",
+  "bugs": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI/issues",
+  "keywords": [
+    "abp",
+    "vue",
+    "theme",
+    "bootstrap"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

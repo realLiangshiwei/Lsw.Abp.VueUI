@@ -8,4 +8,7 @@ packages:
 allowBuilds:
   # esbuild fetches its platform binary in a postinstall; size-limit needs it.
   esbuild: true
+  # vue-demi (under reka-ui) writes its Vue 2 / Vue 3 shim in a postinstall. Without it
+  # the entry point is a placeholder that throws on import.
+  vue-demi: true
   lefthook: false

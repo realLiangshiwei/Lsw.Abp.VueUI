@@ -15,6 +15,8 @@ export interface AbpLibOptions {
   entries: Record<string, string>;
   /** What to keep external beyond the framework and `@lsw-abpvue/*` */
   external?: (string | RegExp)[];
+  /** Base name of the stylesheet a theme emits; `style` makes it `dist/style.css`. */
+  cssFileName?: string;
 }
 
 const FRAMEWORK_EXTERNALS = [/^vue$/, /^vue-router$/, /^@vue\//];
@@ -47,6 +49,7 @@ export function defineAbpLibConfig(options: AbpLibOptions): UserConfig {
         entry,
         formats: ['es'],
         fileName: (_format, entryName) => `${entryName}.js`,
+        ...(options.cssFileName ? { cssFileName: options.cssFileName } : {}),
       },
       rollupOptions: {
         external: [
