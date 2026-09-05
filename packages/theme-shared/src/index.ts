@@ -44,8 +44,16 @@ export type {
   AbpTypeaheadSlots,
 } from './contracts/typeahead.js';
 
+export { ConfirmationStatus } from './models/confirmation.js';
+export type { ConfirmationOptions, ConfirmationRequest } from './models/confirmation.js';
 export { MissingThemeComponentError } from './models/errors.js';
+export type { PageAlert, PageAlertInput } from './models/page-alert.js';
+export type { Toast, ToastId, ToastOptions } from './models/toaster.js';
 
 export { provideThemeComponents } from './providers/theme-components.provider.js';
+
+export { ConfirmationService, useConfirmation } from './services/confirmation.service.js';
+export { PageAlertService, usePageAlert } from './services/page-alert.service.js';
+export { ToasterService, useToaster } from './services/toaster.service.js';
 
 export { THEME_COMPONENTS } from './tokens/theme-components.token.js';
