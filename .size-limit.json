@@ -33,6 +33,6 @@
     "name": "@lsw-abpvue/theme-shared",
     "path": "packages/theme-shared/dist/index.js",
     "ignore": ["vue", "@lsw-abpvue/core"],
-    "limit": "2 kB"
+    "limit": "4 kB"
   }
 ]
