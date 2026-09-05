@@ -7,6 +7,10 @@ import {
 } from '@lsw-abpvue/core';
 import { provideAbpRouter } from '@lsw-abpvue/core/router';
 import { provideAbpOAuth } from '@lsw-abpvue/oauth';
+import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import '@lsw-abpvue/theme-basic/style.css';
 import App from './App.vue';
 import { routes } from './routes';
 import { defaultEnvironment, describeStartupError, startupError } from './startup';
@@ -23,6 +27,8 @@ const { mount } = await createAbpApp(App, {
     // Fills in the AuthService core declares. Which flow runs is read from
     // `environment.oAuthConfig.responseType`, not chosen here.
     provideAbpOAuth(),
+    // The theme: the twelve contract components, the three layouts, the error handlers.
+    provideAbpThemeBasic(),
     // Without one of these an unreachable backend would leave a blank page.
     provideAppInitErrorHandler(error => {
       startupError.value = describeStartupError(error);

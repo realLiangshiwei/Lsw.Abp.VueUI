@@ -1,5 +1,7 @@
 import { LayoutType } from '@lsw-abpvue/core';
 import type { RouteRecordRaw } from 'vue-router';
+import ComponentsPage from './pages/ComponentsPage.vue';
+import FeedbackPage from './pages/FeedbackPage.vue';
 import HomePage from './pages/HomePage.vue';
 import LoginPage from './pages/LoginPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
@@ -13,6 +15,22 @@ export const routes: RouteRecordRaw[] = [
     path: '/',
     component: HomePage,
     meta: { title: 'AbpUi::Welcome', routes: { name: 'AbpUi::Welcome', order: 1 } },
+  },
+  {
+    path: '/theme/components',
+    component: ComponentsPage,
+    meta: {
+      title: 'Components',
+      routes: { name: 'Components', order: 2, iconClass: 'bi bi-ui-checks', group: 'Theme' },
+    },
+  },
+  {
+    path: '/theme/feedback',
+    component: FeedbackPage,
+    meta: {
+      title: 'Feedback',
+      routes: { name: 'Feedback', order: 3, iconClass: 'bi bi-chat-left-text', group: 'Theme' },
+    },
   },
   {
     path: '/identity',

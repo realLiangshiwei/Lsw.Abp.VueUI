@@ -53,7 +53,7 @@ function onOpenChange(open: boolean): void {
     <DialogPortal>
       <DialogOverlay class="abp-modal__backdrop" />
       <DialogContent
-        class="abp-modal"
+        class="modal d-block"
         role="dialog"
         aria-modal="true"
         :aria-busy="busy ? 'true' : undefined"
@@ -100,19 +100,3 @@ function onOpenChange(open: boolean): void {
     </DialogPortal>
   </DialogRoot>
 </template>
-
-<style scoped>
-.abp-modal__backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1050;
-  background-color: var(--abp-scrim);
-}
-
-.abp-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1055;
-  overflow-y: auto;
-}
-</style>

@@ -14,6 +14,8 @@ export interface AbpButtonProps {
     | 'link'
     | undefined;
   size?: AbpSize | undefined;
+  /** The quieter form of the same variant: Bootstrap's outline, Fluent's `outline`. */
+  outline?: boolean | undefined;
   /** Shows a spinner and refuses clicks; `disabled` without saying why. */
   loading?: boolean | undefined;
   disabled?: boolean | undefined;

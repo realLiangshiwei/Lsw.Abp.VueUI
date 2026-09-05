@@ -1,9 +1,23 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
 
 interface PackageManifest {
   name?: string;
-  exports?: Record<string, unknown>;
+  exports?: Record<string, string | Record<string, string>>;
+}
+
+/**
+ * Where a subpath's source lives. `.` is `src/index.ts` and `./config` is
+ * `config/src/index.ts` (design 03 §2, P4); a stylesheet has no entry point of its own,
+ * and its source sits under `src/styles` with the name it is published under.
+ */
+function sourceFor(packageDir: string, subpath: string, target: unknown): string | undefined {
+  if (typeof target === 'string' && target.endsWith('.css')) {
+    return resolve(packageDir, 'src/styles', basename(target));
+  }
+
+  const segment = subpath === '.' ? '' : `${subpath.slice(2)}/`;
+  return resolve(packageDir, `${segment}src/index.ts`);
 }
 
 /**
@@ -36,9 +50,8 @@ export function workspaceAliases(packagesRoot: string): Record<string, string> {
       .sort((a, b) => b.length - a.length);
 
     for (const subpath of subpaths) {
-      const segment = subpath === '.' ? '' : `${subpath.slice(2)}/`;
-      const entry = resolve(packageDir, `${segment}src/index.ts`);
-      if (!existsSync(entry)) continue;
+      const entry = sourceFor(packageDir, subpath, manifest.exports[subpath]);
+      if (!entry || !existsSync(entry)) continue;
 
       aliases[subpath === '.' ? manifest.name : `${manifest.name}/${subpath.slice(2)}`] = entry;
     }

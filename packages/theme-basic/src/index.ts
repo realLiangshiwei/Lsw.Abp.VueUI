@@ -1,4 +1,4 @@
-import './styles/theme.css';
+import './styles/style.css';
 
 export { default as AbpButton } from './components/AbpButton.vue';
 export { default as AbpConfirmHost } from './components/AbpConfirmHost.vue';

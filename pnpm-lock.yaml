@@ -186,9 +186,24 @@ importers:
       '@lsw-abpvue/oauth':
         specifier: workspace:*
         version: link:../packages/oauth
+      '@lsw-abpvue/theme-basic':
+        specifier: workspace:*
+        version: link:../packages/theme-basic
+      '@lsw-abpvue/theme-shared':
+        specifier: workspace:*
+        version: link:../packages/theme-shared
       '@lsw-abpvue/utils':
         specifier: workspace:*
         version: link:../packages/utils
+      bootstrap:
+        specifier: ^5.3.8
+        version: 5.3.8(@popperjs/core@2.11.8)
+      bootstrap-icons:
+        specifier: ^1.13.1
+        version: 1.13.1
+      reka-ui:
+        specifier: ^2.10.4
+        version: 2.10.4(vue@3.5.41(typescript@6.0.3))
       vue:
         specifier: ^3.5.41
         version: 3.5.41(typescript@6.0.3)

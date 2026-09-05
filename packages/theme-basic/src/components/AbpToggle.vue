@@ -1,16 +1,6 @@
 <script setup lang="ts">
 import type { AbpToggleEmits, AbpToggleProps } from '@lsw-abpvue/theme-shared';
-import {
-  CheckboxIndicator,
-  CheckboxRoot,
-  Label,
-  RadioGroupItem,
-  RadioGroupRoot,
-  SwitchRoot,
-  SwitchThumb,
-} from 'reka-ui';
-import { computed, useId } from 'vue';
-import { defined } from '../utils/defined.js';
+import { computed, useId, useTemplateRef, watchEffect } from 'vue';
 
 const props = withDefaults(defineProps<AbpToggleProps>(), { variant: 'checkbox' });
 
@@ -18,73 +8,62 @@ const emit = defineEmits<AbpToggleEmits>();
 
 const generated = useId();
 const controlId = computed(() => props.id ?? generated);
-const checked = computed(() => (props.indeterminate ? 'indeterminate' : props.modelValue === true));
 
-const selectedKey = computed(() =>
-  props.modelValue === undefined || props.modelValue === null
-    ? undefined
-    : String(props.modelValue),
-);
+/**
+ * Native inputs rather than reka-ui. The rule is to outsource behaviour we would get
+ * wrong -- focus traps, popover placement, roving tabindex -- and a checkbox has none of
+ * that: the native one is already the accessible primitive, and it is the one Bootstrap
+ * knows how to draw.
+ */
+function onCheckedChange(event: Event): void {
+  emit('update:modelValue', (event.target as HTMLInputElement).checked);
+}
 
-const byKey = computed(
-  () => new Map((props.options ?? []).map(option => [String(option.value), option.value])),
-);
+// Neither checked nor unchecked is a property, not an attribute, so it cannot be bound.
+const control = useTemplateRef<HTMLInputElement>('control');
+watchEffect(() => {
+  if (control.value) control.value.indeterminate = props.indeterminate === true;
+});
 </script>
 
 <template>
-  <div v-if="variant === 'radio'" class="abp-toggle">
-    <RadioGroupRoot
-      v-bind="defined({ modelValue: selectedKey, name })"
-      :disabled="Boolean(disabled || readonly)"
-      :aria-label="ariaLabel ?? label"
-      :aria-describedby="ariaDescribedby"
-      @update:model-value="emit('update:modelValue', byKey.get(String($event)) ?? null)"
-    >
-      <div v-for="option in options" :key="String(option.value)" class="form-check">
-        <RadioGroupItem
-          :id="`${controlId}-${option.value}`"
-          class="form-check-input"
-          :value="String(option.value)"
-          :disabled="Boolean(option.disabled)"
-        />
-        <Label class="form-check-label" :for="`${controlId}-${option.value}`">
-          {{ option.label }}
-        </Label>
-      </div>
-    </RadioGroupRoot>
-  </div>
+  <fieldset v-if="variant === 'radio'" class="border-0 p-0 m-0">
+    <legend v-if="label" class="form-label fs-6">{{ label }}</legend>
+
+    <div v-for="option in options" :key="String(option.value)" class="form-check">
+      <input
+        :id="`${controlId}-${option.value}`"
+        class="form-check-input"
+        type="radio"
+        :name="name ?? controlId"
+        :value="String(option.value)"
+        :checked="modelValue === option.value"
+        :disabled="disabled || readonly || option.disabled"
+        :aria-invalid="invalid ? 'true' : undefined"
+        :aria-describedby="ariaDescribedby"
+        @change="emit('update:modelValue', option.value)"
+      />
+      <label class="form-check-label" :for="`${controlId}-${option.value}`">
+        {{ option.label }}
+      </label>
+    </div>
+  </fieldset>
 
   <div v-else class="form-check" :class="variant === 'switch' ? 'form-switch' : null">
-    <SwitchRoot
-      v-if="variant === 'switch'"
+    <input
       :id="controlId"
+      ref="control"
       class="form-check-input"
-      v-bind="defined({ name })"
-      :model-value="modelValue === true"
-      :disabled="Boolean(disabled || readonly)"
+      type="checkbox"
+      :role="variant === 'switch' ? 'switch' : undefined"
+      :name="name"
+      :checked="modelValue === true"
+      :disabled="disabled || readonly"
       :aria-invalid="invalid ? 'true' : undefined"
       :aria-describedby="ariaDescribedby"
       :aria-label="ariaLabel"
-      @update:model-value="emit('update:modelValue', $event)"
-    >
-      <SwitchThumb />
-    </SwitchRoot>
-
-    <CheckboxRoot
-      v-else
-      :id="controlId"
-      class="form-check-input"
-      v-bind="defined({ name })"
-      :model-value="checked"
-      :disabled="Boolean(disabled || readonly)"
-      :aria-invalid="invalid ? 'true' : undefined"
-      :aria-describedby="ariaDescribedby"
-      :aria-label="ariaLabel"
-      @update:model-value="emit('update:modelValue', $event === true)"
-    >
-      <CheckboxIndicator />
-    </CheckboxRoot>
-
-    <Label v-if="label" class="form-check-label" :for="controlId">{{ label }}</Label>
+      @change="onCheckedChange"
+    />
+    <label v-if="label" class="form-check-label" :for="controlId">{{ label }}</label>
   </div>
 </template>

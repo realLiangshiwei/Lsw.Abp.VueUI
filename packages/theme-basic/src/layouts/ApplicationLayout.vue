@@ -77,7 +77,9 @@ function toggleSidebar(): void {
     />
 
     <div class="abp-shell__main">
-      <nav class="navbar bg-body-tertiary px-3">
+      <!-- `navbar-expand` keeps `navbar-nav` a row: without it Bootstrap stacks it and
+           the navbar wraps the whole right-hand side onto a second line. -->
+      <nav class="navbar navbar-expand flex-nowrap bg-body-tertiary px-3">
         <button
           type="button"
           class="btn btn-link"
@@ -114,6 +116,11 @@ function toggleSidebar(): void {
 
 .abp-shell--collapsed {
   grid-template-columns: 0 1fr;
+}
+
+/* Zero width still leaves the padding and the border showing as a sliver. */
+.abp-shell--collapsed .abp-shell__sidebar {
+  display: none;
 }
 
 .abp-shell__sidebar {

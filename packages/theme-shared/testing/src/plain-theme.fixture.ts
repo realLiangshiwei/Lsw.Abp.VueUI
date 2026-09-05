@@ -24,6 +24,7 @@ const PlainButton = defineComponent({
     loading: Boolean,
     disabled: Boolean,
     block: Boolean,
+    outline: Boolean,
     iconClass: { type: String, default: undefined },
     ariaLabel: { type: String, default: undefined },
     variant: { type: String, default: undefined },

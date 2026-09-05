@@ -12,7 +12,7 @@ const emit = defineEmits<AbpButtonEmits>();
 
 const classes = computed(() => [
   'btn',
-  `btn-${props.variant}`,
+  props.outline ? `btn-outline-${props.variant}` : `btn-${props.variant}`,
   props.size === 'md' ? null : `btn-${props.size}`,
   props.block ? 'w-100' : null,
 ]);
