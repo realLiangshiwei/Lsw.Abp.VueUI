@@ -70,7 +70,7 @@ function onlyAllow(allowed) {
 }
 
 /** Available to every package's tests, on top of whatever its layer allows. */
-const TEST_TOOLS = ['vitest', '@vue/test-utils', 'happy-dom'];
+const TEST_TOOLS = ['vitest', '@vue/test-utils', 'happy-dom', 'axe-core'];
 
 function layerRule(pkg, allowed, files) {
   return {
@@ -144,6 +144,14 @@ export default tseslint.config(
 
   ...layerRules,
 
+  // The `testing` entry point of theme-shared is the theme contract suite, so it imports
+  // the test tools the way a spec does. That is what it is (design 06 §6).
+  layerRule(
+    'theme-shared/testing',
+    [...ALLOWED_IMPORTS['theme-shared'], '@lsw-abpvue/theme-shared', ...TEST_TOOLS],
+    ['packages/theme-shared/testing/**/*.{ts,mts,vue}'],
+  ),
+
   {
     // SSR discipline: the platform services are the one place allowed to reach for the
     // browser, so `core` stays importable from a server renderer (design 01, T0.4).
@@ -171,11 +179,13 @@ export default tseslint.config(
   },
 
   {
-    files: ['**/*.spec.ts', '**/*.test-d.ts'],
+    files: ['**/*.spec.ts', '**/*.test-d.ts', '**/*.fixture.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       // A component test needs a handful of throwaway components around the one thing it
-      // is about; splitting them across files would hide what is being tested.
+      // is about; splitting them across files would hide what is being tested. The same
+      // goes for the reference theme, which is one file precisely so it can be read as
+      // one answer to "what does a theme have to implement".
       'vue/one-component-per-file': 'off',
     },
   },

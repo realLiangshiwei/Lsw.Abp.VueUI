@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "rootDir": "testing/src",
+    // The testing entry reaches the main one by package name, so the two declaration
+    // programs stay separate and the runtime keeps one instance (design 03 §2).
+    "paths": {},
+    "outDir": "dist/testing"
+  },
+  "include": ["testing/src/**/*.ts", "testing/src/**/*.vue"],
+  "exclude": ["testing/src/**/*.spec.ts", "testing/src/**/*.fixture.ts"]
+}
