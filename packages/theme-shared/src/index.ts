@@ -54,8 +54,12 @@ export type {
 export { DEFAULT_ERROR_MESSAGES, errorMessageFor } from './defaults/error-messages.js';
 export type { ErrorMessage } from './defaults/error-messages.js';
 
+export { AbpFormatErrorHandler } from './handlers/abp-format-error.handler.js';
+export { AuthenticationErrorHandler } from './handlers/authentication-error.handler.js';
 export { StatusCodeErrorHandler } from './handlers/status-code-error.handler.js';
+export { TenantResolveErrorHandler } from './handlers/tenant-resolve-error.handler.js';
 export { UnknownStatusCodeErrorHandler } from './handlers/unknown-status-code-error.handler.js';
+export { ValidationErrorHandler } from './handlers/validation-error.handler.js';
 
 export { ConfirmationStatus } from './models/confirmation.js';
 export type { ConfirmationOptions, ConfirmationRequest } from './models/confirmation.js';
@@ -77,6 +81,11 @@ export { provideThemeComponents } from './providers/theme-components.provider.js
 export { ConfirmationService, useConfirmation } from './services/confirmation.service.js';
 export { ErrorPageService, useErrorPage } from './services/error-page.service.js';
 export { HttpErrorHandlerService } from './services/http-error-handler.service.js';
+export {
+  useServerValidation,
+  ValidationErrorService,
+} from './services/validation-error.service.js';
+export type { ServerErrorTarget } from './services/validation-error.service.js';
 export { PageAlertService, usePageAlert } from './services/page-alert.service.js';
 export { ToasterService, useToaster } from './services/toaster.service.js';
 

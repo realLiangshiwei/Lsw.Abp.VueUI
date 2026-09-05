@@ -4,8 +4,12 @@ import {
   provideAppInitializer,
   type EnvironmentProviders,
 } from '@lsw-abpvue/core';
+import { AbpFormatErrorHandler } from '../handlers/abp-format-error.handler.js';
+import { AuthenticationErrorHandler } from '../handlers/authentication-error.handler.js';
 import { StatusCodeErrorHandler } from '../handlers/status-code-error.handler.js';
+import { TenantResolveErrorHandler } from '../handlers/tenant-resolve-error.handler.js';
 import { UnknownStatusCodeErrorHandler } from '../handlers/unknown-status-code-error.handler.js';
+import { ValidationErrorHandler } from '../handlers/validation-error.handler.js';
 import { HttpErrorHandlerService } from '../services/http-error-handler.service.js';
 import { provideErrorHandler } from './error-handler.provider.js';
 
@@ -16,6 +20,10 @@ import { provideErrorHandler } from './error-handler.provider.js';
  */
 export function provideAbpThemeShared(): EnvironmentProviders {
   return makeEnvironmentProviders([
+    provideErrorHandler(AuthenticationErrorHandler),
+    provideErrorHandler(TenantResolveErrorHandler),
+    provideErrorHandler(ValidationErrorHandler),
+    provideErrorHandler(AbpFormatErrorHandler),
     provideErrorHandler(StatusCodeErrorHandler),
     provideErrorHandler(UnknownStatusCodeErrorHandler),
 
