@@ -123,6 +123,7 @@ export const HttpClient = defineService('HttpClient', () => {
         method,
         url,
         error: parseEnvelope(text),
+        headers: response.headers,
         raw: text,
       });
     }
@@ -137,6 +138,7 @@ export const HttpClient = defineService('HttpClient', () => {
         method,
         url,
         error: { message: 'The response body could not be read as JSON.' },
+        headers: response.headers,
         raw: cause,
       });
     }

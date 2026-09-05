@@ -66,6 +66,7 @@ export interface AbpHttpErrorInit {
   method: string;
   url: string;
   error?: AbpErrorEnvelope | undefined;
+  headers?: Headers | undefined;
   raw?: unknown;
 }
 
@@ -79,6 +80,12 @@ export class AbpHttpError extends Error {
   readonly method: string;
   readonly url: string;
   readonly error: AbpErrorEnvelope | undefined;
+  /**
+   * The response headers, absent for a request that never landed. ABP says several
+   * things there and nowhere else: `_AbpErrorFormat` marks its own error envelope and
+   * `Abp-Tenant-Resolve-Error` says the tenant in the request could not be resolved.
+   */
+  readonly headers: Headers | undefined;
   /** The unparsed response body, or the transport failure for a request that never landed. */
   readonly raw: unknown;
 
@@ -93,6 +100,7 @@ export class AbpHttpError extends Error {
     this.method = init.method;
     this.url = init.url;
     this.error = init.error;
+    this.headers = init.headers;
     this.raw = init.raw;
   }
 

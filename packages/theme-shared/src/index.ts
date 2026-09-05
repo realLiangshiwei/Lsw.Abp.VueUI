@@ -51,8 +51,15 @@ export type {
   AbpFormFieldDefinition,
   AbpFormGroup,
 } from './models/form.js';
+export { DEFAULT_ERROR_MESSAGES, errorMessageFor } from './defaults/error-messages.js';
+export type { ErrorMessage } from './defaults/error-messages.js';
+
+export { StatusCodeErrorHandler } from './handlers/status-code-error.handler.js';
+export { UnknownStatusCodeErrorHandler } from './handlers/unknown-status-code-error.handler.js';
+
 export { ConfirmationStatus } from './models/confirmation.js';
 export type { ConfirmationOptions, ConfirmationRequest } from './models/confirmation.js';
+export type { AbpErrorHandler, AbpErrorPage } from './models/error-handler.js';
 export { MissingThemeComponentError } from './models/errors.js';
 export type { PageAlert, PageAlertInput } from './models/page-alert.js';
 export type { Toast, ToastId, ToastOptions } from './models/toaster.js';
@@ -63,12 +70,17 @@ export type {
   AbpValidatorContext,
 } from './models/validation.js';
 
+export { provideErrorHandler } from './providers/error-handler.provider.js';
+export { provideAbpThemeShared } from './providers/theme-shared.provider.js';
 export { provideThemeComponents } from './providers/theme-components.provider.js';
 
 export { ConfirmationService, useConfirmation } from './services/confirmation.service.js';
+export { ErrorPageService, useErrorPage } from './services/error-page.service.js';
+export { HttpErrorHandlerService } from './services/http-error-handler.service.js';
 export { PageAlertService, usePageAlert } from './services/page-alert.service.js';
 export { ToasterService, useToaster } from './services/toaster.service.js';
 
+export { ABP_ERROR_HANDLERS } from './tokens/error-handlers.token.js';
 export { THEME_COMPONENTS } from './tokens/theme-components.token.js';
 
 export { useAbpForm } from './utils/use-abp-form.js';
