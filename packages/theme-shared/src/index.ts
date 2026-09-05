@@ -53,6 +53,7 @@ export type {
 } from './models/form.js';
 export { DEFAULT_ERROR_MESSAGES, errorMessageFor } from './defaults/error-messages.js';
 export type { ErrorMessage } from './defaults/error-messages.js';
+export { UserMenuItems } from './defaults/user-menu-items.js';
 
 export { AbpFormatErrorHandler } from './handlers/abp-format-error.handler.js';
 export { AuthenticationErrorHandler } from './handlers/authentication-error.handler.js';
@@ -65,6 +66,7 @@ export { ConfirmationStatus } from './models/confirmation.js';
 export type { ConfirmationOptions, ConfirmationRequest } from './models/confirmation.js';
 export type { AbpErrorHandler, AbpErrorPage } from './models/error-handler.js';
 export { MissingThemeComponentError } from './models/errors.js';
+export type { NavItem, NavItemBadge } from './models/nav-item.js';
 export type { PageAlert, PageAlertInput } from './models/page-alert.js';
 export type { Toast, ToastId, ToastOptions } from './models/toaster.js';
 export type {
@@ -76,10 +78,17 @@ export type {
 
 export { provideErrorHandler } from './providers/error-handler.provider.js';
 export { provideAbpThemeShared } from './providers/theme-shared.provider.js';
+export { provideUserMenuItems } from './providers/user-menu.provider.js';
 export { provideThemeComponents } from './providers/theme-components.provider.js';
 
 export { ConfirmationService, useConfirmation } from './services/confirmation.service.js';
 export { ErrorPageService, useErrorPage } from './services/error-page.service.js';
+export {
+  NavItemsService,
+  useNavItems,
+  UserMenuService,
+  useUserMenu,
+} from './services/nav-items.service.js';
 export { HttpErrorHandlerService } from './services/http-error-handler.service.js';
 export {
   useServerValidation,

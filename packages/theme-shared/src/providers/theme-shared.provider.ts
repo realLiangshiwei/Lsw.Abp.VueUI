@@ -12,6 +12,7 @@ import { UnknownStatusCodeErrorHandler } from '../handlers/unknown-status-code-e
 import { ValidationErrorHandler } from '../handlers/validation-error.handler.js';
 import { HttpErrorHandlerService } from '../services/http-error-handler.service.js';
 import { provideErrorHandler } from './error-handler.provider.js';
+import { provideUserMenuItems } from './user-menu.provider.js';
 
 /**
  * What the contract layer needs at application scope: the default error handlers, and
@@ -26,6 +27,8 @@ export function provideAbpThemeShared(): EnvironmentProviders {
     provideErrorHandler(AbpFormatErrorHandler),
     provideErrorHandler(StatusCodeErrorHandler),
     provideErrorHandler(UnknownStatusCodeErrorHandler),
+
+    provideUserMenuItems(),
 
     provideAppInitializer(() => {
       inject(HttpErrorHandlerService).init();
