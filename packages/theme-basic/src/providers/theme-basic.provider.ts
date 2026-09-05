@@ -1,5 +1,6 @@
 import { makeEnvironmentProviders, type EnvironmentProviders } from '@lsw-abpvue/core';
 import { provideAbpThemeShared } from '@lsw-abpvue/theme-shared';
+import { provideThemeBasicLayouts } from './layout.provider.js';
 import { provideThemeBasicComponents } from './theme-components.provider.js';
 
 /**
@@ -7,5 +8,9 @@ import { provideThemeBasicComponents } from './theme-components.provider.js';
  * application scope. An application provides this rather than `provideAbpThemeShared()`.
  */
 export function provideAbpThemeBasic(): EnvironmentProviders {
-  return makeEnvironmentProviders([provideAbpThemeShared(), provideThemeBasicComponents()]);
+  return makeEnvironmentProviders([
+    provideAbpThemeShared(),
+    provideThemeBasicComponents(),
+    provideThemeBasicLayouts(),
+  ]);
 }
