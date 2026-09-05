@@ -72,7 +72,7 @@ const label = (node: TreeNode<AbpRoute>): string => localization.t(node.name);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--abp-menu-group-fg);
 }
 
 .nav-link {

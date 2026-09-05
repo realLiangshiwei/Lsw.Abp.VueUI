@@ -72,8 +72,8 @@ const mine = computed(() =>
 <style scoped>
 .abp-toasts {
   position: fixed;
-  top: 1rem;
-  inset-inline-end: 1rem;
+  top: var(--abp-toast-offset);
+  inset-inline-end: var(--abp-toast-offset);
   z-index: 1090;
 }
 </style>

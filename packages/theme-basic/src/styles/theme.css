@@ -1,0 +1,40 @@
+/*
+ * Everything themable is a custom property. Component styles read these and never a
+ * colour of their own, which is what lets dark mode and a host's branding both be a
+ * matter of redefining a handful of values.
+ *
+ * Dark mode rides on Bootstrap's `data-bs-theme`, set by `ThemeModeService`, so every
+ * Bootstrap component follows without a stylesheet of ours in between.
+ */
+:root {
+  --abp-sidebar-width: 16rem;
+  --abp-sidebar-bg: var(--bs-tertiary-bg);
+  --abp-sidebar-fg: var(--bs-body-color);
+  --abp-sidebar-border: var(--bs-border-color);
+  --abp-navbar-bg: var(--bs-tertiary-bg);
+  --abp-loader-bar-color: var(--bs-primary);
+  --abp-toast-offset: 1rem;
+  --abp-content-padding: 1rem;
+  --abp-menu-group-fg: var(--bs-secondary-color);
+  --abp-overlay-bg: var(--bs-body-bg);
+  --abp-scrim: rgb(0 0 0 / 50%);
+}
+
+/*
+ * Only what does not follow from Bootstrap's own dark palette. The sidebar is one shade
+ * away from the body in both modes, and `--bs-tertiary-bg` already moves with the theme,
+ * so most of the table above needs no dark twin at all.
+ */
+[data-bs-theme='dark'] {
+  --abp-sidebar-bg: var(--bs-body-bg);
+  --abp-sidebar-border: var(--bs-border-color-translucent);
+}
+
+/*
+ * Right to left is `dir` on the document, set from the language's own `isRightToLeft`.
+ * Layout uses logical properties (`inset-inline-start`, `margin-inline`), so this is the
+ * only place direction is named at all.
+ */
+[dir='rtl'] .abp-toasts {
+  inset-inline-end: var(--abp-toast-offset);
+}

@@ -1,6 +1,13 @@
-import { makeEnvironmentProviders, type EnvironmentProviders } from '@lsw-abpvue/core';
+import {
+  inject,
+  makeEnvironmentProviders,
+  provideAppInitializer,
+  type EnvironmentProviders,
+} from '@lsw-abpvue/core';
 import { provideAbpThemeShared } from '@lsw-abpvue/theme-shared';
 import { provideThemeBasicLayouts } from './layout.provider.js';
+import { DirectionService } from '../services/direction.service.js';
+import { ThemeModeService } from '../services/theme-mode.service.js';
 import { provideThemeBasicComponents } from './theme-components.provider.js';
 
 /**
@@ -12,5 +19,10 @@ export function provideAbpThemeBasic(): EnvironmentProviders {
     provideAbpThemeShared(),
     provideThemeBasicComponents(),
     provideThemeBasicLayouts(),
+
+    provideAppInitializer(() => {
+      inject(ThemeModeService).init();
+      inject(DirectionService).init();
+    }),
   ]);
 }

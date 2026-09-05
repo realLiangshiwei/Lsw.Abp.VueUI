@@ -11,5 +11,7 @@ export const ThemeBasicComponents = {
   NavItems: 'Theme.NavItemsComponent',
   CurrentUser: 'Theme.CurrentUserComponent',
   Languages: 'Theme.LanguagesComponent',
+  /** No counterpart in the Angular UI, which has no dark mode to switch. */
+  ThemeToggle: 'Theme.ThemeToggleComponent',
 } as const;
 export type ThemeBasicComponents = (typeof ThemeBasicComponents)[keyof typeof ThemeBasicComponents];

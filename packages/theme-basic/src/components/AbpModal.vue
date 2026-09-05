@@ -106,7 +106,7 @@ function onOpenChange(open: boolean): void {
   position: fixed;
   inset: 0;
   z-index: 1050;
-  background-color: rgb(0 0 0 / 50%);
+  background-color: var(--abp-scrim);
 }
 
 .abp-modal {

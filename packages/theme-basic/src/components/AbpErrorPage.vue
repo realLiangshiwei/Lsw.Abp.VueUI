@@ -35,6 +35,6 @@ const localization = useLocalization();
   position: fixed;
   inset: 0;
   z-index: 1070;
-  background: var(--bs-body-bg, #fff);
+  background: var(--abp-overlay-bg);
 }
 </style>

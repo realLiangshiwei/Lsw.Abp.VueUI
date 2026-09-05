@@ -108,7 +108,7 @@ function toggleSidebar(): void {
 <style scoped>
 .abp-shell {
   display: grid;
-  grid-template-columns: var(--abp-sidebar-width, 16rem) 1fr;
+  grid-template-columns: var(--abp-sidebar-width) 1fr;
   min-height: 100vh;
 }
 
@@ -119,8 +119,8 @@ function toggleSidebar(): void {
 .abp-shell__sidebar {
   overflow: hidden auto;
   padding: 1rem;
-  background: var(--abp-sidebar-bg, var(--bs-tertiary-bg, #f8f9fa));
-  border-inline-end: 1px solid var(--bs-border-color, #dee2e6);
+  background: var(--abp-sidebar-bg);
+  border-inline-end: 1px solid var(--abp-sidebar-border);
 }
 
 .abp-shell__sidebar--drawer {
@@ -128,7 +128,7 @@ function toggleSidebar(): void {
   inset-block: 0;
   inset-inline-start: 0;
   z-index: 1045;
-  width: var(--abp-sidebar-width, 16rem);
+  width: var(--abp-sidebar-width);
   transform: translateX(-100%);
   transition: transform 0.2s ease;
 }
@@ -142,7 +142,7 @@ function toggleSidebar(): void {
   inset: 0;
   z-index: 1040;
   border: 0;
-  background: rgb(0 0 0 / 50%);
+  background: var(--abp-scrim);
 }
 
 .abp-shell__main {

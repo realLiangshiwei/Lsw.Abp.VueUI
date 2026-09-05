@@ -11,6 +11,7 @@ import AbpLanguages from '../components/nav/AbpLanguages.vue';
 import AbpLogo from '../components/nav/AbpLogo.vue';
 import AbpNavItems from '../components/nav/AbpNavItems.vue';
 import AbpRoutes from '../components/nav/AbpRoutes.vue';
+import AbpThemeToggle from '../components/nav/AbpThemeToggle.vue';
 import { ThemeBasicComponents } from '../enums/components.js';
 import AccountLayout from '../layouts/AccountLayout.vue';
 import ApplicationLayout from '../layouts/ApplicationLayout.vue';
@@ -42,6 +43,7 @@ export function provideThemeBasicLayouts(): EnvironmentProviders {
       // The two navbar entries that are components. The behavioural ones -- the profile
       // link and logging out -- come from `theme-shared`, where every theme gets them.
       inject(NavItemsService).add([
+        { name: ThemeBasicComponents.ThemeToggle, order: 50, component: AbpThemeToggle },
         { name: ThemeBasicComponents.Languages, order: 100, component: AbpLanguages },
         { name: ThemeBasicComponents.CurrentUser, order: 200, component: AbpCurrentUser },
       ]);

@@ -23,7 +23,7 @@ const httpWait = useHttpWait();
   z-index: 1100;
   height: 3px;
   width: 100%;
-  background: var(--abp-loader-bar-color, var(--bs-primary, #0d6efd));
+  background: var(--abp-loader-bar-color);
   animation: abp-loader-bar 1s ease-in-out infinite;
   transform-origin: 0 50%;
 }
