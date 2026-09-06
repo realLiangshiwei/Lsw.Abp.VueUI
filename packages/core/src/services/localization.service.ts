@@ -146,6 +146,38 @@ export const LocalizationService = defineService('LocalizationService', () => {
       return () => void listeners.delete(callback);
     },
 
+    /**
+     * The first of the candidate keys that has a text, in the `Resource::Key` form
+     * something else can localize later. ABP's object extensions name their display
+     * texts by convention rather than by key, and this is how the convention is
+     * resolved once, at assembly time, into a key that survives a language change.
+     *
+     * @param resourceNames Resources to look in, in order; the default resource is
+     * looked in last
+     * @param keys Candidate keys, in order
+     * @param fallback Returned when none of them has a text
+     * @see `createLocalizationPipeKeyGenerator` in `@abp/ng.core`
+     */
+    findKey: (
+      resourceNames: readonly string[],
+      keys: readonly string[],
+      fallback?: string,
+    ): string | undefined => {
+      const resources = [...resourceNames, localization.value.defaultResourceName ?? ''].filter(
+        Boolean,
+      );
+
+      for (const resourceName of resources) {
+        for (const key of keys) {
+          // `_` means the key is already the text, the way the localizer reads it.
+          if (resourceName === '_') return key;
+          if (key && texts.value[resourceName]?.[key]) return `${resourceName}::${key}`;
+        }
+      }
+
+      return fallback;
+    },
+
     /** Adds texts at runtime; they win over the backend's for the same key. */
     addLocalization,
 

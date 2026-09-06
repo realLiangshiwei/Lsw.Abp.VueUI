@@ -73,4 +73,10 @@ export {
 } from './tokens/extensions.token.js';
 
 export { mergeWithDefaultActions, mergeWithDefaultProps } from './utils/merge.js';
+export {
+  getObjectExtensionEntities,
+  mapEntitiesToContributors,
+} from './utils/object-extensions.js';
+export type { ObjectExtensionContributors } from './utils/object-extensions.js';
+export { getValidatorsFromProperty } from './utils/object-extension-validators.js';
 export type { ActionsFactoryOf, PropsFactoryOf } from './utils/merge.js';

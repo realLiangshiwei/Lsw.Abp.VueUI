@@ -179,9 +179,28 @@ export interface ExtensionPropertyDto {
   displayName: LocalizableStringDto;
   api: ExtensionPropertyApiDto;
   ui: ExtensionPropertyUiDto;
+  policy?: ExtensionPropertyPolicyDto;
   attributes: ExtensionPropertyAttributeDto[];
   configuration: Record<string, unknown>;
   defaultValue: unknown;
+  /** Help text under a form field. Declared by ABP's UI model, not sent by the backend. */
+  formText?: string;
+}
+
+export interface ExtensionPropertyPolicyDto {
+  globalFeatures: ExtensionPropertyFeaturePolicyDto;
+  features: ExtensionPropertyFeaturePolicyDto;
+  permissions: ExtensionPropertyPermissionPolicyDto;
+}
+
+export interface ExtensionPropertyFeaturePolicyDto {
+  features?: string[];
+  requiresAll: boolean;
+}
+
+export interface ExtensionPropertyPermissionPolicyDto {
+  permissionNames?: string[];
+  requiresAll: boolean;
 }
 
 export interface ExtensionPropertyApiDto {
@@ -191,10 +210,11 @@ export interface ExtensionPropertyApiDto {
 }
 
 export interface ExtensionPropertyUiDto {
-  onTable: { isVisible: boolean };
+  /** `isSortable` is declared by ABP's UI model; the backend does not send it yet. */
+  onTable: { isVisible: boolean; isSortable?: boolean };
   onCreateForm: { isVisible: boolean };
   onEditForm: { isVisible: boolean };
-  lookup: ExtensionPropertyUiLookupDto;
+  lookup?: ExtensionPropertyUiLookupDto;
 }
 
 export interface ExtensionPropertyUiLookupDto {

@@ -54,6 +54,39 @@ function context(
   return injector;
 }
 
+describe('finding the key of a text', () => {
+  const localization = () => context().get(LocalizationService);
+
+  it('returns the first candidate that has a text, as Resource::Key', () => {
+    expect(localization().findKey(['AbpUi'], ['Missing', 'Save'])).toBe('AbpUi::Save');
+  });
+
+  it('searches the default resource last, so a key found nowhere else still resolves', () => {
+    expect(localization().findKey(['AbpUi'], ['Menu'])).toBe('BookStore::Menu');
+  });
+
+  it('the fallback is what comes back when nothing has the text', () => {
+    expect(localization().findKey(['AbpUi'], ['Missing'], 'Missing')).toBe('Missing');
+    expect(localization().findKey(['AbpUi'], ['Missing'])).toBeUndefined();
+  });
+
+  it('the resource "_" means the key is already the text', () => {
+    expect(localization().findKey(['_'], ['Already localized'])).toBe('Already localized');
+  });
+
+  it('a resource that does not exist is skipped rather than throwing', () => {
+    expect(localization().findKey(['Nope'], ['Save'])).toBe('BookStore::Save');
+    expect(localization().findKey(['Nope'], ['NotAKey'])).toBeUndefined();
+  });
+
+  it('what it returns is a key the localizer resolves', () => {
+    const service = localization();
+    const key = service.findKey(['AbpUi'], ['Save']);
+
+    expect(service.t(key ?? '')).toBe('Save');
+  });
+});
+
 describe('resolving text', () => {
   const t = (key: Parameters<ReturnType<typeof localization>['t']>[0], ...params: unknown[]) =>
     localization().t(key, ...params);
