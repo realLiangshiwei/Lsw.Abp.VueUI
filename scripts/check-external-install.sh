@@ -30,20 +30,35 @@ for tarball in "$work"/*.tgz; do
   fi
 done
 
+# `vue-demi` arrives under reka-ui, through @floating-ui/vue, and writes its Vue 2 / Vue 3
+# shim in a postinstall. A consumer has to allow that build, so the check installs the way
+# one that read the README would.
 cd "$work"
 cat > package.json <<'JSON'
 {
   "name": "external-consumer",
   "private": true,
   "type": "module",
-  "dependencies": { "vue": "^3.5.41", "vue-router": "^4.5.1" }
+  "dependencies": {
+    "vue": "^3.5.41",
+    "vue-router": "^4.5.1",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1"
+  }
 }
 JSON
+
+cat > pnpm-workspace.yaml <<'YAML'
+allowBuilds:
+  vue-demi: true
+YAML
 
 cat > app.ts <<'TS'
 import { AbpPermission, createInjector, defineService, inject, InternalStore, MemoryTokenStorage } from '@lsw-abpvue/core';
 import { AbpDynamicLayout, lazyRoutes, provideAbpRouter } from '@lsw-abpvue/core/router';
 import { provideAbpOAuth, withTokenStorage } from '@lsw-abpvue/oauth';
+import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
+import { AbpModal, provideThemeComponents, useAbpForm, Validators } from '@lsw-abpvue/theme-shared';
 import { interpolate } from '@lsw-abpvue/utils';
 
 const Greeter = defineService('Greeter', () => {
@@ -68,6 +83,16 @@ export const layoutIsTyped: IsAny<typeof AbpDynamicLayout> extends false ? true 
 // The authentication package resolves the same `core` as the app does, which is what
 // makes `withTokenStorage` accept a token defined over there.
 export const authentication = provideAbpOAuth(withTokenStorage(MemoryTokenStorage));
+
+// The contract layer arrives as contracts: the stand-in components are real types, and a
+// theme registers against the same tokens the contracts were resolved from.
+export const modalIsTyped: IsAny<typeof AbpModal> extends false ? true : never = true;
+export const theme = provideAbpThemeBasic();
+export const override = provideThemeComponents({ AbpSpinner: AbpModal });
+
+const form = useAbpForm({ userName: { value: '', validators: [Validators.required()] } });
+export const userName: string = form.controls.userName.value;
+export const wasRejected: boolean = form.invalid;
 TS
 
 cat > tsconfig.json <<'JSON'

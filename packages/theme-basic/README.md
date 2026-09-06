@@ -9,6 +9,15 @@ and Bootstrap 5 for looks, plus the three layouts an ABP application is rendered
 pnpm add @lsw-abpvue/theme-basic bootstrap bootstrap-icons
 ```
 
+reka-ui brings `vue-demi` with it (through `@floating-ui/vue`), and `vue-demi` writes its
+Vue 2 / Vue 3 shim in a postinstall script. pnpm asks before running one, so allow it:
+
+```yaml
+# pnpm-workspace.yaml
+allowBuilds:
+  vue-demi: true
+```
+
 ## Setup
 
 ```ts
