@@ -1,4 +1,4 @@
-import type { AbpRoute, LayoutType } from '@lsw-abpvue/core';
+import type { AbpRoute, LayoutType, ProviderInput } from '@lsw-abpvue/core';
 import type { ReplaceableRoute } from './tokens.js';
 
 declare module 'vue-router' {
@@ -11,6 +11,11 @@ declare module 'vue-router' {
     replaceableComponent?: ReplaceableRoute;
     /** Menu entries this route contributes; collected into `RoutesService` at startup. */
     routes?: AbpRoute | AbpRoute[];
+    /**
+     * Providers of the route-level injector, established by `AbpRouterOutlet`. This is
+     * where a module puts what its pages inject, contributors included.
+     */
+    providers?: ProviderInput[];
     /** Localization key for the document title. */
     title?: string;
     layout?: LayoutType;

@@ -10,6 +10,7 @@ import './route-meta.js';
 
 export { default as AbpDynamicLayout } from './components/AbpDynamicLayout.vue';
 export { default as AbpReplaceableRouteContainer } from './components/AbpReplaceableRouteContainer.vue';
+export { default as AbpRouterOutlet } from './components/AbpRouterOutlet.vue';
 export { authGuard, permissionGuard, withResolvers } from './guards.js';
 export { lazyRoutes } from './lazy-routes.js';
 export {
