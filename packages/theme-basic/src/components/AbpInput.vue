@@ -1,12 +1,17 @@
 <script setup lang="ts">
+import { useLocalization } from '@lsw-abpvue/core';
 import type { AbpInputEmits, AbpInputProps } from '@lsw-abpvue/theme-shared';
 import { computed, ref } from 'vue';
+import { HIDE_PASSWORD, SHOW_PASSWORD } from '../defaults/texts.js';
 
 const props = withDefaults(defineProps<AbpInputProps>(), { type: 'text', rows: 3 });
 
 const emit = defineEmits<AbpInputEmits>();
 
+const localization = useLocalization();
 const revealed = ref(false);
+const showPasswordText = computed(() => localization.t(SHOW_PASSWORD));
+const hidePasswordText = computed(() => localization.t(HIDE_PASSWORD));
 const textarea = computed(() => props.type === 'textarea');
 const nativeType = computed(() =>
   props.type === 'password' && revealed.value ? 'text' : props.type,
@@ -69,7 +74,7 @@ function onInput(event: Event): void {
       v-if="revealable && type === 'password'"
       type="button"
       class="btn btn-outline-secondary"
-      :aria-label="revealed ? $t('AbpAccount::HidePassword') : $t('AbpAccount::ShowPassword')"
+      :aria-label="revealed ? hidePasswordText : showPasswordText"
       :aria-pressed="revealed ? 'true' : 'false'"
       @click="revealed = !revealed"
     >

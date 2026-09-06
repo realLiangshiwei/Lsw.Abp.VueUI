@@ -2,6 +2,7 @@
 import { useLocalization, useRoutes, type AbpRoute, type TreeNode } from '@lsw-abpvue/core';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { BREADCRUMB } from '../defaults/texts.js';
 
 /**
  * The trail from the menu tree rather than from the URL: ABP's routes carry the names
@@ -22,7 +23,7 @@ const trail = computed(() => {
 </script>
 
 <template>
-  <nav v-if="trail.length > 0" :aria-label="$t('AbpUi::Breadcrumb')">
+  <nav v-if="trail.length > 0" :aria-label="localization.t(BREADCRUMB)">
     <ol class="breadcrumb">
       <li
         v-for="(node, index) in trail"

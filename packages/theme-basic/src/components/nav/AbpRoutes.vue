@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useLocalization, useRoutes, type AbpRoute, type TreeNode } from '@lsw-abpvue/core';
 import { ref } from 'vue';
+import { MENU } from '../../defaults/texts.js';
 
 /**
  * The sidebar menu. The tree comes from `RoutesService` already filtered by policy,
@@ -21,7 +22,7 @@ const label = (node: TreeNode<AbpRoute>): string => localization.t(node.name);
 </script>
 
 <template>
-  <nav class="abp-routes" :aria-label="$t('AbpUi::Menu')">
+  <nav class="abp-routes" :aria-label="localization.t(MENU)">
     <template
       v-for="group in routes.groupedVisible.value ?? [{ group: '', items: routes.visible.value }]"
       :key="group.group"

@@ -12,6 +12,7 @@ import AbpToastHost from '../components/AbpToastHost.vue';
 import AbpLogo from '../components/nav/AbpLogo.vue';
 import AbpNavItems from '../components/nav/AbpNavItems.vue';
 import AbpRoutes from '../components/nav/AbpRoutes.vue';
+import { MENU } from '../defaults/texts.js';
 import { ThemeBasicComponents } from '../enums/components.js';
 
 const COLLAPSED_KEY = 'abpThemeBasicSidebarCollapsed';
@@ -84,7 +85,7 @@ function toggleSidebar(): void {
           type="button"
           class="btn btn-link"
           :aria-expanded="narrow ? drawerOpen : !collapsed"
-          :aria-label="localization.t('AbpUi::Menu')"
+          :aria-label="localization.t(MENU)"
           @click="toggleSidebar"
         >
           <i class="bi bi-list" aria-hidden="true" />

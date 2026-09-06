@@ -9,6 +9,7 @@ import {
   PaginationRoot,
 } from 'reka-ui';
 import { computed } from 'vue';
+import { PAGER_SIZE } from '../defaults/texts.js';
 
 const props = withDefaults(defineProps<AbpPaginationProps>(), {
   siblingCount: 1,
@@ -64,7 +65,7 @@ const oneBased = computed(() => props.page + 1);
         class="form-select form-select-sm w-auto"
         :value="String(pageSize)"
         :disabled="disabled"
-        :aria-label="$t('AbpUi::PagerSize')"
+        :aria-label="$t(PAGER_SIZE)"
         @change="emit('update:pageSize', Number(($event.target as HTMLSelectElement).value))"
       >
         <option v-for="size in pageSizes" :key="size" :value="String(size)">{{ size }}</option>
