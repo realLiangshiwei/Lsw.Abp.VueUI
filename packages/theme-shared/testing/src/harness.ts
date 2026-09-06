@@ -88,6 +88,23 @@ export function renderContract(
 }
 
 /**
+ * Every match under `root`, shadow roots included. A theme built out of custom elements
+ * -- Fluent UI is -- puts its input inside one, and `querySelectorAll` stops at the
+ * boundary, so a suite that used it would be a suite only light-DOM themes could pass.
+ * @param root Where to start
+ * @param selector CSS selector
+ */
+function queryDeep(root: ParentNode, selector: string): Element[] {
+  const found = [...root.querySelectorAll(selector)];
+
+  for (const element of root.querySelectorAll('*')) {
+    if (element.shadowRoot) found.push(...queryDeep(element.shadowRoot, selector));
+  }
+
+  return found;
+}
+
+/**
  * Waits for what a theme renders asynchronously. An overlay is usually teleported and
  * mounted a tick later, so looking for it in the same turn finds nothing.
  * @param rendered What `renderContract` returned
@@ -108,10 +125,7 @@ export function findRendered(
   rendered: RenderedContract,
   selector: string,
 ): DOMWrapper<Element> | null {
-  const root = rendered.wrapper.element as Partial<Element>;
-  const found = root.querySelector?.(selector) ?? document.querySelector(selector);
-
-  return found ? new DOMWrapper(found) : null;
+  return findAllRendered(rendered, selector)[0] ?? null;
 }
 
 /** Every match, in the wrapper or in the document. @see findRendered */
@@ -120,8 +134,11 @@ export function findAllRendered(
   selector: string,
 ): DOMWrapper<Element>[] {
   const root = rendered.wrapper.element as Partial<Element>;
-  const inside = [...(root.querySelectorAll?.(selector) ?? [])];
-  const found = inside.length > 0 ? inside : [...document.querySelectorAll(selector)];
+  // `querySelectorAll` looks below the root, and a contract component whose whole output
+  // is one element -- an input, a button -- is the root.
+  const own = root.matches?.(selector) ? [root as Element] : [];
+  const inside = root.querySelectorAll ? [...own, ...queryDeep(root as ParentNode, selector)] : [];
+  const found = inside.length > 0 ? inside : queryDeep(document, selector);
 
   return found.map(element => new DOMWrapper(element));
 }

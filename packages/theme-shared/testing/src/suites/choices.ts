@@ -1,6 +1,12 @@
 import { AbpDatePicker, AbpSelect, AbpTypeahead } from '@lsw-abpvue/theme-shared';
 import { describe, expect, it, vi } from 'vitest';
-import { chooseOption, renderContract, type ThemeUnderTest } from '../harness.js';
+import {
+  chooseOption,
+  findAllRendered,
+  findRendered,
+  renderContract,
+  type ThemeUnderTest,
+} from '../harness.js';
 
 const OPTIONS = [
   { value: 'admin', label: 'Administrator' },
@@ -38,22 +44,22 @@ export function testSelect(theme: ThemeUnderTest): void {
     });
 
     it('has an accessible name', () => {
-      const { wrapper } = select();
-      const control = wrapper.find('select, [role="combobox"], [role="listbox"]');
+      const rendered = select();
+      const control = findRendered(rendered, 'select, [role="combobox"], [role="listbox"]');
 
-      expect(control.attributes('aria-label')).toBe('Role');
+      expect(control?.attributes('aria-label')).toBe('Role');
     });
 
     it('cannot be changed when disabled', async () => {
       const rendered = select({ disabled: true });
-      const control = rendered.wrapper.find('select, [role="combobox"], [aria-expanded]');
+      const control = findRendered(rendered, 'select, [role="combobox"], [aria-expanded]');
 
       expect(
-        control.attributes('disabled') !== undefined ||
-          control.attributes('aria-disabled') === 'true',
+        control?.attributes('disabled') !== undefined ||
+          control?.attributes('aria-disabled') === 'true',
       ).toBe(true);
 
-      await control.trigger('click');
+      await control?.trigger('click');
       expect(rendered.emitted('update:modelValue')).toHaveLength(0);
     });
   });
@@ -68,33 +74,35 @@ export function testDatePicker(theme: ThemeUnderTest): void {
 
   describe('AbpDatePicker', () => {
     it('shows the value it was given', () => {
-      const { wrapper } = picker({ modelValue: '2026-09-03' });
+      const rendered = picker({ modelValue: '2026-09-03' });
 
-      expect(wrapper.find('input').element.value).toBe('2026-09-03');
+      expect((findRendered(rendered, 'input')?.element as HTMLInputElement).value).toBe(
+        '2026-09-03',
+      );
     });
 
     it('reports what was picked, still as a string', async () => {
-      const { wrapper, emitted } = picker({ modelValue: '2026-09-03' });
+      const rendered = picker({ modelValue: '2026-09-03' });
 
-      await wrapper.find('input').setValue('2026-10-01');
+      await findRendered(rendered, 'input')?.setValue('2026-10-01');
 
-      expect(emitted('update:modelValue').at(-1)).toEqual(['2026-10-01']);
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual(['2026-10-01']);
     });
 
     it('reports null rather than an empty string when it is cleared', async () => {
-      const { wrapper, emitted } = picker({ modelValue: '2026-09-03', clearable: true });
+      const rendered = picker({ modelValue: '2026-09-03', clearable: true });
 
-      const clear = wrapper.findAll('button').at(-1);
+      const clear = findAllRendered(rendered, 'button').at(-1);
       if (clear) await clear.trigger('click');
-      else await wrapper.find('input').setValue('');
+      else await findRendered(rendered, 'input')?.setValue('');
 
-      expect(emitted('update:modelValue').at(-1)).toEqual([null]);
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual([null]);
     });
 
     it('cannot be changed when disabled', () => {
-      const { wrapper } = picker({ disabled: true });
+      const rendered = picker({ disabled: true });
 
-      expect(wrapper.find('input').attributes('disabled')).toBeDefined();
+      expect(findRendered(rendered, 'input')?.attributes('disabled')).toBeDefined();
     });
   });
 }
@@ -114,34 +122,42 @@ export function testTypeahead(theme: ThemeUnderTest): void {
   describe('AbpTypeahead', () => {
     it('does not go to the backend for a term that is too short', async () => {
       const search = vi.fn(found);
-      const { wrapper } = typeahead(search);
+      const rendered = typeahead(search);
 
-      await wrapper.find('input').setValue('a');
+      await findRendered(rendered, 'input')?.setValue('a');
       await vi.waitFor(() => expect(search).not.toHaveBeenCalled());
     });
 
     it('searches once the typing has stopped, and shows what came back', async () => {
       const search = vi.fn(found);
-      const { wrapper } = typeahead(search);
+      const rendered = typeahead(search);
 
-      await wrapper.find('input').setValue('al');
+      await findRendered(rendered, 'input')?.setValue('al');
 
-      await vi.waitFor(() => expect(wrapper.text()).toContain('Alice'));
+      await vi.waitFor(() =>
+        expect(findAllRendered(rendered, '[role="option"]').map(item => item.text())).toContain(
+          'Alice',
+        ),
+      );
       expect(search).toHaveBeenCalledTimes(1);
     });
 
     it('reports the value, the text and the item that was chosen', async () => {
-      const { wrapper, emitted } = typeahead(vi.fn(found));
+      const rendered = typeahead(vi.fn(found));
 
-      await wrapper.find('input').setValue('al');
-      await vi.waitFor(() => expect(wrapper.text()).toContain('Alice'));
+      await findRendered(rendered, 'input')?.setValue('al');
+      await vi.waitFor(() =>
+        expect(findAllRendered(rendered, '[role="option"]')).not.toHaveLength(0),
+      );
 
-      const option = wrapper.findAll('[role="option"]').find(item => item.text() === 'Alice');
+      const option = findAllRendered(rendered, '[role="option"]').find(
+        item => item.text() === 'Alice',
+      );
       await option?.trigger('click');
 
-      expect(emitted('update:modelValue').at(-1)).toEqual(['1']);
-      expect(emitted('update:displayValue').at(-1)).toEqual(['Alice']);
-      expect(emitted('select').at(-1)).toEqual([{ value: '1', label: 'Alice' }]);
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual(['1']);
+      expect(rendered.emitted('update:displayValue').at(-1)).toEqual(['Alice']);
+      expect(rendered.emitted('select').at(-1)).toEqual([{ value: '1', label: 'Alice' }]);
     });
 
     it('abandons a search the user has already typed past', async () => {
@@ -151,21 +167,21 @@ export function testTypeahead(theme: ThemeUnderTest): void {
         await new Promise(resolve => setTimeout(resolve, 20));
         return [{ value: '1', label: 'Alice' }];
       });
-      const { wrapper } = typeahead(slow);
+      const rendered = typeahead(slow);
 
-      await wrapper.find('input').setValue('al');
+      await findRendered(rendered, 'input')?.setValue('al');
       await vi.waitFor(() => expect(signals).toHaveLength(1));
-      await wrapper.find('input').setValue('ali');
+      await findRendered(rendered, 'input')?.setValue('ali');
 
       await vi.waitFor(() => expect(signals[0]?.aborted).toBe(true));
     });
 
     it('starts out showing the text it was given for the current value', () => {
-      const { wrapper } = renderContract(theme, AbpTypeahead, {
+      const rendered = renderContract(theme, AbpTypeahead, {
         props: { search: found, modelValue: '1', displayValue: 'Alice' },
       });
 
-      expect(wrapper.find('input').element.value).toBe('Alice');
+      expect((findRendered(rendered, 'input')?.element as HTMLInputElement).value).toBe('Alice');
     });
   });
 }

@@ -12,58 +12,58 @@ import {
 export function testButton(theme: ThemeUnderTest): void {
   describe('AbpButton', () => {
     it('renders what it was given to say', () => {
-      const { wrapper } = renderContract(theme, AbpButton, { slots: { default: 'Save' } });
+      const rendered = renderContract(theme, AbpButton, { slots: { default: 'Save' } });
 
-      expect(accessibleName(wrapper.element)).toBe('Save');
+      expect(accessibleName(rendered.wrapper.element)).toBe('Save');
     });
 
     it('reports a click', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpButton, {
+      const { wrapper, injector, emitted } = renderContract(theme, AbpButton, {
         slots: { default: 'Save' },
         events: ['click'],
       });
 
-      await wrapper.find('button').trigger('click');
+      await findRendered({ wrapper, injector, emitted }, 'button')?.trigger('click');
 
       expect(emitted('click')).toHaveLength(1);
     });
 
     it('refuses the click when disabled, and says it is disabled', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpButton, {
+      const rendered = renderContract(theme, AbpButton, {
         props: { disabled: true },
         slots: { default: 'Save' },
         events: ['click'],
       });
-      const button = wrapper.find('button');
+      const button = findRendered(rendered, 'button');
 
-      await button.trigger('click');
+      await button?.trigger('click');
 
-      expect(emitted('click')).toHaveLength(0);
+      expect(rendered.emitted('click')).toHaveLength(0);
       expect(
-        button.attributes('disabled') !== undefined ||
-          button.attributes('aria-disabled') === 'true',
+        button?.attributes('disabled') !== undefined ||
+          button?.attributes('aria-disabled') === 'true',
       ).toBe(true);
     });
 
     it('refuses the click while loading, and says it is busy', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpButton, {
+      const rendered = renderContract(theme, AbpButton, {
         props: { loading: true },
         slots: { default: 'Save' },
         events: ['click'],
       });
 
-      await wrapper.find('button').trigger('click');
+      await findRendered(rendered, 'button')?.trigger('click');
 
-      expect(emitted('click')).toHaveLength(0);
-      expect(wrapper.find('button').attributes('aria-busy')).toBe('true');
+      expect(rendered.emitted('click')).toHaveLength(0);
+      expect(findRendered(rendered, 'button')?.attributes('aria-busy')).toBe('true');
     });
 
     it('takes its accessible name from ariaLabel when it renders only an icon', () => {
-      const { wrapper } = renderContract(theme, AbpButton, {
+      const rendered = renderContract(theme, AbpButton, {
         props: { iconClass: 'bi bi-trash', ariaLabel: 'Delete' },
       });
 
-      expect(wrapper.find('button').attributes('aria-label')).toBe('Delete');
+      expect(findRendered(rendered, 'button')?.attributes('aria-label')).toBe('Delete');
     });
   });
 }
@@ -95,11 +95,11 @@ export function testFormField(theme: ThemeUnderTest): void {
 
   describe('AbpFormField', () => {
     it('labels the control it wraps, by id', () => {
-      const { wrapper } = field({ label: 'User name' });
-      const label = wrapper.find('label');
+      const rendered = field({ label: 'User name' });
+      const label = findRendered(rendered, 'label');
 
-      expect(label.text()).toContain('User name');
-      expect(label.attributes('for')).toBe(wrapper.find('input').attributes('id'));
+      expect(label?.text()).toContain('User name');
+      expect(label?.attributes('for')).toBe(findRendered(rendered, 'input')?.attributes('id'));
     });
 
     it('shows the errors it was given', () => {
@@ -109,24 +109,24 @@ export function testFormField(theme: ThemeUnderTest): void {
     });
 
     it('tells the control it is invalid, and points it at the message', () => {
-      const { wrapper } = field({ label: 'User name', errors: ['This field is required.'] });
-      const input = wrapper.find('input');
+      const rendered = field({ label: 'User name', errors: ['This field is required.'] });
+      const input = findRendered(rendered, 'input');
 
-      expect(input.attributes('aria-invalid')).toBe('true');
+      expect(input?.attributes('aria-invalid')).toBe('true');
 
-      const describedBy = input.attributes('aria-describedby') ?? '';
+      const describedBy = input?.attributes('aria-describedby') ?? '';
       const described = describedBy
         .split(' ')
-        .map(id => wrapper.element.querySelector(`#${id}`)?.textContent ?? '')
+        .map(id => findRendered(rendered, `#${id}`)?.text() ?? '')
         .join(' ');
       expect(described).toContain('This field is required.');
     });
 
     it('leaves the control valid when there is nothing wrong with it', () => {
-      const { wrapper } = field({ label: 'User name', hint: 'At least four characters.' });
+      const rendered = field({ label: 'User name', hint: 'At least four characters.' });
 
-      expect(wrapper.find('input').attributes('aria-invalid')).toBeUndefined();
-      expect(wrapper.text()).toContain('At least four characters.');
+      expect(findRendered(rendered, 'input')?.attributes('aria-invalid')).toBeUndefined();
+      expect(rendered.wrapper.text()).toContain('At least four characters.');
     });
   });
 }
@@ -134,53 +134,53 @@ export function testFormField(theme: ThemeUnderTest): void {
 export function testInput(theme: ThemeUnderTest): void {
   describe('AbpInput', () => {
     it('shows the value it was given and reports what was typed', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpInput, {
+      const rendered = renderContract(theme, AbpInput, {
         props: { modelValue: 'admin' },
         events: ['update:modelValue'],
       });
-      const input = wrapper.find('input');
+      const input = findRendered(rendered, 'input');
 
-      expect(input.element.value).toBe('admin');
+      expect((input?.element as HTMLInputElement).value).toBe('admin');
 
-      await input.setValue('editor');
-      expect(emitted('update:modelValue').at(-1)).toEqual(['editor']);
+      await input?.setValue('editor');
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual(['editor']);
     });
 
     it('renders the type it was asked for', () => {
-      const { wrapper } = renderContract(theme, AbpInput, { props: { type: 'password' } });
+      const rendered = renderContract(theme, AbpInput, { props: { type: 'password' } });
 
-      expect(wrapper.find('input').attributes('type')).toBe('password');
+      expect(findRendered(rendered, 'input')?.attributes('type')).toBe('password');
     });
 
     it('renders a textarea when asked for one', () => {
-      const { wrapper } = renderContract(theme, AbpInput, { props: { type: 'textarea' } });
+      const rendered = renderContract(theme, AbpInput, { props: { type: 'textarea' } });
 
-      expect(wrapper.find('textarea').exists()).toBe(true);
+      expect(findRendered(rendered, 'textarea')).not.toBeNull();
     });
 
     it('reports a number as a number', async () => {
-      const { wrapper, emitted } = renderContract(theme, AbpInput, {
+      const rendered = renderContract(theme, AbpInput, {
         props: { type: 'number' },
         events: ['update:modelValue'],
       });
 
-      await wrapper.find('input').setValue('42');
+      await findRendered(rendered, 'input')?.setValue('42');
 
-      expect(emitted('update:modelValue').at(-1)).toEqual([42]);
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual([42]);
     });
 
     it('cannot be typed into when disabled or read only', () => {
       const disabled = renderContract(theme, AbpInput, { props: { disabled: true } });
       const readonly = renderContract(theme, AbpInput, { props: { readonly: true } });
 
-      expect(disabled.wrapper.find('input').attributes('disabled')).toBeDefined();
-      expect(readonly.wrapper.find('input').attributes('readonly')).toBeDefined();
+      expect(findRendered(disabled, 'input')?.attributes('disabled')).toBeDefined();
+      expect(findRendered(readonly, 'input')?.attributes('readonly')).toBeDefined();
     });
 
     it('says it is invalid when it is', () => {
-      const { wrapper } = renderContract(theme, AbpInput, { props: { invalid: true } });
+      const rendered = renderContract(theme, AbpInput, { props: { invalid: true } });
 
-      expect(wrapper.find('input').attributes('aria-invalid')).toBe('true');
+      expect(findRendered(rendered, 'input')?.attributes('aria-invalid')).toBe('true');
     });
   });
 }
