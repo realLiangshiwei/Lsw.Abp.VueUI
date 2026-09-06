@@ -8,6 +8,10 @@
 // `.d.ts` files describing a `DefineComponent`. So they are renamed to what every other
 // declaration is called and referred to the same way, and the packages resolve
 // everywhere. Runtime output is untouched: the components are compiled into the bundle.
+//
+// The same pass drops the stylesheet import a theme's entry point carries. It is there
+// so the bundler collects the CSS; in a declaration it resolves to nothing, because the
+// stylesheet is emitted as `dist/style.css` rather than beside the source it came from.
 import { readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 
@@ -45,6 +49,7 @@ for (const path of files.map(file => file.replace(/\.vue(\.d\.ts(\.map)?)$/, '$1
   const before = readFileSync(path, 'utf8');
   // `from './x.vue'` becomes `from './x.js'`, the way every other sibling is named.
   const after = before
+    .replace(/^import\s+["']\.{1,2}\/[^"']*\.css["'];?\r?\n/gm, '')
     .replace(/(from\s*["'])(\.{1,2}\/[^"']*)\.vue(["'])/g, '$1$2.js$3')
     .replace(/(sourceMappingURL=.*?)\.vue(\.d\.ts\.map)/g, '$1$2')
     .replace(/("file"\s*:\s*"[^"]*?)\.vue(\.d\.ts")/g, '$1$2');
