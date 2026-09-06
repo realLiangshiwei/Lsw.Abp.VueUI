@@ -16,6 +16,7 @@ import {
   Validators,
   type AbpTypeaheadItem,
 } from '@lsw-abpvue/theme-shared';
+import { AbpHttpError, useHttpErrorReporter } from '@lsw-abpvue/core';
 import { computed, ref } from 'vue';
 
 /**
@@ -36,7 +37,14 @@ const messages = useValidationMessages();
 const errorsFor = (name: keyof typeof form.controls) =>
   computed(() => (form.controls[name].touched ? messages(form.controls[name].errors) : []));
 
-const userNameErrors = errorsFor('userName');
+// Server errors are shown as soon as they arrive, not only once the field is touched.
+const userNameErrors = computed(() =>
+  messages(
+    form.controls.userName.touched
+      ? form.controls.userName.errors
+      : form.controls.userName.errors.filter(error => error.rule === 'server'),
+  ),
+);
 const emailErrors = errorsFor('email');
 
 const roles = [
@@ -53,7 +61,29 @@ const search = async (term: string): Promise<AbpTypeaheadItem[]> =>
   }));
 
 const ownerName = ref('');
+const reporter = useHttpErrorReporter();
 const modalOpen = ref(false);
+
+/**
+ * What a rejected save looks like from here: the form registered itself with
+ * `useServerValidation`, so the handler chain puts the message under the field the
+ * server named rather than in a toast the user has to map back to a field themselves.
+ */
+function rejectFromServer(): void {
+  form.controls.userName.markAsTouched();
+  reporter.reportError(
+    new AbpHttpError({
+      status: 400,
+      statusText: '',
+      method: 'POST',
+      url: '/api/identity/users',
+      error: {
+        message: 'Your request is not valid!',
+        validationErrors: [{ message: 'That name is taken.', members: ['userName'] }],
+      },
+    }),
+  );
+}
 const page = ref(0);
 const pageSize = ref(10);
 const saving = ref(false);
@@ -126,6 +156,9 @@ function submit(): void {
     <div class="col-12 d-flex align-items-center gap-2">
       <AbpButton type="submit" :loading="saving">Save</AbpButton>
       <AbpButton variant="secondary" @click="modalOpen = true">Open a dialog</AbpButton>
+      <AbpButton variant="secondary" outline @click="rejectFromServer">
+        Let the server reject it
+      </AbpButton>
       <AbpSpinner v-if="saving" size="sm" label="Saving" />
     </div>
   </form>

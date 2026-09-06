@@ -58,7 +58,7 @@ async function submit() {
 </script>
 
 <template>
-  <h2>{{ $t('AbpAccount::Login') }}</h2>
+  <h1 class="h4 mb-3">{{ $t('AbpAccount::Login') }}</h1>
 
   <form @submit.prevent="submit">
     <label>

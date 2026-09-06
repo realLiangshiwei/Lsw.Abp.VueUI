@@ -79,5 +79,17 @@ const label = (node: TreeNode<AbpRoute>): string => localization.t(node.name);
 .nav-link {
   display: flex;
   align-items: center;
+  color: var(--abp-sidebar-link-fg);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--abp-sidebar-link-active-fg);
+}
+
+.router-link-active {
+  color: var(--abp-sidebar-link-active-fg);
+  background: var(--abp-sidebar-link-active-bg);
+  border-radius: var(--bs-border-radius);
 }
 </style>
