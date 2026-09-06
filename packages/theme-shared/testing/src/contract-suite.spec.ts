@@ -1,4 +1,4 @@
-import { plainTheme } from './plain-theme.fixture.js';
+import { plainTheme } from './plain-theme.js';
 import { runThemeContractTests } from './run-theme-contract-tests.js';
 
 // The suite run against an implementation built on nothing at all. If an assertion here

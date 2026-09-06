@@ -8,7 +8,7 @@ import {
   PlainSelect,
   PlainToastHost,
   PlainTypeahead,
-} from './plain-overlays.fixture.js';
+} from './plain-overlays.js';
 
 /**
  * The contracts implemented with nothing but native elements. It exists to keep the
@@ -254,6 +254,10 @@ const PlainPagination = defineComponent({
   },
 });
 
+/**
+ * The reference theme as a whole. Exported so a package above the contract layer can
+ * render its own components in a test without pulling a real theme in.
+ */
 export const plainTheme: ThemeUnderTest = {
   name: 'plain',
   providers: [

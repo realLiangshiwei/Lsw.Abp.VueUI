@@ -179,7 +179,7 @@ export default tseslint.config(
   },
 
   {
-    files: ['**/*.spec.ts', '**/*.test-d.ts', '**/*.fixture.ts'],
+    files: ['**/*.spec.ts', '**/*.test-d.ts', 'packages/theme-shared/testing/src/plain-*.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       // A component test needs a handful of throwaway components around the one thing it

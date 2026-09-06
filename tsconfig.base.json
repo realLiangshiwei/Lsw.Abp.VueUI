@@ -33,6 +33,7 @@
       "@lsw-abpvue/oauth": ["./packages/oauth/src/index.ts"],
       "@lsw-abpvue/theme-basic": ["./packages/theme-basic/src/index.ts"],
       "@lsw-abpvue/theme-shared": ["./packages/theme-shared/src/index.ts"],
+      "@lsw-abpvue/theme-shared/testing": ["./packages/theme-shared/testing/src/index.ts"],
       "@lsw-abpvue/utils": ["./packages/utils/src/index.ts"]
     }
   }

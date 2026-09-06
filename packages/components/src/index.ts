@@ -1,3 +1,5 @@
+export { default as AbpDataTable } from './components/AbpDataTable.vue';
+
 export { EXTRA_PROPERTIES_KEY } from './constants/extra-properties.js';
 
 export { PropType } from './enums/prop-type.js';
@@ -45,6 +47,7 @@ export type {
   GroupedFormProps,
 } from './models/form-props.js';
 export { unwrapResolvable } from './models/prop-data.js';
+export type { AbpTableColumn, AbpTableRecordKey, AbpTableSort } from './models/table.js';
 export type {
   GetInjected,
   PropData,
