@@ -59,6 +59,8 @@ import { AbpDynamicLayout, lazyRoutes, provideAbpRouter } from '@lsw-abpvue/core
 import { provideAbpOAuth, withTokenStorage } from '@lsw-abpvue/oauth';
 import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
 import { AbpModal, provideThemeComponents, useAbpForm, Validators } from '@lsw-abpvue/theme-shared';
+import { EntityProp, ExtensionsService, PropType } from '@lsw-abpvue/components';
+import { EntityProp as EntityPropFromSubpath } from '@lsw-abpvue/components/extensible';
 import { interpolate } from '@lsw-abpvue/utils';
 
 const Greeter = defineService('Greeter', () => {
@@ -89,6 +91,12 @@ export const authentication = provideAbpOAuth(withTokenStorage(MemoryTokenStorag
 export const modalIsTyped: IsAny<typeof AbpModal> extends false ? true : never = true;
 export const theme = provideAbpThemeBasic();
 export const override = provideThemeComponents({ AbpSpinner: AbpModal });
+
+// The extension system: the subpath an Angular application knows the package by is the
+// same module, so a contributor registered through either one lands in the same list.
+export const column = EntityProp.create({ type: PropType.String, name: 'userName' });
+export const oneExtensionSystem: true = (EntityProp === EntityPropFromSubpath) as true;
+export const extensions = createInjector([]).get(ExtensionsService).entityProps.get('X').props;
 
 const form = useAbpForm({ userName: { value: '', validators: [Validators.required()] } });
 export const userName: string = form.controls.userName.value;

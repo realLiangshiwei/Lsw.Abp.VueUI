@@ -27,6 +27,15 @@ const ALLOWED = {
     'axe-core',
     'vitest',
   ],
+  components: [
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/theme-shared',
+    '@lsw-abpvue/utils',
+    // Headless, unstyled and with no visual opinion of its own, which is the whole
+    // reason this package may have a table library at all (design 01 §3).
+    '@tanstack/vue-table',
+    'vue',
+  ],
   'theme-basic': [
     '@lsw-abpvue/core',
     '@lsw-abpvue/theme-shared',

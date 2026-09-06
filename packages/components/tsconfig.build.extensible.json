@@ -1,0 +1,13 @@
+{
+  // One declaration build per entry point: the subpath reaches the main entry by package
+  // name, so it never enters that program (design 03 §2).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "rootDir": "extensible/src",
+    "paths": {},
+    "outDir": "dist/extensible"
+  },
+  "include": ["extensible/src/**/*.ts"]
+}

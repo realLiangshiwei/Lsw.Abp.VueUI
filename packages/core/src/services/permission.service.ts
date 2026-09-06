@@ -1,7 +1,7 @@
+import { isDevMode } from '@lsw-abpvue/utils';
 import { computed, toValue, type ComputedRef, type MaybeRefOrGetter } from 'vue';
 import { inject } from '../di/inject.js';
 import { defineService, type ServiceOf } from '../di/token.js';
-import { isDevMode } from '../utils/dev-mode.js';
 import { evaluatePolicy, parsePolicy, type PolicyExpression } from '../utils/policy-expression.js';
 import { ConfigStateService } from './config-state.service.js';
 

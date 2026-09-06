@@ -1,3 +1,4 @@
+import { isDevMode } from '@lsw-abpvue/utils';
 import { computed, shallowRef, type ComputedRef } from 'vue';
 import { inject } from '../di/inject.js';
 import { onServiceDestroy } from '../di/injector.js';
@@ -6,7 +7,6 @@ import type { AbpLocalization, LocalizationParam } from '../models/localization.
 import type { LanguageInfo } from '../proxy/models.js';
 import { LOCALIZATIONS, REGISTER_LOCALE } from '../tokens/localization.token.js';
 import { ABP_ROOT_OPTIONS } from '../tokens/root-options.token.js';
-import { isDevMode } from '../utils/dev-mode.js';
 import {
   createLocalizer,
   flattenResources,

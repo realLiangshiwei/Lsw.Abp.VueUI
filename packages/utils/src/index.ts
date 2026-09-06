@@ -1,3 +1,4 @@
+export { isDevMode } from './dev-mode.js';
 export { LinkedList, ListNode } from './linked-list.js';
 export type {
   AddLocator,
