@@ -4,29 +4,59 @@ export type ListPredicate<T> = (value: T) => boolean;
 /** Either a value compared by reference, or a predicate run against each value. */
 export type ListTarget<T> = T | ListPredicate<T>;
 
+/**
+ * Compares a value in the list with the target of a locator call. ABP's contributors
+ * pass one of these to match on a single field, and so can ours:
+ * `propList.addAfter(prop, 'userName', (value, name) => value.name === name)`.
+ */
+export type ListComparisonFn<T, U = T> = (value: T, target: U) => boolean;
+
 /** A single link of a {@link LinkedList}. Every add call hands one back. */
 export class ListNode<T> {
   previous: ListNode<T> | null = null;
   next: ListNode<T> | null = null;
 
-  constructor(public value: T) {}
+  constructor(public readonly value: T) {}
 }
 
 /** Positions a value relative to the nodes already in the list. */
 export interface AddLocator<T> {
   byIndex(index: number): ListNode<T> | undefined;
-  before(target: ListTarget<T>): ListNode<T> | undefined;
-  after(target: ListTarget<T>): ListNode<T> | undefined;
+  before(target: ListTarget<T>): ListNode<T>;
+  before<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>;
+  after(target: ListTarget<T>): ListNode<T>;
+  after<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>;
   head(): ListNode<T>;
   tail(): ListNode<T>;
+}
+
+/** The same positions, for a whole batch of values. */
+export interface AddManyLocator<T> {
+  byIndex(index: number): ListNode<T>[];
+  before(target: ListTarget<T>): ListNode<T>[];
+  before<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>[];
+  after(target: ListTarget<T>): ListNode<T>[];
+  after<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>[];
+  head(): ListNode<T>[];
+  tail(): ListNode<T>[];
 }
 
 /** Picks the node to remove. */
 export interface DropLocator<T> {
   byIndex(index: number): ListNode<T> | undefined;
-  byValue(value: T): ListNode<T> | undefined;
+  byValue(target: ListTarget<T>): ListNode<T> | undefined;
+  byValue<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T> | undefined;
+  byValueAll(target: ListTarget<T>): ListNode<T>[];
+  byValueAll<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>[];
   head(): ListNode<T> | undefined;
   tail(): ListNode<T> | undefined;
+}
+
+/** Picks where a run of nodes is removed from. */
+export interface DropManyLocator<T> {
+  byIndex(index: number): ListNode<T>[];
+  head(): ListNode<T>[];
+  tail(): ListNode<T>[];
 }
 
 /**
@@ -36,7 +66,11 @@ export interface DropLocator<T> {
  * `list.add(x).after(p => p.name === 'userName')`, which keeps meaning the same thing
  * after somebody upstream inserts another column.
  *
- * @see `LinkedList` in `@abp/utils` — the contributor-facing semantics are the same.
+ * A locator that matches nothing does not swallow the value: `after` appends and
+ * `before` prepends, so a contributor whose target has been renamed away still sees
+ * their column -- at the end of the table rather than nowhere.
+ *
+ * @see `LinkedList` in `@abp/utils` -- the contributor-facing semantics are the same.
  */
 export class LinkedList<T> {
   #first: ListNode<T> | null = null;
@@ -86,47 +120,165 @@ export class LinkedList<T> {
   /**
    * Adds a value at the given position, shifting the node currently there to the right.
    * @param value Value to add
-   * @param index Position between `0` and `length`; anything else adds nothing
+   * @param index Position; a negative one counts back from the end, and anything past
+   * either end lands at that end
    */
   addByIndex(value: T, index: number): ListNode<T> | undefined {
-    if (!Number.isInteger(index) || index < 0 || index > this.#length) return undefined;
-    if (index === 0) return this.addHead(value);
-    if (index === this.#length) return this.addTail(value);
+    const at = this.#resolveIndex(index);
+    if (at === null) return undefined;
+    if (at <= 0) return this.addHead(value);
+    if (at >= this.#length) return this.addTail(value);
 
-    const next = this.#nodeAt(index);
-    // Guarded by the bounds check above, so `next` and its `previous` both exist.
-    return next ? this.#insertBefore(value, next) : undefined;
+    const next = this.#nodeAt(at);
+    // Guarded by the bounds above, so `next` and its `previous` both exist.
+    return next ? this.#insertBefore(value, next) : this.addTail(value);
   }
 
   /**
-   * Adds a value in front of the first node matching the target.
+   * Adds a value in front of the first node matching the target, or at the front of the
+   * list when nothing matches.
    * @param value Value to add
    * @param target Value to compare by reference, or a predicate
    */
-  addBefore(value: T, target: ListTarget<T>): ListNode<T> | undefined {
-    const node = this.#nodeMatching(target);
-    return node ? this.#insertBefore(value, node) : undefined;
+  addBefore(value: T, target: ListTarget<T>): ListNode<T>;
+  /**
+   * @param value Value to add
+   * @param target Passed to `compareFn` for every value in the list
+   * @param compareFn Decides which node the target means
+   */
+  addBefore<U>(value: T, target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>;
+  addBefore(value: T, target: unknown, compareFn?: ListComparisonFn<T, never>): ListNode<T> {
+    const node = this.#nodeMatching(target, compareFn);
+    return node ? this.#insertBefore(value, node) : this.addHead(value);
   }
 
   /**
-   * Adds a value behind the first node matching the target.
+   * Adds a value behind the first node matching the target, or at the end of the list
+   * when nothing matches.
    * @param value Value to add
    * @param target Value to compare by reference, or a predicate
    */
-  addAfter(value: T, target: ListTarget<T>): ListNode<T> | undefined {
-    const node = this.#nodeMatching(target);
-    return node ? this.#insertAfter(value, node) : undefined;
+  addAfter(value: T, target: ListTarget<T>): ListNode<T>;
+  /**
+   * @param value Value to add
+   * @param target Passed to `compareFn` for every value in the list
+   * @param compareFn Decides which node the target means
+   */
+  addAfter<U>(value: T, target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>;
+  addAfter(value: T, target: unknown, compareFn?: ListComparisonFn<T, never>): ListNode<T> {
+    const node = this.#nodeMatching(target, compareFn);
+    return node ? this.#insertAfter(value, node) : this.addTail(value);
   }
 
   /** Chainable form of the add methods: `list.add(value).after(predicate)`. */
   add(value: T): AddLocator<T> {
     return {
       byIndex: index => this.addByIndex(value, index),
-      before: target => this.addBefore(value, target),
-      after: target => this.addAfter(value, target),
+      before: (target: unknown, compareFn?: ListComparisonFn<T, never>) =>
+        this.addBefore(value, target as T, compareFn as ListComparisonFn<T, T>),
+      after: (target: unknown, compareFn?: ListComparisonFn<T, never>) =>
+        this.addAfter(value, target as T, compareFn as ListComparisonFn<T, T>),
       head: () => this.addHead(value),
       tail: () => this.addTail(value),
-    };
+    } as AddLocator<T>;
+  }
+
+  /** Adds values at the front, keeping their order. */
+  addManyHead(values: readonly T[]): ListNode<T>[] {
+    const nodes: ListNode<T>[] = [];
+    for (const value of [...values].reverse()) nodes.unshift(this.addHead(value));
+
+    return nodes;
+  }
+
+  /** Adds values at the end, keeping their order. */
+  addManyTail(values: readonly T[]): ListNode<T>[] {
+    return values.map(value => this.addTail(value));
+  }
+
+  /**
+   * Adds values at the given position, keeping their order.
+   * @param values Values to add
+   * @param index Position, resolved as in {@link addByIndex}
+   */
+  addManyByIndex(values: readonly T[], index: number): ListNode<T>[] {
+    const at = this.#resolveIndex(index);
+    if (at === null) return [];
+    if (at <= 0) return this.addManyHead(values);
+    if (at >= this.#length) return this.addManyTail(values);
+
+    const next = this.#nodeAt(at);
+    if (!next) return this.addManyTail(values);
+
+    return values.map(value => this.#insertBefore(value, next));
+  }
+
+  /**
+   * Adds values in front of the first node matching the target, keeping their order.
+   * @param values Values to add
+   * @param target Value to compare by reference, or a predicate
+   */
+  addManyBefore(values: readonly T[], target: ListTarget<T>): ListNode<T>[];
+  /**
+   * @param values Values to add
+   * @param target Passed to `compareFn` for every value in the list
+   * @param compareFn Decides which node the target means
+   */
+  addManyBefore<U>(
+    values: readonly T[],
+    target: U,
+    compareFn: ListComparisonFn<T, U>,
+  ): ListNode<T>[];
+  addManyBefore(
+    values: readonly T[],
+    target: unknown,
+    compareFn?: ListComparisonFn<T, never>,
+  ): ListNode<T>[] {
+    const node = this.#nodeMatching(target, compareFn);
+    if (!node) return this.addManyHead(values);
+
+    return values.map(value => this.#insertBefore(value, node));
+  }
+
+  /**
+   * Adds values behind the first node matching the target, keeping their order.
+   * @param values Values to add
+   * @param target Value to compare by reference, or a predicate
+   */
+  addManyAfter(values: readonly T[], target: ListTarget<T>): ListNode<T>[];
+  /**
+   * @param values Values to add
+   * @param target Passed to `compareFn` for every value in the list
+   * @param compareFn Decides which node the target means
+   */
+  addManyAfter<U>(
+    values: readonly T[],
+    target: U,
+    compareFn: ListComparisonFn<T, U>,
+  ): ListNode<T>[];
+  addManyAfter(
+    values: readonly T[],
+    target: unknown,
+    compareFn?: ListComparisonFn<T, never>,
+  ): ListNode<T>[] {
+    const node = this.#nodeMatching(target, compareFn);
+    if (!node) return this.addManyTail(values);
+
+    let previous = node;
+    return values.map(value => (previous = this.#insertAfter(value, previous)));
+  }
+
+  /** Chainable form of the batch add methods: `list.addMany(values).after(predicate)`. */
+  addMany(values: readonly T[]): AddManyLocator<T> {
+    return {
+      byIndex: index => this.addManyByIndex(values, index),
+      before: (target: unknown, compareFn?: ListComparisonFn<T, never>) =>
+        this.addManyBefore(values, target as T, compareFn as ListComparisonFn<T, T>),
+      after: (target: unknown, compareFn?: ListComparisonFn<T, never>) =>
+        this.addManyAfter(values, target as T, compareFn as ListComparisonFn<T, T>),
+      head: () => this.addManyHead(values),
+      tail: () => this.addManyTail(values),
+    } as AddManyLocator<T>;
   }
 
   /** Removes the first node and returns it. */
@@ -141,29 +293,104 @@ export class LinkedList<T> {
 
   /**
    * Removes the node at the given position.
-   * @param index Position between `0` and `length - 1`; anything else removes nothing
+   * @param index Position; a negative one counts back from the end. Past either end
+   * removes nothing
    */
   dropByIndex(index: number): ListNode<T> | undefined {
-    const node = this.#nodeAt(index);
+    const at = this.#resolveIndex(index);
+    const node = at === null ? null : this.#nodeAt(at);
+
     return node ? this.#unlink(node) : undefined;
   }
 
   /**
-   * Removes the first node holding the given value, compared by reference.
-   * @param value Value to look for
+   * Removes the first node matching the target.
+   * @param target Value to compare by reference, or a predicate
    */
-  dropByValue(value: T): ListNode<T> | undefined {
-    const node = this.find(candidate => candidate === value);
+  dropByValue(target: ListTarget<T>): ListNode<T> | undefined;
+  /**
+   * @param target Passed to `compareFn` for every value in the list
+   * @param compareFn Decides which node the target means
+   */
+  dropByValue<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T> | undefined;
+  dropByValue(target: unknown, compareFn?: ListComparisonFn<T, never>): ListNode<T> | undefined {
+    const node = this.#nodeMatching(target, compareFn);
     return node ? this.#unlink(node) : undefined;
+  }
+
+  /**
+   * Removes every node matching the target.
+   * @param target Value to compare by reference, or a predicate
+   */
+  dropByValueAll(target: ListTarget<T>): ListNode<T>[];
+  /**
+   * @param target Passed to `compareFn` for every value in the list
+   * @param compareFn Decides which nodes the target means
+   */
+  dropByValueAll<U>(target: U, compareFn: ListComparisonFn<T, U>): ListNode<T>[];
+  dropByValueAll(target: unknown, compareFn?: ListComparisonFn<T, never>): ListNode<T>[] {
+    const matches = this.#predicateFor(target, compareFn);
+    const dropped: ListNode<T>[] = [];
+
+    for (let node = this.#first; node;) {
+      const next = node.next;
+      if (matches(node.value)) dropped.push(this.#unlink(node));
+      node = next;
+    }
+
+    return dropped;
+  }
+
+  /**
+   * Removes nodes from the front, in list order.
+   * @param count How many; more than there are removes all of them
+   */
+  dropManyHead(count: number): ListNode<T>[] {
+    return this.#dropRun(count, () => this.dropHead());
+  }
+
+  /**
+   * Removes nodes from the end. They come back in list order, so the tail is last.
+   * @param count How many; more than there are removes all of them
+   */
+  dropManyTail(count: number): ListNode<T>[] {
+    return this.#dropRun(count, () => this.dropTail()).reverse();
+  }
+
+  /**
+   * Removes a run of nodes starting at the given position, in list order.
+   * @param count How many; a run reaching past the end stops there
+   * @param index Position, resolved as in {@link dropByIndex}
+   */
+  dropManyByIndex(count: number, index: number): ListNode<T>[] {
+    const at = this.#resolveIndex(index);
+    if (at === null || at < 0 || at >= this.#length) return [];
+
+    return this.#dropRun(count, () => this.dropByIndex(at));
   }
 
   /** Chainable form of the drop methods: `list.drop().byIndex(2)`. */
   drop(): DropLocator<T> {
     return {
       byIndex: index => this.dropByIndex(index),
-      byValue: value => this.dropByValue(value),
+      byValue: (target: unknown, compareFn?: ListComparisonFn<T, never>) =>
+        this.dropByValue(target as T, compareFn as ListComparisonFn<T, T>),
+      byValueAll: (target: unknown, compareFn?: ListComparisonFn<T, never>) =>
+        this.dropByValueAll(target as T, compareFn as ListComparisonFn<T, T>),
       head: () => this.dropHead(),
       tail: () => this.dropTail(),
+    } as DropLocator<T>;
+  }
+
+  /**
+   * Chainable form of the batch drop methods: `list.dropMany(2).tail()`.
+   * @param count How many nodes to remove
+   */
+  dropMany(count: number): DropManyLocator<T> {
+    return {
+      byIndex: index => this.dropManyByIndex(count, index),
+      head: () => this.dropManyHead(count),
+      tail: () => this.dropManyTail(count),
     };
   }
 
@@ -180,22 +407,53 @@ export class LinkedList<T> {
   }
 
   /**
-   * Returns the position of the first node holding the value, or `-1`.
-   * @param value Value compared by reference
+   * Returns the position of the first node whose value satisfies the predicate, or `-1`.
+   * @param predicate Test run against each value in order
    */
-  indexOf(value: T): number {
+  findIndex(predicate: ListPredicate<T>): number {
     let index = 0;
 
     for (let node = this.#first; node; node = node.next, index++) {
-      if (node.value === value) return index;
+      if (predicate(node.value)) return index;
     }
 
     return -1;
   }
 
+  /**
+   * Returns the node at the given position.
+   * @param index Position; a negative one counts back from the end
+   */
+  get(index: number): ListNode<T> | null {
+    const at = this.#resolveIndex(index);
+    return at === null ? null : this.#nodeAt(at);
+  }
+
+  /**
+   * Returns the position of the first node matching the target, or `-1`.
+   * @param target Value to compare by reference, or a predicate
+   */
+  indexOf(target: ListTarget<T>): number;
+  /**
+   * @param target Passed to `compareFn` for every value in the list
+   * @param compareFn Decides which node the target means
+   */
+  indexOf<U>(target: U, compareFn: ListComparisonFn<T, U>): number;
+  indexOf(target: unknown, compareFn?: ListComparisonFn<T, never>): number {
+    return this.findIndex(this.#predicateFor(target, compareFn));
+  }
+
   /** Copies the values into a plain array, head first. */
   toArray(): T[] {
     return [...this];
+  }
+
+  /** Copies the nodes into a plain array, head first. */
+  toNodeArray(): ListNode<T>[] {
+    const nodes: ListNode<T>[] = [];
+    for (let node = this.#first; node; node = node.next) nodes.push(node);
+
+    return nodes;
   }
 
   /**
@@ -216,8 +474,15 @@ export class LinkedList<T> {
     }
   }
 
+  /** A negative index counts back from the end; a fractional one means nothing. */
+  #resolveIndex(index: number): number | null {
+    if (!Number.isInteger(index)) return null;
+
+    return index < 0 ? index + this.#length : index;
+  }
+
   #nodeAt(index: number): ListNode<T> | null {
-    if (!Number.isInteger(index) || index < 0 || index >= this.#length) return null;
+    if (index < 0 || index >= this.#length) return null;
 
     let node = this.#first;
     for (let i = 0; i < index && node; i++) node = node.next;
@@ -225,13 +490,29 @@ export class LinkedList<T> {
     return node;
   }
 
-  #nodeMatching(target: ListTarget<T>): ListNode<T> | null {
+  #predicateFor(target: unknown, compareFn?: ListComparisonFn<T, never>): ListPredicate<T> {
+    if (compareFn) return value => compareFn(value, target as never);
+
     // A list of functions would make this ambiguous, but the extension system never
     // holds one, and ABP's own list resolves the target the same way.
-    const predicate: ListPredicate<T> =
-      typeof target === 'function' ? (target as ListPredicate<T>) : value => value === target;
+    return typeof target === 'function' ? (target as ListPredicate<T>) : value => value === target;
+  }
 
-    return this.find(predicate);
+  #nodeMatching(target: unknown, compareFn?: ListComparisonFn<T, never>): ListNode<T> | null {
+    return this.find(this.#predicateFor(target, compareFn));
+  }
+
+  #dropRun(count: number, drop: () => ListNode<T> | undefined): ListNode<T>[] {
+    if (!Number.isInteger(count) || count <= 0) return [];
+
+    const dropped: ListNode<T>[] = [];
+    for (let i = 0; i < count; i++) {
+      const node = drop();
+      if (!node) break;
+      dropped.push(node);
+    }
+
+    return dropped;
   }
 
   #insertBefore(value: T, next: ListNode<T>): ListNode<T> {
