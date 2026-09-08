@@ -7,6 +7,16 @@ export { default as AbpPageToolbar } from './components/AbpPageToolbar.vue';
 
 export { EXTRA_PROPERTIES_KEY } from './constants/extra-properties.js';
 
+// Types only: the inspector itself is development-only, and importing it here would put
+// it in every production bundle (design 05 §11).
+export type {
+  ExtensionPointName,
+  InspectedItem,
+  InspectedPoint,
+  InspectionReport,
+  OrphanContributor,
+} from './dev/inspect.js';
+
 export { PropType } from './enums/prop-type.js';
 
 export {

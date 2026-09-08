@@ -1,4 +1,5 @@
 import { getCurrentInjector, PermissionService, type Injector } from '@lsw-abpvue/core';
+import { installInspector } from '../dev/inspect.js';
 import { computed, type ComputedRef } from 'vue';
 import type { EntityAction, ToolbarAction } from '../models/actions.js';
 import type { GetInjected, PropData } from '../models/prop-data.js';
@@ -17,6 +18,11 @@ export function useGetInjected(): { injector: Injector; getInjected: GetInjected
       'An extensible component was set up outside an injection context. Render it inside an application created with createAbpApp().',
     );
   }
+
+  // The one place every extensible component passes through, which is what makes the
+  // inspector need no wiring from the host. The branch is what a production build drops,
+  // and the module goes with it.
+  if (import.meta.env?.DEV) installInspector(injector);
 
   return { injector, getInjected: injector.get.bind(injector) as GetInjected };
 }
