@@ -1,5 +1,6 @@
 import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import type { PageQueryParams, PagedResultDto, RequestStatus, SortOrder } from '../models/list.js';
+import { useListPreferences } from './list-preferences.js';
 import { useDebounceFn } from './use-debounce-fn.js';
 import { useLatest } from './use-latest.js';
 
@@ -9,6 +10,11 @@ export interface ListServiceOptions {
   maxResultCount?: number | undefined;
   sortKey?: string | undefined;
   sortOrder?: SortOrder | undefined;
+  /**
+   * Remembers the page size and the sorting under this name, per user. The extensible
+   * table stores which columns are hidden under the same one (difference +).
+   */
+  persistKey?: string | undefined;
 }
 
 export interface ListSource<R> {
@@ -18,6 +24,8 @@ export interface ListSource<R> {
 }
 
 export interface ListService {
+  /** What the preferences of this list are stored under, if it stores any. */
+  readonly persistKey: string | undefined;
   filter: Ref<string>;
   /** Zero-based, the way `skipCount` is computed from it. */
   page: Ref<number>;
@@ -46,11 +54,14 @@ export interface ListService {
  * watchers stop with it (difference 8).
  */
 export function useListService(options: ListServiceOptions = {}): ListService {
+  const preferences = options.persistKey ? useListPreferences(options.persistKey) : undefined;
+  const stored = preferences?.read() ?? {};
+
   const filter = ref('');
   const page = ref(0);
-  const maxResultCount = ref(options.maxResultCount ?? 10);
-  const sortKey = ref(options.sortKey ?? '');
-  const sortOrder = ref<SortOrder>(options.sortOrder ?? '');
+  const maxResultCount = ref(stored.maxResultCount ?? options.maxResultCount ?? 10);
+  const sortKey = ref(stored.sortKey ?? options.sortKey ?? '');
+  const sortOrder = ref<SortOrder>(stored.sortOrder ?? options.sortOrder ?? '');
   const totalCount = ref(0);
   const status = ref<RequestStatus>('idle');
   // Bumped to ask for the same query again, which is what a refresh button needs.
@@ -68,7 +79,16 @@ export function useListService(options: ListServiceOptions = {}): ListService {
     page.value = 0;
   });
 
+  // Only what the user changed after the list was built: the defaults are not a
+  // preference, and storing them would freeze a module's own default sorting.
+  if (preferences) {
+    watch([maxResultCount, sortKey, sortOrder], ([count, key, order]) => {
+      preferences.patch({ maxResultCount: count, sortKey: key, sortOrder: order });
+    });
+  }
+
   return {
+    persistKey: options.persistKey,
     filter,
     page,
     maxResultCount,

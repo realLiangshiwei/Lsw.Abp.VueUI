@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
+import { createInjector } from '../di/injector.js';
+import { runInInjectionContext } from '../di/inject.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from '../services/config-state.service.js';
+import { StorageService } from '../services/platform/storage.service.js';
 import type { PageQueryParams, PagedResultDto } from '../models/list.js';
-import { useListService } from './use-list-service.js';
+import { useListService, type ListServiceOptions } from './use-list-service.js';
 
 const page = <R>(items: R[], totalCount = items.length): PagedResultDto<R> => ({
   items,
@@ -182,5 +187,105 @@ describe('races', () => {
 
     expect(signals[0]?.aborted).toBe(true);
     expect(signals[1]?.aborted).toBe(false);
+  });
+});
+
+describe('remembering what the user chose', () => {
+  function withStorage(userId?: string) {
+    const values = new Map<string, string>();
+    const storage: StorageService = {
+      getItem: key => values.get(key) ?? null,
+      setItem: (key, value) => void values.set(key, value),
+      removeItem: key => void values.delete(key),
+      keys: () => [...values.keys()],
+      onChange: () => () => {},
+    };
+
+    const injector = createInjector([{ provide: StorageService, useValue: storage }]);
+    const configState = injector.get(ConfigStateService);
+    configState.setState({
+      ...configState.snapshot(),
+      currentUser: { ...configState.snapshot().currentUser, id: userId },
+    } as ApplicationConfigurationDto);
+
+    return {
+      values,
+      list: (options: ListServiceOptions) =>
+        runInInjectionContext(injector, () => useListService(options)),
+    };
+  }
+
+  it('stores the page size and the sorting under the list and the user', async () => {
+    const { values, list } = withStorage('user-1');
+    const service = list({ persistKey: 'Identity.Users' });
+
+    service.maxResultCount.value = 25;
+    service.sortOrder.value = 'desc';
+    service.sortKey.value = 'userName';
+    await settled();
+
+    expect(JSON.parse(values.get('abpvue.list.Identity.Users.user-1') ?? '{}')).toEqual({
+      maxResultCount: 25,
+      sortKey: 'userName',
+      sortOrder: 'desc',
+    });
+  });
+
+  it('the next visit starts where the last one left off', async () => {
+    const { values, list } = withStorage('user-1');
+    values.set(
+      'abpvue.list.Identity.Users.user-1',
+      JSON.stringify({ maxResultCount: 50, sortKey: 'email', sortOrder: 'asc' }),
+    );
+
+    const service = list({ persistKey: 'Identity.Users', maxResultCount: 10 });
+
+    expect(service.maxResultCount.value).toBe(50);
+    expect(service.query.value.sorting).toBe('email asc');
+  });
+
+  it('what is running right now -- the filter and the page -- is not a preference', async () => {
+    const { values, list } = withStorage('user-1');
+    const service = list({ persistKey: 'Identity.Users' });
+
+    service.filter.value = 'ali';
+    service.page.value = 3;
+    await settled();
+
+    expect(values.size).toBe(0);
+  });
+
+  it('another user on the same machine has their own', async () => {
+    const first = withStorage('user-1');
+    first.list({ persistKey: 'Identity.Users' }).maxResultCount.value = 25;
+    await settled();
+
+    const second = withStorage('user-2');
+    expect(second.list({ persistKey: 'Identity.Users' }).maxResultCount.value).toBe(10);
+  });
+
+  it('a list with no key stores nothing at all', async () => {
+    const { values, list } = withStorage('user-1');
+    list({}).maxResultCount.value = 25;
+    await settled();
+
+    expect(values.size).toBe(0);
+  });
+
+  it('preferences nobody can parse fall back to the defaults', () => {
+    const { values, list } = withStorage('user-1');
+    values.set('abpvue.list.Identity.Users.user-1', 'not json');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    expect(list({ persistKey: 'Identity.Users' }).maxResultCount.value).toBe(10);
+    warn.mockRestore();
+  });
+
+  it('a signed-out visitor gets an entry of their own', async () => {
+    const { values, list } = withStorage();
+    list({ persistKey: 'Identity.Users' }).maxResultCount.value = 25;
+    await settled();
+
+    expect([...values.keys()]).toEqual(['abpvue.list.Identity.Users.anonymous']);
   });
 });

@@ -15,6 +15,13 @@ export const LOADING = 'AbpUi::LoadingWithThreeDot';
 
 export const ACTIONS = 'AbpUi::Actions';
 
+export const YES = 'AbpUi::Yes';
+
+export const NO = 'AbpUi::No';
+
+/** `Showing {0} to {1} of {2} entries`. */
+export const PAGER_INFO = 'AbpUi::PagerInfo{0}{1}{2}';
+
 export const SELECT_ALL: LocalizationWithDefault = {
   key: 'AbpUi::SelectAll',
   defaultValue: 'Select all',

@@ -20,7 +20,14 @@ const props = withDefaults(
     /** Shown instead of the rows when there are none. Already localized. */
     emptyText?: string | undefined;
   }>(),
-  { selectable: false, expandable: false, loading: false },
+  {
+    recordKey: undefined,
+    caption: undefined,
+    emptyText: undefined,
+    selectable: false,
+    expandable: false,
+    loading: false,
+  },
 );
 
 /** The column the backend is sorting by, so it binds to `ListService.sortKey`. */

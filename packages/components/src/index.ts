@@ -1,4 +1,8 @@
 export { default as AbpDataTable } from './components/AbpDataTable.vue';
+export { default as AbpExtensibleTable } from './components/AbpExtensibleTable.vue';
+export { default as AbpGridActions } from './components/AbpGridActions.vue';
+export { default as AbpPage } from './components/AbpPage.vue';
+export { default as AbpPageToolbar } from './components/AbpPageToolbar.vue';
 
 export { EXTRA_PROPERTIES_KEY } from './constants/extra-properties.js';
 
@@ -75,6 +79,7 @@ export {
   ROW_RECORD,
 } from './tokens/extensions.token.js';
 
+export { useEntityActions, useToolbarActions } from './utils/use-action-list.js';
 export { mergeWithDefaultActions, mergeWithDefaultProps } from './utils/merge.js';
 export {
   getObjectExtensionEntities,

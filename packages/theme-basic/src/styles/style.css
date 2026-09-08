@@ -187,3 +187,102 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* The page skeleton and the toolbar above a table. */
+.abp-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.abp-page-title {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.abp-page-toolbar,
+.abp-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.abp-extensible-table-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.abp-table-info {
+  margin: 0;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+}
+
+.abp-table-cell-action {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--bs-link-color);
+  text-decoration: underline;
+}
+
+/*
+ * More than one row action collapses into a disclosure. `details` rather than a menu
+ * widget: the keyboard behaviour is the browser's, and the contract layer has no
+ * dropdown for a theme to implement (api-parity-map §9).
+ */
+.abp-grid-actions {
+  position: relative;
+  display: inline-block;
+}
+
+.abp-grid-actions-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-body-bg);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.abp-grid-actions-menu {
+  position: absolute;
+  z-index: 10;
+  inset-inline-start: 0;
+  min-width: 100%;
+  margin: 0.25rem 0 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--abp-overlay-bg);
+  box-shadow: var(--bs-box-shadow);
+}
+
+.abp-grid-actions-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.375rem 1rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.abp-grid-actions-item:hover,
+.abp-grid-actions-item:focus-visible {
+  background-color: var(--bs-secondary-bg);
+}

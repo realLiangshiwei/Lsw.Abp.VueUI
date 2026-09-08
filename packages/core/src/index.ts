@@ -204,6 +204,8 @@ export type { DebouncedFn } from './utils/use-debounce-fn.js';
 export { loadRuntimeConfig } from './utils/load-runtime-config.js';
 export type { RuntimeConfigOptions } from './utils/load-runtime-config.js';
 export { useLatest } from './utils/use-latest.js';
+export { useListPreferences } from './utils/list-preferences.js';
+export type { ListPreferences, ListPreferenceStore } from './utils/list-preferences.js';
 export { useListService } from './utils/use-list-service.js';
 export type { ListService, ListServiceOptions, ListSource } from './utils/use-list-service.js';
 export { useSubscriptions } from './utils/use-subscriptions.js';
