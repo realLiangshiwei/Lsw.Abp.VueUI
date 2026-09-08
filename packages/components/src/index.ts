@@ -1,4 +1,5 @@
 export { default as AbpDataTable } from './components/AbpDataTable.vue';
+export { default as AbpExtensibleForm } from './components/AbpExtensibleForm.vue';
 export { default as AbpExtensibleTable } from './components/AbpExtensibleTable.vue';
 export { default as AbpGridActions } from './components/AbpGridActions.vue';
 export { default as AbpPage } from './components/AbpPage.vue';
@@ -80,6 +81,8 @@ export {
 } from './tokens/extensions.token.js';
 
 export { useEntityActions, useToolbarActions } from './utils/use-action-list.js';
+export { useExtensibleForm } from './utils/use-extensible-form.js';
+export type { ExtensibleForm } from './utils/use-extensible-form.js';
 export { mergeWithDefaultActions, mergeWithDefaultProps } from './utils/merge.js';
 export {
   getObjectExtensionEntities,
