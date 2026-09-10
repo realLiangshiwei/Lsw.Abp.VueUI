@@ -10,6 +10,7 @@
     "typecheck": "vue-tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@lsw-abpvue/components": "workspace:*",
     "@lsw-abpvue/core": "workspace:*",
     "@lsw-abpvue/oauth": "workspace:*",
     "@lsw-abpvue/theme-basic": "workspace:*",

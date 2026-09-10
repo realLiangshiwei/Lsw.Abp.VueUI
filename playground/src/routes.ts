@@ -5,12 +5,17 @@ import FeedbackPage from './pages/FeedbackPage.vue';
 import HomePage from './pages/HomePage.vue';
 import LoginPage from './pages/LoginPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
+import { userContributors } from './extensions/user-contributors';
+import { createIdentityDemoRoutes } from './modules/identity-demo';
 
 /**
  * Menu entries live in `meta.routes`, which is how an ABP module ships its menu: the
  * routes handler collects them at startup and `RoutesService` filters them by permission.
  */
 export const routes: RouteRecordRaw[] = [
+  // The module's own routes, with the host's contributors handed to it -- the one place
+  // an application says anything about a module's pages (design 05 §6).
+  ...createIdentityDemoRoutes(userContributors),
   {
     path: '/',
     component: HomePage,

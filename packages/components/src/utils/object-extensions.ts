@@ -276,7 +276,8 @@ export function mapEntitiesToContributors<R = unknown>(
         });
 
         contributors.prop[componentKey].push(
-          markObjectExtensionContributor((propList: EntityPropList<R>) => {
+          // Named so the inspector's report says where the column came from.
+          markObjectExtensionContributor(function objectExtension(propList: EntityPropList<R>) {
             propList.addTail(column);
           }),
         );
@@ -305,7 +306,9 @@ export function mapEntitiesToContributors<R = unknown>(
           : {}),
       });
 
-      const contributor = markObjectExtensionContributor((propList: FormPropList<R>) => {
+      const contributor = markObjectExtensionContributor(function objectExtension(
+        propList: FormPropList<R>,
+      ) {
         propList.addTail(field);
       });
 

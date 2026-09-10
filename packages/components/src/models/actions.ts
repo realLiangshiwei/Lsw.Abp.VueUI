@@ -5,7 +5,11 @@ import { ContributorRegistry, Props, type PropContributorCallback } from './prop
 /** Decides whether the button is shown for this row, or for this page of rows. */
 export type ActionPredicate<R> = (data?: PropData<R>) => boolean;
 
-export type ActionCallback<R> = (data: PropData<R>) => void | Promise<void>;
+/**
+ * What a button does. The return value is ignored -- it is `unknown` rather than `void`
+ * so a one-expression callback (`data => toaster.info(...)`) is not a type error.
+ */
+export type ActionCallback<R> = (data: PropData<R>) => unknown;
 
 export interface ActionOptions<R> {
   /** Localization key of the label. */

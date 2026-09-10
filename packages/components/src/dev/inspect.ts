@@ -197,12 +197,20 @@ function printReport(report: InspectionReport): void {
  * Puts the read-only inspector on `globalThis` as `__abpvue`. Called by the extensible
  * components in development only, so a production build never reaches it and the whole
  * module goes with the branch.
- * @param injector The injector the components were rendered under
+ *
+ * It holds the root injector rather than the page's: a page is destroyed when the user
+ * navigates away, and an inspector that stopped answering after that would be useless
+ * exactly when somebody goes looking for it.
+ *
+ * @param injector Any injector; the root above it is what is kept
  */
 export function installInspector(injector: Injector): void {
+  let root = injector;
+  while (root.parent) root = root.parent;
+
   globalThis.__abpvue = {
     inspect: identifier => {
-      const reports = dumpExtensions(injector, identifier);
+      const reports = dumpExtensions(root, identifier);
       if (reports.length === 0) {
         console.info('[abp] No extension point has been assembled yet.');
         return;
@@ -211,6 +219,6 @@ export function installInspector(injector: Injector): void {
       for (const report of reports) printReport(report);
     },
 
-    dump: identifier => dumpExtensions(injector, identifier),
+    dump: identifier => dumpExtensions(root, identifier),
   };
 }

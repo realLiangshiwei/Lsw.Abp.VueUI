@@ -199,6 +199,9 @@ importers:
 
   playground:
     dependencies:
+      '@lsw-abpvue/components':
+        specifier: workspace:*
+        version: link:../packages/components
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../packages/core
