@@ -22,7 +22,9 @@ export function useGetInjected(): { injector: Injector; getInjected: GetInjected
   // The one place every extensible component passes through, which is what makes the
   // inspector need no wiring from the host. The branch is what a production build drops,
   // and the module goes with it.
-  if (import.meta.env?.DEV) installInspector(injector);
+  if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+    installInspector(injector);
+  }
 
   return { injector, getInjected: injector.get.bind(injector) as GetInjected };
 }
