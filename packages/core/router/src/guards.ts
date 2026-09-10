@@ -6,6 +6,7 @@ import {
   runInInjectionContext,
 } from '@lsw-abpvue/core';
 import type { NavigationGuard } from 'vue-router';
+import { routeInjectorChain } from './route-providers.js';
 import { FORBIDDEN_ROUTE } from './tokens.js';
 
 /**
@@ -47,14 +48,21 @@ export const permissionGuard: NavigationGuard = to => {
 /**
  * Runs work that has to finish before a route is shown -- what Angular does with route
  * resolvers, which vue-router has no equivalent for (difference 7).
- * @param resolvers Run in parallel, in the injection context of the application
+ *
+ * The resolvers run in the route's own injector, built from the `meta.providers` of the
+ * records being entered. That is what lets a module's extension resolver read the
+ * contributors the host handed to `provideIdentity(options)`, and `AbpRouterOutlet`
+ * hands the same injector to the pages afterwards.
+ *
+ * @param resolvers Run in parallel, in the injection context of the route
  */
 export function withResolvers(
   resolvers: readonly (() => unknown | Promise<unknown>)[],
 ): NavigationGuard {
-  return async () => {
+  return async to => {
     // Captured before the first await, which is where the context would be gone.
-    const injector = getCurrentInjector();
+    const root = getCurrentInjector();
+    const injector = root ? routeInjectorChain(to.matched, root) : null;
 
     await Promise.all(
       resolvers.map(resolver =>
