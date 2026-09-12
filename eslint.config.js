@@ -30,7 +30,15 @@ const BUSINESS_MODULES = [
  * so it is importable from `theme-basic` and the business modules even though their
  * declared dependency is `theme-shared`.
  */
-const NODE_BUILTINS = ['node:fs', 'node:fs/promises', 'node:path', 'node:process', 'node:url'];
+const NODE_BUILTINS = [
+  'node:fs',
+  'node:fs/promises',
+  // The tests write their proxies into a temporary directory.
+  'node:os',
+  'node:path',
+  'node:process',
+  'node:url',
+];
 
 const ALLOWED_IMPORTS = {
   utils: [],

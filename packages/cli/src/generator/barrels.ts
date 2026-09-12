@@ -16,7 +16,7 @@ export function emitBarrels(files: EmittedFile[]): EmittedFile[] {
 
   ensure('');
 
-  for (const file of files) {
+  for (const file of files.filter(file => file.path.endsWith('.ts'))) {
     const segments = file.path.split('/');
     const name = segments.pop() as string;
     let directory = '';

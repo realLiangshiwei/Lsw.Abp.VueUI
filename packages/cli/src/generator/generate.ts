@@ -5,6 +5,7 @@ import { namespaceOf, parseClrType } from './clr-type.js';
 import { renderDeclaredType } from './declared-type.js';
 import { emitModels, type EmittedFile } from './emit-models.js';
 import { emitPolicyNames, policyNamesFromDefinition } from './emit-policy-names.js';
+import { emitReadme } from './emit-readme.js';
 import { emitServices } from './emit-services.js';
 import { emitDtoValidators, emitExtensionValidators } from './emit-validators.js';
 import { GenerationReport } from './report.js';
@@ -186,5 +187,9 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
   const sorted = files.sort((left, right) => (left.path < right.path ? -1 : 1));
   const barrels = options.index === false ? [] : emitBarrels(sorted);
 
-  return { files: [...sorted, ...barrels], report, modules: [...wanted].sort() };
+  return {
+    files: [...sorted, ...barrels, emitReadme()],
+    report,
+    modules: [...wanted].sort(),
+  };
 }

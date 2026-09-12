@@ -5,7 +5,9 @@ import type { GenerationReport } from './report.js';
 
 const HEADER = [
   '// The permission names the backend declares, so a check is a name the compiler knows',
-  '// rather than a string that quietly answers no when it is misspelled.',
+  '// rather than a string that quietly answers no when it is misspelled. Grouped the way',
+  '// the backend groups them, and covering every module it declares rather than only the',
+  '// ones generated here -- permissions are not filed per module anywhere it states them.',
   '//',
   '// To have a mistyped name stop compiling, merge the union into core once, anywhere in',
   '// the application:',
