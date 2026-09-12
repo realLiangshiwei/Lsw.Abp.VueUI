@@ -139,6 +139,22 @@ describe('what the report says about every entry', () => {
       },
     ]);
   });
+
+  it('counts the orphans of the last assembly, not of every visit', () => {
+    const injector = context();
+    const orphan = { 'BookStore.BookComponent': [() => {}] };
+
+    // A resolver runs again on every navigation into the module.
+    for (let visit = 0; visit < 3; visit += 1) {
+      mergeWithDefaultProps(
+        injector.get(ExtensionsService).entityProps,
+        { [BOOKS]: [column('name')] },
+        orphan,
+      );
+    }
+
+    expect(dumpExtensions(injector, BOOKS)[0]?.orphans[0]?.count).toBe(1);
+  });
 });
 
 describe('what the report covers', () => {

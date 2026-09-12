@@ -37,6 +37,14 @@ function run(action: EntityAction<R>): void {
   open.value = false;
   void action.action(data.value);
 }
+
+/** Tabbing from the summary into the menu is not leaving it. */
+function closeOnLeave(event: FocusEvent): void {
+  const next = event.relatedTarget;
+  if (next instanceof Node && (event.currentTarget as HTMLElement).contains(next)) return;
+
+  open.value = false;
+}
 </script>
 
 <template>
@@ -60,7 +68,7 @@ function run(action: EntityAction<R>): void {
     class="abp-grid-actions"
     :open="open"
     @toggle="open = ($event.target as HTMLDetailsElement).open"
-    @focusout="open = false"
+    @focusout="closeOnLeave"
     @keydown.esc="open = false"
   >
     <summary class="abp-grid-actions-toggle">{{ $t(text ?? ACTIONS) }}</summary>

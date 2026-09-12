@@ -7,7 +7,7 @@ import {
 import { Validators } from '@lsw-abpvue/theme-shared';
 import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { PropType } from '../enums/prop-type.js';
 import { FormProp } from '../models/form-props.js';
@@ -158,6 +158,20 @@ describe('the control each type gets', () => {
       ],
     });
 
+    expect(wrapper.findAll('option').map(option => option.text())).toContain('Draft');
+  });
+
+  it('options that arrive later are asked for once, not forever', async () => {
+    const asked = vi.fn(async () => [{ value: 1, label: 'Draft' }]);
+    const { wrapper } = render({
+      create: [field({ name: 'kind', type: PropType.Enum, options: asked })],
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 20));
+
+    // Reading the resolved value inside the computed that produced the promise would ask
+    // again on every settle, one request per turn, until the heap gives up.
+    expect(asked).toHaveBeenCalledTimes(1);
     expect(wrapper.findAll('option').map(option => option.text())).toContain('Draft');
   });
 

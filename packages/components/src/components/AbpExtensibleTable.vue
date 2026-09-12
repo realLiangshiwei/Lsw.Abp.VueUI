@@ -82,7 +82,11 @@ const preferences = (() => {
   if (!key) return undefined;
 
   const store = useListPreferences(key);
-  hiddenColumns.value = store.read().hiddenColumns ?? hiddenColumns.value;
+  // The union, not the stored list: a page that hides a column for a reason of its own
+  // still hides it after the user has hidden something else.
+  hiddenColumns.value = [
+    ...new Set([...hiddenColumns.value, ...(store.read().hiddenColumns ?? [])]),
+  ];
 
   return store;
 })();

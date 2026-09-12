@@ -246,6 +246,22 @@ describe('custom rendering', () => {
 describe('row actions', () => {
   const edit = EntityAction.create<Book>({ text: 'AbpUi::Edit', action: () => {} });
 
+  it('moving focus into the menu does not close it', async () => {
+    const { wrapper } = render({
+      actions: [edit, EntityAction.create<Book>({ text: 'AbpUi::Delete', action: () => {} })],
+    });
+
+    const details = wrapper.find('td[data-column="__actions"] details');
+    await details.find('summary').trigger('click');
+    // Tabbing from the summary to the first action fires focusout on the summary; the
+    // menu it is moving into is not somewhere else.
+    await details
+      .find('summary')
+      .trigger('focusout', { relatedTarget: details.find('button').element });
+
+    expect(details.attributes('open')).toBeDefined();
+  });
+
   it('there is no actions column when there are no actions', () => {
     expect(headers(render().wrapper)).not.toContain('AbpUi::Actions');
   });
@@ -375,6 +391,24 @@ describe('remembering the hidden columns', () => {
       hiddenColumns: ['name'],
     });
     expect(headers(wrapper)).toEqual(['isPublished']);
+  });
+
+  it('a column the page hid stays hidden alongside the stored ones', () => {
+    const { values, provider } = storageOf();
+    values.set(
+      'abpvue.list.BookStore.Books.anonymous',
+      JSON.stringify({ hiddenColumns: ['name'] }),
+    );
+
+    const { wrapper } = render(
+      { providers: [provider] },
+      {
+        persistKey: 'BookStore.Books',
+        hiddenColumns: ['isPublished'],
+      },
+    );
+
+    expect(headers(wrapper)).toEqual([]);
   });
 
   it('a table with no key at all stores nothing', async () => {

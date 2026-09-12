@@ -12,7 +12,7 @@ import {
   type AbpOption,
   type AbpTypeaheadItem,
 } from '@lsw-abpvue/theme-shared';
-import { computed, toRef } from 'vue';
+import { computed, shallowRef, toRef, watch } from 'vue';
 import { PropType } from '../enums/prop-type.js';
 import type { FormProp } from '../models/form-props.js';
 import { unwrapResolvable, type PropData } from '../models/prop-data.js';
@@ -46,8 +46,23 @@ const required = computed(() =>
     .some(validate => validate('', { valueOf: () => undefined })?.rule === 'required'),
 );
 
-const options = computed<readonly AbpOption[]>(
-  () => unwrapResolvable(props.prop.options?.(props.data) ?? []).value ?? [],
+/**
+ * The ref `unwrapResolvable` made for the current callback result. Two levels on
+ * purpose: this one is rebuilt when the field or the record changes, and reading the
+ * value it resolves to happens in the watcher below. Reading it here instead would let a
+ * promise settling invalidate this computed, which would ask the callback again, which
+ * would settle again -- a loop that issues a request per turn until the heap gives up.
+ */
+const resolvedOptions = computed(() => unwrapResolvable(props.prop.options?.(props.data) ?? []));
+
+const options = shallowRef<readonly AbpOption[]>([]);
+
+watch(
+  () => resolvedOptions.value.value,
+  next => (options.value = next ?? []),
+  {
+    immediate: true,
+  },
 );
 
 const inputType = computed(() => {

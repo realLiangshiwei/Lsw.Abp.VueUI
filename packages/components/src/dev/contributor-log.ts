@@ -49,12 +49,19 @@ export function recordContributions(
 }
 
 /**
+ * How many contributors named a key the module does not have. Set rather than added to:
+ * assembly runs again on every navigation into a module, and a counter would report one
+ * misspelled key as three contributors after three visits.
+ *
  * @param factory The extension point being assembled
  * @param componentKeys Keys the contributors named that the module does not have
  */
 export function recordOrphans(factory: object, componentKeys: readonly string[]): void {
   const { orphans } = logOf(factory);
-  for (const key of componentKeys) orphans.set(key, (orphans.get(key) ?? 0) + 1);
+  const counted = new Map<string, number>();
+
+  for (const key of componentKeys) counted.set(key, (counted.get(key) ?? 0) + 1);
+  for (const [key, count] of counted) orphans.set(key, count);
 }
 
 export function readLog(factory: object): FactoryLog | undefined {
