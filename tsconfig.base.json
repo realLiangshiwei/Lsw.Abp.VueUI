@@ -26,6 +26,7 @@
     "types": [],
 
     "paths": {
+      "@lsw-abpvue/cli": ["./packages/cli/src/index.ts"],
       "@lsw-abpvue/components": ["./packages/components/src/index.ts"],
       "@lsw-abpvue/components/extensible": ["./packages/components/extensible/src/index.ts"],
       "@lsw-abpvue/core": ["./packages/core/src/index.ts"],

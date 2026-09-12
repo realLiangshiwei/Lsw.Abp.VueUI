@@ -1,0 +1,122 @@
+{
+  "generated": [
+    "README.md",
+    "book-store/files/file.service.ts",
+    "book-store/files/index.ts",
+    "book-store/files/models.ts",
+    "book-store/files/validators.ts",
+    "book-store/index.ts",
+    "index.ts",
+    "object-extension-validators.ts",
+    "pages/abp/index.ts",
+    "pages/abp/multi-tenancy/abp-tenant.service.ts",
+    "pages/abp/multi-tenancy/index.ts",
+    "pages/index.ts",
+    "policy-names.ts",
+    "volo/abp/account/account.service.ts",
+    "volo/abp/account/dynamic-claims.service.ts",
+    "volo/abp/account/index.ts",
+    "volo/abp/account/models.ts",
+    "volo/abp/account/profile.service.ts",
+    "volo/abp/account/validators.ts",
+    "volo/abp/account/web/areas/account/controllers/index.ts",
+    "volo/abp/account/web/areas/account/controllers/login.service.ts",
+    "volo/abp/account/web/areas/account/controllers/models/index.ts",
+    "volo/abp/account/web/areas/account/controllers/models/login-result-type.enum.ts",
+    "volo/abp/account/web/areas/account/controllers/models/models.ts",
+    "volo/abp/account/web/areas/account/controllers/models/validators.ts",
+    "volo/abp/account/web/areas/account/index.ts",
+    "volo/abp/account/web/areas/index.ts",
+    "volo/abp/account/web/index.ts",
+    "volo/abp/asp-net-core/index.ts",
+    "volo/abp/asp-net-core/mvc/api-exploring/abp-api-definition.service.ts",
+    "volo/abp/asp-net-core/mvc/api-exploring/index.ts",
+    "volo/abp/asp-net-core/mvc/application-configurations/abp-application-configuration.service.ts",
+    "volo/abp/asp-net-core/mvc/application-configurations/abp-application-localization.service.ts",
+    "volo/abp/asp-net-core/mvc/application-configurations/index.ts",
+    "volo/abp/asp-net-core/mvc/application-configurations/models.ts",
+    "volo/abp/asp-net-core/mvc/application-configurations/object-extending/index.ts",
+    "volo/abp/asp-net-core/mvc/application-configurations/object-extending/models.ts",
+    "volo/abp/asp-net-core/mvc/application-configurations/validators.ts",
+    "volo/abp/asp-net-core/mvc/index.ts",
+    "volo/abp/asp-net-core/mvc/multi-tenancy/index.ts",
+    "volo/abp/asp-net-core/mvc/multi-tenancy/models.ts",
+    "volo/abp/feature-management/features.service.ts",
+    "volo/abp/feature-management/index.ts",
+    "volo/abp/feature-management/models.ts",
+    "volo/abp/http/index.ts",
+    "volo/abp/http/modeling/index.ts",
+    "volo/abp/http/modeling/models.ts",
+    "volo/abp/identity/identity-role.service.ts",
+    "volo/abp/identity/identity-user-lookup.service.ts",
+    "volo/abp/identity/identity-user.service.ts",
+    "volo/abp/identity/index.ts",
+    "volo/abp/identity/models.ts",
+    "volo/abp/identity/validators.ts",
+    "volo/abp/index.ts",
+    "volo/abp/localization/index.ts",
+    "volo/abp/localization/models.ts",
+    "volo/abp/multi-tenancy/index.ts",
+    "volo/abp/multi-tenancy/tenant-user-sharing-strategy.enum.ts",
+    "volo/abp/permission-management/index.ts",
+    "volo/abp/permission-management/models.ts",
+    "volo/abp/permission-management/permissions.service.ts",
+    "volo/abp/setting-management/email-settings.service.ts",
+    "volo/abp/setting-management/index.ts",
+    "volo/abp/setting-management/models.ts",
+    "volo/abp/setting-management/time-zone-settings.service.ts",
+    "volo/abp/setting-management/validators.ts",
+    "volo/abp/tenant-management/index.ts",
+    "volo/abp/tenant-management/models.ts",
+    "volo/abp/tenant-management/tenant.service.ts",
+    "volo/abp/tenant-management/validators.ts",
+    "volo/abp/users/index.ts",
+    "volo/abp/users/models.ts",
+    "volo/abp/validation/index.ts",
+    "volo/abp/validation/string-values/index.ts",
+    "volo/abp/validation/string-values/models.ts",
+    "volo/index.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "abp": {
+      "rootPath": "abp",
+      "remoteServiceName": "abp"
+    },
+    "account": {
+      "rootPath": "account",
+      "remoteServiceName": "AbpAccount"
+    },
+    "app": {
+      "rootPath": "app",
+      "remoteServiceName": "Default"
+    },
+    "featureManagement": {
+      "rootPath": "featureManagement",
+      "remoteServiceName": "AbpFeatureManagement"
+    },
+    "identity": {
+      "rootPath": "identity",
+      "remoteServiceName": "AbpIdentity"
+    },
+    "multi-tenancy": {
+      "rootPath": "multi-tenancy",
+      "remoteServiceName": "AbpTenantManagement"
+    },
+    "permissionManagement": {
+      "rootPath": "permissionManagement",
+      "remoteServiceName": "AbpPermissionManagement"
+    },
+    "settingManagement": {
+      "rootPath": "settingManagement",
+      "remoteServiceName": "SettingManagement"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "index": true,
+    "validators": true,
+    "policyNames": true
+  }
+}

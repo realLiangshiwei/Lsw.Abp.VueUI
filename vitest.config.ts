@@ -1,6 +1,8 @@
-import { dirname } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vitest/config';
+import { workspaceAliases } from './scripts/workspace-aliases.ts';
 
 const root = dirname(fileURLToPath(import.meta.url));
 
@@ -15,6 +17,19 @@ export default defineConfig({
           name: 'tooling',
           root,
           include: ['scripts/**/*.spec.ts'],
+          environment: 'node',
+        },
+      },
+      {
+        // The generated proxy against the backend it was generated from: the one thing
+        // no unit test can answer. `core` is reached through its source, components and
+        // all, so the plugin that compiles them has to be here too.
+        plugins: [vue()],
+        resolve: { alias: workspaceAliases(resolve(root, 'packages')) },
+        test: {
+          name: 'e2e',
+          root,
+          include: ['e2e/specs/**/*.spec.ts'],
           environment: 'node',
         },
       },

@@ -5,6 +5,15 @@
     "allowImportingTsExtensions": true,
     "types": ["node"]
   },
-  "include": ["scripts/**/*.ts", "*.config.ts", "**/vite.config.ts", "**/vitest.config.ts"],
+  "include": [
+    "scripts/**/*.ts",
+    "*.config.ts",
+    "**/vite.config.ts",
+    "**/vitest.config.ts",
+    // The generated proxy and the tests that call a real backend through it: what a
+    // consumer compiles is what is checked here (M3 V1).
+    "e2e/proxy/**/*.ts",
+    "e2e/specs/**/*.ts"
+  ],
   "exclude": ["node_modules", "**/dist", "e2e/backend", "playground"]
 }

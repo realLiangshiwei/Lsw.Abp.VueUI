@@ -129,6 +129,7 @@ export default tseslint.config(
       'packages/*/proxy/**',
       'packages/*/src/proxy/**',
       'playground/src/proxy/**',
+      'e2e/proxy/**',
     ],
   },
 

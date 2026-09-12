@@ -198,6 +198,10 @@ export async function runProxy(action: ProxyAction, args: ProxyArgs): Promise<Pr
         })
       : undefined;
 
+  // `all` is an instruction, not a module: what gets recorded is what it expanded to, so
+  // the next refresh generates the same thing rather than whatever the backend has grown.
+  const generated = generation?.modules ?? modules;
+
   const written = await writeProxy({
     target,
     files: generation?.files ?? [],
@@ -213,7 +217,7 @@ export async function runProxy(action: ProxyAction, args: ProxyArgs): Promise<Pr
         generated: written.written,
         removed: written.removed,
         modules: Object.fromEntries(
-          modules.map(name => [
+          generated.map(name => [
             name,
             {
               rootPath: definition.modules[name]?.rootPath ?? name,
@@ -237,7 +241,7 @@ export async function runProxy(action: ProxyAction, args: ProxyArgs): Promise<Pr
     }
   }
 
-  return { ...written, modules, report };
+  return { ...written, modules: generated, report };
 }
 
 /**
