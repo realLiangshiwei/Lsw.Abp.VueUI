@@ -214,6 +214,8 @@ export { ABP_ROOT_OPTIONS } from './tokens/root-options.token.js';
 export { TENANT_KEY } from './tokens/tenant-key.token.js';
 export { TENANT_NOT_FOUND_BY_NAME } from './tokens/tenant-not-found.token.js';
 
+export { mapEnumToOptions } from './utils/enum-options.js';
+export type { EnumOption } from './utils/enum-options.js';
 export { InternalStore } from './utils/internal-store.js';
 export { createNavTree } from './utils/nav-tree.js';
 export type { NavTree, NavTreeOptions } from './utils/nav-tree.js';

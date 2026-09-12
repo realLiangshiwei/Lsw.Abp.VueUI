@@ -30,8 +30,13 @@ const BUSINESS_MODULES = [
  * so it is importable from `theme-basic` and the business modules even though their
  * declared dependency is `theme-shared`.
  */
+const NODE_BUILTINS = ['node:fs', 'node:fs/promises', 'node:path', 'node:process', 'node:url'];
+
 const ALLOWED_IMPORTS = {
   utils: [],
+  // A build-time tool, not part of any application bundle: no framework, no workspace
+  // package, and the Node APIs it needs listed one by one.
+  cli: [...NODE_BUILTINS, '@clack/prompts', 'citty', 'prettier'],
   core: [...FRAMEWORK, UTILS],
   oauth: [...FRAMEWORK, UTILS, CORE, 'oidc-client-ts'],
   'theme-shared': [...FRAMEWORK, UTILS, CORE],
@@ -111,7 +116,11 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.turbo/**',
       'e2e/backend/**',
+      // Generated proxies: `abpvue proxy add` writes what the backend describes, enums
+      // included, and the rules here are about code someone writes.
       'packages/*/proxy/**',
+      'packages/*/src/proxy/**',
+      'playground/src/proxy/**',
     ],
   },
 
@@ -188,6 +197,12 @@ export default tseslint.config(
       // one answer to "what does a theme have to implement".
       'vue/one-component-per-file': 'off',
     },
+  },
+
+  {
+    // The CLI runs on Node, and the console it writes to is Node's.
+    files: ['packages/cli/**/*.ts'],
+    languageOptions: { globals: globals.node },
   },
 
   {

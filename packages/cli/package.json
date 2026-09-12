@@ -1,0 +1,46 @@
+{
+  "name": "@lsw-abpvue/cli",
+  "version": "0.0.0",
+  "description": "The command line tool of the ABP Vue UI. Generates typed proxies from a running ABP backend.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src"
+  ],
+  "bin": {
+    "abpv": "./dist/bin.js",
+    "abpvue": "./dist/bin.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.json",
+    "typecheck": "vue-tsc -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.0.0",
+    "citty": "^0.2.2",
+    "prettier": "^3.9.6"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realLiangshiwei/Lsw.Abp.VueUI.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI",
+  "publishConfig": {
+    "access": "public"
+  }
+}

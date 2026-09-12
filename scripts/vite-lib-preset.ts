@@ -17,6 +17,11 @@ export interface AbpLibOptions {
   external?: (string | RegExp)[];
   /** Base name of the stylesheet a theme emits; `style` makes it `dist/style.css`. */
   cssFileName?: string;
+  /**
+   * Prepended to a chunk, by output file name. A CLI entry point uses it for the shebang
+   * a bundler would otherwise drop.
+   */
+  banner?: ((chunkFileName: string) => string) | undefined;
 }
 
 const FRAMEWORK_EXTERNALS = [/^vue$/, /^vue-router$/, /^@vue\//];
@@ -60,6 +65,7 @@ export function defineAbpLibConfig(options: AbpLibOptions): UserConfig {
         ],
         output: {
           chunkFileNames: 'chunks/[name]-[hash].js',
+          ...(options.banner ? { banner: chunk => options.banner?.(chunk.fileName) ?? '' } : {}),
         },
       },
     },

@@ -15,6 +15,9 @@ const packagesRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'pac
  */
 const ALLOWED = {
   utils: [],
+  // A development tool that runs on Node and ships no runtime code, so nothing from the
+  // workspace and nothing from the framework belongs in it.
+  cli: ['@clack/prompts', 'citty', 'prettier'],
   core: ['@lsw-abpvue/utils', 'vue', 'vue-router'],
   oauth: ['@lsw-abpvue/core', '@lsw-abpvue/utils', 'oidc-client-ts', 'vue', 'vue-router'],
   'theme-shared': [
