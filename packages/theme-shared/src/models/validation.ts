@@ -26,6 +26,15 @@ export type AbpValidator<T = unknown> = (
   context: AbpValidatorContext,
 ) => AbpValidationError | null;
 
+/**
+ * The validators of a form, keyed by control name. What `abpvue proxy add` generates
+ * from what the backend already declares, and what a hand-written form spreads into its
+ * controls.
+ */
+export type ValidatorMap<T = Record<string, unknown>> = {
+  [K in keyof T & string]?: AbpValidator[];
+};
+
 /** One entry of ABP's `validationErrors`; its message is already localized. */
 export interface AbpServerValidationError {
   message: string;

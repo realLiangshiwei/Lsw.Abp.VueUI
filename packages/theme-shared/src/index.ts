@@ -74,6 +74,7 @@ export type {
   AbpValidationError,
   AbpValidator,
   AbpValidatorContext,
+  ValidatorMap,
 } from './models/validation.js';
 
 export { provideErrorHandler } from './providers/error-handler.provider.js';
