@@ -57,6 +57,23 @@ export type {
   PipeToLoginFn,
 } from './models/auth.js';
 export type {
+  AuditedEntityDto,
+  CreationAuditedEntityDto,
+  EntityDto,
+  ExtensibleAuditedEntityDto,
+  ExtensibleCreationAuditedEntityDto,
+  ExtensibleEntityDto,
+  ExtensibleFullAuditedEntityDto,
+  ExtensibleLimitedResultRequestDto,
+  ExtensibleObject,
+  ExtensiblePagedAndSortedResultRequestDto,
+  ExtensiblePagedResultRequestDto,
+  FullAuditedEntityDto,
+  LimitedResultRequestDto,
+  PagedAndSortedResultRequestDto,
+  PagedResultRequestDto,
+} from './models/dtos.js';
+export type {
   ApiConfig,
   Apis,
   ApplicationInfo,
@@ -87,6 +104,7 @@ export type {
 } from './models/localization.js';
 export { LayoutType } from './models/nav.js';
 export type { AbpNavItem, AbpRoute, RouteGroup, TreeNode } from './models/nav.js';
+export type { AbpKnownPolicyName, AbpPolicyName, UnknownPolicyName } from './models/policy.js';
 export type { AbpRootOptions, ResolvedRootOptions } from './models/root-options.js';
 export { TenantNotFoundError } from './models/tenant.js';
 

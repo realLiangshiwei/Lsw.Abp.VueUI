@@ -2,6 +2,7 @@ import { isDevMode } from '@lsw-abpvue/utils';
 import { computed, toValue, type ComputedRef, type MaybeRefOrGetter } from 'vue';
 import { inject } from '../di/inject.js';
 import { defineService, type ServiceOf } from '../di/token.js';
+import type { AbpPolicyName } from '../models/policy.js';
 import { evaluatePolicy, parsePolicy, type PolicyExpression } from '../utils/policy-expression.js';
 import { ConfigStateService } from './config-state.service.js';
 
@@ -29,7 +30,7 @@ export const PermissionService = defineService('PermissionService', () => {
    * `A || B`, `A && B`, and unlike Angular the two mixed with parentheses.
    * @param policy Policy expression; an empty one is granted, as in Angular
    */
-  function isGranted(policy: string | undefined): boolean {
+  function isGranted<T extends string>(policy: (T & AbpPolicyName<T>) | undefined): boolean {
     if (!policy) return true;
 
     const expression = expressionFor(policy);
@@ -41,8 +42,9 @@ export const PermissionService = defineService('PermissionService', () => {
   return {
     isGranted,
 
-    isGrantedRef: (policy: MaybeRefOrGetter<string | undefined>): ComputedRef<boolean> =>
-      computed(() => isGranted(toValue(policy))),
+    isGrantedRef: <T extends string>(
+      policy: MaybeRefOrGetter<(T & AbpPolicyName<T>) | undefined>,
+    ): ComputedRef<boolean> => computed(() => isGranted(toValue(policy))),
 
     filterByPolicy: <T extends { requiredPolicy?: string | undefined }>(items: readonly T[]): T[] =>
       items.filter(item => isGranted(item.requiredPolicy)),
