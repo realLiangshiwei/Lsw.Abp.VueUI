@@ -1,11 +1,19 @@
 import { readFile } from 'node:fs/promises';
 import type { ApiDefinition } from './models.js';
+import type { ApplicationConfiguration } from './object-extensions.js';
 
 /**
  * `includeTypes` is not optional: without it the backend answers with an empty type
  * pool and there is nothing to generate from.
  */
 export const API_DEFINITION_PATH = '/api/abp/api-definition?includeTypes=true';
+
+/**
+ * Where the object extension properties and their attributes are; the localization
+ * resources are the bulk of the answer and the generator has no use for them.
+ */
+export const APPLICATION_CONFIGURATION_PATH =
+  '/api/abp/application-configuration?includeLocalizationResources=false';
 
 export interface ApiDefinitionSource {
   /** The backend to ask; ignored when `file` is set. */
@@ -109,4 +117,42 @@ export async function readApiDefinition(source: ApiDefinitionSource): Promise<Ap
   }
 
   return readFromBackend(source);
+}
+
+async function readJson<T>(source: ApiDefinitionSource, path: string): Promise<T> {
+  if (source.file) {
+    try {
+      return JSON.parse(await readFile(source.file, 'utf8')) as T;
+    } catch (cause) {
+      throw new ApiDefinitionError(`Cannot read ${source.file}.`, { cause });
+    }
+  }
+
+  const url = `${(source.url ?? '').replace(/\/+$/, '')}${path}`;
+  const send = source.fetch ?? globalThis.fetch;
+
+  try {
+    const response = await send(url, {
+      headers: source.token ? { Authorization: `Bearer ${source.token}` } : {},
+    });
+
+    if (!response.ok) throw new ApiDefinitionError(`${url} answered ${response.status}.`);
+
+    return (await response.json()) as T;
+  } catch (cause) {
+    if (cause instanceof ApiDefinitionError) throw cause;
+    throw new ApiDefinitionError(`Cannot reach ${url}.`, { cause });
+  }
+}
+
+/**
+ * The application configuration, which is where the object extension properties and the
+ * permission names are. Anonymous is enough for the extensions; the permission names a
+ * user has are only there once there is a token.
+ * @param source Where to read it from
+ */
+export async function readApplicationConfiguration(
+  source: ApiDefinitionSource,
+): Promise<ApplicationConfiguration & { auth?: { grantedPolicies?: Record<string, boolean> } }> {
+  return readJson(source, APPLICATION_CONFIGURATION_PATH);
 }

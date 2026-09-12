@@ -1,25 +1,34 @@
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { readApiDefinition } from '../api-definition/source.js';
+import { readApiDefinition, readApplicationConfiguration } from '../api-definition/source.js';
 import type { ApiDefinition } from '../api-definition/models.js';
+import type { ApplicationConfiguration } from '../api-definition/object-extensions.js';
 import { generateProxy, UnknownModuleError } from './generate.js';
 
 const BACKEND = process.env.ABP_BACKEND_URL ?? 'https://localhost:44384';
 const FIXTURE = resolve(import.meta.dirname, '../../../../e2e/fixtures/api-definition.json');
+const CONFIGURATION_FIXTURE = resolve(
+  import.meta.dirname,
+  '../../../../e2e/fixtures/application-configuration.json',
+);
 
-async function live(): Promise<ApiDefinition | undefined> {
+async function withDevelopmentCertificate<T>(read: () => Promise<T>): Promise<T | undefined> {
   // The test backend serves a development certificate, which is what a person generating
   // a proxy on their own machine is talking to as well.
   const strict = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
   try {
-    return await readApiDefinition({ url: BACKEND });
+    return await read();
   } catch {
     return undefined;
   } finally {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = strict ?? '1';
   }
+}
+
+async function live(): Promise<ApiDefinition | undefined> {
+  return withDevelopmentCertificate(() => readApiDefinition({ url: BACKEND }));
 }
 
 const backend = await live();
@@ -29,8 +38,15 @@ if (!backend) {
 
 const definition = backend ?? (await readApiDefinition({ file: FIXTURE }));
 
-function generate(modules: string[]) {
-  const result = generateProxy({ definition, modules });
+const configuration =
+  (backend &&
+    (await withDevelopmentCertificate(() => readApplicationConfiguration({ url: BACKEND })))) ||
+  ((await readApplicationConfiguration({
+    file: CONFIGURATION_FIXTURE,
+  })) as ApplicationConfiguration);
+
+function generate(modules: string[], extras: Partial<Parameters<typeof generateProxy>[0]> = {}) {
+  const result = generateProxy({ definition, modules, ...extras });
 
   return {
     ...result,
@@ -125,5 +141,39 @@ describe('asking for a module the backend does not have', () => {
   it('says which ones it does have', () => {
     expect(() => generate(['nope'])).toThrow(UnknownModuleError);
     expect(() => generate(['nope'])).toThrow(/identity/);
+  });
+});
+
+describe('the object extension properties of the test backend', () => {
+  const result = generate(['identity'], {
+    objectExtensions: configuration.objectExtensions ?? { modules: {} },
+  });
+  const content = result.content('object-extension-validators.ts');
+
+  it.each([
+    [
+      'SocialSecurityNumber',
+      'Validators.required(), Validators.maxLength(64), Validators.minLength(4)',
+    ],
+    ['Age', 'Validators.required(), Validators.range(0, 150)'],
+    ['IsExternal', 'Validators.required()'],
+    ['Title', 'Validators.required()'],
+    ['Website', 'Validators.pattern(new RegExp("^https?://.+"))'],
+    ['InternalNote', 'Validators.maxLength(256)'],
+  ])('%s gets the rules the backend declared for it', (name, rules) => {
+    expect(content).toContain(`${name}: [${rules}],`);
+  });
+
+  it('leaves out HireDate, which declares no rules at all', () => {
+    expect(content).not.toContain('HireDate');
+  });
+
+  it('generates the role property too, in its own map', () => {
+    expect(content).toContain('export const identityRoleExtensionValidators = {');
+    expect(content).toContain('Department: [Validators.maxLength(128)],');
+  });
+
+  it('is not affected by the permission InternalNote is behind', () => {
+    expect(content).toContain('InternalNote: [Validators.maxLength(256)],');
   });
 });

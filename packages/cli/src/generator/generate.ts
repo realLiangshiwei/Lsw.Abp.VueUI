@@ -1,9 +1,12 @@
 import type { ApiDefinition, ControllerDefinition } from '../api-definition/models.js';
+import type { ObjectExtensions } from '../api-definition/object-extensions.js';
 import { emitBarrels } from './barrels.js';
 import { namespaceOf, parseClrType } from './clr-type.js';
 import { renderDeclaredType } from './declared-type.js';
 import { emitModels, type EmittedFile } from './emit-models.js';
+import { emitPolicyNames, policyNamesFromDefinition } from './emit-policy-names.js';
 import { emitServices } from './emit-services.js';
+import { emitDtoValidators, emitExtensionValidators } from './emit-validators.js';
 import { GenerationReport } from './report.js';
 import { TypeRegistry, type RegisteredType } from './type-registry.js';
 import { resolveUniqueNames } from './unique-names.js';
@@ -21,6 +24,21 @@ export interface GenerateOptions {
   apiName?: string | undefined;
   /** Barrel files; off when the proxy is re-exported by hand. */
   index?: boolean | undefined;
+  /** Validator maps out of what the backend declares; on unless asked otherwise. */
+  validators?: boolean | undefined;
+  /** Permission name constants; on unless asked otherwise. */
+  policyNames?: boolean | undefined;
+  /**
+   * The `objectExtensions` of the application configuration. The only place the
+   * attributes of an extension property are stated.
+   */
+  objectExtensions?: ObjectExtensions | undefined;
+  /**
+   * Permission names read from the application configuration. ABP's own modules do not
+   * put their authorization where `api-definition` can see it, so this is what makes the
+   * names complete for them.
+   */
+  grantedPolicies?: string[] | undefined;
 }
 
 export interface GenerationResult {
@@ -143,7 +161,27 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
     referenced.push(...services.referenced);
   }
 
-  files.push(...emitModels(closureOf(referenced, registry), registry, report));
+  const closure = closureOf(referenced, registry);
+  files.push(...emitModels(closure, registry, report));
+
+  if (options.validators !== false) {
+    files.push(...emitDtoValidators(closure, report));
+    if (options.objectExtensions) {
+      files.push(...emitExtensionValidators(options.objectExtensions, report));
+    }
+  }
+
+  if (options.policyNames !== false) {
+    files.push(
+      ...emitPolicyNames(
+        [
+          ...policyNamesFromDefinition(options.definition, wanted),
+          ...(options.grantedPolicies ?? []),
+        ],
+        report,
+      ),
+    );
+  }
 
   const sorted = files.sort((left, right) => (left.path < right.path ? -1 : 1));
   const barrels = options.index === false ? [] : emitBarrels(sorted);
