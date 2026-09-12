@@ -35,6 +35,8 @@ export default defineConfig({
         branches: 80,
         statements: 80,
         'packages/core/src/di/**': { lines: 95, functions: 95, branches: 95, statements: 95 },
+        // The extension system carries every module page after it (testing rules).
+        'packages/components/src/**': { lines: 80, functions: 80, branches: 80, statements: 80 },
       },
     },
   },
