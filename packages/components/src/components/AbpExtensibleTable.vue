@@ -7,8 +7,8 @@ import {
   type ListService,
 } from '@lsw-abpvue/core';
 import { AbpPagination } from '@lsw-abpvue/theme-shared';
-import { computed, watch, type Ref } from 'vue';
-import { ACTIONS, NO, PAGER_INFO, YES } from '../defaults/texts.js';
+import { computed, watch, watchEffect, type Ref } from 'vue';
+import { ACTIONS, NO, PAGER_INFO, PAGINATION, YES } from '../defaults/texts.js';
 import { PropType } from '../enums/prop-type.js';
 import type { EntityProp, PropValue } from '../models/entity-props.js';
 import { unwrapResolvable, type PropData } from '../models/prop-data.js';
@@ -168,6 +168,20 @@ const columns = computed<AbpTableColumn<R>[]>(() => [
 
 const propsByName = computed(() => new Map(visibleProps.value.map(prop => [prop.name, prop])));
 
+// Two columns of one name is a contributor adding what is already there; the table would
+// render both and the second would win every lookup by name. Gated on the expression a
+// bundler substitutes, so the message -- which names the inspector -- is not in a
+// production build either.
+if ((import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV) {
+  watchEffect(() => {
+    if (propsByName.value.size === visibleProps.value.length) return;
+
+    console.warn(
+      `[abp] Two columns of ${identifier} carry the same name. __abpvue.inspect('${identifier}') says which contributor added the second one.`,
+    );
+  });
+}
+
 function cellProp(name: string): EntityProp<R> | undefined {
   return propsByName.value.get(name);
 }
@@ -271,6 +285,7 @@ const pageInfo = computed(() => {
         :page="list.page.value"
         :page-size="list.maxResultCount.value"
         :total="list.totalCount.value"
+        :aria-label="$t(PAGINATION)"
         show-size-selector
         @update:page="goToPage($event)"
         @update:page-size="setPageSize($event)"

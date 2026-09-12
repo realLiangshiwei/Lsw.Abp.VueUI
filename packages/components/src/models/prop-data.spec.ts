@@ -1,5 +1,5 @@
 import { computed, nextTick, ref } from 'vue';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { unwrapResolvable } from './prop-data.js';
 
 describe('unwrapResolvable', () => {
@@ -33,6 +33,17 @@ describe('unwrapResolvable', () => {
     await nextTick();
 
     expect(unwrapped.value).toBe('later');
+  });
+
+  it('a rejected promise leaves the value undefined instead of going unhandled', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const unwrapped = unwrapResolvable(Promise.reject(new Error('the lookup failed')));
+
+    await nextTick();
+
+    expect(unwrapped.value).toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it('a computed counts as a ref rather than as a getter', () => {

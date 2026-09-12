@@ -1,4 +1,5 @@
 import type { Injector } from '@lsw-abpvue/core';
+import { isDevMode } from '@lsw-abpvue/utils';
 import { computed, isRef, shallowRef, type Ref } from 'vue';
 
 /**
@@ -51,9 +52,16 @@ export function unwrapResolvable<T>(value: Resolvable<T>): Ref<T | undefined> {
 
   if (isPromise<T>(value)) {
     const resolved = shallowRef<T>();
-    void value.then(next => {
-      resolved.value = next;
-    });
+    value.then(
+      next => {
+        resolved.value = next;
+      },
+      // A rejected lookup leaves the value undefined rather than an unhandled rejection.
+      // The request itself was already reported by the transport layer.
+      (error: unknown) => {
+        if (isDevMode()) console.warn('[abp] A prop callback was rejected.', error);
+      },
+    );
 
     return resolved;
   }

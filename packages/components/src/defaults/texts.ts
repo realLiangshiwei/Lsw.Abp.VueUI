@@ -32,6 +32,11 @@ export const SELECT_ROW: LocalizationWithDefault = {
   defaultValue: 'Select row',
 };
 
+export const PAGINATION: LocalizationWithDefault = {
+  key: 'AbpUi::Pagination',
+  defaultValue: 'Pagination',
+};
+
 export const EXPAND_ROW: LocalizationWithDefault = {
   key: 'AbpUi::ExpandRow',
   defaultValue: 'Show details',
