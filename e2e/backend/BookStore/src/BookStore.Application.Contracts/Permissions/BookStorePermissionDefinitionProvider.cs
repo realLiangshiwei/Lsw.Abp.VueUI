@@ -11,8 +11,8 @@ public class BookStorePermissionDefinitionProvider : PermissionDefinitionProvide
     {
         var myGroup = context.AddGroup(BookStorePermissions.GroupName);
 
-        //Define your own permissions here. Example:
-        //myGroup.AddPermission(BookStorePermissions.MyPermission1, L("Permission:MyPermission1"));
+        var files = myGroup.AddPermission(BookStorePermissions.Files, L("Permission:Files"));
+        files.AddChild(BookStorePermissions.FilesUpload, L("Permission:Files.Upload"));
     }
 
     private static LocalizableString L(string name)

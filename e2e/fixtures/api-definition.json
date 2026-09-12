@@ -1232,6 +1232,247 @@
                 }
             }
         },
+        "app": {
+            "rootPath": "app",
+            "remoteServiceName": "Default",
+            "controllers": {
+                "BookStore.Files.FileAppService": {
+                    "controllerName": "File",
+                    "controllerGroupName": "File",
+                    "isRemoteService": true,
+                    "isIntegrationService": false,
+                    "apiVersion": null,
+                    "type": "BookStore.Files.FileAppService",
+                    "summary": null,
+                    "remarks": null,
+                    "description": null,
+                    "displayName": null,
+                    "interfaces": [
+                        {
+                            "type": "BookStore.Files.IFileAppService",
+                            "name": "IFileAppService",
+                            "methods": [
+                                {
+                                    "name": "GetListAsync",
+                                    "parametersOnMethod": [],
+                                    "returnValue": {
+                                        "type": "Volo.Abp.Application.Dtos.ListResultDto<BookStore.Files.FileDescriptorDto>",
+                                        "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<BookStore.Files.FileDescriptorDto>",
+                                        "summary": null,
+                                        "contentTypes": null,
+                                        "isRemoteStream": false
+                                    }
+                                },
+                                {
+                                    "name": "GetContentAsync",
+                                    "parametersOnMethod": [
+                                        {
+                                            "name": "name",
+                                            "typeAsString": "System.String, System.Private.CoreLib",
+                                            "type": "System.String",
+                                            "typeSimple": "string",
+                                            "isOptional": false,
+                                            "defaultValue": null,
+                                            "summary": null,
+                                            "description": null,
+                                            "displayName": null
+                                        }
+                                    ],
+                                    "returnValue": {
+                                        "type": "Volo.Abp.Content.IRemoteStreamContent",
+                                        "typeSimple": "Volo.Abp.Content.IRemoteStreamContent",
+                                        "summary": null,
+                                        "contentTypes": null,
+                                        "isRemoteStream": true
+                                    }
+                                },
+                                {
+                                    "name": "UploadAsync",
+                                    "parametersOnMethod": [
+                                        {
+                                            "name": "file",
+                                            "typeAsString": "Volo.Abp.Content.IRemoteStreamContent, Volo.Abp.Core",
+                                            "type": "Volo.Abp.Content.IRemoteStreamContent",
+                                            "typeSimple": "Volo.Abp.Content.IRemoteStreamContent",
+                                            "isOptional": false,
+                                            "defaultValue": null,
+                                            "summary": null,
+                                            "description": null,
+                                            "displayName": null
+                                        }
+                                    ],
+                                    "returnValue": {
+                                        "type": "BookStore.Files.FileDescriptorDto",
+                                        "typeSimple": "BookStore.Files.FileDescriptorDto",
+                                        "summary": null,
+                                        "contentTypes": null,
+                                        "isRemoteStream": false
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "actions": {
+                        "GetListAsync": {
+                            "uniqueName": "GetListAsync",
+                            "name": "GetListAsync",
+                            "httpMethod": "GET",
+                            "url": "api/app/file",
+                            "supportedVersions": [],
+                            "parametersOnMethod": [],
+                            "parameters": [],
+                            "returnValue": {
+                                "type": "Volo.Abp.Application.Dtos.ListResultDto<BookStore.Files.FileDescriptorDto>",
+                                "typeSimple": "Volo.Abp.Application.Dtos.ListResultDto<BookStore.Files.FileDescriptorDto>",
+                                "summary": null,
+                                "contentTypes": [
+                                    "text/plain",
+                                    "application/json",
+                                    "text/json"
+                                ],
+                                "isRemoteStream": false
+                            },
+                            "allowAnonymous": false,
+                            "authorizeDatas": [
+                                {
+                                    "policy": "BookStore.Files",
+                                    "roles": null
+                                }
+                            ],
+                            "implementFrom": "BookStore.Files.IFileAppService",
+                            "summary": null,
+                            "remarks": null,
+                            "description": null,
+                            "displayName": null
+                        },
+                        "GetContentAsyncByName": {
+                            "uniqueName": "GetContentAsyncByName",
+                            "name": "GetContentAsync",
+                            "httpMethod": "GET",
+                            "url": "api/app/file/content",
+                            "supportedVersions": [],
+                            "parametersOnMethod": [
+                                {
+                                    "name": "name",
+                                    "typeAsString": "System.String, System.Private.CoreLib",
+                                    "type": "System.String",
+                                    "typeSimple": "string",
+                                    "isOptional": false,
+                                    "defaultValue": null,
+                                    "summary": null,
+                                    "description": null,
+                                    "displayName": null
+                                }
+                            ],
+                            "parameters": [
+                                {
+                                    "nameOnMethod": "name",
+                                    "name": "name",
+                                    "jsonName": null,
+                                    "type": "System.String",
+                                    "typeSimple": "string",
+                                    "isOptional": false,
+                                    "defaultValue": null,
+                                    "constraintTypes": null,
+                                    "bindingSourceId": "ModelBinding",
+                                    "descriptorName": "",
+                                    "summary": null,
+                                    "description": null,
+                                    "displayName": null
+                                }
+                            ],
+                            "returnValue": {
+                                "type": "Volo.Abp.Content.IRemoteStreamContent",
+                                "typeSimple": "Volo.Abp.Content.IRemoteStreamContent",
+                                "summary": null,
+                                "contentTypes": [
+                                    "text/plain",
+                                    "application/json",
+                                    "text/json"
+                                ],
+                                "isRemoteStream": true
+                            },
+                            "allowAnonymous": false,
+                            "authorizeDatas": [
+                                {
+                                    "policy": "BookStore.Files",
+                                    "roles": null
+                                }
+                            ],
+                            "implementFrom": "BookStore.Files.IFileAppService",
+                            "summary": null,
+                            "remarks": null,
+                            "description": null,
+                            "displayName": null
+                        },
+                        "UploadAsyncByFile": {
+                            "uniqueName": "UploadAsyncByFile",
+                            "name": "UploadAsync",
+                            "httpMethod": "POST",
+                            "url": "api/app/file/upload",
+                            "supportedVersions": [],
+                            "parametersOnMethod": [
+                                {
+                                    "name": "file",
+                                    "typeAsString": "Volo.Abp.Content.IRemoteStreamContent, Volo.Abp.Core",
+                                    "type": "Volo.Abp.Content.IRemoteStreamContent",
+                                    "typeSimple": "Volo.Abp.Content.IRemoteStreamContent",
+                                    "isOptional": false,
+                                    "defaultValue": null,
+                                    "summary": null,
+                                    "description": null,
+                                    "displayName": null
+                                }
+                            ],
+                            "parameters": [
+                                {
+                                    "nameOnMethod": "file",
+                                    "name": "file",
+                                    "jsonName": null,
+                                    "type": "Volo.Abp.Content.IRemoteStreamContent",
+                                    "typeSimple": "Volo.Abp.Content.IRemoteStreamContent",
+                                    "isOptional": false,
+                                    "defaultValue": null,
+                                    "constraintTypes": null,
+                                    "bindingSourceId": "FormFile",
+                                    "descriptorName": "",
+                                    "summary": null,
+                                    "description": null,
+                                    "displayName": null
+                                }
+                            ],
+                            "returnValue": {
+                                "type": "BookStore.Files.FileDescriptorDto",
+                                "typeSimple": "BookStore.Files.FileDescriptorDto",
+                                "summary": null,
+                                "contentTypes": [
+                                    "text/plain",
+                                    "application/json",
+                                    "text/json"
+                                ],
+                                "isRemoteStream": false
+                            },
+                            "allowAnonymous": false,
+                            "authorizeDatas": [
+                                {
+                                    "policy": "BookStore.Files",
+                                    "roles": null
+                                },
+                                {
+                                    "policy": "BookStore.Files.Upload",
+                                    "roles": null
+                                }
+                            ],
+                            "implementFrom": "BookStore.Files.IFileAppService",
+                            "summary": null,
+                            "remarks": null,
+                            "description": null,
+                            "displayName": null
+                        }
+                    }
+                }
+            }
+        },
         "featureManagement": {
             "rootPath": "featureManagement",
             "remoteServiceName": "AbpFeatureManagement",
@@ -6115,6 +6356,51 @@
         }
     },
     "types": {
+        "BookStore.Files.FileDescriptorDto": {
+            "baseType": null,
+            "isEnum": false,
+            "enumNames": null,
+            "enumValues": null,
+            "genericArguments": null,
+            "properties": [
+                {
+                    "name": "Name",
+                    "jsonName": null,
+                    "type": "System.String",
+                    "typeSimple": "string",
+                    "isRequired": true,
+                    "minLength": 1,
+                    "maxLength": 64,
+                    "minimum": null,
+                    "maximum": null,
+                    "regex": null,
+                    "isNullable": false,
+                    "summary": null,
+                    "description": null,
+                    "displayName": null
+                },
+                {
+                    "name": "Size",
+                    "jsonName": null,
+                    "type": "System.Int64",
+                    "typeSimple": "number",
+                    "isRequired": false,
+                    "minLength": null,
+                    "maxLength": null,
+                    "minimum": null,
+                    "maximum": null,
+                    "regex": null,
+                    "isNullable": false,
+                    "summary": null,
+                    "description": null,
+                    "displayName": null
+                }
+            ],
+            "summary": null,
+            "remarks": null,
+            "description": null,
+            "displayName": null
+        },
         "Volo.Abp.Account.ChangePasswordInput": {
             "baseType": null,
             "isEnum": false,
@@ -9807,6 +10093,67 @@
                     "maximum": null,
                     "regex": null,
                     "isNullable": false,
+                    "summary": null,
+                    "description": null,
+                    "displayName": null
+                }
+            ],
+            "summary": null,
+            "remarks": null,
+            "description": null,
+            "displayName": null
+        },
+        "Volo.Abp.Content.IRemoteStreamContent": {
+            "baseType": null,
+            "isEnum": false,
+            "enumNames": null,
+            "enumValues": null,
+            "genericArguments": null,
+            "properties": [
+                {
+                    "name": "FileName",
+                    "jsonName": null,
+                    "type": "System.String",
+                    "typeSimple": "string",
+                    "isRequired": false,
+                    "minLength": null,
+                    "maxLength": null,
+                    "minimum": null,
+                    "maximum": null,
+                    "regex": null,
+                    "isNullable": true,
+                    "summary": null,
+                    "description": null,
+                    "displayName": null
+                },
+                {
+                    "name": "ContentType",
+                    "jsonName": null,
+                    "type": "System.String",
+                    "typeSimple": "string",
+                    "isRequired": false,
+                    "minLength": null,
+                    "maxLength": null,
+                    "minimum": null,
+                    "maximum": null,
+                    "regex": null,
+                    "isNullable": false,
+                    "summary": null,
+                    "description": null,
+                    "displayName": null
+                },
+                {
+                    "name": "ContentLength",
+                    "jsonName": null,
+                    "type": "System.Int64?",
+                    "typeSimple": "number?",
+                    "isRequired": false,
+                    "minLength": null,
+                    "maxLength": null,
+                    "minimum": null,
+                    "maximum": null,
+                    "regex": null,
+                    "isNullable": true,
                     "summary": null,
                     "description": null,
                     "displayName": null

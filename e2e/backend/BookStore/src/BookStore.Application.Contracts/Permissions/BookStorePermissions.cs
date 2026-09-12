@@ -5,7 +5,8 @@ public static class BookStorePermissions
     public const string GroupName = "BookStore";
 
 
-    
-    //Add your own permission names. Example:
-    //public const string MyPermission1 = GroupName + ".MyPermission1";
+    /// <summary>The file store the proxy generator's tests use.</summary>
+    public const string Files = GroupName + ".Files";
+
+    public const string FilesUpload = Files + ".Upload";
 }
