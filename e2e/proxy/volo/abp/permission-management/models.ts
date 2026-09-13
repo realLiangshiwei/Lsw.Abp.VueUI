@@ -28,10 +28,10 @@ export interface PermissionGrantInfoDto {
   name?: string | undefined;
   displayName?: string | undefined;
   parentName?: string | undefined;
-  isGranted?: boolean | undefined;
+  isGranted: boolean;
   allowedProviders?: string[] | undefined;
   grantedProviders?: ProviderInfoDto[] | undefined;
-  isEditable?: boolean | undefined;
+  isEditable: boolean;
 }
 
 export interface PermissionGroupDto {
@@ -64,7 +64,7 @@ export interface ResourcePermissionWithProdiverGrantInfoDto {
   name?: string | undefined;
   displayName?: string | undefined;
   providers?: string[] | undefined;
-  isGranted?: boolean | undefined;
+  isGranted: boolean;
 }
 
 export interface ResourceProviderDto {

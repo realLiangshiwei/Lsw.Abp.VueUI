@@ -7,7 +7,7 @@ export interface FeatureDto {
   provider?: FeatureProviderDto | undefined;
   description?: string | undefined;
   valueType?: IStringValueType | undefined;
-  depth?: number | undefined;
+  depth: number;
   parentName?: string | undefined;
 }
 

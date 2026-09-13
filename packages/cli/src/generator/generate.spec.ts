@@ -85,6 +85,20 @@ describe('generating the identity module', () => {
     expect(service).toContain('delete: (id: string, config?: RestConfig): Promise<void>');
   });
 
+  it('requires what the server cannot leave out, and no more', () => {
+    const models = result.content('volo/abp/identity/models.ts');
+
+    // A value type is never null and is always written, so a reader needs no check.
+    expect(models).toContain('emailConfirmed: boolean;');
+    expect(models).toContain('accessFailedCount: number;');
+    // A string is reported non-nullable whether or not it comes back as one: ABP's own
+    // modules compile without nullable reference types.
+    expect(models).toContain('userName?: string | undefined;');
+    // What the caller builds keeps the other rule: only `[Required]` has to be there.
+    expect(models).toContain('userName: string;');
+    expect(models).toContain('isActive?: boolean | undefined;');
+  });
+
   it('takes the framework DTOs from core instead of generating them again', () => {
     expect(result.content('volo/abp/identity/models.ts')).toContain("from '@lsw-abpvue/core'");
     expect(result.paths).not.toContain('volo/abp/application/dtos/models.ts');

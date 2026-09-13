@@ -30,10 +30,14 @@ const property = (
   ...extra,
 });
 
-function emit(types: Record<string, TypeDefinition>, rootNamespace?: string) {
+function emit(
+  types: Record<string, TypeDefinition>,
+  rootNamespace?: string,
+  directions?: Map<string, 'request' | 'response' | 'both'>,
+) {
   const report = new GenerationReport();
   const registry = new TypeRegistry(types, { rootNamespace, report });
-  const files = emitModels(registry.generated(), registry, report);
+  const files = emitModels(registry.generated(), registry, report, directions);
 
   return {
     files,
@@ -216,5 +220,112 @@ describe('fileOf', () => {
     const [type] = registry.generated();
 
     expect(type && fileOf(type)).toBe('acme/books/models');
+  });
+});
+
+describe('a DTO the server writes', () => {
+  const responses = new Map<string, 'request' | 'response' | 'both'>([
+    ['Acme.Books.BookDto', 'response'],
+  ]);
+
+  const bookDto = (properties: ReturnType<typeof property>[]) =>
+    emit({ 'Acme.Books.BookDto': dto({ properties }) }, undefined, responses).content(
+      'acme/books/models.ts',
+    );
+
+  it('requires a value type, which cannot be null and is always written', () => {
+    const content = bookDto([
+      property('IsPublished', 'boolean', { type: 'System.Boolean' }),
+      property('PageCount', 'number', { type: 'System.Int32' }),
+      property('PublishedAt', 'string', { type: 'System.DateTime' }),
+    ]);
+
+    expect(content).toContain('isPublished: boolean;');
+    expect(content).toContain('pageCount: number;');
+    expect(content).toContain('publishedAt: string;');
+  });
+
+  it('requires an enum, for the same reason', () => {
+    const content = emit(
+      {
+        'Acme.Books.BookDto': dto({
+          properties: [property('Kind', 'enum', { type: 'Acme.Books.BookKind' })],
+        }),
+        'Acme.Books.BookKind': dto({ isEnum: true, enumNames: ['Novel'], enumValues: [0] }),
+      },
+      undefined,
+      responses,
+    ).content('acme/books/models.ts');
+
+    expect(content).toContain('kind: BookKind;');
+  });
+
+  it('leaves a nullable value type optional', () => {
+    const content = bookDto([
+      property('PageCount', 'number?', { type: 'System.Int32?', isNullable: true }),
+    ]);
+
+    expect(content).toContain('pageCount?: number | null | undefined;');
+  });
+
+  it('leaves a string optional, because ABP cannot promise otherwise', () => {
+    // Its own modules compile without nullable reference types, so a `string` is
+    // reported non-nullable whether or not it comes back as null.
+    const content = bookDto([property('Name', 'string', { type: 'System.String' })]);
+
+    expect(content).toContain('name?: string | undefined;');
+  });
+
+  it('leaves a collection and another DTO optional, for the same reason', () => {
+    const content = emit(
+      {
+        'Acme.Books.BookDto': dto({
+          properties: [
+            property('Tags', '[string]', { type: '[System.String]' }),
+            property('Author', 'Acme.Books.AuthorDto', { type: 'Acme.Books.AuthorDto' }),
+          ],
+        }),
+        'Acme.Books.AuthorDto': dto(),
+      },
+      undefined,
+      responses,
+    ).content('acme/books/models.ts');
+
+    expect(content).toContain('tags?: string[] | undefined;');
+    expect(content).toContain('author?: AuthorDto | undefined;');
+  });
+});
+
+describe('a DTO the caller builds', () => {
+  it('requires what the backend marks required and nothing else', () => {
+    const content = emit(
+      {
+        'Acme.Books.BookDto': dto({
+          properties: [
+            property('Name', 'string', { type: 'System.String', isRequired: true }),
+            property('IsPublished', 'boolean', { type: 'System.Boolean' }),
+          ],
+        }),
+      },
+      undefined,
+      new Map([['Acme.Books.BookDto', 'request' as const]]),
+    ).content('acme/books/models.ts');
+
+    expect(content).toContain('name: string;');
+    expect(content).toContain('isPublished?: boolean | undefined;');
+  });
+
+  it('takes the caller rule when the DTO travels both ways', () => {
+    const content = emit(
+      {
+        'Acme.Books.BookDto': dto({
+          properties: [property('IsPublished', 'boolean', { type: 'System.Boolean' })],
+        }),
+      },
+      undefined,
+      new Map([['Acme.Books.BookDto', 'both' as const]]),
+    ).content('acme/books/models.ts');
+
+    expect(content).toContain('isPublished?: boolean | undefined;');
   });
 });

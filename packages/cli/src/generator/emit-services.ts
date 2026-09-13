@@ -24,10 +24,22 @@ export interface ServiceEmitOptions {
   names: ReadonlyMap<string, string>;
 }
 
+/**
+ * What the services mention, kept apart by which way the data travels. A DTO the server
+ * writes and a DTO the caller builds are not the same kind of thing, and the difference
+ * decides which of its properties are optional.
+ */
+export interface ReferencedTypes {
+  /** Reached through a parameter, a body or a query: the caller builds these. */
+  request: RegisteredType[];
+  /** Reached through a return value: the server writes these. */
+  response: RegisteredType[];
+}
+
 export interface EmittedServices {
   files: EmittedFile[];
   /** Everything the services mention, which is where the model closure starts. */
-  referenced: RegisteredType[];
+  referenced: ReferencedTypes;
 }
 
 /** `api-version` is a legal parameter name on the wire but not in TypeScript. */
@@ -98,7 +110,7 @@ interface RequestParts {
 function buildRequest(
   action: ActionDefinition,
   registry: TypeRegistry,
-  refs: RegisteredType[],
+  refs: ReferencedTypes,
 ): RequestParts {
   const parts: RequestParts = {
     url: `/${action.url}`,
@@ -139,7 +151,7 @@ function buildRequest(
 
       case 'Body': {
         const rendered = renderDeclaredType(registry, parameter, new Set());
-        rendered.refs.forEach(ref => refs.push(ref));
+        rendered.refs.forEach(ref => refs.request.push(ref));
 
         if (parameter.typeSimple === 'string') {
           // A bare string body is JSON, not text: the server's input formatter reads it
@@ -189,7 +201,7 @@ function emitMethod(
   action: ActionDefinition,
   name: string,
   options: ServiceEmitOptions,
-  refs: RegisteredType[],
+  refs: ReferencedTypes,
 ): string {
   const { registry } = options;
   const fileParameters = new Set(
@@ -202,7 +214,7 @@ function emitMethod(
     const rendered = fileParameters.has(parameter.name)
       ? { text: 'FormData', refs: [] }
       : renderDeclaredType(registry, parameter, new Set());
-    rendered.refs.forEach(ref => refs.push(ref));
+    rendered.refs.forEach(ref => refs.request.push(ref));
 
     // An array parameter is only forwarded, never written to, so a readonly array is
     // just as good and a caller with one does not have to copy it.
@@ -212,7 +224,7 @@ function emitMethod(
   });
 
   const returned = renderDeclaredType(registry, action.returnValue, new Set());
-  returned.refs.forEach(ref => refs.push(ref));
+  returned.refs.forEach(ref => refs.response.push(ref));
 
   const streams =
     action.returnValue.isRemoteStream === true || isStreamType(action.returnValue.type);
@@ -246,7 +258,7 @@ function emitMethod(
 function emitService(
   controller: ControllerDefinition,
   options: ServiceEmitOptions,
-  refs: RegisteredType[],
+  refs: ReferencedTypes,
 ): EmittedFile {
   const { module, report } = options;
   const namespace = stripRootNamespace(namespaceOf(controller.type), options.rootNamespace);
@@ -283,7 +295,7 @@ function emitService(
     })
     .sort((left, right) => (left.name < right.name ? -1 : 1));
 
-  for (const ref of refs) {
+  for (const ref of [...refs.request, ...refs.response]) {
     if (ref.frameworkName) {
       imports.addType(CORE_PACKAGE, ref.frameworkName);
       continue;
@@ -332,14 +344,15 @@ export function emitServices(
   options: ServiceEmitOptions,
 ): EmittedServices {
   const files: EmittedFile[] = [];
-  const referenced: RegisteredType[] = [];
+  const referenced: ReferencedTypes = { request: [], response: [] };
 
   for (const controller of [...controllers].sort((left, right) =>
     left.type < right.type ? -1 : 1,
   )) {
-    const refs: RegisteredType[] = [];
+    const refs: ReferencedTypes = { request: [], response: [] };
     files.push(emitService(controller, options, refs));
-    referenced.push(...refs);
+    referenced.request.push(...refs.request);
+    referenced.response.push(...refs.response);
   }
 
   return { files, referenced };

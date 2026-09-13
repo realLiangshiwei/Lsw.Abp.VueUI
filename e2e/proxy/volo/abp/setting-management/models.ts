@@ -1,11 +1,11 @@
 export interface EmailSettingsDto {
   smtpHost?: string | undefined;
-  smtpPort?: number | undefined;
+  smtpPort: number;
   smtpUserName?: string | undefined;
   smtpPassword?: string | undefined;
   smtpDomain?: string | undefined;
-  smtpEnableSsl?: boolean | undefined;
-  smtpUseDefaultCredentials?: boolean | undefined;
+  smtpEnableSsl: boolean;
+  smtpUseDefaultCredentials: boolean;
   defaultFromAddress?: string | undefined;
   defaultFromDisplayName?: string | undefined;
 }

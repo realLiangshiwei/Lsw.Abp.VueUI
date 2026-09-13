@@ -73,6 +73,18 @@ export const SYSTEM_TYPES = new Map<string, string>([
   ['System.Void', 'void'],
 ]);
 
+/**
+ * The BCL types that cannot hold null when they are not declared nullable. Only these
+ * make a "the server always sends a value" promise believable: ABP's own modules compile
+ * without nullable reference types, so a `string` property is reported as non-nullable
+ * whether or not it comes back as `null` -- `IdentityUserDto.Name` does both.
+ */
+export const VALUE_TYPES = new Set(
+  [...SYSTEM_TYPES.keys()].filter(
+    name => name !== 'System.String' && name !== 'System.Object' && name !== 'System.Void',
+  ),
+);
+
 /** What ABP already simplified, which arrives as a lower-case word. */
 export const SIMPLE_TYPES = new Map<string, string>([
   ['string', 'string'],

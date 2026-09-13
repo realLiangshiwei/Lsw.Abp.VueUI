@@ -1,7 +1,7 @@
 import type { LoginResultType } from './login-result-type.enum.js';
 
 export interface AbpLoginResult {
-  result?: LoginResultType | undefined;
+  result: LoginResultType;
   description?: string | undefined;
 }
 

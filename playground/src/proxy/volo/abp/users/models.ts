@@ -1,13 +1,13 @@
 export interface UserData {
-  id?: string | undefined;
+  id: string;
   tenantId?: string | null | undefined;
   userName?: string | undefined;
   name?: string | undefined;
   surname?: string | undefined;
-  isActive?: boolean | undefined;
+  isActive: boolean;
   email?: string | undefined;
-  emailConfirmed?: boolean | undefined;
+  emailConfirmed: boolean;
   phoneNumber?: string | undefined;
-  phoneNumberConfirmed?: boolean | undefined;
+  phoneNumberConfirmed: boolean;
   extraProperties?: Record<string, unknown> | undefined;
 }

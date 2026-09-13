@@ -23,11 +23,11 @@ export interface IdentityRoleCreateOrUpdateDtoBase extends ExtensibleObject {
 
 export interface IdentityRoleDto extends ExtensibleEntityDto<string> {
   name?: string | undefined;
-  isDefault?: boolean | undefined;
-  isStatic?: boolean | undefined;
-  isPublic?: boolean | undefined;
+  isDefault: boolean;
+  isStatic: boolean;
+  isPublic: boolean;
   concurrencyStamp?: string | undefined;
-  creationTime?: string | undefined;
+  creationTime: string;
 }
 
 export interface IdentityRoleUpdateDto extends IdentityRoleCreateOrUpdateDtoBase {
@@ -55,15 +55,15 @@ export interface IdentityUserDto extends ExtensibleFullAuditedEntityDto<string> 
   name?: string | undefined;
   surname?: string | undefined;
   email?: string | undefined;
-  emailConfirmed?: boolean | undefined;
+  emailConfirmed: boolean;
   phoneNumber?: string | undefined;
-  phoneNumberConfirmed?: boolean | undefined;
-  isActive?: boolean | undefined;
-  lockoutEnabled?: boolean | undefined;
-  accessFailedCount?: number | undefined;
+  phoneNumberConfirmed: boolean;
+  isActive: boolean;
+  lockoutEnabled: boolean;
+  accessFailedCount: number;
   lockoutEnd?: string | null | undefined;
   concurrencyStamp?: string | undefined;
-  entityVersion?: number | undefined;
+  entityVersion: number;
   lastPasswordChangeTime?: string | null | undefined;
 }
 

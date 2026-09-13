@@ -34,8 +34,8 @@ export interface AuthorizeDataApiDescriptionModel {
 export interface ControllerApiDescriptionModel {
   controllerName?: string | undefined;
   controllerGroupName?: string | null | undefined;
-  isRemoteService?: boolean | undefined;
-  isIntegrationService?: boolean | undefined;
+  isRemoteService: boolean;
+  isIntegrationService: boolean;
   apiVersion?: string | null | undefined;
   type?: string | undefined;
   summary?: string | null | undefined;
@@ -63,7 +63,7 @@ export interface MethodParameterApiDescriptionModel {
   typeAsString?: string | undefined;
   type?: string | undefined;
   typeSimple?: string | undefined;
-  isOptional?: boolean | undefined;
+  isOptional: boolean;
   defaultValue?: unknown | null | undefined;
   summary?: string | null | undefined;
   description?: string | null | undefined;
@@ -82,7 +82,7 @@ export interface ParameterApiDescriptionModel {
   jsonName?: string | null | undefined;
   type?: string | null | undefined;
   typeSimple?: string | null | undefined;
-  isOptional?: boolean | undefined;
+  isOptional: boolean;
   defaultValue?: unknown | null | undefined;
   constraintTypes?: string[] | null | undefined;
   bindingSourceId?: string | null | undefined;
@@ -97,13 +97,13 @@ export interface PropertyApiDescriptionModel {
   jsonName?: string | null | undefined;
   type?: string | undefined;
   typeSimple?: string | undefined;
-  isRequired?: boolean | undefined;
+  isRequired: boolean;
   minLength?: number | null | undefined;
   maxLength?: number | null | undefined;
   minimum?: string | null | undefined;
   maximum?: string | null | undefined;
   regex?: string | null | undefined;
-  isNullable?: boolean | undefined;
+  isNullable: boolean;
   summary?: string | null | undefined;
   description?: string | null | undefined;
   displayName?: string | null | undefined;
@@ -114,12 +114,12 @@ export interface ReturnValueApiDescriptionModel {
   typeSimple?: string | undefined;
   summary?: string | null | undefined;
   contentTypes?: string[] | null | undefined;
-  isRemoteStream?: boolean | undefined;
+  isRemoteStream: boolean;
 }
 
 export interface TypeApiDescriptionModel {
   baseType?: string | null | undefined;
-  isEnum?: boolean | undefined;
+  isEnum: boolean;
   enumNames?: string[] | null | undefined;
   enumValues?: unknown[] | null | undefined;
   genericArguments?: string[] | null | undefined;

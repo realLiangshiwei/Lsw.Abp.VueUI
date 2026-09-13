@@ -6,7 +6,7 @@ import { renderDeclaredType } from './declared-type.js';
 import { emitModels, type EmittedFile } from './emit-models.js';
 import { emitPolicyNames, policyNamesFromDefinition } from './emit-policy-names.js';
 import { emitReadme } from './emit-readme.js';
-import { emitServices } from './emit-services.js';
+import { emitServices, type ReferencedTypes } from './emit-services.js';
 import { emitDtoValidators, emitExtensionValidators } from './emit-validators.js';
 import { GenerationReport } from './report.js';
 import { TypeRegistry, type RegisteredType } from './type-registry.js';
@@ -82,11 +82,19 @@ function controllersOf(
 }
 
 /**
- * Every type reachable from the ones the services mention. A type core already declares
- * is not followed: nothing is generated for it, and its own properties are core's
- * business.
+ * Which way the data travels, which is what decides whether a property is optional.
+ * A type the caller builds and a type the server writes are different promises.
  */
-function closureOf(seeds: RegisteredType[], registry: TypeRegistry): RegisteredType[] {
+export type TypeDirection = 'request' | 'response' | 'both';
+
+/**
+ * Every type reachable from the ones given. A type core already declares is not
+ * followed: nothing is generated for it, and its own properties are core's business.
+ */
+function reachableFrom(
+  seeds: RegisteredType[],
+  registry: TypeRegistry,
+): Map<string, RegisteredType> {
   const seen = new Map<string, RegisteredType>();
   const queue = [...seeds];
 
@@ -110,7 +118,37 @@ function closureOf(seeds: RegisteredType[], registry: TypeRegistry): RegisteredT
     queue.push(...refs);
   }
 
-  return [...seen.values()];
+  return seen;
+}
+
+/**
+ * The closure of what the services mention, and for each type which way it travels.
+ * Walked twice rather than once with a flag: a type reached both ways has to come out
+ * as `both`, and that is what a second pass says without any merging rules.
+ */
+function closureOf(
+  referenced: ReferencedTypes,
+  registry: TypeRegistry,
+): { types: RegisteredType[]; directions: Map<string, TypeDirection> } {
+  const request = reachableFrom(referenced.request, registry);
+  const response = reachableFrom(referenced.response, registry);
+
+  const types = new Map([...request, ...response]);
+  const directions = new Map<string, TypeDirection>();
+
+  for (const type of types.values()) {
+    const inRequest = request.has(type.key);
+    const inResponse = response.has(type.key);
+    // Keyed by family: a type and its own generic form are one interface in the output,
+    // and one of the two carrying a different direction would be undecidable.
+    const direction: TypeDirection =
+      inRequest && inResponse ? 'both' : inRequest ? 'request' : 'response';
+    const existing = directions.get(type.name);
+
+    directions.set(type.name, existing && existing !== direction ? 'both' : direction);
+  }
+
+  return { types: [...types.values()], directions };
 }
 
 /**
@@ -147,7 +185,7 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
   }
 
   const files: EmittedFile[] = [];
-  const referenced: RegisteredType[] = [];
+  const referenced: ReferencedTypes = { request: [], response: [] };
   const serviceType = options.serviceType ?? 'application';
 
   const selected = [...wanted].sort().map(name => ({
@@ -183,14 +221,15 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
     });
 
     files.push(...services.files);
-    referenced.push(...services.referenced);
+    referenced.request.push(...services.referenced.request);
+    referenced.response.push(...services.referenced.response);
   }
 
   const closure = closureOf(referenced, registry);
-  files.push(...emitModels(closure, registry, report));
+  files.push(...emitModels(closure.types, registry, report, closure.directions));
 
   if (options.validators !== false) {
-    files.push(...emitDtoValidators(closure, report));
+    files.push(...emitDtoValidators(closure.types, report));
     if (options.objectExtensions) {
       files.push(...emitExtensionValidators(options.objectExtensions, report));
     }

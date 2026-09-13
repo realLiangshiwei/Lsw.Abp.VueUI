@@ -14,7 +14,7 @@ export interface ExtensionEnumFieldDto {
 }
 
 export interface ExtensionPropertyApiCreateDto {
-  isAvailable?: boolean | undefined;
+  isAvailable: boolean;
 }
 
 export interface ExtensionPropertyApiDto {
@@ -24,11 +24,11 @@ export interface ExtensionPropertyApiDto {
 }
 
 export interface ExtensionPropertyApiGetDto {
-  isAvailable?: boolean | undefined;
+  isAvailable: boolean;
 }
 
 export interface ExtensionPropertyApiUpdateDto {
-  isAvailable?: boolean | undefined;
+  isAvailable: boolean;
 }
 
 export interface ExtensionPropertyAttributeDto {
@@ -50,17 +50,17 @@ export interface ExtensionPropertyDto {
 
 export interface ExtensionPropertyFeaturePolicyDto {
   features?: string[] | undefined;
-  requiresAll?: boolean | undefined;
+  requiresAll: boolean;
 }
 
 export interface ExtensionPropertyGlobalFeaturePolicyDto {
   features?: string[] | undefined;
-  requiresAll?: boolean | undefined;
+  requiresAll: boolean;
 }
 
 export interface ExtensionPropertyPermissionPolicyDto {
   permissionNames?: string[] | undefined;
-  requiresAll?: boolean | undefined;
+  requiresAll: boolean;
 }
 
 export interface ExtensionPropertyPolicyDto {
@@ -77,7 +77,7 @@ export interface ExtensionPropertyUiDto {
 }
 
 export interface ExtensionPropertyUiFormDto {
-  isVisible?: boolean | undefined;
+  isVisible: boolean;
 }
 
 export interface ExtensionPropertyUiLookupDto {
@@ -89,7 +89,7 @@ export interface ExtensionPropertyUiLookupDto {
 }
 
 export interface ExtensionPropertyUiTableDto {
-  isVisible?: boolean | undefined;
+  isVisible: boolean;
 }
 
 export interface LocalizableStringDto {

@@ -1,9 +1,11 @@
 import { parseClrType } from './clr-type.js';
 import { renderDeclaredType } from './declared-type.js';
-import { CORE_PACKAGE } from './framework-types.js';
+import { CORE_PACKAGE, VALUE_TYPES } from './framework-types.js';
 import { ImportCollector, moduleSpecifier } from './imports.js';
 import { camelCase, kebabCase, namespaceToDirectory, quoteName } from './names.js';
+import type { TypeDirection } from './generate.js';
 import type { GenerationReport } from './report.js';
+import type { PropertyDefinition } from '../api-definition/models.js';
 import type { RegisteredType, TypeRegistry } from './type-registry.js';
 
 export interface EmittedFile {
@@ -61,11 +63,42 @@ function genericsOf(type: RegisteredType): string {
   return `<${parameters.join(', ')}>`;
 }
 
+/** Whether the CLR type behind a property is one that cannot hold null. */
+function cannotBeNull(property: PropertyDefinition, registry: TypeRegistry): boolean {
+  if (property.isNullable) return false;
+
+  const parsed = parseClrType(property.type);
+  if (parsed.kind !== 'name') return false;
+
+  return VALUE_TYPES.has(parsed.name) || registry.find(parsed)?.isEnum === true;
+}
+
+/**
+ * Whether the backend may leave a property out.
+ *
+ * A DTO the caller builds needs only what `[Required]` marks. A DTO the server writes is
+ * the other way round -- the serializer writes every property, a null rather than a
+ * missing key -- but that only helps where the metadata can say a value is never null,
+ * which is a non-nullable value type or enum. ABP's own modules compile without nullable
+ * reference types, so a `string` is reported non-nullable whether or not it comes back
+ * as one, and staying optional there is the difference between a promise and a guess.
+ *
+ * A DTO used both ways takes the caller's rule, the weaker of the two.
+ */
+function isOptional(
+  property: PropertyDefinition,
+  direction: TypeDirection,
+  registry: TypeRegistry,
+): boolean {
+  return direction === 'response' ? !cannotBeNull(property, registry) : !property.isRequired;
+}
+
 function emitInterface(
   type: RegisteredType,
   registry: TypeRegistry,
   imports: ImportCollector,
   report: GenerationReport,
+  direction: TypeDirection,
 ): string {
   const scope = new Set(type.genericParameters);
   const lines: string[] = [];
@@ -98,10 +131,11 @@ function emitInterface(
     // `?: T` and `?: T | undefined` differ under `exactOptionalPropertyTypes`, which a
     // strict application has on: without the union, handing it an object that has the
     // property set to `undefined` does not compile.
-    const optional = property.isRequired ? '' : '?';
-    const undefinable = property.isRequired ? '' : ' | undefined';
+    const optional = isOptional(property, direction, registry);
 
-    lines.push(`  ${name}${optional}: ${rendered.text}${nullable}${undefinable};`);
+    lines.push(
+      `  ${name}${optional ? '?' : ''}: ${rendered.text}${nullable}${optional ? ' | undefined' : ''};`,
+    );
   }
 
   // A DTO that adds nothing to the one it derives from is an alias; an empty interface
@@ -152,11 +186,13 @@ function oneDefinitionPerFamily(types: RegisteredType[]): RegisteredType[] {
  * @param types The types to write, which is the closure of what the services reference
  * @param registry Every type the backend described
  * @param report Where anything that could not be honoured is recorded
+ * @param directions Which way each type travels, by CLR name without generic arity
  */
 export function emitModels(
   types: RegisteredType[],
   registry: TypeRegistry,
   report: GenerationReport,
+  directions: ReadonlyMap<string, TypeDirection> = new Map(),
 ): EmittedFile[] {
   const files: EmittedFile[] = [];
   const byNamespace = new Map<string, RegisteredType[]>();
@@ -184,7 +220,11 @@ export function emitModels(
     if (interfaces.length === 0) continue;
 
     const imports = new ImportCollector();
-    const bodies = interfaces.map(type => emitInterface(type, registry, imports, report));
+    const bodies = interfaces.map(type =>
+      // A type nothing reached is generated as if the caller built it, which is the
+      // weaker of the two promises.
+      emitInterface(type, registry, imports, report, directions.get(type.name) ?? 'request'),
+    );
     const header = imports.isEmpty ? '' : `${imports.render()}\n\n`;
     const directory = namespaceToDirectory(namespace);
 

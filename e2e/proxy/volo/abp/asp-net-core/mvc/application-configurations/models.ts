@@ -42,7 +42,7 @@ export interface ApplicationLocalizationConfigurationDto {
   defaultResourceName?: string | null | undefined;
   languagesMap?: Record<string, NameValue[]> | undefined;
   languageFilesMap?: Record<string, NameValue[]> | undefined;
-  useRouteBasedCulture?: boolean | undefined;
+  useRouteBasedCulture: boolean;
 }
 
 export interface ApplicationLocalizationDto {
@@ -73,7 +73,7 @@ export interface CurrentCultureDto {
   englishName?: string | undefined;
   threeLetterIsoLanguageName?: string | undefined;
   twoLetterIsoLanguageName?: string | undefined;
-  isRightToLeft?: boolean | undefined;
+  isRightToLeft: boolean;
   cultureName?: string | undefined;
   name?: string | undefined;
   nativeName?: string | undefined;
@@ -81,7 +81,7 @@ export interface CurrentCultureDto {
 }
 
 export interface CurrentUserDto {
-  isAuthenticated?: boolean | undefined;
+  isAuthenticated: boolean;
   id?: string | null | undefined;
   tenantId?: string | null | undefined;
   impersonatorUserId?: string | null | undefined;
@@ -92,9 +92,9 @@ export interface CurrentUserDto {
   name?: string | null | undefined;
   surName?: string | null | undefined;
   email?: string | null | undefined;
-  emailVerified?: boolean | undefined;
+  emailVerified: boolean;
   phoneNumber?: string | null | undefined;
-  phoneNumberVerified?: boolean | undefined;
+  phoneNumberVerified: boolean;
   roles?: string[] | undefined;
   sessionId?: string | null | undefined;
 }

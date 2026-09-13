@@ -11,8 +11,8 @@ export interface ProfileDto extends ExtensibleObject {
   name?: string | undefined;
   surname?: string | undefined;
   phoneNumber?: string | undefined;
-  isExternal?: boolean | undefined;
-  hasPassword?: boolean | undefined;
+  isExternal: boolean;
+  hasPassword: boolean;
   concurrencyStamp?: string | undefined;
 }
 
