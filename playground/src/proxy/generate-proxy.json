@@ -1,0 +1,32 @@
+{
+  "generated": [
+    "README.md",
+    "index.ts",
+    "object-extension-validators.ts",
+    "policy-names.ts",
+    "volo/abp/identity/identity-role.service.ts",
+    "volo/abp/identity/identity-user-lookup.service.ts",
+    "volo/abp/identity/identity-user.service.ts",
+    "volo/abp/identity/index.ts",
+    "volo/abp/identity/models.ts",
+    "volo/abp/identity/validators.ts",
+    "volo/abp/index.ts",
+    "volo/abp/users/index.ts",
+    "volo/abp/users/models.ts",
+    "volo/index.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "identity": {
+      "rootPath": "identity",
+      "remoteServiceName": "AbpIdentity"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "index": true,
+    "validators": true,
+    "policyNames": true
+  }
+}

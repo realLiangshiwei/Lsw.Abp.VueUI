@@ -1,108 +1,108 @@
 export interface EntityExtensionDto {
-  properties?: Record<string, ExtensionPropertyDto>;
-  configuration?: Record<string, unknown>;
+  properties?: Record<string, ExtensionPropertyDto> | undefined;
+  configuration?: Record<string, unknown> | undefined;
 }
 
 export interface ExtensionEnumDto {
-  fields?: ExtensionEnumFieldDto[];
-  localizationResource?: string | null;
+  fields?: ExtensionEnumFieldDto[] | undefined;
+  localizationResource?: string | null | undefined;
 }
 
 export interface ExtensionEnumFieldDto {
-  name?: string | null;
-  value?: unknown | null;
+  name?: string | null | undefined;
+  value?: unknown | null | undefined;
 }
 
 export interface ExtensionPropertyApiCreateDto {
-  isAvailable?: boolean;
+  isAvailable?: boolean | undefined;
 }
 
 export interface ExtensionPropertyApiDto {
-  onGet?: ExtensionPropertyApiGetDto;
-  onCreate?: ExtensionPropertyApiCreateDto;
-  onUpdate?: ExtensionPropertyApiUpdateDto;
+  onGet?: ExtensionPropertyApiGetDto | undefined;
+  onCreate?: ExtensionPropertyApiCreateDto | undefined;
+  onUpdate?: ExtensionPropertyApiUpdateDto | undefined;
 }
 
 export interface ExtensionPropertyApiGetDto {
-  isAvailable?: boolean;
+  isAvailable?: boolean | undefined;
 }
 
 export interface ExtensionPropertyApiUpdateDto {
-  isAvailable?: boolean;
+  isAvailable?: boolean | undefined;
 }
 
 export interface ExtensionPropertyAttributeDto {
-  typeSimple?: string;
-  config?: Record<string, unknown>;
+  typeSimple?: string | undefined;
+  config?: Record<string, unknown> | undefined;
 }
 
 export interface ExtensionPropertyDto {
-  type?: string;
-  typeSimple?: string;
-  displayName?: LocalizableStringDto | null;
-  api?: ExtensionPropertyApiDto;
-  ui?: ExtensionPropertyUiDto;
-  policy?: ExtensionPropertyPolicyDto;
-  attributes?: ExtensionPropertyAttributeDto[];
-  configuration?: Record<string, unknown>;
-  defaultValue?: unknown | null;
+  type?: string | undefined;
+  typeSimple?: string | undefined;
+  displayName?: LocalizableStringDto | null | undefined;
+  api?: ExtensionPropertyApiDto | undefined;
+  ui?: ExtensionPropertyUiDto | undefined;
+  policy?: ExtensionPropertyPolicyDto | undefined;
+  attributes?: ExtensionPropertyAttributeDto[] | undefined;
+  configuration?: Record<string, unknown> | undefined;
+  defaultValue?: unknown | null | undefined;
 }
 
 export interface ExtensionPropertyFeaturePolicyDto {
-  features?: string[];
-  requiresAll?: boolean;
+  features?: string[] | undefined;
+  requiresAll?: boolean | undefined;
 }
 
 export interface ExtensionPropertyGlobalFeaturePolicyDto {
-  features?: string[];
-  requiresAll?: boolean;
+  features?: string[] | undefined;
+  requiresAll?: boolean | undefined;
 }
 
 export interface ExtensionPropertyPermissionPolicyDto {
-  permissionNames?: string[];
-  requiresAll?: boolean;
+  permissionNames?: string[] | undefined;
+  requiresAll?: boolean | undefined;
 }
 
 export interface ExtensionPropertyPolicyDto {
-  globalFeatures?: ExtensionPropertyGlobalFeaturePolicyDto;
-  features?: ExtensionPropertyFeaturePolicyDto;
-  permissions?: ExtensionPropertyPermissionPolicyDto;
+  globalFeatures?: ExtensionPropertyGlobalFeaturePolicyDto | undefined;
+  features?: ExtensionPropertyFeaturePolicyDto | undefined;
+  permissions?: ExtensionPropertyPermissionPolicyDto | undefined;
 }
 
 export interface ExtensionPropertyUiDto {
-  onTable?: ExtensionPropertyUiTableDto;
-  onCreateForm?: ExtensionPropertyUiFormDto;
-  onEditForm?: ExtensionPropertyUiFormDto;
-  lookup?: ExtensionPropertyUiLookupDto;
+  onTable?: ExtensionPropertyUiTableDto | undefined;
+  onCreateForm?: ExtensionPropertyUiFormDto | undefined;
+  onEditForm?: ExtensionPropertyUiFormDto | undefined;
+  lookup?: ExtensionPropertyUiLookupDto | undefined;
 }
 
 export interface ExtensionPropertyUiFormDto {
-  isVisible?: boolean;
+  isVisible?: boolean | undefined;
 }
 
 export interface ExtensionPropertyUiLookupDto {
-  url?: string;
-  resultListPropertyName?: string;
-  displayPropertyName?: string;
-  valuePropertyName?: string;
-  filterParamName?: string;
+  url?: string | undefined;
+  resultListPropertyName?: string | undefined;
+  displayPropertyName?: string | undefined;
+  valuePropertyName?: string | undefined;
+  filterParamName?: string | undefined;
 }
 
 export interface ExtensionPropertyUiTableDto {
-  isVisible?: boolean;
+  isVisible?: boolean | undefined;
 }
 
 export interface LocalizableStringDto {
-  name?: string;
-  resource?: string | null;
+  name?: string | undefined;
+  resource?: string | null | undefined;
 }
 
 export interface ModuleExtensionDto {
-  entities?: Record<string, EntityExtensionDto>;
-  configuration?: Record<string, unknown>;
+  entities?: Record<string, EntityExtensionDto> | undefined;
+  configuration?: Record<string, unknown> | undefined;
 }
 
 export interface ObjectExtensionsDto {
-  modules?: Record<string, ModuleExtensionDto>;
-  enums?: Record<string, ExtensionEnumDto>;
+  modules?: Record<string, ModuleExtensionDto> | undefined;
+  enums?: Record<string, ExtensionEnumDto> | undefined;
 }

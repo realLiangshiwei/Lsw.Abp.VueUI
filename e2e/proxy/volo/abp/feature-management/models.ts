@@ -1,36 +1,36 @@
 import type { IStringValueType } from '../validation/string-values/models.js';
 
 export interface FeatureDto {
-  name?: string;
-  displayName?: string;
-  value?: string;
-  provider?: FeatureProviderDto;
-  description?: string;
-  valueType?: IStringValueType;
-  depth?: number;
-  parentName?: string;
+  name?: string | undefined;
+  displayName?: string | undefined;
+  value?: string | undefined;
+  provider?: FeatureProviderDto | undefined;
+  description?: string | undefined;
+  valueType?: IStringValueType | undefined;
+  depth?: number | undefined;
+  parentName?: string | undefined;
 }
 
 export interface FeatureGroupDto {
-  name?: string;
-  displayName?: string;
-  features?: FeatureDto[];
+  name?: string | undefined;
+  displayName?: string | undefined;
+  features?: FeatureDto[] | undefined;
 }
 
 export interface FeatureProviderDto {
-  name?: string;
-  key?: string;
+  name?: string | undefined;
+  key?: string | undefined;
 }
 
 export interface GetFeatureListResultDto {
-  groups?: FeatureGroupDto[];
+  groups?: FeatureGroupDto[] | undefined;
 }
 
 export interface UpdateFeatureDto {
-  name?: string;
-  value?: string;
+  name?: string | undefined;
+  value?: string | undefined;
 }
 
 export interface UpdateFeaturesDto {
-  features?: UpdateFeatureDto[];
+  features?: UpdateFeatureDto[] | undefined;
 }

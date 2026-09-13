@@ -1,6 +1,6 @@
 export interface LanguageInfo {
-  cultureName?: string;
-  uiCultureName?: string;
-  displayName?: string;
-  twoLetterISOLanguageName?: string;
+  cultureName?: string | undefined;
+  uiCultureName?: string | undefined;
+  displayName?: string | undefined;
+  twoLetterISOLanguageName?: string | undefined;
 }

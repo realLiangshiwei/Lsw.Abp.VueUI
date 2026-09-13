@@ -1,30 +1,30 @@
 export interface EmailSettingsDto {
-  smtpHost?: string;
-  smtpPort?: number;
-  smtpUserName?: string;
-  smtpPassword?: string;
-  smtpDomain?: string;
-  smtpEnableSsl?: boolean;
-  smtpUseDefaultCredentials?: boolean;
-  defaultFromAddress?: string;
-  defaultFromDisplayName?: string;
+  smtpHost?: string | undefined;
+  smtpPort?: number | undefined;
+  smtpUserName?: string | undefined;
+  smtpPassword?: string | undefined;
+  smtpDomain?: string | undefined;
+  smtpEnableSsl?: boolean | undefined;
+  smtpUseDefaultCredentials?: boolean | undefined;
+  defaultFromAddress?: string | undefined;
+  defaultFromDisplayName?: string | undefined;
 }
 
 export interface SendTestEmailInput {
   senderEmailAddress: string;
   targetEmailAddress: string;
   subject: string;
-  body?: string;
+  body?: string | undefined;
 }
 
 export interface UpdateEmailSettingsDto {
-  smtpHost?: string;
-  smtpPort?: number;
-  smtpUserName?: string;
-  smtpPassword?: string;
-  smtpDomain?: string;
-  smtpEnableSsl?: boolean;
-  smtpUseDefaultCredentials?: boolean;
+  smtpHost?: string | undefined;
+  smtpPort?: number | undefined;
+  smtpUserName?: string | undefined;
+  smtpPassword?: string | undefined;
+  smtpDomain?: string | undefined;
+  smtpEnableSsl?: boolean | undefined;
+  smtpUseDefaultCredentials?: boolean | undefined;
   defaultFromAddress: string;
   defaultFromDisplayName: string;
 }

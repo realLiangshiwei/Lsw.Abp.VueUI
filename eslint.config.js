@@ -146,6 +146,12 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/consistent-type-imports': 'error',
+      // `interface X extends Y {}` is how a union is merged into an augmentable
+      // interface, which is what a generated `policy-names.ts` asks an application to do.
+      '@typescript-eslint/no-empty-object-type': [
+        'error',
+        { allowInterfaces: 'with-single-extends' },
+      ],
       '@typescript-eslint/no-non-null-assertion': 'error',
       'no-restricted-syntax': [
         'error',

@@ -5,7 +5,7 @@ import type {
 } from '@lsw-abpvue/core';
 
 export interface GetTenantsInput extends PagedAndSortedResultRequestDto {
-  filter?: string;
+  filter?: string | undefined;
 }
 
 export interface TenantCreateDto extends TenantCreateOrUpdateDtoBase {
@@ -18,10 +18,10 @@ export interface TenantCreateOrUpdateDtoBase extends ExtensibleObject {
 }
 
 export interface TenantDto extends ExtensibleEntityDto<string> {
-  name?: string;
-  concurrencyStamp?: string;
+  name?: string | undefined;
+  concurrencyStamp?: string | undefined;
 }
 
 export interface TenantUpdateDto extends TenantCreateOrUpdateDtoBase {
-  concurrencyStamp?: string;
+  concurrencyStamp?: string | undefined;
 }

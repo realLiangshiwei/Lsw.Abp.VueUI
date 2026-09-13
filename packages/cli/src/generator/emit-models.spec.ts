@@ -56,8 +56,8 @@ describe('an interface', () => {
       }),
     });
 
-    expect(content('acme/books/models.ts')).toContain('name?: string;');
-    expect(content('acme/books/models.ts')).toContain('publishDate?: string;');
+    expect(content('acme/books/models.ts')).toContain('name?: string | undefined;');
+    expect(content('acme/books/models.ts')).toContain('publishDate?: string | undefined;');
   });
 
   it('honours a jsonName the backend chose, quoting it when it needs quoting', () => {
@@ -70,11 +70,11 @@ describe('an interface', () => {
       }),
     });
 
-    expect(content('acme/books/models.ts')).toContain('book_name?: string;');
-    expect(content('acme/books/models.ts')).toContain("'book-author'?: string;");
+    expect(content('acme/books/models.ts')).toContain('book_name?: string | undefined;');
+    expect(content('acme/books/models.ts')).toContain("'book-author'?: string | undefined;");
   });
 
-  it('is optional unless the backend requires it', () => {
+  it('is optional unless the backend requires it, and says undefined out loud', () => {
     const { content } = emit({
       'Acme.Books.BookDto': dto({
         properties: [
@@ -85,7 +85,7 @@ describe('an interface', () => {
     });
 
     expect(content('acme/books/models.ts')).toContain('name: string;');
-    expect(content('acme/books/models.ts')).toContain('author?: string;');
+    expect(content('acme/books/models.ts')).toContain('author?: string | undefined;');
   });
 
   it('admits null where the backend says the value may be null', () => {
@@ -95,7 +95,7 @@ describe('an interface', () => {
       }),
     });
 
-    expect(content('acme/books/models.ts')).toContain('tenantId?: string | null;');
+    expect(content('acme/books/models.ts')).toContain('tenantId?: string | null | undefined;');
   });
 
   it('extends its base type', () => {
@@ -153,7 +153,7 @@ describe('an interface', () => {
     });
 
     expect(content('acme/books/models.ts')).toContain('export interface Page<T> {');
-    expect(content('acme/books/models.ts')).toContain('items?: T[];');
+    expect(content('acme/books/models.ts')).toContain('items?: T[] | undefined;');
   });
 });
 

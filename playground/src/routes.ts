@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import ComponentsPage from './pages/ComponentsPage.vue';
 import FeedbackPage from './pages/FeedbackPage.vue';
 import HomePage from './pages/HomePage.vue';
+import IdentityUsersPage from './pages/IdentityUsersPage.vue';
 import LoginPage from './pages/LoginPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
 import { userContributors } from './extensions/user-contributors';
@@ -56,8 +57,9 @@ export const routes: RouteRecordRaw[] = [
     meta: { title: 'AbpAccount::Login', layout: LayoutType.account },
   },
   {
+    // The M3 demonstration: every part of this page came out of `abpvue proxy add`.
     path: '/identity/users',
-    component: PlaceholderPage,
+    component: IdentityUsersPage,
     meta: {
       title: 'AbpIdentity::Users',
       // Both guards apply: anonymous visitors are sent to log in, and a signed-in user

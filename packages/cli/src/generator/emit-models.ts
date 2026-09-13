@@ -94,10 +94,14 @@ function emitInterface(
     rendered.refs.forEach(ref => importType(imports, type, ref));
 
     const name = quoteName(property.jsonName ?? camelCase(property.name));
-    const optional = property.isRequired ? '' : '?';
     const nullable = property.isNullable ? ' | null' : '';
+    // `?: T` and `?: T | undefined` differ under `exactOptionalPropertyTypes`, which a
+    // strict application has on: without the union, handing it an object that has the
+    // property set to `undefined` does not compile.
+    const optional = property.isRequired ? '' : '?';
+    const undefinable = property.isRequired ? '' : ' | undefined';
 
-    lines.push(`  ${name}${optional}: ${rendered.text}${nullable};`);
+    lines.push(`  ${name}${optional}: ${rendered.text}${nullable}${undefinable};`);
   }
 
   // A DTO that adds nothing to the one it derives from is an alias; an empty interface

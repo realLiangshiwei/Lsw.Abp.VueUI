@@ -10,65 +10,65 @@
 
 /** Carries the values of the object extension properties the backend declares. */
 export interface ExtensibleObject {
-  extraProperties?: Record<string, unknown>;
+  extraProperties?: Record<string, unknown> | undefined;
 }
 
 export interface EntityDto<TKey = string> {
-  id?: TKey;
+  id?: TKey | undefined;
 }
 
 export interface CreationAuditedEntityDto<TKey = string> extends EntityDto<TKey> {
-  creationTime?: string;
-  creatorId?: string;
+  creationTime?: string | undefined;
+  creatorId?: string | undefined;
 }
 
 export interface AuditedEntityDto<TKey = string> extends CreationAuditedEntityDto<TKey> {
-  lastModificationTime?: string;
-  lastModifierId?: string;
+  lastModificationTime?: string | undefined;
+  lastModifierId?: string | undefined;
 }
 
 export interface FullAuditedEntityDto<TKey = string> extends AuditedEntityDto<TKey> {
-  isDeleted?: boolean;
-  deleterId?: string;
-  deletionTime?: string;
+  isDeleted?: boolean | undefined;
+  deleterId?: string | undefined;
+  deletionTime?: string | undefined;
 }
 
 export interface ExtensibleEntityDto<TKey = string> extends ExtensibleObject {
-  id?: TKey;
+  id?: TKey | undefined;
 }
 
 export interface ExtensibleCreationAuditedEntityDto<
   TKey = string,
 > extends ExtensibleEntityDto<TKey> {
-  creationTime?: string;
-  creatorId?: string;
+  creationTime?: string | undefined;
+  creatorId?: string | undefined;
 }
 
 export interface ExtensibleAuditedEntityDto<
   TKey = string,
 > extends ExtensibleCreationAuditedEntityDto<TKey> {
-  lastModificationTime?: string;
-  lastModifierId?: string;
+  lastModificationTime?: string | undefined;
+  lastModifierId?: string | undefined;
 }
 
 export interface ExtensibleFullAuditedEntityDto<
   TKey = string,
 > extends ExtensibleAuditedEntityDto<TKey> {
-  isDeleted?: boolean;
-  deleterId?: string;
-  deletionTime?: string;
+  isDeleted?: boolean | undefined;
+  deleterId?: string | undefined;
+  deletionTime?: string | undefined;
 }
 
 export interface LimitedResultRequestDto {
-  maxResultCount?: number;
+  maxResultCount?: number | undefined;
 }
 
 export interface PagedResultRequestDto extends LimitedResultRequestDto {
-  skipCount?: number;
+  skipCount?: number | undefined;
 }
 
 export interface PagedAndSortedResultRequestDto extends PagedResultRequestDto {
-  sorting?: string;
+  sorting?: string | undefined;
 }
 
 /**
@@ -77,13 +77,13 @@ export interface PagedAndSortedResultRequestDto extends PagedResultRequestDto {
  * and so does this.
  */
 export interface ExtensibleLimitedResultRequestDto extends ExtensibleObject {
-  maxResultCount?: number;
+  maxResultCount?: number | undefined;
 }
 
 export interface ExtensiblePagedResultRequestDto extends ExtensibleLimitedResultRequestDto {
-  skipCount?: number;
+  skipCount?: number | undefined;
 }
 
 export interface ExtensiblePagedAndSortedResultRequestDto extends ExtensiblePagedResultRequestDto {
-  sorting?: string;
+  sorting?: string | undefined;
 }

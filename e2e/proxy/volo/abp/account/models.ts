@@ -1,19 +1,19 @@
 import type { ExtensibleObject } from '@lsw-abpvue/core';
 
 export interface ChangePasswordInput {
-  currentPassword?: string;
+  currentPassword?: string | undefined;
   newPassword: string;
 }
 
 export interface ProfileDto extends ExtensibleObject {
-  userName?: string;
-  email?: string;
-  name?: string;
-  surname?: string;
-  phoneNumber?: string;
-  isExternal?: boolean;
-  hasPassword?: boolean;
-  concurrencyStamp?: string;
+  userName?: string | undefined;
+  email?: string | undefined;
+  name?: string | undefined;
+  surname?: string | undefined;
+  phoneNumber?: string | undefined;
+  isExternal?: boolean | undefined;
+  hasPassword?: boolean | undefined;
+  concurrencyStamp?: string | undefined;
 }
 
 export interface RegisterDto extends ExtensibleObject {
@@ -24,7 +24,7 @@ export interface RegisterDto extends ExtensibleObject {
 }
 
 export interface ResetPasswordDto {
-  userId?: string;
+  userId?: string | undefined;
   resetToken: string;
   password: string;
 }
@@ -32,20 +32,20 @@ export interface ResetPasswordDto {
 export interface SendPasswordResetCodeDto {
   email: string;
   appName: string;
-  returnUrl?: string;
-  returnUrlHash?: string;
+  returnUrl?: string | undefined;
+  returnUrlHash?: string | undefined;
 }
 
 export interface UpdateProfileDto extends ExtensibleObject {
-  userName?: string;
-  email?: string;
-  name?: string;
-  surname?: string;
-  phoneNumber?: string;
-  concurrencyStamp?: string;
+  userName?: string | undefined;
+  email?: string | undefined;
+  name?: string | undefined;
+  surname?: string | undefined;
+  phoneNumber?: string | undefined;
+  concurrencyStamp?: string | undefined;
 }
 
 export interface VerifyPasswordResetTokenInput {
-  userId?: string;
+  userId?: string | undefined;
   resetToken: string;
 }

@@ -18,7 +18,9 @@ const HEADER = [
   '// the attributes on an object extension property.',
   '//',
   '// The maps are sparse on purpose. A rule the backend enforces in code rather than in an',
-  '// attribute is not here, and a form still says whatever else it needs to say.',
+  '// attribute is not here, and a form still says whatever else it needs to say. A rule a',
+  '// DTO inherits stays in the map of the type that declares it, so a form that edits a',
+  '// derived DTO spreads the two together.',
 ].join('\n');
 
 function numberOf(value: unknown): number | undefined {

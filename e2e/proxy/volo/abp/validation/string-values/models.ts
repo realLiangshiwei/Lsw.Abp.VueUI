@@ -1,12 +1,12 @@
 export interface IStringValueType {
-  name?: string;
-  item?: unknown | null;
-  properties?: Record<string, unknown>;
-  validator?: IValueValidator;
+  name?: string | undefined;
+  item?: unknown | null | undefined;
+  properties?: Record<string, unknown> | undefined;
+  validator?: IValueValidator | undefined;
 }
 
 export interface IValueValidator {
-  name?: string;
-  item?: unknown | null;
-  properties?: Record<string, unknown>;
+  name?: string | undefined;
+  item?: unknown | null | undefined;
+  properties?: Record<string, unknown> | undefined;
 }

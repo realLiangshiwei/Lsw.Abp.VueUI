@@ -1,4 +1,4 @@
 export interface FileDescriptorDto {
   name: string;
-  size?: number;
+  size?: number | undefined;
 }

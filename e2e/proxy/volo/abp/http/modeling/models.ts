@@ -1,131 +1,131 @@
 export interface ActionApiDescriptionModel {
-  uniqueName?: string;
-  name?: string;
-  httpMethod?: string | null;
-  url?: string;
-  supportedVersions?: string[] | null;
-  parametersOnMethod?: MethodParameterApiDescriptionModel[];
-  parameters?: ParameterApiDescriptionModel[];
-  returnValue?: ReturnValueApiDescriptionModel;
-  allowAnonymous?: boolean | null;
-  authorizeDatas?: AuthorizeDataApiDescriptionModel[];
-  implementFrom?: string | null;
-  summary?: string | null;
-  remarks?: string | null;
-  description?: string | null;
-  displayName?: string | null;
+  uniqueName?: string | undefined;
+  name?: string | undefined;
+  httpMethod?: string | null | undefined;
+  url?: string | undefined;
+  supportedVersions?: string[] | null | undefined;
+  parametersOnMethod?: MethodParameterApiDescriptionModel[] | undefined;
+  parameters?: ParameterApiDescriptionModel[] | undefined;
+  returnValue?: ReturnValueApiDescriptionModel | undefined;
+  allowAnonymous?: boolean | null | undefined;
+  authorizeDatas?: AuthorizeDataApiDescriptionModel[] | undefined;
+  implementFrom?: string | null | undefined;
+  summary?: string | null | undefined;
+  remarks?: string | null | undefined;
+  description?: string | null | undefined;
+  displayName?: string | null | undefined;
 }
 
 export interface ApplicationApiDescriptionModel {
-  modules?: Record<string, ModuleApiDescriptionModel>;
-  types?: Record<string, TypeApiDescriptionModel>;
+  modules?: Record<string, ModuleApiDescriptionModel> | undefined;
+  types?: Record<string, TypeApiDescriptionModel> | undefined;
 }
 
 export interface ApplicationApiDescriptionModelRequestDto {
-  includeTypes?: boolean;
-  includeDescriptions?: boolean;
+  includeTypes?: boolean | undefined;
+  includeDescriptions?: boolean | undefined;
 }
 
 export interface AuthorizeDataApiDescriptionModel {
-  policy?: string | null;
-  roles?: string | null;
+  policy?: string | null | undefined;
+  roles?: string | null | undefined;
 }
 
 export interface ControllerApiDescriptionModel {
-  controllerName?: string;
-  controllerGroupName?: string | null;
-  isRemoteService?: boolean;
-  isIntegrationService?: boolean;
-  apiVersion?: string | null;
-  type?: string;
-  summary?: string | null;
-  remarks?: string | null;
-  description?: string | null;
-  displayName?: string | null;
-  interfaces?: ControllerInterfaceApiDescriptionModel[];
-  actions?: Record<string, ActionApiDescriptionModel>;
+  controllerName?: string | undefined;
+  controllerGroupName?: string | null | undefined;
+  isRemoteService?: boolean | undefined;
+  isIntegrationService?: boolean | undefined;
+  apiVersion?: string | null | undefined;
+  type?: string | undefined;
+  summary?: string | null | undefined;
+  remarks?: string | null | undefined;
+  description?: string | null | undefined;
+  displayName?: string | null | undefined;
+  interfaces?: ControllerInterfaceApiDescriptionModel[] | undefined;
+  actions?: Record<string, ActionApiDescriptionModel> | undefined;
 }
 
 export interface ControllerInterfaceApiDescriptionModel {
-  type?: string;
-  name?: string;
-  methods?: InterfaceMethodApiDescriptionModel[];
+  type?: string | undefined;
+  name?: string | undefined;
+  methods?: InterfaceMethodApiDescriptionModel[] | undefined;
 }
 
 export interface InterfaceMethodApiDescriptionModel {
-  name?: string;
-  parametersOnMethod?: MethodParameterApiDescriptionModel[];
-  returnValue?: ReturnValueApiDescriptionModel;
+  name?: string | undefined;
+  parametersOnMethod?: MethodParameterApiDescriptionModel[] | undefined;
+  returnValue?: ReturnValueApiDescriptionModel | undefined;
 }
 
 export interface MethodParameterApiDescriptionModel {
-  name?: string;
-  typeAsString?: string;
-  type?: string;
-  typeSimple?: string;
-  isOptional?: boolean;
-  defaultValue?: unknown | null;
-  summary?: string | null;
-  description?: string | null;
-  displayName?: string | null;
+  name?: string | undefined;
+  typeAsString?: string | undefined;
+  type?: string | undefined;
+  typeSimple?: string | undefined;
+  isOptional?: boolean | undefined;
+  defaultValue?: unknown | null | undefined;
+  summary?: string | null | undefined;
+  description?: string | null | undefined;
+  displayName?: string | null | undefined;
 }
 
 export interface ModuleApiDescriptionModel {
-  rootPath?: string;
-  remoteServiceName?: string;
-  controllers?: Record<string, ControllerApiDescriptionModel>;
+  rootPath?: string | undefined;
+  remoteServiceName?: string | undefined;
+  controllers?: Record<string, ControllerApiDescriptionModel> | undefined;
 }
 
 export interface ParameterApiDescriptionModel {
-  nameOnMethod?: string;
-  name?: string;
-  jsonName?: string | null;
-  type?: string | null;
-  typeSimple?: string | null;
-  isOptional?: boolean;
-  defaultValue?: unknown | null;
-  constraintTypes?: string[] | null;
-  bindingSourceId?: string | null;
-  descriptorName?: string | null;
-  summary?: string | null;
-  description?: string | null;
-  displayName?: string | null;
+  nameOnMethod?: string | undefined;
+  name?: string | undefined;
+  jsonName?: string | null | undefined;
+  type?: string | null | undefined;
+  typeSimple?: string | null | undefined;
+  isOptional?: boolean | undefined;
+  defaultValue?: unknown | null | undefined;
+  constraintTypes?: string[] | null | undefined;
+  bindingSourceId?: string | null | undefined;
+  descriptorName?: string | null | undefined;
+  summary?: string | null | undefined;
+  description?: string | null | undefined;
+  displayName?: string | null | undefined;
 }
 
 export interface PropertyApiDescriptionModel {
-  name?: string;
-  jsonName?: string | null;
-  type?: string;
-  typeSimple?: string;
-  isRequired?: boolean;
-  minLength?: number | null;
-  maxLength?: number | null;
-  minimum?: string | null;
-  maximum?: string | null;
-  regex?: string | null;
-  isNullable?: boolean;
-  summary?: string | null;
-  description?: string | null;
-  displayName?: string | null;
+  name?: string | undefined;
+  jsonName?: string | null | undefined;
+  type?: string | undefined;
+  typeSimple?: string | undefined;
+  isRequired?: boolean | undefined;
+  minLength?: number | null | undefined;
+  maxLength?: number | null | undefined;
+  minimum?: string | null | undefined;
+  maximum?: string | null | undefined;
+  regex?: string | null | undefined;
+  isNullable?: boolean | undefined;
+  summary?: string | null | undefined;
+  description?: string | null | undefined;
+  displayName?: string | null | undefined;
 }
 
 export interface ReturnValueApiDescriptionModel {
-  type?: string;
-  typeSimple?: string;
-  summary?: string | null;
-  contentTypes?: string[] | null;
-  isRemoteStream?: boolean;
+  type?: string | undefined;
+  typeSimple?: string | undefined;
+  summary?: string | null | undefined;
+  contentTypes?: string[] | null | undefined;
+  isRemoteStream?: boolean | undefined;
 }
 
 export interface TypeApiDescriptionModel {
-  baseType?: string | null;
-  isEnum?: boolean;
-  enumNames?: string[] | null;
-  enumValues?: unknown[] | null;
-  genericArguments?: string[] | null;
-  properties?: PropertyApiDescriptionModel[] | null;
-  summary?: string | null;
-  remarks?: string | null;
-  description?: string | null;
-  displayName?: string | null;
+  baseType?: string | null | undefined;
+  isEnum?: boolean | undefined;
+  enumNames?: string[] | null | undefined;
+  enumValues?: unknown[] | null | undefined;
+  genericArguments?: string[] | null | undefined;
+  properties?: PropertyApiDescriptionModel[] | null | undefined;
+  summary?: string | null | undefined;
+  remarks?: string | null | undefined;
+  description?: string | null | undefined;
+  displayName?: string | null | undefined;
 }
