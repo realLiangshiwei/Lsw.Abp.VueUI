@@ -242,7 +242,8 @@ export function mapEntitiesToContributors<R = unknown>(
         : name;
       const displayName = displayNameOf(
         localization,
-        properties[labelledAs]?.displayName ?? property.displayName,
+        // The backend sends null for a property with no display name of its own.
+        properties[labelledAs]?.displayName ?? property.displayName ?? undefined,
         { name: labelledAs, resource: localizationResource },
       );
 

@@ -4,6 +4,8 @@
  * generator will emit so the swap is a delete.
  */
 
+import type { NameValue } from '../models/dtos.js';
+
 export interface ApplicationConfigurationDto {
   localization: ApplicationLocalizationConfigurationDto;
   auth: ApplicationAuthConfigurationDto;
@@ -44,7 +46,7 @@ export interface ApplicationLocalizationConfigurationDto {
   resources: Record<string, ApplicationLocalizationResourceDto>;
   languages: LanguageInfo[];
   currentCulture: CurrentCultureDto;
-  defaultResourceName?: string;
+  defaultResourceName?: string | null;
   languagesMap: Record<string, NameValue[]>;
   languageFilesMap: Record<string, NameValue[]>;
   useRouteBasedCulture: boolean;
@@ -70,7 +72,6 @@ export interface LanguageInfo {
   uiCultureName?: string;
   displayName?: string;
   twoLetterISOLanguageName?: string;
-  flagIcon?: string;
 }
 
 export interface CurrentCultureDto {
@@ -97,25 +98,26 @@ export interface DateTimeFormatDto {
 
 export interface CurrentUserDto {
   isAuthenticated: boolean;
-  id?: string;
-  tenantId?: string;
-  impersonatorUserId?: string;
-  impersonatorTenantId?: string;
-  impersonatorUserName?: string;
-  impersonatorTenantName?: string;
-  userName?: string;
-  name?: string;
-  surName?: string;
-  email?: string;
+  sessionId?: string | null;
+  id?: string | null;
+  tenantId?: string | null;
+  impersonatorUserId?: string | null;
+  impersonatorTenantId?: string | null;
+  impersonatorUserName?: string | null;
+  impersonatorTenantName?: string | null;
+  userName?: string | null;
+  name?: string | null;
+  surName?: string | null;
+  email?: string | null;
   emailVerified: boolean;
-  phoneNumber?: string;
+  phoneNumber?: string | null;
   phoneNumberVerified: boolean;
   roles: string[];
 }
 
 export interface CurrentTenantDto {
-  id?: string;
-  name?: string;
+  id?: string | null;
+  name?: string | null;
   isAvailable: boolean;
 }
 
@@ -126,9 +128,9 @@ export interface MultiTenancyInfoDto {
 
 export interface FindTenantResultDto {
   success: boolean;
-  tenantId?: string;
-  name?: string;
-  normalizedName?: string;
+  tenantId?: string | null;
+  name?: string | null;
+  normalizedName?: string | null;
   isActive: boolean;
 }
 
@@ -142,20 +144,15 @@ export interface TimeZone {
 }
 
 export interface IanaTimeZone {
-  timeZoneName?: string;
+  timeZoneName?: string | null;
 }
 
 export interface WindowsTimeZone {
-  timeZoneId?: string;
+  timeZoneId?: string | null;
 }
 
 export interface ClockDto {
   kind?: string;
-}
-
-export interface NameValue<T = string> {
-  name?: string;
-  value: T;
 }
 
 export interface ObjectExtensionsDto {
@@ -176,7 +173,7 @@ export interface EntityExtensionDto {
 export interface ExtensionPropertyDto {
   type?: string;
   typeSimple?: string;
-  displayName: LocalizableStringDto;
+  displayName: LocalizableStringDto | null;
   api: ExtensionPropertyApiDto;
   ui: ExtensionPropertyUiDto;
   policy?: ExtensionPropertyPolicyDto;
@@ -232,15 +229,15 @@ export interface ExtensionPropertyAttributeDto {
 
 export interface ExtensionEnumDto {
   fields: ExtensionEnumFieldDto[];
-  localizationResource?: string;
+  localizationResource?: string | null;
 }
 
 export interface ExtensionEnumFieldDto {
-  name?: string;
+  name?: string | null;
   value: unknown;
 }
 
 export interface LocalizableStringDto {
   name?: string;
-  resource?: string;
+  resource?: string | null;
 }

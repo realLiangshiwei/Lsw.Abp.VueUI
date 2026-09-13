@@ -87,3 +87,9 @@ export interface ExtensiblePagedResultRequestDto extends ExtensibleLimitedResult
 export interface ExtensiblePagedAndSortedResultRequestDto extends ExtensiblePagedResultRequestDto {
   sorting?: string | undefined;
 }
+
+/** ABP's `NameValue`, a pair the settings and localization payloads are full of. */
+export interface NameValue<T = string> {
+  name: string;
+  value: T;
+}

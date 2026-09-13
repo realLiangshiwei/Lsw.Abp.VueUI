@@ -70,6 +70,7 @@ export type {
   ExtensiblePagedResultRequestDto,
   FullAuditedEntityDto,
   LimitedResultRequestDto,
+  NameValue,
   PagedAndSortedResultRequestDto,
   PagedResultRequestDto,
 } from './models/dtos.js';
@@ -154,7 +155,6 @@ export type {
   LocalizableStringDto,
   ModuleExtensionDto,
   MultiTenancyInfoDto,
-  NameValue,
   ObjectExtensionsDto,
   TimeZone,
   TimingDto,

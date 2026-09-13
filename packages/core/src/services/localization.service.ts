@@ -61,7 +61,9 @@ export const LocalizationService = defineService('LocalizationService', () => {
   const translate = (param: LocalizationParam, params: unknown[]): string =>
     createLocalizer({
       texts: texts.value,
-      defaultResourceName: localization.value.defaultResourceName,
+      // The backend sends null when there is no default resource, which is the same
+      // thing as not having one.
+      defaultResourceName: localization.value.defaultResourceName ?? undefined,
       onMissing: message => {
         if (isDevMode()) console.warn(`[abp] ${message}`);
       },
