@@ -1,6 +1,5 @@
 import { rm } from 'node:fs/promises';
-import { isAbsolute, resolve } from 'node:path';
-import { join } from 'node:path';
+import { isAbsolute, join, resolve } from 'node:path';
 import process from 'node:process';
 import * as prompts from '@clack/prompts';
 import { defineCommand } from 'citty';
