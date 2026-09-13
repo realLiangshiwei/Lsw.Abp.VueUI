@@ -34,6 +34,10 @@
       "@lsw-abpvue/core": ["./packages/core/src/index.ts"],
       "@lsw-abpvue/core/router": ["./packages/core/router/src/index.ts"],
       "@lsw-abpvue/oauth": ["./packages/oauth/src/index.ts"],
+      "@lsw-abpvue/permission-management": ["./packages/permission-management/src/index.ts"],
+      "@lsw-abpvue/permission-management/proxy": [
+        "./packages/permission-management/proxy/src/index.ts"
+      ],
       "@lsw-abpvue/theme-basic": ["./packages/theme-basic/src/index.ts"],
       "@lsw-abpvue/theme-shared": ["./packages/theme-shared/src/index.ts"],
       "@lsw-abpvue/theme-shared/testing": ["./packages/theme-shared/testing/src/index.ts"],

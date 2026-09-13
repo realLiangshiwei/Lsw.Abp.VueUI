@@ -59,5 +59,11 @@
     "path": "packages/account-core/dist/index.js",
     "ignore": ["vue", "vue-router", "@lsw-abpvue/core"],
     "limit": "2 kB"
+  },
+  {
+    "name": "@lsw-abpvue/permission-management",
+    "path": "packages/permission-management/dist/index.js",
+    "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
+    "limit": "6 kB"
   }
 ]

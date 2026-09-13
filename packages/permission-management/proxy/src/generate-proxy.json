@@ -1,0 +1,24 @@
+{
+  "generated": [
+    "README.md",
+    "index.ts",
+    "permission-management/index.ts",
+    "permission-management/models.ts",
+    "permission-management/permissions.service.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "permissionManagement": {
+      "rootPath": "permissionManagement",
+      "remoteServiceName": "AbpPermissionManagement"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

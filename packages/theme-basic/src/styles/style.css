@@ -286,3 +286,71 @@
 .abp-grid-actions-item:focus-visible {
   background-color: var(--bs-secondary-bg);
 }
+
+/*
+ * The permission grant dialog. The module ships the markup and the class names; a theme
+ * is what gives them a look, which is what keeps the module free of any theme at all.
+ */
+.abp-permissions__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.abp-permissions__body {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) 2fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.abp-permissions__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-height: min(60vh, 30rem);
+  overflow-y: auto;
+}
+
+.abp-permissions__group {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-body-bg);
+  color: inherit;
+  text-align: start;
+}
+
+.abp-permissions__group--active {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+}
+
+.abp-permissions__list {
+  max-height: min(60vh, 30rem);
+  overflow-y: auto;
+}
+
+.abp-permissions__permission {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.abp-permissions__badge {
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--bs-border-radius-pill);
+  background-color: var(--bs-secondary-bg);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 767.98px) {
+  .abp-permissions__body {
+    grid-template-columns: 1fr;
+  }
+}
