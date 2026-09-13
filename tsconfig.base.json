@@ -26,6 +26,8 @@
     "types": [],
 
     "paths": {
+      "@lsw-abpvue/account-core": ["./packages/account-core/src/index.ts"],
+      "@lsw-abpvue/account-core/proxy": ["./packages/account-core/proxy/src/index.ts"],
       "@lsw-abpvue/cli": ["./packages/cli/src/index.ts"],
       "@lsw-abpvue/components": ["./packages/components/src/index.ts"],
       "@lsw-abpvue/components/extensible": ["./packages/components/extensible/src/index.ts"],

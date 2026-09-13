@@ -30,6 +30,7 @@ const ALLOWED = {
     'axe-core',
     'vitest',
   ],
+  'account-core': ['@lsw-abpvue/core', '@lsw-abpvue/utils', 'vue', 'vue-router'],
   components: [
     '@lsw-abpvue/core',
     '@lsw-abpvue/theme-shared',

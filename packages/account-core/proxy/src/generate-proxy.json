@@ -1,0 +1,36 @@
+{
+  "generated": [
+    "README.md",
+    "account/account.service.ts",
+    "account/dynamic-claims.service.ts",
+    "account/index.ts",
+    "account/models.ts",
+    "account/profile.service.ts",
+    "account/web/areas/account/controllers/index.ts",
+    "account/web/areas/account/controllers/login.service.ts",
+    "account/web/areas/account/controllers/models/index.ts",
+    "account/web/areas/account/controllers/models/login-result-type.enum.ts",
+    "account/web/areas/account/controllers/models/models.ts",
+    "account/web/areas/account/index.ts",
+    "account/web/areas/index.ts",
+    "account/web/index.ts",
+    "identity/index.ts",
+    "identity/models.ts",
+    "index.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "account": {
+      "rootPath": "account",
+      "remoteServiceName": "AbpAccount"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}
