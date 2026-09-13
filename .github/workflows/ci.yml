@@ -37,6 +37,24 @@ jobs:
       # pkg.pr.new prints. Nothing goes to npm; entries are purged after a month.
       - run: pnpm exec pkg-pr-new publish './packages/*' --pnpm
 
+  # The CLI writes files and joins paths, which is the one part of this repository whose
+  # behaviour differs per platform. Everything else runs in a browser.
+  cli-platforms:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @lsw-abpvue/cli test
+
   # The declarations we publish have to be readable by projects on an older TypeScript
   # than the one we build with. Kept separate so a failure here is unmistakable.
   downstream-types:
