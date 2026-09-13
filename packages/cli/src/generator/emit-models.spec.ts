@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { TypeDefinition } from '../api-definition/models.js';
-import { emitModels } from './emit-models.js';
+import { emitModels, fileOf } from './emit-models.js';
 import { GenerationReport } from './report.js';
 import { TypeRegistry } from './type-registry.js';
 
@@ -192,5 +192,29 @@ describe('the root namespace', () => {
     const { files } = emit({ 'Acme.BookStore.Books.BookDto': dto() }, 'Acme.BookStore');
 
     expect(files.map(file => file.path)).toEqual(['books/models.ts']);
+  });
+});
+
+describe('two enums whose names differ only in case', () => {
+  it('are two identifiers but one file name, which is what the duplicate check is for', () => {
+    const { files } = emit({
+      'Acme.Books.AB': dto({ isEnum: true, enumNames: ['One'], enumValues: [0] }),
+      'Acme.Books.Ab': dto({ isEnum: true, enumNames: ['Two'], enumValues: [0] }),
+    });
+
+    expect(files.map(file => file.path)).toEqual([
+      'acme/books/ab.enum.ts',
+      'acme/books/ab.enum.ts',
+    ]);
+  });
+});
+
+describe('fileOf', () => {
+  it('says where a type will be, so another file can import it from there', () => {
+    const report = new GenerationReport();
+    const registry = new TypeRegistry({ 'Acme.Books.BookDto': dto() }, { report });
+    const [type] = registry.generated();
+
+    expect(type && fileOf(type)).toBe('acme/books/models');
   });
 });

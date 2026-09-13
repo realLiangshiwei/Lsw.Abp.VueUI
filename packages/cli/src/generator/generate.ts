@@ -49,6 +49,17 @@ export interface GenerationResult {
   modules: string[];
 }
 
+/** Two generated files that would land on the same path. */
+export class DuplicatePathError extends Error {
+  constructor(path: string) {
+    super(
+      `Two generated files both want to be ${path}. That is a name collision the ` +
+        'generator should have resolved; please report it with the api-definition.',
+    );
+    this.name = 'DuplicatePathError';
+  }
+}
+
 export class UnknownModuleError extends Error {
   constructor(name: string, available: string[]) {
     super(
@@ -100,6 +111,19 @@ function closureOf(seeds: RegisteredType[], registry: TypeRegistry): RegisteredT
   }
 
   return [...seen.values()];
+}
+
+/**
+ * No two files on the same path. Names come from the backend, and one overwriting
+ * another silently would be a proxy that is missing a service nobody notices.
+ */
+function assertOnePerPath(files: EmittedFile[]): void {
+  const seen = new Set<string>();
+
+  for (const file of files) {
+    if (seen.has(file.path)) throw new DuplicatePathError(file.path);
+    seen.add(file.path);
+  }
 }
 
 /**
@@ -183,6 +207,8 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
       ),
     );
   }
+
+  assertOnePerPath(files);
 
   const sorted = files.sort((left, right) => (left.path < right.path ? -1 : 1));
   const barrels = options.index === false ? [] : emitBarrels(sorted);

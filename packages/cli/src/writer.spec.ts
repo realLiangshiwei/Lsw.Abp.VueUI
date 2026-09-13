@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { writeProxy } from './writer.js';
+import { OutsideTargetError, writeProxy } from './writer.js';
 
 const directories: string[] = [];
 
@@ -85,6 +85,14 @@ describe('writing a proxy', () => {
     await writeProxy({ target: directory, files: [], previous: ['../not-ours.ts'] });
 
     expect(await readFile(outside, 'utf8')).toBe('keep');
+  });
+
+  it('refuses to write a file whose path leaves the directory', async () => {
+    const directory = await target();
+
+    await expect(
+      writeProxy({ target: directory, files: [{ path: '../escaped.ts', content: 'no' }] }),
+    ).rejects.toBeInstanceOf(OutsideTargetError);
   });
 
   it('writes nothing on a dry run, and says what it would have done', async () => {

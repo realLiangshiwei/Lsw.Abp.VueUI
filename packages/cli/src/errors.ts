@@ -1,5 +1,6 @@
 import { ApiDefinitionError } from './api-definition/source.js';
-import { UnknownModuleError } from './generator/generate.js';
+import { DuplicatePathError, UnknownModuleError } from './generator/generate.js';
+import { OutsideTargetError } from './writer.js';
 
 /**
  * Something the person running the command can fix. The message is printed on its own,
@@ -17,6 +18,8 @@ export function isUserFacingError(error: unknown): error is Error {
   return (
     error instanceof CliError ||
     error instanceof ApiDefinitionError ||
-    error instanceof UnknownModuleError
+    error instanceof UnknownModuleError ||
+    error instanceof DuplicatePathError ||
+    error instanceof OutsideTargetError
   );
 }

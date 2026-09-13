@@ -43,11 +43,11 @@ export type { ProxyConfig, ProxyConfigModule, ProxyConfigSource } from './config
 
 export { CliError, isUserFacingError } from './errors.js';
 
-export { generateProxy, UnknownModuleError } from './generator/generate.js';
+export { DuplicatePathError, generateProxy, UnknownModuleError } from './generator/generate.js';
 export type { GenerateOptions, GenerationResult, ServiceType } from './generator/generate.js';
 export type { EmittedFile } from './generator/emit-models.js';
 export { GenerationReport } from './generator/report.js';
 export type { ReportEntry, ReportKind } from './generator/report.js';
 
-export { writeProxy } from './writer.js';
+export { OutsideTargetError, writeProxy } from './writer.js';
 export type { WriteOptions, WriteResult } from './writer.js';

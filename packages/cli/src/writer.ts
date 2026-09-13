@@ -1,7 +1,15 @@
 import { mkdir, readdir, rm, rmdir, writeFile } from 'node:fs/promises';
-import { dirname, join, relative, sep } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { format, resolveConfig } from 'prettier';
 import type { EmittedFile } from './generator/emit-models.js';
+
+/** A file whose path would leave the directory it is meant to be written into. */
+export class OutsideTargetError extends Error {
+  constructor(path: string, target: string) {
+    super(`"${path}" is not inside ${target}, so nothing was written.`);
+    this.name = 'OutsideTargetError';
+  }
+}
 
 export interface WriteResult {
   written: string[];
@@ -43,6 +51,16 @@ async function formatted(target: string, file: EmittedFile): Promise<string> {
   }
 }
 
+/**
+ * Whether a recorded or generated path stays inside the directory it belongs to. The
+ * paths are built from names the backend chose, so this side does not get to assume it.
+ */
+function isInside(target: string, path: string): boolean {
+  const inside = relative(target, join(target, path));
+
+  return inside !== '' && !inside.startsWith('..');
+}
+
 /** Takes away the directories a removed file leaves behind, but never the target itself. */
 async function pruneEmptyDirectories(target: string, from: string): Promise<void> {
   let directory = from;
@@ -70,16 +88,18 @@ export async function writeProxy(options: WriteOptions): Promise<WriteResult> {
   if (options.dryRun) return { written, removed: stale };
 
   for (const path of stale) {
-    const absolute = join(options.target, path);
-    // A path from the configuration file is data, and joining it must not walk out of
-    // the directory it belongs to.
-    if (relative(options.target, absolute).startsWith(`..${sep}`)) continue;
+    if (!isInside(options.target, path)) continue;
 
+    const absolute = join(options.target, path);
     await rm(absolute, { force: true });
     await pruneEmptyDirectories(options.target, dirname(absolute));
   }
 
   for (const file of options.files) {
+    if (!isInside(options.target, file.path)) {
+      throw new OutsideTargetError(file.path, options.target);
+    }
+
     const absolute = join(options.target, file.path);
     await mkdir(dirname(absolute), { recursive: true });
     await writeFile(absolute, await formatted(options.target, file), 'utf8');

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { readApiDefinition, readApplicationConfiguration } from '../api-definition/source.js';
 import type { ApiDefinition } from '../api-definition/models.js';
 import type { ApplicationConfiguration } from '../api-definition/object-extensions.js';
-import { generateProxy, UnknownModuleError } from './generate.js';
+import { DuplicatePathError, generateProxy, UnknownModuleError } from './generate.js';
 
 const BACKEND = process.env.ABP_BACKEND_URL ?? 'https://localhost:44384';
 const FIXTURE = resolve(import.meta.dirname, '../../../../e2e/fixtures/api-definition.json');
@@ -175,5 +175,55 @@ describe('the object extension properties of the test backend', () => {
 
   it('is not affected by the permission InternalNote is behind', () => {
     expect(content).toContain('InternalNote: [Validators.maxLength(256)],');
+  });
+});
+
+describe('a backend whose type names collide in the file system', () => {
+  it('stops rather than letting one generated file overwrite another', () => {
+    const colliding: ApiDefinition = {
+      modules: {
+        app: {
+          rootPath: 'app',
+          remoteServiceName: 'Default',
+          controllers: {
+            'Acme.BookController': {
+              controllerName: 'Book',
+              isRemoteService: true,
+              isIntegrationService: false,
+              type: 'Acme.BookController',
+              actions: {
+                GetAsync: {
+                  uniqueName: 'GetAsync',
+                  name: 'GetAsync',
+                  httpMethod: 'GET',
+                  url: 'api/app/book',
+                  parametersOnMethod: [],
+                  parameters: [],
+                  returnValue: { type: 'Acme.AB', typeSimple: 'Acme.AB' },
+                },
+                GetOtherAsync: {
+                  uniqueName: 'GetOtherAsync',
+                  name: 'GetOtherAsync',
+                  httpMethod: 'GET',
+                  url: 'api/app/book/other',
+                  parametersOnMethod: [],
+                  parameters: [],
+                  returnValue: { type: 'Acme.Ab', typeSimple: 'Acme.Ab' },
+                },
+              },
+            },
+          },
+        },
+      },
+      // Two enums a case-insensitive file name cannot tell apart.
+      types: {
+        'Acme.AB': { isEnum: true, enumNames: ['One'], enumValues: [0] },
+        'Acme.Ab': { isEnum: true, enumNames: ['Two'], enumValues: [0] },
+      },
+    };
+
+    expect(() => generateProxy({ definition: colliding, modules: ['app'] })).toThrow(
+      DuplicatePathError,
+    );
   });
 });
