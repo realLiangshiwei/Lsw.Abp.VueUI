@@ -71,6 +71,18 @@ without forking the theme:
 replaceable.add({ key: ThemeBasicComponents.Logo, component: MyLogo });
 ```
 
+## The account shell
+
+The account layout wraps every page it shows in `Account.AuthWrapperComponent`: the card,
+the tenant box above it, and the notice that goes up in place of the form when the client
+has no login scheme of its own. Both it and `Account.TenantBoxComponent` are replaceable
+under the keys the Angular UI uses.
+
+Switching tenant is `@lsw-abpvue/account-core`'s `TenantBoxService`, which answers whether
+the name was found; the toast that says it was not is the theme's. A route can set
+`meta.tenantBoxVisible: false` to leave the box out, which is what the reset password page
+does.
+
 ## Dark mode and right to left
 
 Dark mode is Bootstrap's own `data-bs-theme`, set by `ThemeModeService`, which follows

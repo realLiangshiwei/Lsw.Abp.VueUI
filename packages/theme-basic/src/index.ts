@@ -17,6 +17,8 @@ export { default as AbpBreadcrumb } from './components/AbpBreadcrumb.vue';
 export { default as AbpErrorPage } from './components/AbpErrorPage.vue';
 export { default as AbpLoaderBar } from './components/AbpLoaderBar.vue';
 export { default as AbpPageAlerts } from './components/AbpPageAlerts.vue';
+export { default as AbpAuthWrapper } from './components/account/AbpAuthWrapper.vue';
+export { default as AbpTenantBox } from './components/account/AbpTenantBox.vue';
 export { default as AbpCurrentUser } from './components/nav/AbpCurrentUser.vue';
 export { default as AbpThemeToggle } from './components/nav/AbpThemeToggle.vue';
 export { default as AbpLanguages } from './components/nav/AbpLanguages.vue';

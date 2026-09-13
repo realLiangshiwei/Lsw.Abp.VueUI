@@ -44,7 +44,14 @@
   {
     "name": "@lsw-abpvue/theme-basic",
     "path": "packages/theme-basic/dist/index.js",
-    "ignore": ["vue", "vue-router", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared", "reka-ui"],
+    "ignore": [
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/account-core",
+      "reka-ui"
+    ],
     "limit": "12 kB"
   },
   {

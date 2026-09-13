@@ -179,6 +179,9 @@ importers:
         specifier: ^2.10.4
         version: 2.10.4(vue@3.5.41(typescript@6.0.3))
     devDependencies:
+      '@lsw-abpvue/account-core':
+        specifier: workspace:*
+        version: link:../account-core
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../core

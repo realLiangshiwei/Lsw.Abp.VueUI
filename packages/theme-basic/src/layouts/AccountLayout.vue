@@ -1,11 +1,21 @@
 <script setup lang="ts">
+import { AccountComponents } from '@lsw-abpvue/account-core';
+import { useReplaceableComponents } from '@lsw-abpvue/core';
+import { computed } from 'vue';
 import AbpConfirmHost from '../components/AbpConfirmHost.vue';
 import AbpErrorPage from '../components/AbpErrorPage.vue';
 import AbpLoaderBar from '../components/AbpLoaderBar.vue';
 import AbpPageAlerts from '../components/AbpPageAlerts.vue';
 import AbpToastHost from '../components/AbpToastHost.vue';
+import AbpAuthWrapper from '../components/account/AbpAuthWrapper.vue';
 import AbpLogo from '../components/nav/AbpLogo.vue';
 import AbpLanguages from '../components/nav/AbpLanguages.vue';
+
+const replaceable = useReplaceableComponents();
+
+const authWrapper = computed(
+  () => replaceable.getRef(AccountComponents.AuthWrapper).value ?? AbpAuthWrapper,
+);
 </script>
 
 <template>
@@ -19,11 +29,13 @@ import AbpLanguages from '../components/nav/AbpLanguages.vue';
       </ul>
     </header>
 
-    <main class="card abp-account__card">
-      <div class="card-body">
-        <AbpPageAlerts />
+    <main class="abp-account__main">
+      <AbpPageAlerts />
+      <!-- The card, the tenant box and the "no login schemes" notice all live in the
+           wrapper, because a page has to be able to be replaced without losing them. -->
+      <component :is="authWrapper">
         <slot />
-      </div>
+      </component>
     </main>
   </div>
 
@@ -38,8 +50,8 @@ import AbpLanguages from '../components/nav/AbpLanguages.vue';
   padding: 1rem;
 }
 
-.abp-account__card {
+.abp-account__main {
   width: 100%;
-  max-width: 26rem;
+  max-width: 28rem;
 }
 </style>

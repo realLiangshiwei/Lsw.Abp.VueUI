@@ -41,6 +41,9 @@ const ALLOWED = {
     'vue',
   ],
   'theme-basic': [
+    // The account layout draws the tenant box and the card the account pages sit in, and
+    // neither has any UI of its own to bring (design 03 §1).
+    '@lsw-abpvue/account-core',
     '@lsw-abpvue/core',
     '@lsw-abpvue/theme-shared',
     '@lsw-abpvue/utils',
