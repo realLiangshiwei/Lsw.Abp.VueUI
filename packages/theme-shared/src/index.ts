@@ -103,5 +103,13 @@ export { ABP_ERROR_HANDLERS } from './tokens/error-handlers.token.js';
 export { THEME_COMPONENTS } from './tokens/theme-components.token.js';
 
 export { useAbpForm } from './utils/use-abp-form.js';
+export {
+  getPasswordValidators,
+  passwordRulesOf,
+  passwordValidators,
+  PASSWORD_MESSAGES,
+  usePasswordValidators,
+} from './utils/password-validators.js';
+export type { PasswordRules } from './utils/password-validators.js';
 export { useValidationMessages } from './utils/use-validation-messages.js';
 export { VALIDATION_MESSAGES, Validators } from './utils/validators.js';

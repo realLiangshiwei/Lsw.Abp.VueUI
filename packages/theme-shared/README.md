@@ -88,6 +88,17 @@ useServerValidation(form); // a rejected save lands on the fields it was about
 directly. Validators carry ABP's own `AbpValidation::*` localization keys, so a backend
 that has been translated translates these messages too.
 
+A password field takes its rules from the backend rather than from the form:
+
+```ts
+const form = useAbpForm({
+  password: { value: '', validators: [Validators.required(), ...usePasswordValidators()] },
+});
+```
+
+`Abp.Identity.Password.*` is what the tenant's policy is stored under, and the messages
+are the ones ABP's Identity module would have refused the password with.
+
 ## Error handling
 
 A chain of handlers, each with a priority and a `canHandle`; the first one that claims an
