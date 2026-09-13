@@ -54,7 +54,7 @@ allowBuilds:
 YAML
 
 cat > app.ts <<'TS'
-import { AbpPermission, createInjector, defineService, inject, InternalStore, MemoryTokenStorage } from '@lsw-abpvue/core';
+import { AbpPermission, createInjector, defineService, inject, InternalStore, MemoryTokenStorage, PermissionService } from '@lsw-abpvue/core';
 import { AbpDynamicLayout, lazyRoutes, provideAbpRouter } from '@lsw-abpvue/core/router';
 import { provideAbpOAuth, withTokenStorage } from '@lsw-abpvue/oauth';
 import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
@@ -101,6 +101,21 @@ export const extensions = createInjector([]).get(ExtensionsService).entityProps.
 const form = useAbpForm({ userName: { value: '', validators: [Validators.required()] } });
 export const userName: string = form.controls.userName.value;
 export const wasRejected: boolean = form.invalid;
+
+// What a generated `policy-names.ts` asks an application to do, and what it buys: with
+// the union merged in, a permission name the backend never declared stops compiling.
+declare module '@lsw-abpvue/core' {
+  interface AbpKnownPolicyName {
+    'AbpIdentity.Users': true;
+  }
+}
+
+const permission = createInjector([]).get(PermissionService);
+export const declaredNameCompiles: boolean = permission.isGranted('AbpIdentity.Users');
+export const expressionCompiles: boolean = permission.isGranted('AbpIdentity.Users || Whatever');
+export const runtimeStringCompiles: boolean = permission.isGranted(userName);
+// @ts-expect-error -- no module declares this one, which is the whole point.
+export const misspelledDoesNot: boolean = permission.isGranted('AbpIdentity.Userz');
 TS
 
 cat > tsconfig.json <<'JSON'
