@@ -1,12 +1,18 @@
 import { AccountComponents } from '@lsw-abpvue/account-core';
 import { AccountRouteNames } from '@lsw-abpvue/account/config';
 import { LayoutType } from '@lsw-abpvue/core';
-import { AbpReplaceableRouteContainer, AbpRouterOutlet } from '@lsw-abpvue/core/router';
+import {
+  AbpReplaceableRouteContainer,
+  AbpRouterOutlet,
+  withResolvers,
+} from '@lsw-abpvue/core/router';
 import type { RouteRecordRaw } from 'vue-router';
 import ForgotPasswordPage from './components/ForgotPasswordPage.vue';
 import LoginPage from './components/LoginPage.vue';
+import ManageProfilePage from './components/ManageProfilePage.vue';
 import RegisterPage from './components/RegisterPage.vue';
 import ResetPasswordPage from './components/ResetPasswordPage.vue';
+import { accountExtensionsResolver } from './resolvers/extensions.resolver.js';
 import { authenticationFlowGuard } from './guards/authentication-flow.guard.js';
 import type { AccountConfigOptions } from './models/config-options.js';
 import { provideAccount } from './providers/account.provider.js';
@@ -26,6 +32,7 @@ export function createAccountRoutes(options: AccountConfigOptions = {}): RouteRe
     {
       path: '/account',
       component: AbpRouterOutlet,
+      beforeEnter: [withResolvers([accountExtensionsResolver])],
       meta: { providers: provideAccount(options), layout: LayoutType.account },
       children: [
         { path: '', redirect: '/account/login' },
@@ -59,6 +66,21 @@ export function createAccountRoutes(options: AccountConfigOptions = {}): RouteRe
             replaceableComponent: {
               key: AccountComponents.ForgotPassword,
               defaultComponent: ForgotPasswordPage,
+            },
+          },
+        },
+        {
+          // The one page behind the ordinary auth guard, and the one that is part of the
+          // application rather than of the sign-in flow.
+          path: 'manage',
+          component: AbpReplaceableRouteContainer,
+          meta: {
+            title: AccountRouteNames.ManageProfile,
+            layout: LayoutType.application,
+            requiresAuthentication: true,
+            replaceableComponent: {
+              key: AccountComponents.ManageProfile,
+              defaultComponent: ManageProfilePage,
             },
           },
         },

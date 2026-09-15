@@ -378,3 +378,44 @@
   border-bottom-color: var(--bs-primary);
   color: var(--bs-primary);
 }
+
+/*
+ * The profile page's tabs. The account module ships the markup and the class names, the
+ * way the identity and permission dialogs do.
+ */
+.abp-profile {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) 3fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.abp-profile__tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.abp-profile__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-body-bg);
+  color: inherit;
+  text-align: start;
+}
+
+.abp-profile__tab--active {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+}
+
+@media (max-width: 767.98px) {
+  .abp-profile {
+    grid-template-columns: 1fr;
+  }
+}
