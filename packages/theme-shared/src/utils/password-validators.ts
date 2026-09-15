@@ -90,14 +90,17 @@ export function passwordRulesOf(configState: ConfigStateService): PasswordRules 
  * required at all is the form's decision, not the policy's.
  * @param rules What the password has to be
  */
-export function passwordValidators(rules: PasswordRules): AbpValidator<string>[] {
-  const validators: AbpValidator<string>[] = [];
+export function passwordValidators(rules: PasswordRules): AbpValidator[] {
+  const validators: AbpValidator[] = [];
 
-  const contains = (name: keyof typeof CHARACTER_CLASSES): AbpValidator<string> => {
+  // A control's value is whatever it holds; only a string can break a password rule.
+  const text = (value: unknown) => (typeof value === 'string' ? value : '');
+
+  const contains = (name: keyof typeof CHARACTER_CLASSES): AbpValidator => {
     const expression = CHARACTER_CLASSES[name];
 
     return value =>
-      !value || expression.test(fold(value))
+      !text(value) || expression.test(fold(text(value)))
         ? null
         : { rule: name, key: PASSWORD_MESSAGES[name], params: [] };
   };
@@ -108,14 +111,14 @@ export function passwordValidators(rules: PasswordRules): AbpValidator<string>[]
   if (rules.requireNonAlphanumeric) validators.push(contains('nonAlphanumeric'));
 
   validators.push(value =>
-    !value || value.length >= rules.requiredLength
+    !text(value) || text(value).length >= rules.requiredLength
       ? null
       : { rule: 'tooShort', key: PASSWORD_MESSAGES.tooShort, params: [rules.requiredLength] },
   );
 
   if (rules.requiredUniqueChars > 1) {
     validators.push(value =>
-      !value || new Set(value).size >= rules.requiredUniqueChars
+      !text(value) || new Set(text(value)).size >= rules.requiredUniqueChars
         ? null
         : {
             rule: 'uniqueChars',
@@ -125,7 +128,7 @@ export function passwordValidators(rules: PasswordRules): AbpValidator<string>[]
     );
   }
 
-  validators.push(maxLength<string>(MAX_LENGTH));
+  validators.push(maxLength(MAX_LENGTH));
 
   return validators;
 }
@@ -135,11 +138,11 @@ export function passwordValidators(rules: PasswordRules): AbpValidator<string>[]
  * @param get Reaches `ConfigStateService`; a prop callback's `getInjected`
  * @see Angular's `getPasswordValidators` in `@abp/ng.theme.shared`
  */
-export function getPasswordValidators(get: Injector['get']): AbpValidator<string>[] {
+export function getPasswordValidators(get: Injector['get']): AbpValidator[] {
   return passwordValidators(passwordRulesOf(get(ConfigStateService)));
 }
 
 /** The same list, for a component that is inside an injection context of its own. */
-export function usePasswordValidators(): AbpValidator<string>[] {
+export function usePasswordValidators(): AbpValidator[] {
   return passwordValidators(passwordRulesOf(inject(ConfigStateService)));
 }

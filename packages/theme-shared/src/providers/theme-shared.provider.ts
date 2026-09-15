@@ -2,8 +2,10 @@ import {
   inject,
   makeEnvironmentProviders,
   provideAppInitializer,
+  RoutesService,
   type EnvironmentProviders,
 } from '@lsw-abpvue/core';
+import { ThemeSharedRouteNames } from '../defaults/route-names.js';
 import { AbpFormatErrorHandler } from '../handlers/abp-format-error.handler.js';
 import { AuthenticationErrorHandler } from '../handlers/authentication-error.handler.js';
 import { StatusCodeErrorHandler } from '../handlers/status-code-error.handler.js';
@@ -32,6 +34,12 @@ export function provideAbpThemeShared(): EnvironmentProviders {
 
     provideAppInitializer(() => {
       inject(HttpErrorHandlerService).init();
+
+      // The branch every administration module hangs its pages under. It is here rather
+      // than in a theme because the modules name it, and they must not name a theme.
+      inject(RoutesService).add([
+        { name: ThemeSharedRouteNames.Administration, iconClass: 'bi bi-wrench', order: 100 },
+      ]);
     }),
   ]);
 }

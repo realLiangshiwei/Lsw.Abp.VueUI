@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "rootDir": "proxy/src",
+    "paths": {},
+    "outDir": "dist/proxy"
+  },
+  "include": ["proxy/src/**/*.ts"]
+}

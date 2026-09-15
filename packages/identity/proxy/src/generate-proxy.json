@@ -1,0 +1,28 @@
+{
+  "generated": [
+    "README.md",
+    "identity/identity-role.service.ts",
+    "identity/identity-user-lookup.service.ts",
+    "identity/identity-user.service.ts",
+    "identity/index.ts",
+    "identity/models.ts",
+    "index.ts",
+    "users/index.ts",
+    "users/models.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "identity": {
+      "rootPath": "identity",
+      "remoteServiceName": "AbpIdentity"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

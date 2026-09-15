@@ -40,6 +40,16 @@ const ALLOWED = {
     '@tanstack/vue-table',
     'vue',
   ],
+  identity: [
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/core',
+    // The grant dialog, opened from a row action on both pages (design 03 §1).
+    '@lsw-abpvue/permission-management',
+    '@lsw-abpvue/theme-shared',
+    '@lsw-abpvue/utils',
+    'vue',
+    'vue-router',
+  ],
   'permission-management': [
     '@lsw-abpvue/core',
     '@lsw-abpvue/theme-shared',

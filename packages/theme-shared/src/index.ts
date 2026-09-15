@@ -53,6 +53,8 @@ export type {
 } from './models/form.js';
 export { DEFAULT_ERROR_MESSAGES, errorMessageFor } from './defaults/error-messages.js';
 export type { ErrorMessage } from './defaults/error-messages.js';
+export { ThemeSharedRouteNames } from './defaults/route-names.js';
+export type { ThemeSharedRouteName } from './defaults/route-names.js';
 export { UserMenuItems } from './defaults/user-menu-items.js';
 
 export { AbpFormatErrorHandler } from './handlers/abp-format-error.handler.js';

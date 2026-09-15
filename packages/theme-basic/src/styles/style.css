@@ -354,3 +354,27 @@
     grid-template-columns: 1fr;
   }
 }
+
+/*
+ * The tabs inside the identity module's user dialog. Same reasoning as the permission
+ * dialog above: the module ships the markup, the theme gives it a look.
+ */
+.abp-identity-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.abp-identity-tabs__tab {
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: inherit;
+}
+
+.abp-identity-tabs__tab--active {
+  border-bottom-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
