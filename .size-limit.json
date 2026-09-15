@@ -84,5 +84,24 @@
     "path": "packages/identity/dist/config/index.js",
     "ignore": ["vue", "vue-router", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
     "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/account",
+    "path": "packages/account/dist/index.js",
+    "ignore": [
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/account-core"
+    ],
+    "limit": "10 kB"
+  },
+  {
+    "name": "@lsw-abpvue/account/config",
+    "path": "packages/account/dist/config/index.js",
+    "ignore": ["vue", "vue-router", "@lsw-abpvue/core"],
+    "limit": "3 kB"
   }
 ]

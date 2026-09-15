@@ -1,0 +1,63 @@
+{
+  "name": "@lsw-abpvue/account",
+  "version": "0.0.0",
+  "description": "The account pages of the ABP Vue UI: login, register, the two ways to a new password, and the profile page.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src",
+    "config/src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.config.json && vue-tsc -p tsconfig.build.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
+    "typecheck": "vue-tsc -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "peerDependencies": {
+    "@lsw-abpvue/account-core": "workspace:^",
+    "@lsw-abpvue/components": "workspace:^",
+    "@lsw-abpvue/core": "workspace:^",
+    "@lsw-abpvue/theme-shared": "workspace:^",
+    "@lsw-abpvue/utils": "workspace:^",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@lsw-abpvue/account-core": "workspace:*",
+    "@lsw-abpvue/components": "workspace:*",
+    "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/theme-shared": "workspace:*",
+    "@lsw-abpvue/utils": "workspace:*",
+    "vue": "^3.5.41",
+    "vue-router": "^4.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realLiangshiwei/Lsw.Abp.VueUI.git",
+    "directory": "packages/account"
+  },
+  "homepage": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI",
+  "bugs": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI/issues",
+  "keywords": [
+    "abp",
+    "vue",
+    "account"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
