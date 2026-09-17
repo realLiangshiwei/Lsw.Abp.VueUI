@@ -57,8 +57,9 @@ public static class BookStoreModuleExtensionConfigurator
                         p.UI.OnEditForm.IsVisible = true;
                     });
 
-                    // bool, table only
-                    user.AddOrUpdateProperty<bool>("IsExternal", p =>
+                    // bool, table only. Nullable on purpose: ABP requires a value for a
+                    // non-nullable extension property, and no form here can give it one.
+                    user.AddOrUpdateProperty<bool?>("IsExternal", p =>
                     {
                         p.DefaultValue = false;
                         p.UI.OnTable.IsVisible = true;

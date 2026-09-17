@@ -13,10 +13,12 @@ const localization = useLocalization();
 </script>
 
 <template>
-  <i
-    v-if="!user.isActive"
-    class="bi bi-slash-circle text-danger me-1"
-    :title="localization.t('AbpIdentity::ThisUserIsNotActiveMessage')"
-  />
-  <span :class="{ 'text-body-secondary': !user.isActive }">{{ user.userName }}</span>
+  <span>
+    <i
+      v-if="!user.isActive"
+      class="bi bi-slash-circle text-danger me-1"
+      :title="localization.t('AbpIdentity::ThisUserIsNotActiveMessage')"
+    />
+    <span :class="{ 'text-body-secondary': !user.isActive }">{{ user.userName }}</span>
+  </span>
 </template>

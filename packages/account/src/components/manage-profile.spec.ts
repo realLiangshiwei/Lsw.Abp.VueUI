@@ -233,6 +233,50 @@ describe('PersonalSettingsTab', () => {
     return injector;
   }
 
+  it('has a field for every extension property the backend put on the user', async () => {
+    const injector = seeded();
+    const configState = injector.get(ConfigStateService);
+    configState.setState({
+      ...configState.snapshot(),
+      objectExtensions: {
+        modules: {
+          Identity: {
+            entities: {
+              User: {
+                properties: {
+                  SocialSecurityNumber: {
+                    typeSimple: 'string',
+                    attributes: [{ typeSimple: 'required', config: {} }],
+                    api: {
+                      onGet: { isAvailable: true },
+                      onCreate: { isAvailable: true },
+                      onUpdate: { isAvailable: true },
+                    },
+                    ui: {
+                      onTable: { isVisible: true },
+                      onCreateForm: { isVisible: true },
+                      onEditForm: { isVisible: true },
+                    },
+                  },
+                },
+                configuration: {},
+              },
+            },
+            configuration: {},
+          },
+        },
+        enums: {},
+      },
+    } as never);
+
+    injector.runInContext(() => accountExtensionsResolver());
+    const wrapper = await render(PersonalSettingsTab, injector);
+
+    // `UpdateProfileDto` carries the same extraProperties the identity user does, so a
+    // property the backend requires has to be askable here too.
+    expect(wrapper.find('input[name="SocialSecurityNumber"]').exists()).toBe(true);
+  });
+
   it('fills the form from the profile and saves what was changed', async () => {
     const update = vi.fn<(input: unknown) => Promise<ProfileDto>>(input =>
       Promise.resolve({ ...PROFILE, ...(input as Partial<ProfileDto>) }),

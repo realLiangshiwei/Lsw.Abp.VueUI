@@ -13,9 +13,9 @@ import {
 } from '@lsw-abpvue/core';
 import { AccountComponents } from '@lsw-abpvue/account-core';
 import { ToasterService } from '@lsw-abpvue/theme-shared';
-import { mount } from '@vue/test-utils';
+import { mount, type VueWrapper } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { defineComponent } from 'vue';
+import { defineComponent, type Component } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 import { provideAbpThemeBasic } from '../../providers/theme-basic.provider.js';
 import AbpAuthWrapper from './AbpAuthWrapper.vue';
@@ -62,8 +62,8 @@ async function routerAt(path: string, meta: Record<string, unknown> = {}): Promi
   return router;
 }
 
-async function render(component: unknown, injector: Injector, router: Router) {
-  const wrapper = mount(component as never, {
+async function render(component: Component, injector: Injector, router: Router) {
+  const wrapper: VueWrapper = mount(component as never, {
     slots: { default: '<p>the page</p>' },
     attachTo: document.body,
     global: {

@@ -292,15 +292,27 @@ importers:
 
   playground:
     dependencies:
+      '@lsw-abpvue/account':
+        specifier: workspace:*
+        version: link:../packages/account
+      '@lsw-abpvue/account-core':
+        specifier: workspace:*
+        version: link:../packages/account-core
       '@lsw-abpvue/components':
         specifier: workspace:*
         version: link:../packages/components
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@lsw-abpvue/identity':
+        specifier: workspace:*
+        version: link:../packages/identity
       '@lsw-abpvue/oauth':
         specifier: workspace:*
         version: link:../packages/oauth
+      '@lsw-abpvue/permission-management':
+        specifier: workspace:*
+        version: link:../packages/permission-management
       '@lsw-abpvue/theme-basic':
         specifier: workspace:*
         version: link:../packages/theme-basic

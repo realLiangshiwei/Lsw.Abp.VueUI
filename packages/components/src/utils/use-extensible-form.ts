@@ -82,7 +82,9 @@ export function useExtensibleForm<R = unknown>(record?: R | undefined): Extensib
 
     toRequestBody: () => {
       const body: Record<string, unknown> = {};
-      const extras: Record<string, unknown> = {};
+      // What the record already carries, so a property the backend declared invisible on
+      // this form is not erased by a save that never showed it.
+      const extras: Record<string, unknown> = { ...extraPropertiesOf(record) };
 
       for (const prop of props) {
         const value = form.get(prop.name)?.value;

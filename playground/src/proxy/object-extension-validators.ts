@@ -16,7 +16,6 @@ import type { ValidatorMap } from '@lsw-abpvue/theme-shared';
 export const identityUserExtensionValidators = {
   SocialSecurityNumber: [Validators.required(), Validators.maxLength(64), Validators.minLength(4)],
   Age: [Validators.required(), Validators.range(0, 150)],
-  IsExternal: [Validators.required()],
   Title: [Validators.required()],
   Website: [Validators.pattern(new RegExp('^https?://.+'))],
   InternalNote: [Validators.maxLength(256)],

@@ -71,6 +71,26 @@ describe('ApplicationLayout', () => {
     expect(wrapper.find('.abp-routes').text()).toContain('Books');
   });
 
+  it('opens a branch three levels deep, which is how ABP files its own pages', async () => {
+    // Administration -> Identity management -> Users. The middle one has no page of its
+    // own, so a menu that only renders two levels loses the whole branch.
+    injector.get(RoutesService).add([
+      { name: '::Menu:Administration', order: 100 },
+      { name: '::Menu:Identity', parentName: '::Menu:Administration', order: 1 },
+      { path: '/identity/users', name: '::Users', parentName: '::Menu:Identity', order: 1 },
+    ]);
+
+    const wrapper = await render(ApplicationLayout, injector, router);
+    const menu = wrapper.find('.abp-routes');
+    const expander = (label: string) =>
+      menu.findAll('button').find(button => button.text().includes(label));
+
+    await expander('Administration')?.trigger('click');
+    await expander('Identity')?.trigger('click');
+
+    expect(menu.find('a[href="/identity/users"]').exists()).toBe(true);
+  });
+
   it('leaves out what the current user has no policy for', async () => {
     injector
       .get(RoutesService)

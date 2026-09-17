@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="R">
 import { provideAbp } from '@lsw-abpvue/core';
 import { AbpButton } from '@lsw-abpvue/theme-shared';
-import { computed, ref, toRef } from 'vue';
+import { computed, onScopeDispose, ref, toRef, useTemplateRef } from 'vue';
 import { ACTIONS } from '../defaults/texts.js';
 import type { EntityAction } from '../models/actions.js';
 import type { PropData } from '../models/prop-data.js';
@@ -32,6 +32,54 @@ provideAbp([
 
 const actions = useEntityActions<R>(() => data.value);
 const open = ref(false);
+
+/**
+ * Where the menu is drawn. It has to be `fixed`: the table scrolls sideways when there
+ * are more columns than fit, and a menu positioned inside that scroller is clipped by it.
+ */
+const toggle = useTemplateRef<HTMLElement>('toggle');
+const position = ref<Record<string, string>>();
+
+function place(): void {
+  const element = toggle.value;
+  if (!element) return;
+
+  const rect = element.getBoundingClientRect();
+  const rightToLeft = getComputedStyle(element).direction === 'rtl';
+
+  position.value = {
+    position: 'fixed',
+    top: `${rect.bottom}px`,
+    ...(rightToLeft
+      ? { right: `${window.innerWidth - rect.right}px`, left: 'auto' }
+      : { left: `${rect.left}px`, right: 'auto' }),
+    minWidth: `${rect.width}px`,
+  };
+}
+
+/** A menu pinned to the viewport would be left behind by whatever scrolled under it. */
+function closeOnScroll(): void {
+  open.value = false;
+}
+
+function onToggle(isOpen: boolean): void {
+  open.value = isOpen;
+
+  if (isOpen) {
+    place();
+    window.addEventListener('scroll', closeOnScroll, true);
+    window.addEventListener('resize', closeOnScroll);
+    return;
+  }
+
+  window.removeEventListener('scroll', closeOnScroll, true);
+  window.removeEventListener('resize', closeOnScroll);
+}
+
+onScopeDispose(() => {
+  window.removeEventListener('scroll', closeOnScroll, true);
+  window.removeEventListener('resize', closeOnScroll);
+});
 
 function run(action: EntityAction<R>): void {
   open.value = false;
@@ -67,12 +115,12 @@ function closeOnLeave(event: FocusEvent): void {
     v-else-if="actions.length > 1"
     class="abp-grid-actions"
     :open="open"
-    @toggle="open = ($event.target as HTMLDetailsElement).open"
+    @toggle="onToggle(($event.target as HTMLDetailsElement).open)"
     @focusout="closeOnLeave"
     @keydown.esc="open = false"
   >
-    <summary class="abp-grid-actions-toggle">{{ $t(text ?? ACTIONS) }}</summary>
-    <ul class="abp-grid-actions-menu">
+    <summary ref="toggle" class="abp-grid-actions-toggle">{{ $t(text ?? ACTIONS) }}</summary>
+    <ul class="abp-grid-actions-menu" :style="position">
       <li v-for="action in actions" :key="action.text">
         <button
           type="button"

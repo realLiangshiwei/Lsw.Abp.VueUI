@@ -40,6 +40,17 @@ const controlOf = (prop: FormProp<R>): AbpFormControl | undefined => props.form.
 
 <template>
   <div class="abp-extensible-form">
+    <!-- What the server rejected and no field is named after. The form's own props come
+         from contributors, so a member with nowhere to land is a real possibility, and a
+         save that failed with nothing on screen is the worst of the two outcomes. -->
+    <ul
+      v-if="form.form.unmatchedServerErrors.length"
+      class="abp-extensible-form__errors"
+      role="alert"
+    >
+      <li v-for="message in form.form.unmatchedServerErrors" :key="message">{{ message }}</li>
+    </ul>
+
     <component
       :is="group.group ? 'fieldset' : 'div'"
       v-for="(group, index) in groups"

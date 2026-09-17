@@ -8,6 +8,9 @@ import {
 import { provideAbpRouter } from '@lsw-abpvue/core/router';
 import { provideAbpOAuth } from '@lsw-abpvue/oauth';
 import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
+import { provideManageProfileTabs } from '@lsw-abpvue/account';
+import { provideAccountConfig } from '@lsw-abpvue/account/config';
+import { provideIdentityConfig } from '@lsw-abpvue/identity/config';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '@lsw-abpvue/theme-basic/style.css';
@@ -29,6 +32,11 @@ const { mount } = await createAbpApp(App, {
     provideAbpOAuth(),
     // The theme: the twelve contract components, the three layouts, the error handlers.
     provideAbpThemeBasic(),
+    // The modules' menu entries and the profile page's tabs. Small and synchronous; the
+    // pages themselves arrive on the first navigation into them (design 03 §2).
+    provideAccountConfig(),
+    provideIdentityConfig(),
+    provideManageProfileTabs(),
     // Without one of these an unreachable backend would leave a blank page.
     provideAppInitErrorHandler(error => {
       startupError.value = describeStartupError(error);

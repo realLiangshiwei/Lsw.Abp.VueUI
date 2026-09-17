@@ -10,9 +10,13 @@
     "typecheck": "vue-tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@lsw-abpvue/account": "workspace:*",
+    "@lsw-abpvue/account-core": "workspace:*",
     "@lsw-abpvue/components": "workspace:*",
     "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/identity": "workspace:*",
     "@lsw-abpvue/oauth": "workspace:*",
+    "@lsw-abpvue/permission-management": "workspace:*",
     "@lsw-abpvue/theme-basic": "workspace:*",
     "@lsw-abpvue/theme-shared": "workspace:*",
     "@lsw-abpvue/utils": "workspace:*",

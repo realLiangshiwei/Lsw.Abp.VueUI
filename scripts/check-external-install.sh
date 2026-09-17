@@ -62,6 +62,14 @@ import { AbpModal, provideThemeComponents, useAbpForm, Validators } from '@lsw-a
 import { EntityProp, ExtensionsService, PropType } from '@lsw-abpvue/components';
 import { EntityProp as EntityPropFromSubpath } from '@lsw-abpvue/components/extensible';
 import { interpolate } from '@lsw-abpvue/utils';
+import { AccountComponents, TenantBoxService } from '@lsw-abpvue/account-core';
+import type { ProfileDto } from '@lsw-abpvue/account-core/proxy';
+import { createAccountRoutes, ManageProfileTabs } from '@lsw-abpvue/account';
+import { provideAccountConfig } from '@lsw-abpvue/account/config';
+import { createIdentityRoutes, IdentityComponents } from '@lsw-abpvue/identity';
+import { provideIdentityConfig, IdentityPolicyNames } from '@lsw-abpvue/identity/config';
+import type { IdentityUserDto } from '@lsw-abpvue/identity/proxy';
+import { flatten, PermissionManagementComponents } from '@lsw-abpvue/permission-management';
 
 const Greeter = defineService('Greeter', () => {
   const store = new InternalStore<{ template: string }>({ template: 'Hei {0}.' });
@@ -97,6 +105,32 @@ export const override = provideThemeComponents({ AbpSpinner: AbpModal });
 export const column = EntityProp.create({ type: PropType.String, name: 'userName' });
 export const oneExtensionSystem: true = (EntityProp === EntityPropFromSubpath) as true;
 export const extensions = createInjector([]).get(ExtensionsService).entityProps.get('X').props;
+
+// The module packages: three entry points each, and the pages typed against the DTOs
+// their own proxy declares.
+export const modules = [
+  ...createIdentityRoutes({
+    entityPropContributors: {
+      [IdentityComponents.Users]: [list => list.dropByValue('email', (p, n) => p.name === n)],
+    },
+  }),
+  ...createAccountRoutes({ appName: 'Vue' }),
+];
+export const moduleConfig = [provideAccountConfig(), provideIdentityConfig()];
+export const policy: string = IdentityPolicyNames.UsersCreate;
+export const tabs: string = ManageProfileTabs.PersonalSettings;
+export const dialogKey: string = PermissionManagementComponents.PermissionManagement;
+export const tenantBoxKey: string = AccountComponents.TenantBox;
+export const switchTenant = () => createInjector([]).get(TenantBoxService).switchTo('acme');
+export const grants = flatten([{ name: 'g', displayName: 'g', permissions: [] }]);
+
+// A route's `meta.tenantBoxVisible` comes from `account-core`'s module augmentation, so
+// this only compiles if the published declarations carry it.
+export const hidesTenantBox: boolean = modules[1]?.children?.[4]?.meta?.tenantBoxVisible ?? true;
+
+type UserIsTyped = IdentityUserDto['userName'];
+type ProfileIsTyped = ProfileDto['userName'];
+export const dtos: [UserIsTyped, ProfileIsTyped] = [undefined, undefined];
 
 const form = useAbpForm({ userName: { value: '', validators: [Validators.required()] } });
 export const userName: string = form.controls.userName.value;

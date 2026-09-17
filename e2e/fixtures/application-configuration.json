@@ -440,8 +440,8 @@
                                 "defaultValue": 0
                             },
                             "IsExternal": {
-                                "type": "System.Boolean",
-                                "typeSimple": "boolean",
+                                "type": "System.Boolean?",
+                                "typeSimple": "boolean?",
                                 "displayName": null,
                                 "api": {
                                     "onGet": {
@@ -486,14 +486,7 @@
                                         "requiresAll": false
                                     }
                                 },
-                                "attributes": [
-                                    {
-                                        "typeSimple": "required",
-                                        "config": {
-                                            "allowEmptyStrings": false
-                                        }
-                                    }
-                                ],
+                                "attributes": [],
                                 "configuration": {},
                                 "defaultValue": false
                             },

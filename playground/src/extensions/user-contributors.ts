@@ -1,7 +1,6 @@
 import {
   EntityAction,
   EntityProp,
-  FormProp,
   PropType,
   ToolbarAction,
   type EntityActionList,
@@ -9,54 +8,47 @@ import {
   type FormPropList,
   type ToolbarActionList,
 } from '@lsw-abpvue/components';
-import { ToasterService, Validators } from '@lsw-abpvue/theme-shared';
-import { IdentityComponents } from '../modules/identity-demo/enums';
-import type { IdentityDemoOptions } from '../modules/identity-demo/providers/identity-demo.provider';
-import type { DemoUserDto } from '../modules/identity-demo/services/users.service';
-import RolesCell from './RolesCell.vue';
+import { IdentityComponents, type IdentityConfigOptions } from '@lsw-abpvue/identity';
+import type { IdentityUserDto } from '@lsw-abpvue/identity/proxy';
+import { ToasterService } from '@lsw-abpvue/theme-shared';
+import FullNameCell from './FullNameCell.vue';
 
 /**
  * Everything an application can do to a module's pages without touching the module: this
- * whole file is the host's, and `modules/identity-demo` does not know it exists.
+ * whole file is the host's, and `@lsw-abpvue/identity` does not know it exists.
  *
  * One contributor per extension point, which is what the acceptance list of milestone 5
- * asks the playground to show.
+ * asks the playground to show -- now against the real module rather than a stand-in.
  */
 
 /** A column, placed after another one by name rather than by index. */
-function addRolesColumn(propList: EntityPropList<DemoUserDto>): void {
+function addFullNameColumn(propList: EntityPropList<IdentityUserDto>): void {
   propList
     .add(
-      EntityProp.create<DemoUserDto>({
+      EntityProp.create<IdentityUserDto>({
         type: PropType.String,
-        name: 'roles',
-        displayName: 'AbpIdentity::Roles',
+        name: 'fullName',
+        displayName: 'AbpIdentity::DisplayName:Name',
         columnWidth: 180,
         // A cell that is more than text is a component, never a string of HTML.
-        component: RolesCell,
+        component: FullNameCell,
       }),
     )
     .after('userName', (prop, name) => prop.name === name);
 }
 
-/** A field on both forms, with a validator of the host's own. */
-function addNicknameField(propList: FormPropList<DemoUserDto>): void {
-  propList.addTail(
-    FormProp.create<DemoUserDto>({
-      type: PropType.String,
-      name: 'nickname',
-      displayName: 'AbpIdentity::DisplayName:Name',
-      isExtra: true,
-      validators: () => [Validators.maxLength(32)],
-    }),
-  );
+/** A field the host takes off the create form; the server does not require it. */
+function dropPhoneNumberField(propList: FormPropList<IdentityUserDto>): void {
+  propList.dropByValue('phoneNumber', (prop, name) => prop.name === name);
 }
 
 /** A row button. `getInjected` is how a callback reaches a service from outside DI. */
-function addGreetAction(actionList: EntityActionList<DemoUserDto>): void {
+function addGreetAction(actionList: EntityActionList<IdentityUserDto>): void {
   actionList.addTail(
-    EntityAction.create<DemoUserDto>({
-      text: 'AbpAccount::PersonalInfo',
+    EntityAction.create<IdentityUserDto>({
+      // A key with no resource passes through the localizer unchanged, which is how a
+      // host labels something ABP has no word for.
+      text: 'Greet',
       icon: 'bi bi-hand-thumbs-up',
       action: data =>
         data.getInjected(ToasterService).info(`Hello, ${data.record.userName}.`, 'Extensions'),
@@ -65,9 +57,9 @@ function addGreetAction(actionList: EntityActionList<DemoUserDto>): void {
 }
 
 /** A toolbar button, which is handed the whole page of records. */
-function addCountAction(actionList: ToolbarActionList<readonly DemoUserDto[]>): void {
+function addCountAction(actionList: ToolbarActionList<readonly IdentityUserDto[]>): void {
   actionList.addTail(
-    ToolbarAction.create<readonly DemoUserDto[]>({
+    ToolbarAction.create<readonly IdentityUserDto[]>({
       text: 'AbpUi::Total',
       icon: 'bi bi-123',
       action: data =>
@@ -78,15 +70,9 @@ function addCountAction(actionList: ToolbarActionList<readonly DemoUserDto[]>): 
   );
 }
 
-/** A field the host takes off the edit form again. */
-function dropIsActiveField(propList: FormPropList<DemoUserDto>): void {
-  propList.dropByValue('isActive', (prop, name) => prop.name === name);
-}
-
-export const userContributors: IdentityDemoOptions = {
-  entityPropContributors: { [IdentityComponents.Users]: [addRolesColumn] },
-  createFormPropContributors: { [IdentityComponents.Users]: [addNicknameField] },
-  editFormPropContributors: { [IdentityComponents.Users]: [addNicknameField, dropIsActiveField] },
+export const userContributors: IdentityConfigOptions = {
+  entityPropContributors: { [IdentityComponents.Users]: [addFullNameColumn] },
+  createFormPropContributors: { [IdentityComponents.Users]: [dropPhoneNumberField] },
   entityActionContributors: { [IdentityComponents.Users]: [addGreetAction] },
   toolbarActionContributors: { [IdentityComponents.Users]: [addCountAction] },
 };

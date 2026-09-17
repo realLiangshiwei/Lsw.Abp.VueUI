@@ -8,11 +8,13 @@ const role = injectAbp(ROW_RECORD) as Ref<IdentityRoleDto>;
 </script>
 
 <template>
-  <span>{{ role.name }}</span>
-  <span v-if="role.isDefault" class="badge rounded-pill text-bg-success ms-1">
-    {{ $t('AbpIdentity::DisplayName:IsDefault') }}
-  </span>
-  <span v-if="role.isPublic" class="badge rounded-pill text-bg-info ms-1">
-    {{ $t('AbpIdentity::DisplayName:IsPublic') }}
+  <span>
+    {{ role.name }}
+    <span v-if="role.isDefault" class="badge rounded-pill text-bg-success ms-1">
+      {{ $t('AbpIdentity::DisplayName:IsDefault') }}
+    </span>
+    <span v-if="role.isPublic" class="badge rounded-pill text-bg-info ms-1">
+      {{ $t('AbpIdentity::DisplayName:IsPublic') }}
+    </span>
   </span>
 </template>

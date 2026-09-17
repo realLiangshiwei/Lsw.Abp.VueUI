@@ -23,6 +23,7 @@ export { default as AbpCurrentUser } from './components/nav/AbpCurrentUser.vue';
 export { default as AbpThemeToggle } from './components/nav/AbpThemeToggle.vue';
 export { default as AbpLanguages } from './components/nav/AbpLanguages.vue';
 export { default as AbpLogo } from './components/nav/AbpLogo.vue';
+export { default as AbpMenuNode } from './components/nav/AbpMenuNode.vue';
 export { default as AbpNavItems } from './components/nav/AbpNavItems.vue';
 export { default as AbpRoutes } from './components/nav/AbpRoutes.vue';
 

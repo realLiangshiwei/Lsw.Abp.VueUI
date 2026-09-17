@@ -256,8 +256,10 @@
 }
 
 .abp-grid-actions-menu {
+  /* The component overrides this with `fixed` and the coordinates of the summary: a
+     table that scrolls sideways would otherwise clip its own row menus. */
   position: absolute;
-  z-index: 10;
+  z-index: 1050;
   inset-inline-start: 0;
   min-width: 100%;
   margin: 0.25rem 0 0;
@@ -418,4 +420,15 @@
   .abp-profile {
     grid-template-columns: 1fr;
   }
+}
+
+/* What a rejected save said that no field is named after (`AbpExtensibleForm`). */
+.abp-extensible-form__errors {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  list-style: none;
+  border: 1px solid var(--bs-danger-border-subtle);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-danger-bg-subtle);
+  color: var(--bs-danger-text-emphasis);
 }

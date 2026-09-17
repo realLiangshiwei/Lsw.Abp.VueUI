@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useLocalization, useRoutes, type AbpRoute, type TreeNode } from '@lsw-abpvue/core';
-import { ref } from 'vue';
+import { useLocalization, useRoutes } from '@lsw-abpvue/core';
 import { MENU } from '../../defaults/texts.js';
+import AbpMenuNode from './AbpMenuNode.vue';
 
 /**
  * The sidebar menu. The tree comes from `RoutesService` already filtered by policy,
@@ -9,16 +9,6 @@ import { MENU } from '../../defaults/texts.js';
  */
 const routes = useRoutes();
 const localization = useLocalization();
-
-const expanded = ref(new Set<string>());
-
-function toggle(name: string): void {
-  const next = new Set(expanded.value);
-  if (!next.delete(name)) next.add(name);
-  expanded.value = next;
-}
-
-const label = (node: TreeNode<AbpRoute>): string => localization.t(node.name);
 </script>
 
 <template>
@@ -30,38 +20,7 @@ const label = (node: TreeNode<AbpRoute>): string => localization.t(node.name);
       <h2 v-if="group.group" class="abp-routes__group">{{ localization.t(group.group) }}</h2>
 
       <ul class="nav flex-column">
-        <li v-for="node in group.items" :key="node.name" class="nav-item">
-          <RouterLink v-if="node.isLeaf && node.path" class="nav-link" :to="node.path">
-            <i v-if="node.iconClass" :class="node.iconClass" aria-hidden="true" />
-            <span class="ms-2">{{ label(node) }}</span>
-          </RouterLink>
-
-          <template v-else>
-            <button
-              type="button"
-              class="nav-link btn btn-link w-100 text-start"
-              :aria-expanded="expanded.has(node.name) ? 'true' : 'false'"
-              @click="toggle(node.name)"
-            >
-              <i v-if="node.iconClass" :class="node.iconClass" aria-hidden="true" />
-              <span class="ms-2">{{ label(node) }}</span>
-              <i
-                class="bi ms-auto"
-                :class="expanded.has(node.name) ? 'bi-chevron-up' : 'bi-chevron-down'"
-                aria-hidden="true"
-              />
-            </button>
-
-            <ul v-show="expanded.has(node.name)" class="nav flex-column ms-3">
-              <li v-for="child in node.children" :key="child.name" class="nav-item">
-                <RouterLink v-if="child.path" class="nav-link" :to="child.path">
-                  <i v-if="child.iconClass" :class="child.iconClass" aria-hidden="true" />
-                  <span class="ms-2">{{ label(child) }}</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </template>
-        </li>
+        <AbpMenuNode v-for="node in group.items" :key="node.name" :node="node" />
       </ul>
     </template>
   </nav>
@@ -74,22 +33,5 @@ const label = (node: TreeNode<AbpRoute>): string => localization.t(node.name);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--abp-menu-group-fg);
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  color: var(--abp-sidebar-link-fg);
-}
-
-.nav-link:hover,
-.nav-link:focus-visible {
-  color: var(--abp-sidebar-link-active-fg);
-}
-
-.router-link-active {
-  color: var(--abp-sidebar-link-active-fg);
-  background: var(--abp-sidebar-link-active-bg);
-  border-radius: var(--bs-border-radius);
 }
 </style>

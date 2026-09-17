@@ -1,22 +1,18 @@
-import { LayoutType } from '@lsw-abpvue/core';
+import { lazyRoutes } from '@lsw-abpvue/core/router';
+import { ThemeSharedRouteNames } from '@lsw-abpvue/theme-shared';
 import type { RouteRecordRaw } from 'vue-router';
 import ComponentsPage from './pages/ComponentsPage.vue';
 import FeedbackPage from './pages/FeedbackPage.vue';
 import HomePage from './pages/HomePage.vue';
-import IdentityUsersPage from './pages/IdentityUsersPage.vue';
-import LoginPage from './pages/LoginPage.vue';
 import PlaceholderPage from './pages/PlaceholderPage.vue';
 import { userContributors } from './extensions/user-contributors';
-import { createIdentityDemoRoutes } from './modules/identity-demo';
 
 /**
- * Menu entries live in `meta.routes`, which is how an ABP module ships its menu: the
- * routes handler collects them at startup and `RoutesService` filters them by permission.
+ * Menu entries live in `meta.routes`, which is how a page declares its own. A module's
+ * come from its `/config` entry instead: the menu has to be there at startup, and the
+ * pages arrive on the first navigation into them.
  */
 export const routes: RouteRecordRaw[] = [
-  // The module's own routes, with the host's contributors handed to it -- the one place
-  // an application says anything about a module's pages (design 05 §6).
-  ...createIdentityDemoRoutes(userContributors),
   {
     path: '/',
     component: HomePage,
@@ -38,42 +34,16 @@ export const routes: RouteRecordRaw[] = [
       routes: { name: 'Feedback', order: 3, iconClass: 'bi bi-chat-left-text', group: 'Theme' },
     },
   },
-  {
-    path: '/identity',
-    component: PlaceholderPage,
-    meta: {
-      routes: {
-        name: 'AbpIdentity::Menu:IdentityManagement',
-        order: 2,
-        group: 'AbpUi::Administration',
-      },
-    },
-  },
-  {
-    // No menu entry: the login page is where the auth guard sends people, not somewhere
-    // they navigate to. The account layout is the one a theme renders without a shell.
-    path: '/account/login',
-    component: LoginPage,
-    meta: { title: 'AbpAccount::Login', layout: LayoutType.account },
-  },
-  {
-    // The M3 demonstration: every part of this page came out of `abpvue proxy add`.
-    path: '/identity/users',
-    component: IdentityUsersPage,
-    meta: {
-      title: 'AbpIdentity::Users',
-      // Both guards apply: anonymous visitors are sent to log in, and a signed-in user
-      // without the policy is turned away.
-      requiresAuthentication: true,
-      requiredPolicy: 'AbpIdentity.Users',
-      routes: {
-        name: 'AbpIdentity::Users',
-        parentName: 'AbpIdentity::Menu:IdentityManagement',
-        requiredPolicy: 'AbpIdentity.Users',
-        order: 1,
-      },
-    },
-  },
+
+  // The two modules of milestone 6. The host's contributors are handed to identity here
+  // -- the one place an application says anything about a module's pages (design 05 §6).
+  lazyRoutes('/identity', () =>
+    import('@lsw-abpvue/identity').then(module => module.createIdentityRoutes(userContributors)),
+  ),
+  lazyRoutes('/account', () =>
+    import('@lsw-abpvue/account').then(module => module.createAccountRoutes()),
+  ),
+
   {
     path: '/tenants',
     component: PlaceholderPage,
@@ -82,9 +52,9 @@ export const routes: RouteRecordRaw[] = [
       requiredPolicy: 'AbpTenantManagement.Tenants',
       routes: {
         name: 'AbpTenantManagement::Tenants',
+        parentName: ThemeSharedRouteNames.Administration,
         requiredPolicy: 'AbpTenantManagement.Tenants',
         order: 3,
-        group: 'AbpUi::Administration',
       },
     },
   },
@@ -93,7 +63,11 @@ export const routes: RouteRecordRaw[] = [
     component: PlaceholderPage,
     meta: {
       title: 'AbpSettingManagement::Settings',
-      routes: { name: 'AbpSettingManagement::Settings', order: 4, group: 'AbpUi::Administration' },
+      routes: {
+        name: 'AbpSettingManagement::Settings',
+        parentName: ThemeSharedRouteNames.Administration,
+        order: 4,
+      },
     },
   },
 ];

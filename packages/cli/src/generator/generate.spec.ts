@@ -170,7 +170,6 @@ describe('the object extension properties of the test backend', () => {
       'Validators.required(), Validators.maxLength(64), Validators.minLength(4)',
     ],
     ['Age', 'Validators.required(), Validators.range(0, 150)'],
-    ['IsExternal', 'Validators.required()'],
     ['Title', 'Validators.required()'],
     ['Website', 'Validators.pattern(new RegExp("^https?://.+"))'],
     ['InternalNote', 'Validators.maxLength(256)'],
@@ -178,8 +177,8 @@ describe('the object extension properties of the test backend', () => {
     expect(content).toContain(`${name}: [${rules}],`);
   });
 
-  it('leaves out HireDate, which declares no rules at all', () => {
-    expect(content).not.toContain('HireDate');
+  it.each(['HireDate', 'IsExternal'])('leaves out %s, which declares no rules at all', name => {
+    expect(content).not.toContain(name);
   });
 
   it('generates the role property too, in its own map', () => {

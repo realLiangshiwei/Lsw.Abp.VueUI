@@ -114,6 +114,34 @@ describe('the fields come from the extension point', () => {
     expect(form.toRequestBody()).toEqual({ name: 'Dune' });
   });
 
+  it('keeps an extra property the form was never given a field for', () => {
+    // The backend can declare a property visible in the table and not on the form. A
+    // save that dropped it would erase what the user was never shown.
+    const { form } = render(
+      { create: [field({ name: 'name' })] },
+      {
+        name: 'Dune',
+        extraProperties: { Isbn: '0441013597' },
+      },
+    );
+
+    expect(form.toRequestBody()).toEqual({
+      name: 'Dune',
+      extraProperties: { Isbn: '0441013597' },
+    });
+  });
+
+  it('puts a rejected member nothing is named after in front of the user', async () => {
+    const { wrapper, form } = render({ create: [field({ name: 'name' })] }, { name: 'Dune' });
+
+    form.form.setServerErrors([
+      { message: 'The IsExternal field is required.', members: ['isExternal'] },
+    ]);
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find('[role="alert"]').text()).toContain('The IsExternal field is required.');
+  });
+
   it('a field that says it is not visible for this record is not rendered', () => {
     const { wrapper } = render(
       { create: [field({ name: 'name' }), field({ name: 'draft', visible: () => false })] },
