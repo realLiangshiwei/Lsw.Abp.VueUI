@@ -40,7 +40,15 @@ export default defineConfig({
       // The second pattern is the secondary entry points (`core/router/src`), which the
       // first one silently missed — a whole entry point outside the gate.
       include: ['packages/*/src/**/*.{ts,vue}', 'packages/*/*/src/**/*.{ts,vue}'],
-      exclude: ['**/*.spec.ts', '**/*.test-d.ts', '**/index.ts'],
+      // Generated proxies are what the backend describes, not code anyone wrote; the
+      // architecture lint rules exempt them for the same reason.
+      exclude: [
+        '**/*.spec.ts',
+        '**/*.test-d.ts',
+        '**/index.ts',
+        'packages/*/proxy/src/**',
+        'packages/*/src/proxy/**',
+      ],
       // Targets are core and components/extensible 80%, the DI kernel 95%, everything
       // else 60% (testing rules). Raised as each package lands, so the gate never blocks
       // work that has no implementation yet.
