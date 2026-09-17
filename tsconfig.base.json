@@ -43,6 +43,11 @@
       "@lsw-abpvue/permission-management/proxy": [
         "./packages/permission-management/proxy/src/index.ts"
       ],
+      "@lsw-abpvue/setting-management": ["./packages/setting-management/src/index.ts"],
+      "@lsw-abpvue/setting-management/config": [
+        "./packages/setting-management/config/src/index.ts"
+      ],
+      "@lsw-abpvue/setting-management/proxy": ["./packages/setting-management/proxy/src/index.ts"],
       "@lsw-abpvue/theme-basic": ["./packages/theme-basic/src/index.ts"],
       "@lsw-abpvue/theme-shared": ["./packages/theme-shared/src/index.ts"],
       "@lsw-abpvue/theme-shared/testing": ["./packages/theme-shared/testing/src/index.ts"],

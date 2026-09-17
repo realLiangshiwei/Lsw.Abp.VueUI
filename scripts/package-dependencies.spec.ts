@@ -49,6 +49,14 @@ const ALLOWED = {
     '@tanstack/vue-table',
     'vue',
   ],
+  'setting-management': [
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/theme-shared',
+    '@lsw-abpvue/utils',
+    'vue',
+    'vue-router',
+  ],
   identity: [
     '@lsw-abpvue/components',
     '@lsw-abpvue/core',

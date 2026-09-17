@@ -1,0 +1,25 @@
+{
+  "generated": [
+    "README.md",
+    "index.ts",
+    "setting-management/email-settings.service.ts",
+    "setting-management/index.ts",
+    "setting-management/models.ts",
+    "setting-management/time-zone-settings.service.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "settingManagement": {
+      "rootPath": "settingManagement",
+      "remoteServiceName": "SettingManagement"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

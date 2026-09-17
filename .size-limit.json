@@ -103,5 +103,30 @@
     "path": "packages/account/dist/config/index.js",
     "ignore": ["vue", "vue-router", "@lsw-abpvue/core"],
     "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/setting-management",
+    "path": "packages/setting-management/dist/index.js",
+    "ignore": [
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/setting-management"
+    ],
+    "limit": "12 kB"
+  },
+  {
+    "name": "@lsw-abpvue/setting-management/config",
+    "path": "packages/setting-management/dist/config/index.js",
+    "ignore": [
+      "vue",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "../chunks/EmailSettingsTab-*",
+      "../chunks/TimeZoneSettingsTab-*"
+    ],
+    "limit": "3 kB"
   }
 ]
