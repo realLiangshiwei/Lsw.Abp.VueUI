@@ -49,5 +49,11 @@ export type { EmittedFile } from './generator/emit-models.js';
 export { GenerationReport } from './generator/report.js';
 export type { ReportEntry, ReportKind } from './generator/report.js';
 
+export { moduleBlocks, readTemplateManifest, TEMPLATE_MANIFEST_FILE } from './template/manifest.js';
+export type { TemplateBlock, TemplateManifest } from './template/manifest.js';
+export { templateRoot } from './template/paths.js';
+export { packageNameOf, renderTemplate } from './template/render.js';
+export type { RenderOptions, RenderResult, TemplateValues } from './template/render.js';
+
 export { OutsideTargetError, writeProxy } from './writer.js';
 export type { WriteOptions, WriteResult } from './writer.js';
