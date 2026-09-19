@@ -197,7 +197,7 @@ export default tseslint.config(
   {
     // The injection context does not survive an await, and the runtime error it produces
     // names the wrong place, so the mistake is caught here instead (design 02 §5).
-    files: ['packages/**/*.{ts,mts,vue}', 'playground/**/*.{ts,vue}'],
+    files: ['packages/**/*.{ts,mts,vue}', 'playground/**/*.{ts,vue}', 'templates/**/*.{ts,vue}'],
     plugins: { abp },
     rules: { 'abp/no-inject-after-await': 'error' },
   },

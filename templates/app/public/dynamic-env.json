@@ -1,0 +1,14 @@
+{
+  "apis": { "default": { "url": "__API_URL__" } },
+  "application": { "name": "__PROJECT_NAME__", "baseUrl": "__APP_URL__" },
+  "production": false,
+  "oAuthConfig": {
+    "issuer": "__AUTH_URL__",
+    "clientId": "__CLIENT_ID__",
+    "scope": "offline_access __APP_NAME__",
+    "responseType": "code",
+    "redirectUri": "__APP_URL__",
+    "postLogoutRedirectUri": "__APP_URL__",
+    "silentRefreshRedirectUri": "__APP_URL__/silent-renew.html"
+  }
+}

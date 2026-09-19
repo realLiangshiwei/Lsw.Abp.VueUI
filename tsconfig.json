@@ -15,5 +15,5 @@
     "e2e/proxy/**/*.ts",
     "e2e/specs/**/*.ts"
   ],
-  "exclude": ["node_modules", "**/dist", "e2e/backend", "playground"]
+  "exclude": ["node_modules", "**/dist", "e2e/backend", "playground", "templates"]
 }

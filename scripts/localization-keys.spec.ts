@@ -61,12 +61,14 @@ function usagesIn(file: string): Usage[] {
 }
 
 /**
- * Every package's `src`, and every secondary entry point's (`config/src`, `router/src`).
- * A module's `/config` ships text too -- the setting management tabs live there -- and
- * leaving it out was a whole entry point outside the gate.
+ * Every package's `src`, and every secondary entry point's (`config/src`, `router/src`),
+ * plus the application template's. A module's `/config` ships text too -- the setting
+ * management tabs live there -- and leaving it out was a whole entry point outside the
+ * gate. The template ships text of its own, and a key it gets wrong reaches every project
+ * created from it.
  */
 function sourceRoots(): string[] {
-  const roots: string[] = [];
+  const roots: string[] = [join(repoRoot, 'templates/app/src')];
 
   for (const entry of readdirSync(join(repoRoot, 'packages'), { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;

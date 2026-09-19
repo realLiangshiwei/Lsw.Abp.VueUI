@@ -1,0 +1,11 @@
+{
+  "$comment": "Read by the CLI when it renders this template; never copied into a project.",
+  "blocks": {
+    "account": { "kind": "module" },
+    "identity": { "kind": "module" },
+    "tenant-management": { "kind": "module" },
+    "setting-management": { "kind": "module" },
+    "feature-management": { "kind": "module" },
+    "sample-crud": { "kind": "feature", "files": ["src/pages/BooksPage.vue"] }
+  }
+}

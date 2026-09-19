@@ -1,0 +1,39 @@
+{
+  "name": "@lsw-abpvue/template-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@lsw-abpvue/account": "workspace:*",
+    "@lsw-abpvue/account-core": "workspace:*",
+    "@lsw-abpvue/components": "workspace:*",
+    "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/feature-management": "workspace:*",
+    "@lsw-abpvue/identity": "workspace:*",
+    "@lsw-abpvue/oauth": "workspace:*",
+    "@lsw-abpvue/permission-management": "workspace:*",
+    "@lsw-abpvue/setting-management": "workspace:*",
+    "@lsw-abpvue/tenant-management": "workspace:*",
+    "@lsw-abpvue/theme-basic": "workspace:*",
+    "@lsw-abpvue/theme-shared": "workspace:*",
+    "@lsw-abpvue/utils": "workspace:*",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
+    "vue": "^3.5.41",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@lsw-abpvue/cli": "workspace:*",
+    "@types/node": "^24.10.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "vite": "^8.2.1",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vue-tsc": "^3.3.9"
+  }
+}

@@ -12,3 +12,9 @@ allowBuilds:
   # the entry point is a placeholder that throws on import.
   vue-demi: true
   lefthook: false
+
+peerDependencyRules:
+  allowedVersions:
+    # `tsconfck`, under vite-tsconfig-paths, still names TypeScript 5 as its peer. The
+    # repo is locked to 6.0.3 (M0), and all it does with it is parse a tsconfig.
+    tsconfck>typescript: '6'
