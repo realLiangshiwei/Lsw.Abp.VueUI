@@ -180,6 +180,9 @@ importers:
 
   packages/feature-management:
     devDependencies:
+      '@lsw-abpvue/components':
+        specifier: workspace:*
+        version: link:../components
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../core
@@ -241,6 +244,9 @@ importers:
 
   packages/permission-management:
     devDependencies:
+      '@lsw-abpvue/components':
+        specifier: workspace:*
+        version: link:../components
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../core

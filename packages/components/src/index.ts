@@ -4,6 +4,7 @@ export { default as AbpExtensibleTable } from './components/AbpExtensibleTable.v
 export { default as AbpGridActions } from './components/AbpGridActions.vue';
 export { default as AbpPage } from './components/AbpPage.vue';
 export { default as AbpPageToolbar } from './components/AbpPageToolbar.vue';
+export { default as AbpTabList } from './components/AbpTabList.vue';
 
 export { EXTRA_PROPERTIES_KEY } from './constants/extra-properties.js';
 
@@ -63,6 +64,7 @@ export type {
 } from './models/form-props.js';
 export { unwrapResolvable } from './models/prop-data.js';
 export type { AbpTableColumn, AbpTableRecordKey, AbpTableSort } from './models/table.js';
+export type { AbpTabItem } from './models/tab.js';
 export type {
   GetInjected,
   PropData,
@@ -93,6 +95,12 @@ export {
 export { useEntityActions, useToolbarActions } from './utils/use-action-list.js';
 export { useExtensibleForm } from './utils/use-extensible-form.js';
 export type { ExtensibleForm } from './utils/use-extensible-form.js';
+export { useRecordEditor } from './utils/use-record-editor.js';
+export type {
+  RecordCommands,
+  RecordEditor,
+  RecordEditorOptions,
+} from './utils/use-record-editor.js';
 export { mergeWithDefaultActions, mergeWithDefaultProps } from './utils/merge.js';
 export {
   getObjectExtensionEntities,

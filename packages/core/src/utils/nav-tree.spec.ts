@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { AbpRoute } from '../models/nav.js';
-import { createNavTree } from './nav-tree.js';
+import { ref } from 'vue';
+import { createInjector } from '../di/injector.js';
+import type { AbpNavTab, AbpRoute } from '../models/nav.js';
+import { provideAbpCore } from '../providers/core.provider.js';
+import type { ApplicationConfigurationDto } from '../proxy/models.js';
+import { ConfigStateService } from '../services/config-state.service.js';
+import { createNavTabs, createNavTree, type NavTree } from './nav-tree.js';
 
 const route = (name: string, extra: Partial<AbpRoute> = {}): AbpRoute => ({ name, ...extra });
 
@@ -146,5 +151,64 @@ describe('finding', () => {
   it('search matches a property exactly', () => {
     expect(nav.search({ name: 'users' })?.path).toBe('/users');
     expect(nav.search({ name: 'users', path: '/other' })).toBeNull();
+  });
+});
+
+describe('createNavTabs', () => {
+  const tab = (name: string, extra: Partial<AbpNavTab> = {}): AbpNavTab => ({
+    name,
+    component: { render: () => null },
+    ...extra,
+  });
+
+  function tabsWith(policies: string[], items: AbpNavTab[]): NavTree<AbpNavTab> {
+    const injector = createInjector([provideAbpCore()]);
+    const configState = injector.get(ConfigStateService);
+
+    configState.setState({
+      ...configState.snapshot(),
+      auth: { grantedPolicies: Object.fromEntries(policies.map(name => [name, true])) },
+    } as ApplicationConfigurationDto);
+
+    const tabs = injector.runInContext(() => createNavTabs<AbpNavTab>());
+    tabs.add(items);
+
+    return tabs;
+  }
+
+  it('keeps a tab whose policy is granted and drops one whose is not', () => {
+    const tabs = tabsWith(
+      ['Settings.Emailing'],
+      [
+        tab('emailing', { requiredPolicy: 'Settings.Emailing' }),
+        tab('audit', { requiredPolicy: 'Audit' }),
+      ],
+    );
+
+    expect(tabs.visible.value.map(node => node.name)).toEqual(['emailing']);
+  });
+
+  it('drops one that says it is invisible, and one whose own condition is false', () => {
+    const tabs = tabsWith(
+      [],
+      [tab('hidden', { invisible: true }), tab('off', { visible: () => false }), tab('on')],
+    );
+
+    expect(tabs.visible.value.map(node => node.name)).toEqual(['on']);
+  });
+
+  it('re-reads the condition, so a tab can appear without being registered again', () => {
+    const enabled = ref(false);
+    const tabs = tabsWith([], [tab('features', { visible: () => enabled.value })]);
+
+    expect(tabs.visible.value).toEqual([]);
+    enabled.value = true;
+    expect(tabs.visible.value.map(node => node.name)).toEqual(['features']);
+  });
+
+  it('orders the tabs the way every other ABP tree is ordered', () => {
+    const tabs = tabsWith([], [tab('second', { order: 2 }), tab('first', { order: 1 })]);
+
+    expect(tabs.visible.value.map(node => node.name)).toEqual(['first', 'second']);
   });
 });

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AbpTabList } from '@lsw-abpvue/components';
 import { ConfigStateService, inject as injectAbp, useLocalization } from '@lsw-abpvue/core';
 import { FeaturesService, type FeatureGroupDto } from '@lsw-abpvue/feature-management/proxy';
 import {
@@ -61,6 +62,11 @@ const title = computed(() =>
 
 const shown = computed(() =>
   working.value.filter(feature => feature.groupName === selectedGroup.value),
+);
+
+/** The group tabs, named the way `AbpTabList` names a tab. */
+const tabs = computed(() =>
+  groups.value.map(group => ({ name: group.name ?? '', displayName: group.displayName })),
 );
 
 const selectedGroupName = computed(
@@ -155,26 +161,13 @@ async function resetToDefault(): Promise<void> {
     <p v-else-if="!groups.length">{{ $t('AbpFeatureManagement::NoFeatureFoundMessage') }}</p>
 
     <div v-else class="abp-features">
-      <div
-        class="abp-features__groups"
-        role="tablist"
-        aria-orientation="vertical"
+      <AbpTabList
+        v-model="selectedGroup"
+        :items="tabs"
         :aria-label="$t('AbpFeatureManagement::Features')"
       >
-        <button
-          v-for="group in groups"
-          :key="group.name"
-          type="button"
-          role="tab"
-          class="abp-features__group"
-          :class="{ 'abp-features__group--active': group.name === selectedGroup }"
-          :aria-selected="group.name === selectedGroup"
-          :tabindex="group.name === selectedGroup ? 0 : -1"
-          @click="selectedGroup = group.name ?? ''"
-        >
-          {{ group.displayName }}
-        </button>
-      </div>
+        <template #label="{ item }">{{ item.displayName }}</template>
+      </AbpTabList>
 
       <div class="abp-features__list" role="tabpanel">
         <h3 class="h6">{{ selectedGroupName }}</h3>

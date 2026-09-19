@@ -1,10 +1,8 @@
 import {
-  createNavTree,
+  createNavTabs,
   defineService,
   inject,
   InternalStore,
-  NAV_COMPARE_FN,
-  PermissionService,
   type NavTree,
   type ServiceOf,
 } from '@lsw-abpvue/core';
@@ -19,18 +17,7 @@ import type { ProfileTab } from '../models/profile-tab.js';
  */
 export const ManageProfileTabsService = defineService(
   'ManageProfileTabsService',
-  (): NavTree<ProfileTab> => {
-    const permission = inject(PermissionService);
-    const sort = inject(NAV_COMPARE_FN);
-
-    return createNavTree<ProfileTab>({
-      hide: tab =>
-        tab.invisible === true ||
-        !permission.isGranted(tab.requiredPolicy) ||
-        tab.visible?.() === false,
-      sort,
-    });
-  },
+  (): NavTree<ProfileTab> => createNavTabs<ProfileTab>(),
 );
 export type ManageProfileTabsService = ServiceOf<typeof ManageProfileTabsService>;
 

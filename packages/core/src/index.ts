@@ -104,7 +104,7 @@ export type {
   LocalizationWithDefault,
 } from './models/localization.js';
 export { LayoutType } from './models/nav.js';
-export type { AbpNavItem, AbpRoute, RouteGroup, TreeNode } from './models/nav.js';
+export type { AbpNavItem, AbpNavTab, AbpRoute, RouteGroup, TreeNode } from './models/nav.js';
 export type { AbpKnownPolicyName, AbpPolicyName, UnknownPolicyName } from './models/policy.js';
 export type { AbpRootOptions, ResolvedRootOptions } from './models/root-options.js';
 export { TenantNotFoundError } from './models/tenant.js';
@@ -217,7 +217,7 @@ export { TENANT_NOT_FOUND_BY_NAME } from './tokens/tenant-not-found.token.js';
 export { mapEnumToOptions } from './utils/enum-options.js';
 export type { EnumOption } from './utils/enum-options.js';
 export { InternalStore } from './utils/internal-store.js';
-export { createNavTree } from './utils/nav-tree.js';
+export { createNavTabs, createNavTree } from './utils/nav-tree.js';
 export type { NavTree, NavTreeOptions } from './utils/nav-tree.js';
 export { useDebounceFn } from './utils/use-debounce-fn.js';
 export type { DebouncedFn } from './utils/use-debounce-fn.js';

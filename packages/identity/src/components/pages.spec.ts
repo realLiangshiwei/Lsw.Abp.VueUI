@@ -214,7 +214,8 @@ describe('UsersPage', () => {
     await new Promise(resolve => setTimeout(resolve));
     await wrapper.vm.$nextTick();
 
-    buttonsSaying('AbpIdentity::Roles')[0]?.click();
+    // The dialog's tabs are `AbpTabList`, which localizes its own labels.
+    document.querySelectorAll<HTMLButtonElement>('[role="tab"]')[1]?.click();
     await wrapper.vm.$nextTick();
 
     const checked = [...document.querySelectorAll<HTMLInputElement>('.abp-identity-roles input')];

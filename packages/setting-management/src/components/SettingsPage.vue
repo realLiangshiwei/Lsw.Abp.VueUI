@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { AbpPage } from '@lsw-abpvue/components';
-import { useLocalization } from '@lsw-abpvue/core';
+import { AbpPage, AbpTabList } from '@lsw-abpvue/components';
 import { useSettingTabs } from '@lsw-abpvue/setting-management/config';
 import { computed, ref, watch } from 'vue';
 
 const tabs = useSettingTabs();
-const localization = useLocalization();
 
 const selected = ref('');
 
@@ -31,27 +29,11 @@ watch(
     </p>
 
     <div v-else class="abp-settings">
-      <div
-        class="abp-settings__tabs"
-        role="tablist"
-        aria-orientation="vertical"
+      <AbpTabList
+        v-model="selected"
+        :items="visible"
         :aria-label="$t('AbpSettingManagement::Settings')"
-      >
-        <button
-          v-for="tab in visible"
-          :key="tab.name"
-          type="button"
-          role="tab"
-          class="abp-settings__tab"
-          :class="{ 'abp-settings__tab--active': tab.name === selected }"
-          :aria-selected="tab.name === selected"
-          :tabindex="tab.name === selected ? 0 : -1"
-          @click="selected = tab.name"
-        >
-          <i v-if="tab.iconClass" :class="tab.iconClass" aria-hidden="true" />
-          {{ localization.t(tab.text ?? tab.name) }}
-        </button>
-      </div>
+      />
 
       <div class="abp-settings__panel" role="tabpanel">
         <component :is="current.component" v-if="current" :key="current.name" />

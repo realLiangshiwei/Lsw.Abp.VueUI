@@ -1,5 +1,8 @@
 import { computed, shallowRef, type ComputedRef } from 'vue';
-import type { AbpNavItem, RouteGroup, TreeNode } from '../models/nav.js';
+import { inject } from '../di/inject.js';
+import type { AbpNavItem, AbpNavTab, RouteGroup, TreeNode } from '../models/nav.js';
+import { PermissionService } from '../services/permission.service.js';
+import { NAV_COMPARE_FN } from '../tokens/nav.token.js';
 
 export interface NavTreeOptions<T extends AbpNavItem> {
   /** Keeps an item out of `visible`, along with everything under it. */
@@ -182,4 +185,25 @@ export function createNavTree<T extends AbpNavItem>(options: NavTreeOptions<T> =
     /** Kept for parity; the derived values recompute on their own. */
     refresh: () => publish([...items.value]),
   };
+}
+
+/**
+ * The tree behind a page whose tabs other modules add to. The rules are the same
+ * wherever such a page appears -- the profile page, the settings page -- so they are
+ * stated once: a tab is out while it says it is invisible, while its policy is not
+ * granted, or while its own condition is false.
+ *
+ * Runs in an injection context, which is where the services it reads come from.
+ */
+export function createNavTabs<T extends AbpNavTab>(): NavTree<T> {
+  const permission = inject(PermissionService);
+  const sort = inject(NAV_COMPARE_FN);
+
+  return createNavTree<T>({
+    hide: tab =>
+      tab.invisible === true ||
+      !permission.isGranted(tab.requiredPolicy) ||
+      tab.visible?.() === false,
+    sort,
+  });
 }

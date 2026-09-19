@@ -330,29 +330,6 @@
   align-items: start;
 }
 
-.abp-permissions__groups {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  max-height: min(60vh, 30rem);
-  overflow-y: auto;
-}
-
-.abp-permissions__group {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-body-bg);
-  color: inherit;
-  text-align: start;
-}
-
-.abp-permissions__group--active {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
-}
-
 .abp-permissions__list {
   max-height: min(60vh, 30rem);
   overflow-y: auto;
@@ -389,29 +366,6 @@
   align-items: start;
 }
 
-.abp-features__groups {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  max-height: min(60vh, 30rem);
-  overflow-y: auto;
-}
-
-.abp-features__group {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-body-bg);
-  color: inherit;
-  text-align: start;
-}
-
-.abp-features__group--active {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
-}
-
 .abp-features__list {
   max-height: min(60vh, 30rem);
   overflow-y: auto;
@@ -439,62 +393,14 @@
 }
 
 /*
- * The tabs inside the identity module's user dialog. Same reasoning as the permission
- * dialog above: the module ships the markup, the theme gives it a look.
- */
-.abp-identity-tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--bs-border-color);
-}
-
-.abp-identity-tabs__tab {
-  padding: 0.5rem 1rem;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  background: none;
-  color: inherit;
-}
-
-.abp-identity-tabs__tab--active {
-  border-bottom-color: var(--bs-primary);
-  color: var(--bs-primary);
-}
-
-/*
- * The profile page's tabs. The account module ships the markup and the class names, the
- * way the identity and permission dialogs do.
+ * The profile page. The account module ships the markup and the class names, the way the
+ * identity and permission dialogs do; `AbpTabList` brings the tabs themselves.
  */
 .abp-profile {
   display: grid;
   grid-template-columns: minmax(12rem, 1fr) 3fr;
   gap: 1.5rem;
   align-items: start;
-}
-
-.abp-profile__tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.abp-profile__tab {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-body-bg);
-  color: inherit;
-  text-align: start;
-}
-
-.abp-profile__tab--active {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
 }
 
 @media (max-width: 767.98px) {
@@ -504,38 +410,65 @@
 }
 
 /*
- * The settings page's tabs. The setting management module ships the markup and the class
- * names, the way the profile page above does.
+ * `AbpTabList`. Four pages and dialogs had a hand-written copy of this before M7 -- the
+ * permission and feature dialogs, the profile page and the settings page -- and every
+ * copy needed the theme to style it separately. One component, one set of class names.
  */
+.abp-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.abp-tabs--vertical {
+  flex-direction: column;
+  max-height: min(60vh, 30rem);
+  overflow-y: auto;
+}
+
+.abp-tabs--horizontal {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.abp-tabs__tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+  text-align: start;
+}
+
+.abp-tabs--vertical .abp-tabs__tab {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  background-color: var(--bs-body-bg);
+}
+
+.abp-tabs--vertical .abp-tabs__tab--active {
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+}
+
+.abp-tabs--horizontal .abp-tabs__tab {
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+}
+
+.abp-tabs--horizontal .abp-tabs__tab--active {
+  border-bottom-color: var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+/* The settings page, laid out the way the profile page above is. */
 .abp-settings {
   display: grid;
   grid-template-columns: minmax(12rem, 1fr) 3fr;
   gap: 1.5rem;
   align-items: start;
-}
-
-.abp-settings__tabs {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.abp-settings__tab {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-body-bg);
-  color: inherit;
-  text-align: start;
-}
-
-.abp-settings__tab--active {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
 }
 
 @media (max-width: 767.98px) {

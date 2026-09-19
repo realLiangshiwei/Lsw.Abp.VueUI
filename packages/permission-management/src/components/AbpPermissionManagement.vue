@@ -8,8 +8,8 @@ import {
 import {
   PermissionsService,
   type GetPermissionListResultDto,
-  type PermissionGroupDto,
 } from '@lsw-abpvue/permission-management/proxy';
+import { AbpTabList } from '@lsw-abpvue/components';
 import {
   AbpButton,
   AbpInput,
@@ -81,9 +81,14 @@ const groupState = computed(() => checkboxState(shown.value));
 const allDisabled = computed(() => isSelectAllDisabled(working.value, props.providerName));
 const groupDisabled = computed(() => isSelectAllDisabled(shown.value, props.providerName));
 
-function grantedCount(group: PermissionGroupDto): number {
+/** The group tabs, named the way `AbpTabList` names a tab. */
+const tabs = computed(() =>
+  groups.value.map(group => ({ name: group.name ?? '', displayName: group.displayName })),
+);
+
+function grantedCount(groupName: string): number {
   return working.value.filter(
-    permission => permission.groupName === group.name && permission.isGranted,
+    permission => permission.groupName === groupName && permission.isGranted,
   ).length;
 }
 
@@ -193,27 +198,16 @@ async function save(): Promise<void> {
       </div>
 
       <div class="abp-permissions__body">
-        <div
-          class="abp-permissions__groups"
-          role="tablist"
-          aria-orientation="vertical"
+        <AbpTabList
+          v-model="selectedGroup"
+          :items="tabs"
           :aria-label="$t('AbpPermissionManagement::PermissionGroup')"
         >
-          <button
-            v-for="group in groups"
-            :key="group.name"
-            type="button"
-            role="tab"
-            class="abp-permissions__group"
-            :class="{ 'abp-permissions__group--active': group.name === selectedGroup }"
-            :aria-selected="group.name === selectedGroup"
-            :tabindex="group.name === selectedGroup ? 0 : -1"
-            @click="selectedGroup = group.name ?? ''"
-          >
-            {{ group.displayName }}
-            <span v-if="grantedCount(group) > 0">({{ grantedCount(group) }})</span>
-          </button>
-        </div>
+          <template #label="{ item }">
+            {{ item.displayName }}
+            <span v-if="grantedCount(item.name) > 0">({{ grantedCount(item.name) }})</span>
+          </template>
+        </AbpTabList>
 
         <div class="abp-permissions__list" role="tabpanel">
           <AbpToggle

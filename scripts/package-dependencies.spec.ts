@@ -58,6 +58,8 @@ const ALLOWED = {
     'vue-router',
   ],
   'feature-management': [
+    // The tab list every module's grouped dialog renders (design 03 §1).
+    '@lsw-abpvue/components',
     '@lsw-abpvue/core',
     // The tab it puts on the settings page goes into that module's tab tree (design 03 §1).
     '@lsw-abpvue/setting-management',
@@ -76,6 +78,8 @@ const ALLOWED = {
     'vue-router',
   ],
   'permission-management': [
+    // The tab list every module's grouped dialog renders (design 03 §1).
+    '@lsw-abpvue/components',
     '@lsw-abpvue/core',
     '@lsw-abpvue/theme-shared',
     '@lsw-abpvue/utils',
