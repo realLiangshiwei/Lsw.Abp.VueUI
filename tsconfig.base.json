@@ -53,6 +53,9 @@
         "./packages/setting-management/config/src/index.ts"
       ],
       "@lsw-abpvue/setting-management/proxy": ["./packages/setting-management/proxy/src/index.ts"],
+      "@lsw-abpvue/tenant-management": ["./packages/tenant-management/src/index.ts"],
+      "@lsw-abpvue/tenant-management/config": ["./packages/tenant-management/config/src/index.ts"],
+      "@lsw-abpvue/tenant-management/proxy": ["./packages/tenant-management/proxy/src/index.ts"],
       "@lsw-abpvue/theme-basic": ["./packages/theme-basic/src/index.ts"],
       "@lsw-abpvue/theme-shared": ["./packages/theme-shared/src/index.ts"],
       "@lsw-abpvue/theme-shared/testing": ["./packages/theme-shared/testing/src/index.ts"],

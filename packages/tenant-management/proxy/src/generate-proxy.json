@@ -1,0 +1,24 @@
+{
+  "generated": [
+    "README.md",
+    "index.ts",
+    "tenant-management/index.ts",
+    "tenant-management/models.ts",
+    "tenant-management/tenant.service.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "multi-tenancy": {
+      "rootPath": "multi-tenancy",
+      "remoteServiceName": "AbpTenantManagement"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

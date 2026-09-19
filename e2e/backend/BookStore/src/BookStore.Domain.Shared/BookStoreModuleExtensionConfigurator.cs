@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Identity;
 using Volo.Abp.ObjectExtending;
+using Volo.Abp.TenantManagement;
 using Volo.Abp.Threading;
 
 namespace BookStore;
@@ -109,6 +110,24 @@ public static class BookStoreModuleExtensionConfigurator
                     role.AddOrUpdateProperty<string>("Department", p =>
                     {
                         p.Attributes.Add(new StringLengthAttribute(128));
+                        p.UI.OnTable.IsVisible = true;
+                        p.UI.OnCreateForm.IsVisible = true;
+                        p.UI.OnEditForm.IsVisible = true;
+                    });
+                });
+            });
+
+        ObjectExtensionManager.Instance.Modules()
+            .ConfigureTenantManagement(tenantManagement =>
+            {
+                tenantManagement.ConfigureTenant(tenant =>
+                {
+                    // The tenant page has an object extension path of its own, reading a
+                    // different module and a different entity name from identity's.
+                    tenant.AddOrUpdateProperty<string>("ContactEmail", p =>
+                    {
+                        p.Attributes.Add(new EmailAddressAttribute());
+                        p.Attributes.Add(new StringLengthAttribute(256));
                         p.UI.OnTable.IsVisible = true;
                         p.UI.OnCreateForm.IsVisible = true;
                         p.UI.OnEditForm.IsVisible = true;

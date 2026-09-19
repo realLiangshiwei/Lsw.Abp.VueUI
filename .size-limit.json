@@ -146,5 +146,25 @@
       "../chunks/FeatureManagementTab-*"
     ],
     "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/tenant-management",
+    "path": "packages/tenant-management/dist/index.js",
+    "ignore": [
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/feature-management",
+      "@lsw-abpvue/tenant-management"
+    ],
+    "limit": "10 kB"
+  },
+  {
+    "name": "@lsw-abpvue/tenant-management/config",
+    "path": "packages/tenant-management/dist/config/index.js",
+    "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
+    "limit": "3 kB"
   }
 ]
