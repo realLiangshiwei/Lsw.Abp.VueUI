@@ -70,6 +70,15 @@ import { createIdentityRoutes, IdentityComponents } from '@lsw-abpvue/identity';
 import { provideIdentityConfig, IdentityPolicyNames } from '@lsw-abpvue/identity/config';
 import type { IdentityUserDto } from '@lsw-abpvue/identity/proxy';
 import { flatten, PermissionManagementComponents } from '@lsw-abpvue/permission-management';
+import { changedFeatures, FeatureManagementComponents, flattenFeatures } from '@lsw-abpvue/feature-management';
+import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/config';
+import type { FeatureDto } from '@lsw-abpvue/feature-management/proxy';
+import { createTenantManagementRoutes, TenantManagementComponents } from '@lsw-abpvue/tenant-management';
+import { provideTenantManagementConfig, TenantManagementPolicyNames } from '@lsw-abpvue/tenant-management/config';
+import type { TenantDto } from '@lsw-abpvue/tenant-management/proxy';
+import { createSettingManagementRoutes, SettingManagementComponents } from '@lsw-abpvue/setting-management';
+import { provideSettingManagementConfig, SettingTabsService } from '@lsw-abpvue/setting-management/config';
+import type { EmailSettingsDto } from '@lsw-abpvue/setting-management/proxy';
 
 const Greeter = defineService('Greeter', () => {
   const store = new InternalStore<{ template: string }>({ template: 'Hei {0}.' });
@@ -115,14 +124,33 @@ export const modules = [
     },
   }),
   ...createAccountRoutes({ appName: 'Vue' }),
+  ...createTenantManagementRoutes({
+    entityPropContributors: {
+      [TenantManagementComponents.Tenants]: [list => list.dropByValue('name', (p, n) => p.name === n)],
+    },
+  }),
+  ...createSettingManagementRoutes(),
 ];
-export const moduleConfig = [provideAccountConfig(), provideIdentityConfig()];
+export const moduleConfig = [
+  provideAccountConfig(),
+  provideIdentityConfig(),
+  provideTenantManagementConfig(),
+  // Setting management before feature management: the tab tree is in the first, and the
+  // second puts one of its own into it.
+  provideSettingManagementConfig(),
+  provideFeatureManagementConfig(),
+];
 export const policy: string = IdentityPolicyNames.UsersCreate;
 export const tabs: string = ManageProfileTabs.PersonalSettings;
 export const dialogKey: string = PermissionManagementComponents.PermissionManagement;
 export const tenantBoxKey: string = AccountComponents.TenantBox;
 export const switchTenant = () => createInjector([]).get(TenantBoxService).switchTo('acme');
 export const grants = flatten([{ name: 'g', displayName: 'g', permissions: [] }]);
+export const featureKey: string = FeatureManagementComponents.FeatureManagement;
+export const settingsKey: string = SettingManagementComponents.SettingManagement;
+export const tenantPolicy: string = TenantManagementPolicyNames.TenantsManageConnectionStrings;
+export const changed = changedFeatures(flattenFeatures([{ name: 'g', displayName: 'g', features: [] }]));
+export const settingTabs = createInjector([]).get(SettingTabsService).visible.value;
 
 // A route's `meta.tenantBoxVisible` comes from `account-core`'s module augmentation, so
 // this only compiles if the published declarations carry it.
@@ -130,7 +158,16 @@ export const hidesTenantBox: boolean = modules[1]?.children?.[4]?.meta?.tenantBo
 
 type UserIsTyped = IdentityUserDto['userName'];
 type ProfileIsTyped = ProfileDto['userName'];
-export const dtos: [UserIsTyped, ProfileIsTyped] = [undefined, undefined];
+type TenantIsTyped = TenantDto['name'];
+type FeatureIsTyped = FeatureDto['displayName'];
+type EmailIsTyped = EmailSettingsDto['smtpHost'];
+export const dtos: [UserIsTyped, ProfileIsTyped, TenantIsTyped, FeatureIsTyped, EmailIsTyped] = [
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+];
 
 const form = useAbpForm({ userName: { value: '', validators: [Validators.required()] } });
 export const userName: string = form.controls.userName.value;

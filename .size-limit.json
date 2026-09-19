@@ -63,7 +63,7 @@
   {
     "name": "@lsw-abpvue/permission-management",
     "path": "packages/permission-management/dist/index.js",
-    "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
+    "ignore": ["@lsw-abpvue/components", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared", "vue"],
     "limit": "6 kB"
   },
   {
@@ -132,7 +132,7 @@
   {
     "name": "@lsw-abpvue/feature-management",
     "path": "packages/feature-management/dist/index.js",
-    "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
+    "ignore": ["@lsw-abpvue/components", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared", "vue"],
     "limit": "8 kB"
   },
   {
