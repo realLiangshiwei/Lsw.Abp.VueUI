@@ -255,6 +255,27 @@
   white-space: nowrap;
 }
 
+/*
+ * What reka-ui puts on `body` for a popper: a wrapper of its own with an inline
+ * `z-index: 1000`. Two things follow, and both are fixed here because both selectors
+ * reach elements that are outside the component that rendered them.
+ *
+ * The wrapper's stacking context sits below Bootstrap's modal at 1055, so a select
+ * opened inside a dialog was painted behind it -- and beating an inline style takes
+ * `!important`. And the scope attribute of `AbpSelect` lands on that wrapper rather than
+ * on the list, so the list's own height and scrolling have to be stated globally too.
+ */
+[data-reka-popper-content-wrapper] {
+  /* Above the modal (1055), the confirmation (1065) and the error page (1070); below the
+     toasts (1090), which stay on top of everything. */
+  z-index: 1080 !important;
+}
+
+.abp-select__content {
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
 .abp-grid-actions-menu {
   /* The component overrides this with `fixed` and the coordinates of the summary: a
      table that scrolls sideways would otherwise clip its own row menus. */

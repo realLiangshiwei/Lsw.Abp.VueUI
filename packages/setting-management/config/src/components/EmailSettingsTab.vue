@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { AbpPermission, inject as injectAbp, useLocalization } from '@lsw-abpvue/core';
+import {
+  AbpPermission,
+  ConfigStateService,
+  inject as injectAbp,
+  useLocalization,
+} from '@lsw-abpvue/core';
 import { EmailSettingsService } from '@lsw-abpvue/setting-management/proxy';
 import {
   AbpButton,
@@ -18,6 +23,7 @@ import { computed, onMounted, ref } from 'vue';
 import { SettingManagementPolicyNames } from '../enums/policy-names.js';
 
 const settings = injectAbp(EmailSettingsService);
+const configState = injectAbp(ConfigStateService);
 const localization = useLocalization();
 const toaster = useToaster();
 const messagesOf = useValidationMessages();
@@ -105,7 +111,8 @@ async function submit(): Promise<void> {
 function openTest(): void {
   testForm.reset({
     senderEmailAddress: form.value.defaultFromAddress,
-    targetEmailAddress: '',
+    // Whoever is asking for the test is the one who can go and look for it.
+    targetEmailAddress: configState.getOne('currentUser').value.email ?? '',
     subject: localization.t(
       'AbpSettingManagement::TestEmailSubject',
       String(Math.floor(Math.random() * 9999)),

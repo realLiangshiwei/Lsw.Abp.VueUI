@@ -82,6 +82,9 @@ function onChange(next: unknown): void {
       <SelectValue :placeholder="placeholder ?? ''">{{ selectedLabel }}</SelectValue>
     </SelectTrigger>
 
+    <!-- Portalled to `body`, which is why `.abp-select__content` is styled in the
+         theme's stylesheet rather than in a scoped block here: the scope attribute lands
+         on reka-ui's popper wrapper, not on the list. -->
     <SelectPortal>
       <SelectContent class="abp-select__content dropdown-menu show" position="popper">
         <SelectViewport>
@@ -106,11 +109,3 @@ function onChange(next: unknown): void {
     </SelectPortal>
   </SelectRoot>
 </template>
-
-<style scoped>
-.abp-select__content {
-  z-index: 1080;
-  max-height: 16rem;
-  overflow-y: auto;
-}
-</style>

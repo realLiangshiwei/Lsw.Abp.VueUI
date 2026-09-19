@@ -367,6 +367,9 @@ importers:
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@lsw-abpvue/feature-management':
+        specifier: workspace:*
+        version: link:../packages/feature-management
       '@lsw-abpvue/identity':
         specifier: workspace:*
         version: link:../packages/identity
@@ -376,6 +379,12 @@ importers:
       '@lsw-abpvue/permission-management':
         specifier: workspace:*
         version: link:../packages/permission-management
+      '@lsw-abpvue/setting-management':
+        specifier: workspace:*
+        version: link:../packages/setting-management
+      '@lsw-abpvue/tenant-management':
+        specifier: workspace:*
+        version: link:../packages/tenant-management
       '@lsw-abpvue/theme-basic':
         specifier: workspace:*
         version: link:../packages/theme-basic

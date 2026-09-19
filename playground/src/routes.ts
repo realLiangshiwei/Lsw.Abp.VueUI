@@ -1,10 +1,8 @@
 import { lazyRoutes } from '@lsw-abpvue/core/router';
-import { ThemeSharedRouteNames } from '@lsw-abpvue/theme-shared';
 import type { RouteRecordRaw } from 'vue-router';
 import ComponentsPage from './pages/ComponentsPage.vue';
 import FeedbackPage from './pages/FeedbackPage.vue';
 import HomePage from './pages/HomePage.vue';
-import PlaceholderPage from './pages/PlaceholderPage.vue';
 import { userContributors } from './extensions/user-contributors';
 
 /**
@@ -35,39 +33,18 @@ export const routes: RouteRecordRaw[] = [
     },
   },
 
-  // The two modules of milestone 6. The host's contributors are handed to identity here
-  // -- the one place an application says anything about a module's pages (design 05 §6).
+  // All five open source modules. The host's contributors are handed to identity here --
+  // the one place an application says anything about a module's pages (design 05 §6).
   lazyRoutes('/identity', () =>
     import('@lsw-abpvue/identity').then(module => module.createIdentityRoutes(userContributors)),
   ),
   lazyRoutes('/account', () =>
     import('@lsw-abpvue/account').then(module => module.createAccountRoutes()),
   ),
-
-  {
-    path: '/tenants',
-    component: PlaceholderPage,
-    meta: {
-      title: 'AbpTenantManagement::Tenants',
-      requiredPolicy: 'AbpTenantManagement.Tenants',
-      routes: {
-        name: 'AbpTenantManagement::Tenants',
-        parentName: ThemeSharedRouteNames.Administration,
-        requiredPolicy: 'AbpTenantManagement.Tenants',
-        order: 3,
-      },
-    },
-  },
-  {
-    path: '/settings',
-    component: PlaceholderPage,
-    meta: {
-      title: 'AbpSettingManagement::Settings',
-      routes: {
-        name: 'AbpSettingManagement::Settings',
-        parentName: ThemeSharedRouteNames.Administration,
-        order: 4,
-      },
-    },
-  },
+  lazyRoutes('/tenant-management', () =>
+    import('@lsw-abpvue/tenant-management').then(module => module.createTenantManagementRoutes()),
+  ),
+  lazyRoutes('/setting-management', () =>
+    import('@lsw-abpvue/setting-management').then(module => module.createSettingManagementRoutes()),
+  ),
 ];

@@ -10,7 +10,10 @@ import { provideAbpOAuth } from '@lsw-abpvue/oauth';
 import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
 import { provideManageProfileTabs } from '@lsw-abpvue/account';
 import { provideAccountConfig } from '@lsw-abpvue/account/config';
+import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/config';
 import { provideIdentityConfig } from '@lsw-abpvue/identity/config';
+import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/config';
+import { provideTenantManagementConfig } from '@lsw-abpvue/tenant-management/config';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '@lsw-abpvue/theme-basic/style.css';
@@ -36,6 +39,11 @@ const { mount } = await createAbpApp(App, {
     // pages themselves arrive on the first navigation into them (design 03 §2).
     provideAccountConfig(),
     provideIdentityConfig(),
+    provideTenantManagementConfig(),
+    // Setting management before feature management: the tab tree lives in the first, and
+    // the second puts one of its own into it.
+    provideSettingManagementConfig(),
+    provideFeatureManagementConfig(),
     provideManageProfileTabs(),
     // Without one of these an unreachable backend would leave a blank page.
     provideAppInitErrorHandler(error => {

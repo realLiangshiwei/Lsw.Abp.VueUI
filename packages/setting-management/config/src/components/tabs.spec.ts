@@ -50,6 +50,15 @@ function injectorWith(providers: ProviderInput[], policies: string[] = []): Inje
   configState.setState({
     ...configState.snapshot(),
     auth: { grantedPolicies: Object.fromEntries(policies.map(name => [name, true])) },
+    currentUser: {
+      id: 'user-1',
+      userName: 'admin',
+      email: 'admin@abp.io',
+      isAuthenticated: true,
+      emailVerified: true,
+      phoneNumberVerified: false,
+      roles: ['admin'],
+    },
   } as ApplicationConfigurationDto);
 
   return injector;
@@ -101,6 +110,23 @@ describe('EmailSettingsTab', () => {
     await new Promise(resolve => setTimeout(resolve));
 
     expect(update).toHaveBeenCalledWith(expect.objectContaining({ smtpPassword: '' }));
+  });
+
+  it('addresses the test mail to the person asking for it', async () => {
+    const page = await render(
+      EmailSettingsTab,
+      injectorWith([emailService()], ['SettingManagement.Emailing.Test']),
+    );
+
+    const send = [...document.querySelectorAll('button')].find(
+      button => button.textContent?.trim() === 'AbpSettingManagement::SendTestEmail',
+    );
+    send?.click();
+    await new Promise(resolve => setTimeout(resolve));
+    await page.vm.$nextTick();
+
+    const boxes = [...document.querySelectorAll<HTMLInputElement>('input[type="email"]')];
+    expect(boxes.map(box => box.value)).toContain('admin@abp.io');
   });
 
   it('offers the test mail only to whoever may send one', async () => {
