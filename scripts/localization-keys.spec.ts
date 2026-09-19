@@ -60,10 +60,31 @@ function usagesIn(file: string): Usage[] {
   }));
 }
 
-const packages = readdirSync(join(repoRoot, 'packages'), { withFileTypes: true })
-  .filter(entry => entry.isDirectory())
-  .map(entry => join(repoRoot, 'packages', entry.name, 'src'))
-  .filter(existsSync);
+/**
+ * Every package's `src`, and every secondary entry point's (`config/src`, `router/src`).
+ * A module's `/config` ships text too -- the setting management tabs live there -- and
+ * leaving it out was a whole entry point outside the gate.
+ */
+function sourceRoots(): string[] {
+  const roots: string[] = [];
+
+  for (const entry of readdirSync(join(repoRoot, 'packages'), { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+
+    const packageRoot = join(repoRoot, 'packages', entry.name);
+    roots.push(join(packageRoot, 'src'));
+
+    for (const inner of readdirSync(packageRoot, { withFileTypes: true })) {
+      // Generated proxies say what the backend says, keys included.
+      if (!inner.isDirectory() || inner.name === 'proxy' || inner.name === 'src') continue;
+      roots.push(join(packageRoot, inner.name, 'src'));
+    }
+  }
+
+  return roots.filter(existsSync);
+}
+
+const packages = sourceRoots();
 
 const usages = packages.flatMap(dir => [...sources(dir)].flatMap(usagesIn));
 
