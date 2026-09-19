@@ -132,6 +132,17 @@ describe('the authorization code flow settings', () => {
     });
   });
 
+  it('renews in the page meant for it rather than in a copy of the application', () => {
+    const storage = createInjector([]).get(MemoryTokenStorage);
+
+    const renewal = 'https://app.abp.io/silent-renew.html';
+    const settings = buildSettings({ silentRefreshRedirectUri: renewal }, storage);
+
+    expect(settings.silent_redirect_uri).toBe(renewal);
+    // Left out, the library renews at `redirect_uri`, which boots the whole application.
+    expect(buildSettings({}, storage).silent_redirect_uri).toBeUndefined();
+  });
+
   it('the library sends the token request, so the tenant travels on the settings', () => {
     const storage = createInjector([]).get(MemoryTokenStorage);
 

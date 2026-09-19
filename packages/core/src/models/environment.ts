@@ -44,6 +44,8 @@ export interface OAuthConfig {
   responseType?: string | undefined;
   redirectUri?: string | undefined;
   postLogoutRedirectUri?: string | undefined;
+  /** The page the token renewal iframe loads; named as `angular-oauth2-oidc` names it. */
+  silentRefreshRedirectUri?: string | undefined;
   dummyClientSecret?: string | undefined;
   requireHttps?: boolean | undefined;
   impersonation?:

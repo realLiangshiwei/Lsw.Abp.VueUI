@@ -60,6 +60,12 @@ export function buildSettings(
     ...(config.postLogoutRedirectUri
       ? { post_logout_redirect_uri: config.postLogoutRedirectUri }
       : {}),
+    // Without one the library renews in an iframe pointed at `redirect_uri`, which boots
+    // the whole application to answer one token request. The template ships a page that
+    // does nothing else, and this is what points at it.
+    ...(config.silentRefreshRedirectUri
+      ? { silent_redirect_uri: config.silentRefreshRedirectUri }
+      : {}),
     ...(config.dummyClientSecret ? { client_secret: config.dummyClientSecret } : {}),
   };
 }

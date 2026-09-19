@@ -18,3 +18,4 @@ export { LOGIN_ROUTE, PasswordFlowStrategy } from './strategies/password-flow.st
 export type { AuthFlowStrategy } from './strategies/strategy.js';
 
 export { decodeJwt } from './utils/jwt.js';
+export { completeSilentRenew } from './utils/silent-renew.js';
