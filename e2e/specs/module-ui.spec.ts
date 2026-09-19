@@ -18,12 +18,31 @@ import {
 } from '@lsw-abpvue/identity';
 import { IdentityRoleService, IdentityUserService } from '@lsw-abpvue/identity/proxy';
 import {
+  changedFeatures,
+  flattenFeatures,
+  isFeatureDisabled,
+  selectionItemsOf,
+  setFeatureValue,
+  type EditableFeature,
+} from '@lsw-abpvue/feature-management';
+import { FeaturesService } from '@lsw-abpvue/feature-management/proxy';
+import {
   changesBetween,
   flatten,
   isGrantedElsewhere,
   toggle,
 } from '@lsw-abpvue/permission-management';
 import { PermissionsService } from '@lsw-abpvue/permission-management/proxy';
+import {
+  EmailSettingsService,
+  TimeZoneSettingsService,
+} from '@lsw-abpvue/setting-management/proxy';
+import {
+  DEFAULT_TENANTS_ENTITY_PROPS,
+  TenantManagementComponents,
+  tenantManagementExtensionsResolver,
+} from '@lsw-abpvue/tenant-management';
+import { TenantService } from '@lsw-abpvue/tenant-management/proxy';
 import { afterAll, describe, expect, it } from 'vitest';
 
 const BACKEND = process.env.ABP_BACKEND_URL ?? 'https://localhost:44384';
@@ -272,6 +291,211 @@ describe.skipIf(!token)('the module pages against the backend they are for', () 
         status: 403,
         error: { message: expect.stringContaining('Passwords must be at least') },
       });
+    });
+  });
+
+  describe('tenant management, over the endpoints and the extensions of a real backend', () => {
+    const tenants = injector.get(TenantService);
+
+    it('puts the backend’s own tenant extension on the page', () => {
+      runInInjectionContext(injector, () => tenantManagementExtensionsResolver());
+
+      const columns = injector
+        .get(ExtensionsService)
+        .entityProps.get(TenantManagementComponents.Tenants)
+        .props.toArray()
+        .map(prop => prop.name);
+
+      expect(columns).toEqual(
+        expect.arrayContaining(DEFAULT_TENANTS_ENTITY_PROPS.map(prop => prop.name)),
+      );
+      // Declared on `TenantManagement.Tenant`, which is a different module and a
+      // different entity name from identity's.
+      expect(columns).toContain('ContactEmail');
+    });
+
+    it('asks a new tenant for an administrator and an existing one for nothing but a name', () => {
+      runInInjectionContext(injector, () => tenantManagementExtensionsResolver());
+      const extensions = injector.get(ExtensionsService);
+
+      const create = extensions.createFormProps
+        .get(TenantManagementComponents.Tenants)
+        .props.toArray()
+        .map(prop => prop.name);
+      const edit = extensions.editFormProps
+        .get(TenantManagementComponents.Tenants)
+        .props.toArray()
+        .map(prop => prop.name);
+
+      expect(create).toContain('adminEmailAddress');
+      expect(create).toContain('adminPassword');
+      expect(edit).not.toContain('adminEmailAddress');
+      expect(edit).toContain('ContactEmail');
+    });
+
+    it('creates, renames and deletes a tenant, and keeps its connection string', async () => {
+      const name = unique();
+      const created = await tenants.create({
+        name,
+        adminEmailAddress: `${name}@abp.io`,
+        adminPassword: '1q2w3E*',
+      });
+      const id = created.id as string;
+
+      try {
+        expect(await tenants.getDefaultConnectionString(id)).toBe('');
+
+        await tenants.updateDefaultConnectionString(id, 'mongodb://localhost:27017/one');
+        expect(await tenants.getDefaultConnectionString(id)).toBe('mongodb://localhost:27017/one');
+
+        // Ticking "use the shared database" deletes it rather than saving an empty one.
+        await tenants.deleteDefaultConnectionString(id);
+        expect(await tenants.getDefaultConnectionString(id)).toBe('');
+
+        // Re-read, because setting a connection string is a change to the tenant and so
+        // moves its stamp on. The page does the same before it opens the edit form.
+        const current = await tenants.get(id);
+        const renamed = await tenants.update(id, {
+          name: `${name}-renamed`,
+          concurrencyStamp: current.concurrencyStamp,
+        });
+        expect(renamed.name).toBe(`${name}-renamed`);
+      } finally {
+        await tenants.delete(id);
+      }
+    });
+  });
+
+  describe('feature management, against the value types the backend defines', () => {
+    const features = injector.get(FeaturesService);
+    const tenants = injector.get(TenantService);
+
+    it('reads all three value types and sends back only what changed', async () => {
+      const name = unique();
+      const created = await tenants.create({
+        name,
+        adminEmailAddress: `${name}@abp.io`,
+        adminPassword: '1q2w3E*',
+      });
+      const id = created.id as string;
+
+      try {
+        const answer = await features.get('T', id);
+        const all = flattenFeatures(answer.groups ?? []);
+
+        const toggleFeature = all.find(feature => feature.name === 'BookStore.Printing');
+        const freeText = all.find(feature => feature.name === 'BookStore.Printing.MaxCopies');
+        const selection = all.find(feature => feature.name === 'BookStore.Printing.PaperSize');
+        expect(toggleFeature?.valueType?.name).toBe('ToggleStringValueType');
+        expect(freeText?.valueType?.validator?.name).toBe('NUMERIC');
+        expect(selection?.name).toBeTruthy();
+        expect(selectionItemsOf(selection as EditableFeature).map(item => item.value)).toEqual([
+          'A4',
+          'Letter',
+        ]);
+
+        // Everything is the default provider's to start with, so all of it is editable.
+        expect(all.every(feature => !isFeatureDisabled(all, feature, 'T'))).toBe(true);
+
+        const next = setFeatureValue(all, 'BookStore.Printing.PaperSize', 'Letter');
+        expect(changedFeatures(next)).toEqual([
+          { name: 'BookStore.Printing.PaperSize', value: 'Letter' },
+        ]);
+
+        await features.update('T', id, { features: changedFeatures(next) });
+
+        const saved = flattenFeatures((await features.get('T', id)).groups ?? []);
+        const paper = saved.find(feature => feature.name === 'BookStore.Printing.PaperSize');
+        expect(paper?.value).toBe('Letter');
+        // Set at this level now, which is what the dialog shows as editable here.
+        expect(paper?.provider?.name).toBe('T');
+
+        await features.delete('T', id);
+        const reset = flattenFeatures((await features.get('T', id)).groups ?? []);
+        expect(reset.find(feature => feature.name === 'BookStore.Printing.PaperSize')?.value).toBe(
+          'A4',
+        );
+      } finally {
+        await tenants.delete(id);
+      }
+    });
+
+    it('switches on the toggles above the one switched on', async () => {
+      const name = unique();
+      const created = await tenants.create({
+        name,
+        adminEmailAddress: `${name}@abp.io`,
+        adminPassword: '1q2w3E*',
+      });
+
+      try {
+        // A parent and child that ABP's own setting management module defines, rather
+        // than anything this backend added for the tests.
+        const all = flattenFeatures((await features.get('T', created.id as string)).groups ?? []);
+        const child = all.find(
+          feature => feature.parentName && feature.valueType?.name === 'ToggleStringValueType',
+        );
+        expect(child?.name).toBeTruthy();
+
+        const next = setFeatureValue(all, child?.name as string, 'true');
+
+        expect(next.find(feature => feature.name === child?.parentName)?.value).toBe('true');
+      } finally {
+        await tenants.delete(created.id as string);
+      }
+    });
+  });
+
+  describe('setting management, over the settings it actually stores', () => {
+    const emails = injector.get(EmailSettingsService);
+    const zones = injector.get(TimeZoneSettingsService);
+
+    it('reads the email settings and never hands back the password', async () => {
+      const settings = await emails.get();
+
+      expect(settings.smtpPort).toBeGreaterThan(0);
+      expect(settings.smtpPassword).toBeFalsy();
+    });
+
+    it('saves the email settings and leaves the password alone when none is typed', async () => {
+      const before = await emails.get();
+      const displayName = unique();
+
+      try {
+        await emails.update({
+          ...before,
+          smtpPassword: '',
+          defaultFromAddress: before.defaultFromAddress as string,
+          defaultFromDisplayName: displayName,
+        });
+
+        expect((await emails.get()).defaultFromDisplayName).toBe(displayName);
+      } finally {
+        await emails.update({
+          ...before,
+          smtpPassword: '',
+          defaultFromAddress: before.defaultFromAddress as string,
+          defaultFromDisplayName: before.defaultFromDisplayName as string,
+        });
+      }
+    });
+
+    it('offers a list of time zones with the server’s own default first', async () => {
+      const list = await zones.getTimezones();
+
+      expect(list[0]?.value).toBe('Unspecified');
+      expect(list.length).toBeGreaterThan(100);
+    });
+
+    it('saves the time zone', async () => {
+      const before = await zones.get();
+
+      try {
+        await zones.update('Europe/Paris');
+        expect(await zones.get()).toBe('Europe/Paris');
+      } finally {
+        await zones.update(before);
+      }
     });
   });
 });
