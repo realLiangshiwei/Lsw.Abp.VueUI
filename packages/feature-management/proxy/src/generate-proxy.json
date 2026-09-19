@@ -1,0 +1,27 @@
+{
+  "generated": [
+    "README.md",
+    "feature-management/features.service.ts",
+    "feature-management/index.ts",
+    "feature-management/models.ts",
+    "index.ts",
+    "validation/index.ts",
+    "validation/string-values/index.ts",
+    "validation/string-values/models.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "featureManagement": {
+      "rootPath": "featureManagement",
+      "remoteServiceName": "AbpFeatureManagement"
+    }
+  },
+  "source": {
+    "url": "https://localhost:44384",
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

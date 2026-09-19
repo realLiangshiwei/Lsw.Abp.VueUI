@@ -128,5 +128,23 @@
       "../chunks/TimeZoneSettingsTab-*"
     ],
     "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/feature-management",
+    "path": "packages/feature-management/dist/index.js",
+    "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
+    "limit": "8 kB"
+  },
+  {
+    "name": "@lsw-abpvue/feature-management/config",
+    "path": "packages/feature-management/dist/config/index.js",
+    "ignore": [
+      "vue",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/setting-management",
+      "../chunks/FeatureManagementTab-*"
+    ],
+    "limit": "3 kB"
   }
 ]

@@ -57,6 +57,14 @@ const ALLOWED = {
     'vue',
     'vue-router',
   ],
+  'feature-management': [
+    '@lsw-abpvue/core',
+    // The tab it puts on the settings page goes into that module's tab tree (design 03 §1).
+    '@lsw-abpvue/setting-management',
+    '@lsw-abpvue/theme-shared',
+    '@lsw-abpvue/utils',
+    'vue',
+  ],
   identity: [
     '@lsw-abpvue/components',
     '@lsw-abpvue/core',

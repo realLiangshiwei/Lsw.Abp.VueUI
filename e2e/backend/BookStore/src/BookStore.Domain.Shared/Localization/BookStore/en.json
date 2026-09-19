@@ -6,6 +6,13 @@
     "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information visit",
     "Welcome": "Welcome",
     "Permission:Files": "File store",
-    "Permission:Files.Upload": "Upload"
+    "Permission:Files.Upload": "Upload",
+    "Feature:BookStore": "Book store",
+    "Feature:Printing": "Printing",
+    "Feature:PrintingDescription": "Lets this tenant print what it sells.",
+    "Feature:MaxCopies": "Maximum copies per print",
+    "Feature:PaperSize": "Paper size",
+    "Feature:PaperSize.A4": "A4",
+    "Feature:PaperSize.Letter": "Letter"
   }
 }

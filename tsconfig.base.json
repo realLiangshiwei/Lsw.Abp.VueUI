@@ -35,6 +35,11 @@
       "@lsw-abpvue/components/extensible": ["./packages/components/extensible/src/index.ts"],
       "@lsw-abpvue/core": ["./packages/core/src/index.ts"],
       "@lsw-abpvue/core/router": ["./packages/core/router/src/index.ts"],
+      "@lsw-abpvue/feature-management": ["./packages/feature-management/src/index.ts"],
+      "@lsw-abpvue/feature-management/config": [
+        "./packages/feature-management/config/src/index.ts"
+      ],
+      "@lsw-abpvue/feature-management/proxy": ["./packages/feature-management/proxy/src/index.ts"],
       "@lsw-abpvue/identity": ["./packages/identity/src/index.ts"],
       "@lsw-abpvue/identity/config": ["./packages/identity/config/src/index.ts"],
       "@lsw-abpvue/identity/proxy": ["./packages/identity/proxy/src/index.ts"],

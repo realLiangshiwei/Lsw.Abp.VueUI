@@ -1,0 +1,64 @@
+{
+  "name": "@lsw-abpvue/feature-management",
+  "version": "0.0.0",
+  "description": "The feature dialog of the ABP Vue UI: the grouped tabs, the three value types, and what a feature inherited from somewhere else looks like.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src",
+    "config/src",
+    "proxy/src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js"
+    },
+    "./proxy": {
+      "types": "./dist/proxy/index.d.ts",
+      "import": "./dist/proxy/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.build.proxy.json && vue-tsc -p tsconfig.build.json && vue-tsc -p tsconfig.build.config.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
+    "typecheck": "vue-tsc -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "peerDependencies": {
+    "@lsw-abpvue/core": "workspace:^",
+    "@lsw-abpvue/setting-management": "workspace:^",
+    "@lsw-abpvue/theme-shared": "workspace:^",
+    "@lsw-abpvue/utils": "workspace:^",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/setting-management": "workspace:*",
+    "@lsw-abpvue/theme-shared": "workspace:*",
+    "@lsw-abpvue/utils": "workspace:*",
+    "vue": "^3.5.41"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/realLiangshiwei/Lsw.Abp.VueUI.git",
+    "directory": "packages/feature-management"
+  },
+  "homepage": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI",
+  "bugs": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI/issues",
+  "keywords": [
+    "abp",
+    "vue",
+    "features"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
