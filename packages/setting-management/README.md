@@ -68,7 +68,7 @@ Same component key, same route name, same tab names, same localization keys. Wha
 | The test mail button is behind `SettingManagement.Emailing`, which is not what the endpoint checks | Behind `SettingManagement.Emailing.Test` |
 | The emailing tab is shown to a tenant whose feature is off, and its endpoints then refuse | Hidden, the way the MVC UI hides it |
 | The tab label is the tab's name | The name still works as one; `text` names a different key |
-| Tab components are imported at startup | Asked for when a tab opens, which is the chunk the page came in |
+| Tab components are imported at startup | Asked for when a tab opens, in a chunk of their own |
 
 Registered in the design documents' `api-parity-map.md`.
 
