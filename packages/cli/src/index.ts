@@ -29,7 +29,7 @@ export type { ApiDefinitionSource } from './api-definition/source.js';
 
 export { main } from './commands/main.js';
 export { newCommand, runNew } from './commands/new.js';
-export type { NewArgs, NewResult } from './commands/new.js';
+export type { NewOptions, NewResult } from './commands/new.js';
 export { runSwitchUi, switchUiCommand } from './commands/switch-ui.js';
 export type { Renamed, SwitchUiArgs, SwitchUiResult } from './commands/switch-ui.js';
 export { proxyCommand, runProxy } from './commands/proxy.js';

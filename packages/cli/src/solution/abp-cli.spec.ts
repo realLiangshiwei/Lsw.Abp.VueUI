@@ -28,6 +28,21 @@ describe('splitArgs', () => {
     ]);
   });
 
+  it('reads its own flags as they were typed, values and all', () => {
+    // A parser reads `--no-backend` as `backend: false`, which is a different flag with a
+    // value nobody wrote -- and it takes the real `--backend` down with it.
+    const { flags } = splitArgs(['Acme.BookStore', '--no-backend', '--backend', 'https://x']);
+
+    expect(flags).toEqual({ 'no-backend': true, backend: 'https://x' });
+  });
+
+  it('reads a value written with an equals sign the same way', () => {
+    expect(splitArgs(['X', '--dir=frontend', '--dry-run']).flags).toEqual({
+      dir: 'frontend',
+      'dry-run': true,
+    });
+  });
+
   it('keeps its own flags, whichever way their value was written', () => {
     const { passthrough } = splitArgs([
       'Acme.BookStore',

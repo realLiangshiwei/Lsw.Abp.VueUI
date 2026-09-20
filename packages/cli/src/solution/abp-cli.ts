@@ -17,7 +17,6 @@ export const NEW_FLAGS: Record<string, boolean> = {
   'skip-install': false,
   'skip-proxy': false,
   template: true,
-  theme: true,
   'with-source-code': true,
 };
 
@@ -26,6 +25,13 @@ export interface SplitArgs {
   name: string;
   /** What goes to `abp new` untouched. */
   passthrough: string[];
+  /**
+   * This command's own flags as they were typed: the value for the ones that take one,
+   * `true` for the rest. Read here rather than from the parsed arguments because a parser
+   * reads `--no-backend` as `backend: false`, which is a different flag with a value the
+   * caller never wrote.
+   */
+  flags: Record<string, string | boolean>;
 }
 
 /**
@@ -46,6 +52,7 @@ export function splitArgs(
   }
 
   const passthrough: string[] = [];
+  const own: Record<string, string | boolean> = {};
 
   for (let index = 0; index < rest.length; index += 1) {
     const token = rest[index] as string;
@@ -58,11 +65,17 @@ export function splitArgs(
       continue;
     }
 
+    if (!flags[flag]) {
+      own[flag] = true;
+      continue;
+    }
+
     // A value written apart from its flag is a second token, and it is not the CLI's.
-    if (flags[flag] && inlineValue === undefined) index += 1;
+    own[flag] = inlineValue ?? rest[index + 1] ?? '';
+    if (inlineValue === undefined) index += 1;
   }
 
-  return { name, passthrough };
+  return { name, passthrough, flags: own };
 }
 
 const has = (args: readonly string[], ...names: string[]): boolean =>

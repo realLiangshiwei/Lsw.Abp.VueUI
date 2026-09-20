@@ -5,7 +5,7 @@ import * as prompts from '@clack/prompts';
 import { defineCommand } from 'citty';
 import { failed, formatChecks, printChecks, type Check } from '../diagnostics/checks.js';
 import { checkEnvironment } from '../diagnostics/environment.js';
-import { generateProxy, installDependencies } from './frontend.js';
+import { generateProxy, installDependencies, releaseAskedSources } from './frontend.js';
 import { CliError, isUserFacingError } from '../errors.js';
 import { abpNewArgs, splitArgs } from '../solution/abp-cli.js';
 import { configureBackend, type BackendEdit } from '../solution/backend-config.js';
@@ -17,20 +17,10 @@ import { run } from '../system/run.js';
 import { Rollback } from '../system/rollback.js';
 import { cliVersion } from '../system/version.js';
 
-/** The options of `abpv new`, as the flags spell them. Everything else goes to `abp new`. */
-export interface NewArgs {
+/** What the command needs beyond its command line. */
+export interface NewOptions {
+  /** Where it runs; the directory the solution is created in. */
   cwd?: string | undefined;
-  dir?: string | undefined;
-  port?: string | number | undefined;
-  backend?: string | undefined;
-  modules?: string | undefined;
-  template?: string | undefined;
-  'package-manager'?: string | undefined;
-  'no-backend'?: boolean | undefined;
-  'sample-crud'?: boolean | undefined;
-  'skip-proxy'?: boolean | undefined;
-  'skip-install'?: boolean | undefined;
-  'dry-run'?: boolean | undefined;
 }
 
 export interface NewResult {
@@ -56,6 +46,14 @@ async function exists(path: string): Promise<boolean> {
   );
 }
 
+/** A comma separated flag, as a list; nothing at all when it was not given. */
+function listOf(value: string | undefined): string[] {
+  return (value ?? '')
+    .split(',')
+    .map(name => name.trim())
+    .filter(Boolean);
+}
+
 /** The sample CRUD page has a backend half, and it is the official CLI that writes it. */
 function withSampleCrud(passthrough: readonly string[]): string[] {
   const asked = passthrough.some(arg => arg === '-scp' || arg === '--sample-crud-page');
@@ -63,12 +61,10 @@ function withSampleCrud(passthrough: readonly string[]): string[] {
   return asked ? [...passthrough] : [...passthrough, '-scp'];
 }
 
-async function chosenBlocks(source: string, args: NewArgs): Promise<string[]> {
+async function chosenBlocks(source: string, flags: Flags): Promise<string[]> {
   const available = moduleBlocks(await readTemplateManifest(source));
-  const asked = args.modules
-    ?.split(',')
-    .map(name => name.trim())
-    .filter(Boolean);
+  const named = listOf(flags.value('modules'));
+  const asked = named.length > 0 ? named : undefined;
 
   for (const name of asked ?? []) {
     if (!available.includes(name)) {
@@ -76,7 +72,7 @@ async function chosenBlocks(source: string, args: NewArgs): Promise<string[]> {
     }
   }
 
-  return [...(asked ?? available), ...(args['sample-crud'] ? ['sample-crud'] : [])];
+  return [...(asked ?? available), ...(flags.on('sample-crud') ? ['sample-crud'] : [])];
 }
 
 /** Runs the official CLI, and remembers the directory it created so an interrupt can undo it. */
@@ -104,25 +100,47 @@ async function generateBackend(
   return readSolution(await findSolutionRoot(cwd, name));
 }
 
+/** The flags as they were typed, which is the only reading of them that is not lossy. */
+class Flags {
+  constructor(private readonly typed: Record<string, string | boolean>) {}
+
+  value(name: string): string | undefined {
+    const value = this.typed[name];
+
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  on(name: string): boolean {
+    return this.typed[name] === true;
+  }
+}
+
 /**
  * Creates a solution: the backend by the official ABP CLI, the frontend from this
  * project's template, and the configuration that makes the two talk to each other.
  *
- * @param args The options this command reads itself
- * @param rawArgs The command line after `abpv new`, so the rest reaches `abp new` as typed
+ * @param rawArgs The command line after `abpv new`; the flags this command does not read
+ * itself reach `abp new` as they were typed
+ * @param options Where the command runs
  */
-export async function runNew(args: NewArgs, rawArgs: readonly string[]): Promise<NewResult> {
-  const cwd = args.cwd ?? process.cwd();
-  const { name, passthrough } = splitArgs(rawArgs);
-  const dryRun = args['dry-run'] === true;
-  const packageManager = args['package-manager'] ?? 'pnpm';
-  const port = Number(args.port ?? DEFAULT_PORT);
+export async function runNew(
+  rawArgs: readonly string[],
+  options: NewOptions = {},
+): Promise<NewResult> {
+  const cwd = options.cwd ?? process.cwd();
+  const split = splitArgs(rawArgs);
+  const { name, passthrough } = split;
+  const flags = new Flags(split.flags);
+
+  const dryRun = flags.on('dry-run');
+  const packageManager = flags.value('package-manager') ?? 'pnpm';
+  const port = Number(flags.value('port') ?? DEFAULT_PORT);
   const appUrl = `http://localhost:${port}`;
   const notes: string[] = [];
 
   const checks = await checkEnvironment({
-    backend: args['no-backend'] !== true,
-    packageManager: args['skip-install'] ? undefined : packageManager,
+    backend: !flags.on('no-backend'),
+    packageManager: flags.on('skip-install') ? undefined : packageManager,
   });
 
   if (failed(checks).length > 0) {
@@ -131,27 +149,28 @@ export async function runNew(args: NewArgs, rawArgs: readonly string[]): Promise
     );
   }
 
-  const source = args.template
-    ? isAbsolute(args.template)
-      ? args.template
-      : resolve(cwd, args.template)
+  const template = flags.value('template');
+  const source = template
+    ? isAbsolute(template)
+      ? template
+      : resolve(cwd, template)
     : templateRoot();
 
-  const blocks = await chosenBlocks(source, args);
+  const blocks = await chosenBlocks(source, flags);
   const rollback = new Rollback();
   rollback.watchInterrupts(undone => prompts.log.warn(['Interrupted.', ...undone].join('\n  ')));
 
   try {
     let solution: Solution | undefined;
 
-    if (args['no-backend'] === true) {
+    if (flags.on('no-backend')) {
       notes.push('No backend was created, so nothing was configured on one either.');
     } else if (dryRun) {
       notes.push(`Would run: abp ${abpNewArgs(name, passthrough).join(' ')}`);
     } else {
       solution = await generateBackend(
         name,
-        args['sample-crud'] ? withSampleCrud(passthrough) : passthrough,
+        flags.on('sample-crud') ? withSampleCrud(passthrough) : passthrough,
         cwd,
         rollback,
       );
@@ -160,10 +179,10 @@ export async function runNew(args: NewArgs, rawArgs: readonly string[]): Promise
     // With no backend beside it the application is the project, and there is nothing for
     // a subdirectory to keep it apart from.
     const root = solution?.root ?? join(cwd, name);
-    const frontend = args['no-backend'] === true ? root : join(root, args.dir ?? 'vue');
+    const frontend = flags.on('no-backend') ? root : join(root, flags.value('dir') ?? 'vue');
 
     const appName = solution?.appName ?? (name.split('.').at(-1) as string);
-    const apiUrl = args.backend ?? solution?.hostUrl ?? DEFAULT_BACKEND;
+    const apiUrl = flags.value('backend') ?? solution?.hostUrl ?? DEFAULT_BACKEND;
 
     const existed = await exists(frontend);
     const { written } = await renderTemplate({
@@ -199,13 +218,16 @@ export async function runNew(args: NewArgs, rawArgs: readonly string[]): Promise
         frontend,
         apiUrl,
         packageManager,
-        skipProxy: args['skip-proxy'],
-        skipInstall: args['skip-install'],
+        skipProxy: flags.on('skip-proxy'),
+        skipInstall: flags.on('skip-install'),
+        withSourceCode: listOf(flags.value('with-source-code')),
         notes,
+        rollback,
       };
 
-      await generateProxy(frontendOptions);
       await installDependencies(frontendOptions);
+      await releaseAskedSources(frontendOptions);
+      await generateProxy(frontendOptions);
     }
 
     rollback.commit();
@@ -233,12 +255,15 @@ export const newCommand = defineCommand({
     'sample-crud': { type: 'boolean', description: "Add ABP's Books sample, backend and page" },
     'skip-proxy': { type: 'boolean', description: 'Do not generate the proxy' },
     'skip-install': { type: 'boolean', description: 'Do not install the dependencies' },
+    'with-source-code': {
+      type: 'string',
+      description: "Release these packages' source into the project, or all",
+    },
     'dry-run': { type: 'boolean', description: 'Say what would happen and change nothing' },
   },
-  run: async ({ args, rawArgs }) => {
+  run: async ({ rawArgs }) => {
     try {
-      const result = await runNew(args as unknown as NewArgs, rawArgs);
-      print(result, args as unknown as NewArgs);
+      print(await runNew(rawArgs), rawArgs);
     } catch (error) {
       if (!isUserFacingError(error)) throw error;
 
@@ -248,7 +273,8 @@ export const newCommand = defineCommand({
   },
 });
 
-function print(result: NewResult, args: NewArgs): void {
+function print(result: NewResult, rawArgs: readonly string[]): void {
+  const dryRun = rawArgs.includes('--dry-run');
   printChecks(result.checks);
 
   if (result.edits.length > 0) {
@@ -262,6 +288,6 @@ function print(result: NewResult, args: NewArgs): void {
 
   if (result.notes.length > 0) prompts.log.info(result.notes.join('\n'));
 
-  const verb = args['dry-run'] ? 'Would write' : 'Wrote';
+  const verb = dryRun ? 'Would write' : 'Wrote';
   prompts.log.success(`${verb} ${result.files.length} files to ${result.frontend}`);
 }
