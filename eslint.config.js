@@ -31,6 +31,8 @@ const BUSINESS_MODULES = [
  * declared dependency is `theme-shared`.
  */
 const NODE_BUILTINS = [
+  // `abp new` is another program, and its output is meant to be watched as it runs.
+  'node:child_process',
   'node:fs',
   'node:fs/promises',
   // The tests write their proxies into a temporary directory.
@@ -44,7 +46,7 @@ const ALLOWED_IMPORTS = {
   utils: [],
   // A build-time tool, not part of any application bundle: no framework, no workspace
   // package, and the Node APIs it needs listed one by one.
-  cli: [...NODE_BUILTINS, '@clack/prompts', 'citty', 'prettier'],
+  cli: [...NODE_BUILTINS, '@clack/prompts', 'citty', 'jsonc-parser', 'prettier'],
   core: [...FRAMEWORK, UTILS],
   oauth: [...FRAMEWORK, UTILS, CORE, 'oidc-client-ts'],
   'theme-shared': [...FRAMEWORK, UTILS, CORE],
