@@ -31,6 +31,19 @@ the frontend. A solution generated with no UI has neither.
 Requires the .NET SDK and `dotnet tool install -g Volo.Abp.Studio.Cli`; `--no-backend` does
 not.
 
+## A solution that already exists
+
+```bash
+abpv switch-ui                  # renames angular/ to angular.bak/ and adds vue/
+abpv switch-ui --mode keep      # leaves the old UI where it is
+abpv switch-ui --dry-run        # says what it would do to your files
+```
+
+It edits files you already have, so it is deliberately timid: it stops on an uncommitted
+working tree unless you pass `--force`, copies every file before editing it, edits JSON
+through an AST so comments and formatting survive, never touches a `.cs` file, renames
+instead of deleting, and puts all of it back if it cannot finish.
+
 ## What it writes
 
 ```bash

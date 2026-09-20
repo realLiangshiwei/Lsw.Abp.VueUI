@@ -4,8 +4,8 @@ import process from 'node:process';
 import * as prompts from '@clack/prompts';
 import { defineCommand } from 'citty';
 import { failed, formatChecks, printChecks, type Check } from '../diagnostics/checks.js';
-import { reachBackend } from '../diagnostics/backend.js';
 import { checkEnvironment } from '../diagnostics/environment.js';
+import { generateProxy, installDependencies } from './frontend.js';
 import { CliError, isUserFacingError } from '../errors.js';
 import { abpNewArgs, splitArgs } from '../solution/abp-cli.js';
 import { configureBackend, type BackendEdit } from '../solution/backend-config.js';
@@ -16,7 +16,6 @@ import { renderTemplate } from '../template/render.js';
 import { run } from '../system/run.js';
 import { Rollback } from '../system/rollback.js';
 import { cliVersion } from '../system/version.js';
-import { runProxy } from './proxy.js';
 
 /** The options of `abpv new`, as the flags spell them. Everything else goes to `abp new`. */
 export interface NewArgs {
@@ -196,8 +195,17 @@ export async function runNew(args: NewArgs, rawArgs: readonly string[]): Promise
     }
 
     if (!dryRun) {
-      await generateProxy({ args, frontend, apiUrl, solution, notes });
-      await install({ args, frontend, packageManager, notes });
+      const frontendOptions = {
+        frontend,
+        apiUrl,
+        packageManager,
+        skipProxy: args['skip-proxy'],
+        skipInstall: args['skip-install'],
+        notes,
+      };
+
+      await generateProxy(frontendOptions);
+      await installDependencies(frontendOptions);
     }
 
     rollback.commit();
@@ -209,60 +217,6 @@ export async function runNew(args: NewArgs, rawArgs: readonly string[]): Promise
 
     throw error;
   }
-}
-
-async function generateProxy(context: {
-  args: NewArgs;
-  frontend: string;
-  apiUrl: string;
-  solution: Solution | undefined;
-  notes: string[];
-}): Promise<void> {
-  const { args, frontend, apiUrl, notes } = context;
-  if (args['skip-proxy'] === true) return;
-
-  const { reachable, detail, developmentCertificate } = await reachBackend(apiUrl);
-
-  if (!reachable) {
-    notes.push(
-      `${detail}, so no proxy was generated. Start the backend and run: abpv proxy add --module all`,
-    );
-    return;
-  }
-
-  const result = await runProxy('add', {
-    module: 'all',
-    target: 'src/proxy',
-    cwd: frontend,
-    url: apiUrl,
-    insecure: developmentCertificate,
-  });
-
-  notes.push(`Generated ${result.written.length} proxy files from ${apiUrl}.`);
-}
-
-async function install(context: {
-  args: NewArgs;
-  frontend: string;
-  packageManager: string;
-  notes: string[];
-}): Promise<void> {
-  const { args, frontend, packageManager, notes } = context;
-
-  if (args['skip-install'] === true) {
-    notes.push(`Dependencies were not installed. Run: ${packageManager} install`);
-    return;
-  }
-
-  prompts.log.step(`${packageManager} install`);
-  const { code } = await run(packageManager, ['install'], {
-    cwd: frontend,
-    stream: true,
-    // Every Node package manager is a `.cmd` shim on Windows, which needs the shell.
-    shell: process.platform === 'win32',
-  });
-
-  if (code !== 0) notes.push(`${packageManager} install exited with ${code}; run it again.`);
 }
 
 export const newCommand = defineCommand({

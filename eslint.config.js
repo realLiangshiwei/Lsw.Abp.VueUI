@@ -35,6 +35,9 @@ const NODE_BUILTINS = [
   'node:child_process',
   'node:fs',
   'node:fs/promises',
+  // A test that needs a backend to answer starts one.
+  'node:http',
+  'node:net',
   // The tests write their proxies into a temporary directory.
   'node:os',
   'node:path',

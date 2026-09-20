@@ -1,5 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { basename, join } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { parse } from 'jsonc-parser';
 import { CliError } from '../errors.js';
 
@@ -65,6 +65,29 @@ export async function findSolutionRoot(
   return chosen;
 }
 
+/**
+ * The solution at or above a directory, which is how a command run from anywhere inside a
+ * checkout finds the one it is meant to work on.
+ *
+ * @param from Where to start looking
+ */
+export async function findSolutionUpwards(from: string): Promise<string> {
+  let dir = resolve(from);
+
+  for (;;) {
+    if (await solutionFileIn(dir)) return dir;
+
+    const parent = dirname(dir);
+    if (parent === dir) {
+      throw new CliError(
+        `No ABP solution in ${from} or any directory above it. Pass --solution with its root.`,
+      );
+    }
+
+    dir = parent;
+  }
+}
+
 /** The https address a project's launch profile serves on. */
 async function launchUrl(projectDir: string): Promise<string | undefined> {
   const settings = parse(
@@ -77,7 +100,8 @@ async function launchUrl(projectDir: string): Promise<string | undefined> {
 
   for (const profile of profiles) {
     // `applicationUrl` may name both schemes; the frontend talks to the secure one.
-    const url = profile.applicationUrl?.split(';').find(entry => entry.startsWith('https://'));
+    const urls = profile.applicationUrl?.split(';') ?? [];
+    const url = urls.find(entry => entry.startsWith('https://')) ?? urls[0];
     if (url) return url;
   }
 

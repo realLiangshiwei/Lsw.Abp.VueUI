@@ -1,63 +1,11 @@
-import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CliError } from '../errors.js';
 import { configureBackend } from './backend-config.js';
 import { findSolutionRoot, readSolution } from './locate.js';
-
-/**
- * What `abp new Acme.BookStore -t app -u no-ui -uost -d mongodb -csf` writes, cut down to
- * the four files this reads. The two absences are the point of the exercise: the `_App`
- * client has no `RootUrl` and `App` has no `CorsOrigins` (design 08 §3).
- */
-async function solutionTree(root: string, options: { separateAuthServer?: boolean } = {}) {
-  const project = async (name: string, files: Record<string, unknown>) => {
-    for (const [path, content] of Object.entries(files)) {
-      const file = join(root, 'src', `Acme.BookStore.${name}`, path);
-      await mkdir(join(file, '..'), { recursive: true });
-      await writeFile(file, `${JSON.stringify(content, null, 2)}\n`, 'utf8');
-    }
-  };
-
-  const launchSettings = (url: string) => ({
-    iisSettings: { iisExpress: { applicationUrl: url, sslPort: 44335 } },
-    profiles: {
-      'IIS Express': { commandName: 'IISExpress', launchBrowser: true },
-      'Acme.BookStore.HttpApi.Host': { commandName: 'Project', applicationUrl: url },
-    },
-  });
-
-  await mkdir(root, { recursive: true });
-  await writeFile(join(root, 'Acme.BookStore.slnx'), '<Solution />\n', 'utf8');
-
-  await project('DbMigrator', {
-    'appsettings.json': {
-      ConnectionStrings: { Default: 'mongodb://localhost:27017/BookStore' },
-      OpenIddict: {
-        Applications: {
-          BookStore_App: { ClientId: 'BookStore_App' },
-          BookStore_Swagger: { ClientId: 'BookStore_Swagger', RootUrl: 'https://localhost:44335/' },
-        },
-      },
-    },
-  });
-
-  await project('HttpApi.Host', {
-    'appsettings.json': {
-      App: { SelfUrl: 'https://localhost:44335', HealthCheckUrl: '/health-status' },
-      AuthServer: { Authority: 'https://localhost:44335' },
-    },
-    'Properties/launchSettings.json': launchSettings('https://localhost:44335'),
-  });
-
-  if (options.separateAuthServer) {
-    await project('AuthServer', {
-      'appsettings.json': { App: { SelfUrl: 'https://localhost:44336' } },
-      'Properties/launchSettings.json': launchSettings('https://localhost:44336'),
-    });
-  }
-}
+import { writeSolutionFixture } from './solution-fixture.js';
 
 describe('a generated solution', () => {
   let dir: string;
@@ -66,7 +14,7 @@ describe('a generated solution', () => {
   beforeEach(async () => {
     dir = await mkdtemp(join(tmpdir(), 'abpvue-solution-'));
     root = join(dir, 'Acme.BookStore');
-    await solutionTree(root);
+    await writeSolutionFixture(root);
   });
 
   afterEach(async () => {
@@ -99,7 +47,7 @@ describe('a generated solution', () => {
   });
 
   it('takes the identity server from its own project when the solution was separated', async () => {
-    await solutionTree(root, { separateAuthServer: true });
+    await writeSolutionFixture(root, { separateAuthServer: true });
 
     expect((await readSolution(root)).authUrl).toBe('https://localhost:44336');
   });

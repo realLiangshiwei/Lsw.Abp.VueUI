@@ -1,6 +1,7 @@
 import { copyFile, readFile, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { applyEdits, modify, parse, type FormattingOptions } from 'jsonc-parser';
+import type { Rollback } from '../system/rollback.js';
 import type { Solution } from './locate.js';
 
 /** One value the CLI changed in a solution's configuration. */
@@ -20,6 +21,8 @@ export interface ConfigureOptions {
   dryRun?: boolean | undefined;
   /** Writes a copy beside each file before changing it (design 08 §4, S2). */
   backup?: boolean | undefined;
+  /** Told how to put each file back as it was, for a command that may not finish. */
+  rollback?: Rollback | undefined;
 }
 
 /** ABP writes its appsettings with two spaces; a file that disagrees keeps its own. */
@@ -43,6 +46,7 @@ function withOrigin(current: unknown, origin: string): string {
 
 class ConfigFile {
   private text = '';
+  private original = '';
   readonly edits: BackendEdit[] = [];
 
   constructor(
@@ -52,6 +56,7 @@ class ConfigFile {
 
   async read(): Promise<boolean> {
     this.text = await readFile(this.path, 'utf8').catch(() => '');
+    this.original = this.text;
 
     return this.text !== '';
   }
@@ -80,12 +85,17 @@ class ConfigFile {
     });
   }
 
-  async write(options: { backup?: boolean | undefined }): Promise<void> {
+  async write(options: Pick<ConfigureOptions, 'backup' | 'rollback'>): Promise<void> {
     if (this.edits.length === 0) return;
 
     if (options.backup) {
       await copyFile(this.path, `${this.path}.${Date.now()}.bak`);
     }
+
+    const original = this.original;
+    options.rollback?.add(`put ${this.name} back as it was`, () =>
+      writeFile(this.path, original, 'utf8'),
+    );
 
     await writeFile(this.path, this.text, 'utf8');
   }
