@@ -6,7 +6,7 @@ import { defineCommand } from 'citty';
 import { failed, formatChecks } from '../diagnostics/checks.js';
 import { checkEnvironment } from '../diagnostics/environment.js';
 import { CliError, isUserFacingError } from '../errors.js';
-import { generateProxy, installDependencies } from './frontend.js';
+import { generateProxy, installDependencies, releaseAskedSources } from './frontend.js';
 import { configureBackend, type BackendEdit } from '../solution/backend-config.js';
 import { findSolutionUpwards, readSolution, type Solution } from '../solution/locate.js';
 import { readTemplateManifest, moduleBlocks } from '../template/manifest.js';
@@ -30,6 +30,7 @@ export interface SwitchUiArgs {
   'skip-backend-config'?: boolean | undefined;
   'skip-proxy'?: boolean | undefined;
   'skip-install'?: boolean | undefined;
+  'with-source-code'?: string | undefined;
   'dry-run'?: boolean | undefined;
 }
 
@@ -217,11 +218,17 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
         packageManager: args['package-manager'] ?? 'pnpm',
         skipProxy: args['skip-proxy'],
         skipInstall: args['skip-install'],
+        withSourceCode: (args['with-source-code'] ?? '')
+          .split(',')
+          .map(name => name.trim())
+          .filter(Boolean),
         notes,
+        rollback,
       };
 
-      await generateProxy(frontendOptions);
       await installDependencies(frontendOptions);
+      await releaseAskedSources(frontendOptions);
+      await generateProxy(frontendOptions);
     }
 
     rollback.commit();
@@ -275,6 +282,10 @@ export const switchUiCommand = defineCommand({
     force: { type: 'boolean', description: 'Run even with uncommitted changes' },
     'skip-proxy': { type: 'boolean', description: 'Do not generate the proxy' },
     'skip-install': { type: 'boolean', description: 'Do not install the dependencies' },
+    'with-source-code': {
+      type: 'string',
+      description: "Release these packages' source into the project, or all",
+    },
     'skip-backend-config': { type: 'boolean', description: 'Leave the appsettings alone' },
     'dry-run': { type: 'boolean', description: 'Say what would happen and change nothing' },
   },

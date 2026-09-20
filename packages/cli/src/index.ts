@@ -30,6 +30,8 @@ export type { ApiDefinitionSource } from './api-definition/source.js';
 export { main } from './commands/main.js';
 export { newCommand, runNew } from './commands/new.js';
 export type { NewOptions, NewResult } from './commands/new.js';
+export { addPackageCommand, ejectCommand, runAddPackage } from './commands/add-package.js';
+export type { AddPackageArgs, AddPackageResult } from './commands/add-package.js';
 export { runSwitchUi, switchUiCommand } from './commands/switch-ui.js';
 export type { Renamed, SwitchUiArgs, SwitchUiResult } from './commands/switch-ui.js';
 export { proxyCommand, runProxy } from './commands/proxy.js';
@@ -65,6 +67,17 @@ export type { TemplateBlock, TemplateManifest } from './template/manifest.js';
 export { templateRoot } from './template/paths.js';
 export { packageNameOf, renderTemplate } from './template/render.js';
 export type { RenderOptions, RenderResult, TemplateValues } from './template/render.js';
+
+export { entriesOf } from './source-code/entries.js';
+export type { PackageManifest, SourceEntry } from './source-code/entries.js';
+export {
+  readSourceCodeRecord,
+  SOURCE_CODE_FILE,
+  writeSourceCodeRecord,
+} from './source-code/record.js';
+export type { ReleasedPackage, SourceCodeRecord } from './source-code/record.js';
+export { releasablePackages, releaseSourceCode } from './source-code/release.js';
+export type { ReleaseOptions, ReleaseResult } from './source-code/release.js';
 
 export { OutsideTargetError, writeProxy } from './writer.js';
 export type { WriteOptions, WriteResult } from './writer.js';

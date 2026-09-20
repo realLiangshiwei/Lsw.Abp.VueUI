@@ -44,6 +44,21 @@ working tree unless you pass `--force`, copies every file before editing it, edi
 through an AST so comments and formatting survive, never touches a `.cs` file, renames
 instead of deleting, and puts all of it back if it cannot finish.
 
+## Taking a package into the project
+
+```bash
+abpv add-package @lsw-abpvue/identity --with-source-code
+abpv add-package --list-source-ready
+```
+
+The sources land in `packages/`, `tsconfig.json` gets a path that shadows the npm package,
+and not a single import in the application changes -- the package name does not change,
+which is how the ABP CLI has released Angular sources all along.
+
+What the released package depended on becomes a dependency of the project, because a
+package's own dependencies live under that package and the released source no longer does.
+Install again afterwards.
+
 ## What it writes
 
 ```bash

@@ -13,6 +13,7 @@
     "check:external-install": "./scripts/check-external-install.sh",
     "check:published-types": "./scripts/check-published-types.sh",
     "check:resolution": "./scripts/check-resolution.sh",
+    "check:source-code-release": "./scripts/check-source-code-release.sh",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "lint": "eslint . && prettier --check .",
