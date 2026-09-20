@@ -102,7 +102,7 @@ describe('reading the configuration', () => {
     await state.refreshAppState();
 
     expect(state.getDeep('localization.currentCulture.cultureName').value).toBe('en');
-    expect(state.getDeep(['clock', 'kind']).value).toBe('Unspecified');
+    expect(state.getDeep(['clock', 'kind']).value).toBe('Utc');
   });
 
   it('a path that breaks halfway is undefined rather than a throw', async () => {

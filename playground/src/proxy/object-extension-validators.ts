@@ -24,3 +24,7 @@ export const identityUserExtensionValidators = {
 export const identityRoleExtensionValidators = {
   Department: [Validators.maxLength(128)],
 } satisfies ValidatorMap;
+
+export const tenantManagementTenantExtensionValidators = {
+  ContactEmail: [Validators.email(), Validators.maxLength(256)],
+} satisfies ValidatorMap;

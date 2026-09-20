@@ -61,9 +61,9 @@ fixtures cannot drift silently.
 
 ## Object extensions
 
-`BookStoreModuleExtensionConfigurator` adds eight extra properties to the identity user
-and role. They are there for coverage, not realism: each one exercises a different branch
-of the objectExtensions mapping.
+`BookStoreModuleExtensionConfigurator` adds nine extra properties, to the identity user
+and role and to the tenant. They are there for coverage, not realism: each one exercises a
+different branch of the objectExtensions mapping.
 
 | Property | Type | Table | Create | Edit | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -75,5 +75,6 @@ of the objectExtensions mapping.
 | Website | string | no | no | yes | RegularExpression, edit only |
 | InternalNote | string | no | yes | yes | requires AbpIdentity.Users.Update |
 | Role.Department | string | yes | yes | yes | StringLength(128) |
+| Tenant.ContactEmail | string | yes | yes | yes | EmailAddress, StringLength(256), another module |
 
 Adding a case to the mapping tests means adding a property here and refreshing the fixtures.

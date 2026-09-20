@@ -270,7 +270,10 @@
     "features": {
         "values": {
             "SettingManagement.Enable": "true",
-            "SettingManagement.AllowChangingEmailSettings": "false"
+            "SettingManagement.AllowChangingEmailSettings": "false",
+            "BookStore.Printing": "false",
+            "BookStore.Printing.MaxCopies": "10",
+            "BookStore.Printing.PaperSize": "A4"
         }
     },
     "globalFeatures": {
@@ -296,7 +299,7 @@
         }
     },
     "clock": {
-        "kind": "Unspecified"
+        "kind": "Utc"
     },
     "objectExtensions": {
         "modules": {
@@ -785,6 +788,81 @@
                                         "typeSimple": "stringLength",
                                         "config": {
                                             "maximumLength": 128,
+                                            "minimumLength": 0
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": null
+                            }
+                        },
+                        "configuration": {}
+                    }
+                },
+                "configuration": {}
+            },
+            "TenantManagement": {
+                "entities": {
+                    "Tenant": {
+                        "properties": {
+                            "ContactEmail": {
+                                "type": "System.String",
+                                "typeSimple": "string",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": true
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "emailAddress",
+                                        "config": {
+                                            "dataType": "EmailAddress"
+                                        }
+                                    },
+                                    {
+                                        "typeSimple": "stringLength",
+                                        "config": {
+                                            "maximumLength": 256,
                                             "minimumLength": 0
                                         }
                                     }
