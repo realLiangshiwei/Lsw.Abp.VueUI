@@ -33,48 +33,37 @@ function nodeCheck(): Check {
  * @param options Which parts of the toolchain this run actually uses
  */
 export async function checkEnvironment(options: EnvironmentOptions = {}): Promise<Check[]> {
-  const checks: Check[] = [nodeCheck()];
+  const wanted: [string, string, string][] = [
+    ...(options.packageManager
+      ? [
+          [
+            options.packageManager,
+            'not on the PATH',
+            `npm install -g ${options.packageManager}`,
+          ] as [string, string, string],
+        ]
+      : []),
+    ...(options.backend === false
+      ? []
+      : ([
+          ['dotnet', 'no .NET SDK on the PATH', 'https://dotnet.microsoft.com/download'],
+          // The official CLI is what generates the solution; this one only wraps it.
+          ['abp', 'the ABP CLI is not on the PATH', 'dotnet tool install -g Volo.Abp.Studio.Cli'],
+        ] as [string, string, string][])),
+  ];
 
-  if (options.packageManager) {
-    const version = await versionOf(options.packageManager, ['--version']);
-    checks.push(
-      version
-        ? { name: options.packageManager, status: 'ok', detail: version }
-        : {
-            name: options.packageManager,
-            status: 'fail',
-            detail: 'not on the PATH',
-            fix: `npm install -g ${options.packageManager}`,
-          },
-    );
-  }
+  // At the same time: `abp --version` alone takes seconds, and nothing here waits on
+  // anything else.
+  const versions = await Promise.all(wanted.map(([command]) => versionOf(command, ['--version'])));
 
-  if (options.backend === false) return checks;
+  return [
+    nodeCheck(),
+    ...wanted.map(([name, missing, fix], index): Check => {
+      const version = versions[index];
 
-  const dotnet = await versionOf('dotnet', ['--version']);
-  checks.push(
-    dotnet
-      ? { name: 'dotnet', status: 'ok', detail: dotnet }
-      : {
-          name: 'dotnet',
-          status: 'fail',
-          detail: 'no .NET SDK on the PATH',
-          fix: 'https://dotnet.microsoft.com/download',
-        },
-  );
-
-  // The official CLI is what generates the solution; this one only wraps it.
-  const abp = await versionOf('abp', ['--version']);
-  checks.push(
-    abp
-      ? { name: 'abp', status: 'ok', detail: abp }
-      : {
-          name: 'abp',
-          status: 'fail',
-          detail: 'the ABP CLI is not on the PATH',
-          fix: 'dotnet tool install -g Volo.Abp.Studio.Cli',
-        },
-  );
-
-  return checks;
+      return version
+        ? { name, status: 'ok', detail: version }
+        : { name, status: 'fail', detail: missing, fix };
+    }),
+  ];
 }

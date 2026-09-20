@@ -44,6 +44,28 @@ working tree unless you pass `--force`, copies every file before editing it, edi
 through an AST so comments and formatting survive, never touches a `.cs` file, renames
 instead of deleting, and puts all of it back if it cannot finish.
 
+## When it does not work
+
+```bash
+abpv doctor
+abpv doctor --token "$ACCESS_TOKEN"   # also compares the permission names
+abpv doctor --offline                 # only what can be told without the backend
+```
+
+Nearly every "the frontend cannot talk to the backend" is one of a handful of mismatches,
+and all of them are mechanically checkable: the toolchain, what the project says its
+backend is, whether that backend answers, whether its certificate is trusted, whether the
+origin is allowed, whether the identity server knows the client, whether the redirect URI
+is the one the client was seeded with, which ABP the solution was generated for, whether
+the proxy still matches the API, how much of the backend's `objectExtensions` the mapping
+rules recognise, and which packages have had their source released. Every failure prints
+the command that fixes it.
+
+The object extension line is the one worth knowing about: fifteen rules turn a property
+the backend declares into a column and a form field, and missing any one of them looks
+exactly like a mistake in your own configuration. It puts both numbers next to each other
+and names the difference.
+
 ## Taking a package into the project
 
 ```bash

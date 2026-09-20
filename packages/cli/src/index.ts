@@ -28,6 +28,8 @@ export {
 export type { ApiDefinitionSource } from './api-definition/source.js';
 
 export { main } from './commands/main.js';
+export { doctorCommand, runDoctorCommand } from './commands/doctor.js';
+export type { DoctorArgs } from './commands/doctor.js';
 export { newCommand, runNew } from './commands/new.js';
 export type { NewOptions, NewResult } from './commands/new.js';
 export { addPackageCommand, ejectCommand, runAddPackage } from './commands/add-package.js';
@@ -38,6 +40,8 @@ export { proxyCommand, runProxy } from './commands/proxy.js';
 export type { ProxyAction, ProxyArgs, ProxyRunResult } from './commands/proxy.js';
 
 export { inferBackendUrl } from './config/backend-url.js';
+export { readProjectEnvironment } from './config/project-env.js';
+export type { ProjectEnvironment } from './config/project-env.js';
 export {
   EMPTY_PROXY_CONFIG,
   PROXY_CONFIG_FILE,
@@ -51,7 +55,14 @@ export type { Check, CheckStatus } from './diagnostics/checks.js';
 export { failed, formatChecks } from './diagnostics/checks.js';
 export { reachBackend } from './diagnostics/backend.js';
 export type { ReachResult } from './diagnostics/backend.js';
+export { runDoctor } from './diagnostics/doctor.js';
+export type { DoctorOptions, DoctorResult } from './diagnostics/doctor.js';
 export { checkEnvironment } from './diagnostics/environment.js';
+export { extensionCoverage, RECOGNISED_TYPES } from './diagnostics/object-extensions.js';
+export type {
+  ExtensionCoverage,
+  ExtensionPropertyReport,
+} from './diagnostics/object-extensions.js';
 export type { EnvironmentOptions } from './diagnostics/environment.js';
 
 export { CliError, isUserFacingError } from './errors.js';
