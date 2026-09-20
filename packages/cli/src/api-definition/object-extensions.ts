@@ -25,6 +25,15 @@ export interface ExtensionProperty {
   type?: string | undefined;
   typeSimple?: string | undefined;
   attributes?: ExtensionPropertyAttribute[] | undefined;
+  ui?: ExtensionPropertyUi | undefined;
+}
+
+/** Where the backend says a property should show, and what it should be looked up from. */
+export interface ExtensionPropertyUi {
+  onTable?: { isVisible?: boolean | undefined } | undefined;
+  onCreateForm?: { isVisible?: boolean | undefined } | undefined;
+  onEditForm?: { isVisible?: boolean | undefined } | undefined;
+  lookup?: { url?: string | null | undefined } | undefined;
 }
 
 export interface ExtensionPropertyAttribute {

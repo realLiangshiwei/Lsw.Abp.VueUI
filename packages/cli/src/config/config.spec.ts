@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { inferBackendUrl } from './backend-url.js';
+import { readProjectEnvironment } from './project-env.js';
 import {
   EMPTY_PROXY_CONFIG,
   readProxyConfig,
@@ -103,5 +104,42 @@ describe('the proxy configuration', () => {
     expect(text.indexOf('"a.ts"')).toBeLessThan(text.indexOf('"b.ts"'));
     expect(text.indexOf('account')).toBeLessThan(text.indexOf('identity'));
     expect(text.endsWith('\n')).toBe(true);
+  });
+});
+
+describe('what a project says about itself', () => {
+  it('reads the client and the addresses out of the deployed configuration', async () => {
+    const directory = await project({
+      'public/dynamic-env.json': JSON.stringify({
+        apis: { default: { url: 'https://localhost:44384' } },
+        application: { baseUrl: 'http://localhost:4200' },
+        oAuthConfig: { issuer: 'https://localhost:44384', clientId: 'BookStore_App' },
+      }),
+    });
+
+    await expect(readProjectEnvironment(directory)).resolves.toEqual({
+      apiUrl: 'https://localhost:44384',
+      appUrl: 'http://localhost:4200',
+      authUrl: 'https://localhost:44384',
+      clientId: 'BookStore_App',
+      scope: undefined,
+      redirectUri: undefined,
+    });
+  });
+
+  it('fills in from the env files what the deployed configuration does not say', async () => {
+    const directory = await project({
+      'public/dynamic-env.json': '{ "apis": { "default": { "url": "https://localhost:44384" } } }',
+      '.env.development': '# where it is served from\nVITE_APP_URL=http://localhost:5173\n',
+    });
+
+    const environment = await readProjectEnvironment(directory);
+
+    expect(environment.apiUrl).toBe('https://localhost:44384');
+    expect(environment.appUrl).toBe('http://localhost:5173');
+  });
+
+  it('says nothing at all about a directory that is not a project', async () => {
+    await expect(readProjectEnvironment(await project())).resolves.toEqual({});
   });
 });
