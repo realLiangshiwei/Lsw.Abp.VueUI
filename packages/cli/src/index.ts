@@ -28,6 +28,8 @@ export {
 export type { ApiDefinitionSource } from './api-definition/source.js';
 
 export { main } from './commands/main.js';
+export { newCommand, runNew } from './commands/new.js';
+export type { NewArgs, NewResult } from './commands/new.js';
 export { proxyCommand, runProxy } from './commands/proxy.js';
 export type { ProxyAction, ProxyArgs, ProxyRunResult } from './commands/proxy.js';
 
@@ -40,6 +42,13 @@ export {
   writeProxyConfig,
 } from './config/proxy-config.js';
 export type { ProxyConfig, ProxyConfigModule, ProxyConfigSource } from './config/proxy-config.js';
+
+export type { Check, CheckStatus } from './diagnostics/checks.js';
+export { failed, formatChecks } from './diagnostics/checks.js';
+export { reachBackend } from './diagnostics/backend.js';
+export type { ReachResult } from './diagnostics/backend.js';
+export { checkEnvironment } from './diagnostics/environment.js';
+export type { EnvironmentOptions } from './diagnostics/environment.js';
 
 export { CliError, isUserFacingError } from './errors.js';
 

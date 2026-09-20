@@ -8,7 +8,7 @@
  */
 export const defaultEnvironment = {
   apis: { default: { url: '__API_URL__' } },
-  application: { name: '__PROJECT_NAME__', baseUrl: '__APP_URL__' },
+  application: { name: '__APP_NAME__', baseUrl: '__APP_URL__' },
   production: false,
   oAuthConfig: {
     issuer: '__AUTH_URL__',
