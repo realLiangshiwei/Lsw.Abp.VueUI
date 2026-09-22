@@ -205,6 +205,18 @@ describe('releaseSourceCode', () => {
     expect(result.released.map(entry => entry.name)).toEqual(['@lsw-abpvue/identity']);
   });
 
+  it('adds a named package to all, rather than being replaced by it', async () => {
+    const result = await releaseSourceCode({
+      project,
+      packages: ['all', '@lsw-abpvue/core'],
+    });
+
+    expect(result.released.map(entry => entry.name).sort()).toEqual([
+      '@lsw-abpvue/core',
+      '@lsw-abpvue/identity',
+    ]);
+  });
+
   it('releases a framework package all the same when it is named', async () => {
     const result = await releaseSourceCode({ project, packages: ['@lsw-abpvue/core'] });
 

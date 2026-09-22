@@ -57,9 +57,11 @@ echo "Installing"
 
 before="$(cd "$app/src" && find . -type f | sort | xargs shasum | shasum)"
 
-echo "Releasing the source of two packages"
+# `all` is the module UIs; the theme is named because a stylesheet entry point is the
+# one shape nothing else covers.
+echo "Releasing the source of every module, and the theme"
 (cd "$app" && node "$root/packages/cli/dist/bin.js" add-package \
-  @lsw-abpvue/identity,@lsw-abpvue/theme-basic --with-source-code)
+  all,@lsw-abpvue/theme-basic --with-source-code)
 
 after="$(cd "$app/src" && find . -type f | sort | xargs shasum | shasum)"
 if [ "$before" != "$after" ]; then
@@ -69,11 +71,20 @@ fi
 echo "  the application's own source is untouched"
 
 for entry in packages/identity/src/index.ts packages/identity/config/src/index.ts \
-             packages/identity/proxy/src/index.ts packages/theme-basic/src/styles/style.css \
-             .abpvue/source-code.json; do
+             packages/identity/proxy/src/index.ts packages/account/config/src/index.ts \
+             packages/tenant-management/proxy/src/index.ts \
+             packages/theme-basic/src/styles/style.css .abpvue/source-code.json; do
   [ -f "$app/$entry" ] || { echo "Missing $entry" >&2; exit 1; }
 done
 echo "  every entry point and the record are there"
+
+# What `all` leaves on npm: the layers a provider replaces, and nothing else.
+remaining="$(node -e '
+const released = Object.keys(require(process.argv[1]).packages);
+const declared = Object.keys(require(process.argv[2]).dependencies).filter(n => n.startsWith("@lsw-abpvue/"));
+console.log(declared.filter(n => !released.includes(n)).sort().join(" "));
+' "$app/.abpvue/source-code.json" "$app/package.json")"
+echo "  still on npm: $remaining"
 
 # The released source imports what its package depended on, and the release added those
 # to the project. A user does the same thing the note tells them to.

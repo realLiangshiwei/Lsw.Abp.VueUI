@@ -115,6 +115,17 @@ describe('abpv switch-ui', () => {
     expect(await readFile(settings, 'utf8')).toBe(before);
   });
 
+  it('would do what it does: the dry run and the real one agree', async () => {
+    const planned = await switchUi({ 'dry-run': true });
+    const done = await switchUi();
+
+    expect(done.files).toEqual(planned.files);
+    expect(done.renamed).toEqual(planned.renamed);
+    expect(done.edits.map(edit => `${edit.file} ${edit.key} ${edit.to}`)).toEqual(
+      planned.edits.map(edit => `${edit.file} ${edit.key} ${edit.to}`),
+    );
+  });
+
   it('puts the configuration back when a later step fails', async () => {
     // A backend that answers, but with nothing the generator can use: reachable, then
     // fatal -- which is the one path that runs after the appsettings were edited.

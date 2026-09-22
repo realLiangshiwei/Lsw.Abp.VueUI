@@ -183,8 +183,15 @@ async function addDependencies(
  */
 export async function releaseSourceCode(options: ReleaseOptions): Promise<ReleaseResult> {
   const { project } = options;
+  // `all` expands where it stands rather than replacing the list: `all,@lsw-abpvue/theme-basic`
+  // means the module UIs and the theme, not the module UIs alone.
   const asked = options.packages.includes('all')
-    ? await releasablePackages(project)
+    ? [
+        ...new Set([
+          ...(await releasablePackages(project)),
+          ...options.packages.filter(name => name !== 'all'),
+        ]),
+      ]
     : options.packages;
 
   const record = await readSourceCodeRecord(project);
