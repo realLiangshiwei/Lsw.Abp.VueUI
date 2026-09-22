@@ -36,12 +36,20 @@ function formattingOf(text: string): FormattingOptions {
   };
 }
 
-/** The comma separated list ABP reads these settings as, with the origin added once. */
+/**
+ * The comma separated list ABP reads these settings as, with the origin added once. A
+ * list that already names it comes back untouched, down to the trailing comma the
+ * official templates leave in: a command that edits someone's files should not rewrite a
+ * value that was already right.
+ */
 function withOrigin(current: unknown, origin: string): string {
-  const values = typeof current === 'string' ? current.split(',') : [];
-  const kept = values.map(value => value.trim()).filter(Boolean);
+  const text = typeof current === 'string' ? current : '';
+  const kept = text
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean);
 
-  return kept.includes(origin) ? kept.join(',') : [...kept, origin].join(',');
+  return kept.includes(origin) ? text : [...kept, origin].join(',');
 }
 
 class ConfigFile {

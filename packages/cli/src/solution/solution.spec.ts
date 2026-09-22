@@ -124,6 +124,22 @@ describe('a generated solution', () => {
     );
   });
 
+  it('leaves a list that already names the origin exactly as it was', async () => {
+    const path = join(root, 'src', 'Acme.BookStore.HttpApi.Host', 'appsettings.json');
+    // The trailing comma is what `abp new -u angular` writes.
+    const before =
+      '{\n  "App": {\n    "CorsOrigins": "https://*.Acme.com,http://localhost:4200,"\n  }\n}\n';
+    await writeFile(path, before, 'utf8');
+
+    const edits = await configureBackend({
+      solution: await readSolution(root),
+      appUrl: 'http://localhost:4200',
+    });
+
+    expect(edits.map(edit => edit.key)).not.toContain('App:CorsOrigins');
+    expect(await readFile(path, 'utf8')).toBe(before);
+  });
+
   it('changes nothing on a second run', async () => {
     const solution = await readSolution(root);
     await configureBackend({ solution, appUrl: 'http://localhost:4200' });
