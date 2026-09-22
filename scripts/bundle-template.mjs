@@ -18,7 +18,7 @@ rmSync(target, { recursive: true, force: true });
 mkdirSync(dirname(target), { recursive: true });
 cpSync(source, target, {
   recursive: true,
-  filter: path => !SKIPPED.has(path.slice(source.length + 1).split('/')[0]),
+  filter: path => !SKIPPED.has(path.slice(source.length + 1).split(/[\\/]/)[0]),
 });
 
 /** Every dotfile, at any depth, under the name npm will carry. */

@@ -54,6 +54,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lsw-abpvue/cli test
+        # `e2e/specs/abp-new.spec.ts` is not among these: it needs the .NET SDK, the
+        # official ABP CLI and a template download from get.abp.io. It is run by hand with
+        # ABPVUE_E2E_ABP=1, and what it proves is written down in the milestone notes.
 
   # The declarations we publish have to be readable by projects on an older TypeScript
   # than the one we build with. Kept separate so a failure here is unmistakable.
@@ -74,3 +77,6 @@ jobs:
       # One physical copy of each package in a consumer's tree, and declarations that
       # work after a plain `pnpm add`. Neither can be proven from inside the workspace.
       - run: pnpm check:external-install
+      # Releasing a package's source into a project that installed it, then compiling and
+      # building that project. The frontend template is exercised end to end on the way.
+      - run: pnpm check:source-code-release

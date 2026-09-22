@@ -59,6 +59,21 @@ Refresh them after upgrading ABP or changing the object extensions:
 A scheduled CI job runs the same script against a live backend and fails on a diff, so the
 fixtures cannot drift silently.
 
+## The spec that needs the official CLI
+
+`specs/abp-new.spec.ts` answers the M8 stop-loss question -- whether wrapping `abp new`
+leaves what it produces alone -- by generating the same solution twice, once through each
+CLI, and comparing them. It is off by default because it needs the .NET SDK, the ABP CLI
+and a template download from get.abp.io:
+
+```bash
+ABPVUE_E2E_ABP=1 pnpm test
+```
+
+Two runs of the same `abp new` differ in 23 files on their own -- project ids, creation
+times, ports, two passphrases -- so the comparison normalises those first. What is left
+should be the two `appsettings.json` `abpv new` is meant to change, and nothing else.
+
 ## Object extensions
 
 `BookStoreModuleExtensionConfigurator` adds nine extra properties, to the identity user
