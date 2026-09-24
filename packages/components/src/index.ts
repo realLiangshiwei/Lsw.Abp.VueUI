@@ -4,6 +4,7 @@ export { default as AbpExtensibleTable } from './components/AbpExtensibleTable.v
 export { default as AbpGridActions } from './components/AbpGridActions.vue';
 export { default as AbpPage } from './components/AbpPage.vue';
 export { default as AbpPageToolbar } from './components/AbpPageToolbar.vue';
+export { default as AbpRecordModal } from './components/AbpRecordModal.vue';
 export { default as AbpTabList } from './components/AbpTabList.vue';
 
 export { EXTRA_PROPERTIES_KEY } from './constants/extra-properties.js';

@@ -4,6 +4,7 @@ import {
   AbpExtensibleTable,
   AbpPage,
   AbpPageToolbar,
+  AbpRecordModal,
   AbpTabList,
   useRecordEditor,
 } from '@lsw-abpvue/components';
@@ -16,7 +17,7 @@ import {
   type IdentityUserUpdateDto,
 } from '@lsw-abpvue/identity/proxy';
 import { AbpPermissionManagement } from '@lsw-abpvue/permission-management';
-import { AbpButton, AbpInput, AbpModal, AbpToggle } from '@lsw-abpvue/theme-shared';
+import { AbpInput, AbpToggle } from '@lsw-abpvue/theme-shared';
 import { ref, shallowRef } from 'vue';
 import { IdentityComponents } from '../enums/components.js';
 import { USERS_PAGE } from '../tokens/extensions.token.js';
@@ -129,17 +130,12 @@ function toggleRole(name: string, granted: boolean): void {
 
     <AbpExtensibleTable :data="items" :list="list" record-key="id" caption="AbpIdentity::Users" />
 
-    <AbpModal
-      v-model:visible="editor.open.value"
-      :busy="editor.busy.value"
-      :aria-label="$t('AbpIdentity::Users')"
+    <AbpRecordModal
+      :editor="editor"
+      label="AbpIdentity::Users"
+      create-title="AbpIdentity::NewUser"
+      :save="save"
     >
-      <template #header>
-        <h2 class="h5 mb-0">
-          {{ editor.editing.value ? $t('AbpUi::Edit') : $t('AbpIdentity::NewUser') }}
-        </h2>
-      </template>
-
       <AbpTabList
         v-model="tab"
         orientation="horizontal"
@@ -165,21 +161,7 @@ function toggleRole(name: string, granted: boolean): void {
           />
         </div>
       </div>
-
-      <template #footer>
-        <AbpButton
-          variant="secondary"
-          outline
-          :disabled="editor.busy.value"
-          @click="editor.open.value = false"
-        >
-          {{ $t('AbpUi::Cancel') }}
-        </AbpButton>
-        <AbpButton variant="primary" :loading="editor.busy.value" @click="save">
-          {{ $t('AbpUi::Save') }}
-        </AbpButton>
-      </template>
-    </AbpModal>
+    </AbpRecordModal>
 
     <AbpPermissionManagement
       v-if="permissionsFor"

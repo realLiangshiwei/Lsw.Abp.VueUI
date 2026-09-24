@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {
-  AbpExtensibleForm,
   AbpExtensibleTable,
   AbpPage,
   AbpPageToolbar,
+  AbpRecordModal,
   EntityAction,
   EntityProp,
   FormProp,
@@ -23,7 +23,7 @@ import {
   type PagedAndSortedResultRequestDto,
   type PagedResultDto,
 } from '@lsw-abpvue/core';
-import { AbpButton, AbpModal, Validators, type AbpOption } from '@lsw-abpvue/theme-shared';
+import { Validators, type AbpOption } from '@lsw-abpvue/theme-shared';
 
 /**
  * The sample entity `abp new --sample-crud-page` puts in the backend. Once
@@ -202,36 +202,10 @@ const editor = useRecordEditor<BookDto>({
       caption="__APP_NAME__::Menu:Books"
     />
 
-    <AbpModal
-      v-model:visible="editor.open.value"
-      :busy="editor.busy.value"
-      :aria-label="$t('__APP_NAME__::Menu:Books')"
-    >
-      <template #header>
-        <h2 class="h5 mb-0">
-          {{ editor.editing.value ? $t('AbpUi::Edit') : $t('__APP_NAME__::NewBook') }}
-        </h2>
-      </template>
-
-      <AbpExtensibleForm
-        v-if="editor.form.value"
-        :form="editor.form.value"
-        :record="editor.editing.value"
-      />
-
-      <template #footer>
-        <AbpButton
-          variant="secondary"
-          outline
-          :disabled="editor.busy.value"
-          @click="editor.open.value = false"
-        >
-          {{ $t('AbpUi::Cancel') }}
-        </AbpButton>
-        <AbpButton variant="primary" :loading="editor.busy.value" @click="editor.save()">
-          {{ $t('AbpUi::Save') }}
-        </AbpButton>
-      </template>
-    </AbpModal>
+    <AbpRecordModal
+      :editor="editor"
+      label="__APP_NAME__::Menu:Books"
+      create-title="__APP_NAME__::NewBook"
+    />
   </AbpPage>
 </template>

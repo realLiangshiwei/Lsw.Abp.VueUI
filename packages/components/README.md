@@ -145,6 +145,17 @@ above. A refused request stops the save and goes no further: the error handlers 
 already reported it, and letting it reject again would report it a second time as a
 crash.
 
+`AbpRecordModal` is the dialog that goes with the editor: the heading, the extensible
+form and the cancel/save footer that four pages had written out by hand.
+
+```vue
+<AbpRecordModal :editor="editor" label="BookStore::Books" create-title="BookStore::NewBook" />
+```
+
+Its body slot is for a page that edits more than the form does -- the identity users page
+puts a tab strip and its role toggles there -- and `save` for one that saves more than the
+form holds.
+
 `AbpTabList` is the tab strip four ABP pages and dialogs draw. It renders roles and
 `tabindex` correctly, localizes each tab's `text` (or its name), and takes a `#label`
 slot for anything else:

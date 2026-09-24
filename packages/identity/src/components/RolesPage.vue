@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {
-  AbpExtensibleForm,
   AbpExtensibleTable,
   AbpPage,
   AbpPageToolbar,
+  AbpRecordModal,
   useRecordEditor,
 } from '@lsw-abpvue/components';
 import { inject as injectAbp, useListService } from '@lsw-abpvue/core';
@@ -14,7 +14,7 @@ import {
   type IdentityRoleUpdateDto,
 } from '@lsw-abpvue/identity/proxy';
 import { AbpPermissionManagement } from '@lsw-abpvue/permission-management';
-import { AbpButton, AbpInput, AbpModal } from '@lsw-abpvue/theme-shared';
+import { AbpInput } from '@lsw-abpvue/theme-shared';
 import { ref, shallowRef } from 'vue';
 import { IdentityComponents } from '../enums/components.js';
 import { ROLES_PAGE } from '../tokens/extensions.token.js';
@@ -73,37 +73,11 @@ const editor = useRecordEditor<IdentityRoleDto>({
 
     <AbpExtensibleTable :data="items" :list="list" record-key="id" caption="AbpIdentity::Roles" />
 
-    <AbpModal
-      v-model:visible="editor.open.value"
-      :busy="editor.busy.value"
-      :aria-label="$t('AbpIdentity::Roles')"
-    >
-      <template #header>
-        <h2 class="h5 mb-0">
-          {{ editor.editing.value ? $t('AbpUi::Edit') : $t('AbpIdentity::NewRole') }}
-        </h2>
-      </template>
-
-      <AbpExtensibleForm
-        v-if="editor.form.value"
-        :form="editor.form.value"
-        :record="editor.editing.value"
-      />
-
-      <template #footer>
-        <AbpButton
-          variant="secondary"
-          outline
-          :disabled="editor.busy.value"
-          @click="editor.open.value = false"
-        >
-          {{ $t('AbpUi::Cancel') }}
-        </AbpButton>
-        <AbpButton variant="primary" :loading="editor.busy.value" @click="editor.save()">
-          {{ $t('AbpUi::Save') }}
-        </AbpButton>
-      </template>
-    </AbpModal>
+    <AbpRecordModal
+      :editor="editor"
+      label="AbpIdentity::Roles"
+      create-title="AbpIdentity::NewRole"
+    />
 
     <AbpPermissionManagement
       v-if="permissionsFor"
