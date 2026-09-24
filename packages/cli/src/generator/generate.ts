@@ -47,6 +47,11 @@ export interface GenerationResult {
   report: GenerationReport;
   /** The modules that were generated, which is what `refresh` replays. */
   modules: string[];
+  /** The types under the names they were written with; what a page generated on top
+   * of the proxy has to import them by. */
+  registry: TypeRegistry;
+  /** The service names, keyed by the controller's CLR type, after disambiguation. */
+  serviceNames: ReadonlyMap<string, string>;
 }
 
 /** Two generated files that would land on the same path. */
@@ -256,5 +261,7 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
     files: [...sorted, ...barrels, emitReadme()],
     report,
     modules: [...wanted].sort(),
+    registry,
+    serviceNames: names,
   };
 }

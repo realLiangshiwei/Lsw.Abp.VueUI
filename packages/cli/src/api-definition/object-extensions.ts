@@ -6,6 +6,11 @@
  */
 export interface ApplicationConfiguration {
   objectExtensions?: ObjectExtensions | undefined;
+  /**
+   * The resource the application's own texts are in. A generated page localizes its
+   * columns and its title out of it, the way the backend's own pages do.
+   */
+  localization?: { defaultResourceName?: string | null | undefined } | undefined;
 }
 
 export interface ObjectExtensions {

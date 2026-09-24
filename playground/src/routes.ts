@@ -47,4 +47,14 @@ export const routes: RouteRecordRaw[] = [
   lazyRoutes('/setting-management', () =>
     import('@lsw-abpvue/setting-management').then(module => module.createSettingManagementRoutes()),
   ),
+  // abpv:begin route:identity-roles
+  {
+    path: '/generated/roles',
+    component: () => import('./pages/IdentityRolesPage.vue'),
+    meta: {
+      title: 'Generated roles',
+      routes: { name: 'Generated roles', order: 4, iconClass: 'bi bi-magic' },
+    },
+  },
+  // abpv:end route:identity-roles
 ];

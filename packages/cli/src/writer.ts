@@ -37,19 +37,23 @@ const DEFAULT_FORMAT = {
 /**
  * Formats generated code with the project's own Prettier configuration, so it does not
  * show up as a diff the first time anyone runs the formatter.
+ *
+ * @param path Where the file will be written, which is what picks the parser
+ * @param content The generated source
  */
-async function formatted(target: string, file: EmittedFile): Promise<string> {
-  const path = join(target, file.path);
-
+export async function formatSource(path: string, content: string): Promise<string> {
   try {
     const options = await resolveConfig(path);
-    return await format(file.content, { ...(options ?? DEFAULT_FORMAT), filepath: path });
+    return await format(content, { ...(options ?? DEFAULT_FORMAT), filepath: path });
   } catch {
     // A file the formatter refuses is still a file the compiler may accept, and the
     // generation is more useful written than lost.
-    return file.content;
+    return content;
   }
 }
+
+const formatted = (target: string, file: EmittedFile): Promise<string> =>
+  formatSource(join(target, file.path), file.content);
 
 /**
  * Whether a recorded or generated path stays inside the directory it belongs to. The

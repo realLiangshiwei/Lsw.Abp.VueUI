@@ -150,6 +150,42 @@ not there, and a rule a DTO inherits stays in the map of the type that declares 
 
 Turn them off with `--no-validators`.
 
+## A page for one of your own entities
+
+```bash
+abpv generate Book                            # reads the backend, writes the page
+abpv generate Book --policy Acme.BookStore.Books --icon "bi bi-book"
+abpv generate Book --force                    # rewrite the generated blocks of a page you have
+```
+
+Two files, plus a route and a menu entry:
+
+```
+src/pages/BooksPage.vue          the list, the dialog and the four requests
+src/pages/books.extensions.ts    the columns, the form fields and the buttons
+src/routes.ts                    one entry, wrapped in `abpv:begin` markers
+```
+
+The page is about seventy lines because the work is in the extension system: paging,
+sorting, validation, the permission checks on the buttons, the deletion question and the
+server-side validation errors all belong to `AbpExtensibleTable`, `AbpExtensibleForm` and
+`useRecordEditor`. What is generated is a description of the entity, not a page.
+
+It reads the entity off `api-definition`: the list endpoint says what the record is, the
+create endpoint says what the form holds, the data annotations become validators, and the
+controller's `[Authorize]` becomes the permission on each button. A `DateTime` becomes a
+date control even though ABP reports it as a string, and an enum becomes a select whose
+members are localized under ABP's own `Enum:{Type}.{value}` convention.
+
+It needs a proxy: `abpv proxy add --module app` first, because the page is built on the
+generated service and imports its DTOs.
+
+Regenerating leaves the page alone unless `--force` says otherwise, and even then only
+what is inside the `abpv:begin` markers of the extensions file is rewritten -- a helper
+or a column you added outside them survives. A backend that grows an `ObjectExtensions`
+property needs no regeneration at all: the extension system puts the column and the field
+on the page at runtime.
+
 ## Permission names
 
 ```ts
@@ -191,6 +227,20 @@ the application service behind them. Pass `--token` and the names are read from
 | `--no-index` | No barrel files |
 | `--no-validators` / `--no-policy-names` | Leave those out |
 | `--dry-run` | Say what would change and write nothing |
+
+`abpv generate` takes `--module`, `--url`, `--source`, `--config-source`, `--token`,
+`--insecure` and `--dry-run` too, plus:
+
+| | |
+| --- | --- |
+| `--target <dir>` | Where the page goes; default `src/pages` |
+| `--proxy <dir>` | Where the proxy is; default `src/proxy` |
+| `--routes <file>` | The file that declares the routes; default `src/routes.ts` |
+| `--no-router` | Do not touch the routes file |
+| `--resource <name>` | The localization resource; the backend's default when absent |
+| `--route <path>` / `--menu <key>` / `--icon <class>` | Override what is inferred |
+| `--policy <name>` | The base permission; `.Create`, `.Update` and `.Delete` follow from it |
+| `--force` | Write the generated blocks of files that are already there |
 
 ## Compared with Angular
 
