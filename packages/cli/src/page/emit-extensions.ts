@@ -152,7 +152,11 @@ export function emitExtensions(page: EntityPage): string {
   }
 
   imports.addValue(COMPONENTS, 'useExtensions');
+  imports.addValue(COMPONENTS, 'getObjectExtensionEntities');
+  imports.addValue(COMPONENTS, 'mapEntitiesToContributors');
+  imports.addValue(COMPONENTS, 'mergeWithDefaultProps');
   imports.addValue(CORE, 'defineToken');
+  imports.addValue(CORE, 'getCurrentInjector');
   imports.addType(`../proxy/${page.service.directory}`, record);
 
   const actions = [
@@ -236,11 +240,36 @@ export function emitExtensions(page: EntityPage): string {
     block('register', [
       '/** Puts all of it on the page. The page calls it once, from its `setup`. */',
       `export function ${names.register}(): void {`,
+      '  const injector = getCurrentInjector();',
+      '  if (!injector) return;',
+      '',
       '  const extensions = useExtensions();',
       '',
-      `  mergeWithDefaultProps(extensions.entityProps, { [${names.key}]: ${names.entityProps} });`,
-      `  mergeWithDefaultProps(extensions.createFormProps, { [${names.key}]: ${names.formProps} });`,
-      `  mergeWithDefaultProps(extensions.editFormProps, { [${names.key}]: ${names.formProps} });`,
+      '  // Whatever the backend declares in `ObjectExtensions` for this entity becomes a',
+      '  // column and a form field here, with no regeneration: it arrives in the',
+      '  // application configuration at runtime.',
+      `  const entities = getObjectExtensionEntities(injector, '${page.extensionModule}');`,
+      `  const fromBackend = mapEntitiesToContributors<${record}>(`,
+      '    injector,',
+      `    { [${names.key}]: entities.${page.extensionEntity} },`,
+      `    '${page.resource}',`,
+      '  );',
+      '',
+      `  mergeWithDefaultProps(`,
+      '    extensions.entityProps,',
+      `    { [${names.key}]: ${names.entityProps} },`,
+      '    fromBackend.prop,',
+      '  );',
+      `  mergeWithDefaultProps(`,
+      '    extensions.createFormProps,',
+      `    { [${names.key}]: ${names.formProps} },`,
+      '    fromBackend.createForm,',
+      '  );',
+      `  mergeWithDefaultProps(`,
+      '    extensions.editFormProps,',
+      `    { [${names.key}]: ${names.formProps} },`,
+      '    fromBackend.editForm,',
+      '  );',
       `  mergeWithDefaultActions(extensions.entityActions, { [${names.key}]: ${names.entityActions} });`,
       '  mergeWithDefaultActions(extensions.toolbarActions, {',
       `    [${names.key}]: ${names.toolbarActions},`,

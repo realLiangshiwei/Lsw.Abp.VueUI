@@ -17,6 +17,7 @@ proxy: the page imports the generated service and its DTOs.
 | `--routes <file>` | The file that declares the routes; default `src/routes.ts` |
 | `--no-router` | Do not touch the routes file |
 | `--resource <name>` | The localization resource; the backend's default otherwise |
+| `--extension-module <m>` | Where the backend files this entity's object extensions, as `Module` or `Module.Entity`; the resource and the entity name otherwise |
 | `--route` / `--menu` / `--icon` | Override what is inferred |
 | `--policy <name>` | The base permission; `.Create`, `.Update` and `.Delete` follow |
 | `--force` | Rewrite the generated blocks of files already there |

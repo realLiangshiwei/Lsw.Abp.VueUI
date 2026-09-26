@@ -128,6 +128,7 @@ Running it twice changes nothing the second time, markers and route included.
 | `--policy <name>` | The base permission. `.Create`, `.Update` and `.Delete` follow from it |
 | `--route` / `--menu` / `--icon` | Override what is inferred |
 | `--resource <name>` | The localization resource; the backend's default resource otherwise |
+| `--extension-module <m>` | Where the backend files the object extensions, as `Module` or `Module.Entity` |
 | `--target` / `--proxy` / `--routes` | Where the files are |
 | `--no-router` | Do not touch the routes file |
 | `--dry-run` | Say what would change and write nothing |

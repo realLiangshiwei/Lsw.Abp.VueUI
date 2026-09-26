@@ -10,6 +10,8 @@ const book: EntityPage = {
   fileBase: 'books',
   componentKey: 'BookStore.BooksComponent',
   resource: 'BookStore',
+  extensionModule: 'BookStore',
+  extensionEntity: 'Book',
   route: '/books',
   menuKey: 'BookStore::Menu:Books',
   icon: 'bi bi-book',
@@ -159,6 +161,19 @@ describe('emitExtensions', () => {
     const key = source.indexOf('export const BOOKS =');
     expect(key).toBeGreaterThan(source.indexOf('// abpv:end imports'));
     expect(key).toBeLessThan(source.indexOf('// abpv:begin enums'));
+  });
+
+  it('wires the backend’s object extensions into the same page', () => {
+    const source = emitExtensions(book);
+
+    // A property the backend adds to `ObjectExtensions` has to become a column without
+    // anyone regenerating anything, which means the mapping has to be called here.
+    expect(source).toContain("getObjectExtensionEntities(injector, 'BookStore')");
+    expect(source).toContain('mapEntitiesToContributors<BookDto>');
+    expect(source).toContain('{ [BOOKS]: entities.Book }');
+    expect(source).toContain('fromBackend.prop');
+    expect(source).toContain('fromBackend.createForm');
+    expect(source).toContain('fromBackend.editForm');
   });
 
   it('has no enum block when the entity has no enum', () => {

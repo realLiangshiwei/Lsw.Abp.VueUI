@@ -91,6 +91,14 @@ export interface EntityPage {
   componentKey: string;
   /** The localization resource, `BookStore`. */
   resource: string;
+  /**
+   * How the backend files this entity's object extensions: the module
+   * `objectExtensions.modules` is keyed by, and the entity under it. ABP's own modules
+   * use `Identity` and `User`; an application picks its own module name, usually the
+   * project's, and names the entity after the class.
+   */
+  extensionModule: string;
+  extensionEntity: string;
   route: string;
   /** Localization key of the menu entry and the page title. */
   menuKey: string;
@@ -339,6 +347,11 @@ export interface EntityPageOptions {
   module?: string | undefined;
   /** The localization resource of the texts; the project's own by default. */
   resource?: string | undefined;
+  /**
+   * Where the backend files this entity's object extensions, as `Module` or
+   * `Module.Entity`. The resource name and the entity name by default.
+   */
+  extensionModule?: string | undefined;
   route?: string | undefined;
   menu?: string | undefined;
   icon?: string | undefined;
@@ -391,6 +404,8 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
     fileBase: kebabCase(plural),
     componentKey: `${pascalCase(resource)}.${plural}Component`,
     resource,
+    extensionModule: options.extensionModule?.split('.')[0] ?? resource,
+    extensionEntity: options.extensionModule?.split('.')[1] ?? entity,
     route: options.route ?? `/${kebabCase(plural)}`,
     menuKey: options.menu ?? `${resource}::Menu:${plural}`,
     icon: options.icon,

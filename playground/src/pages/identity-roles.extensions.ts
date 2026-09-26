@@ -10,13 +10,15 @@ import {
   EntityAction,
   EntityProp,
   FormProp,
+  getObjectExtensionEntities,
+  mapEntitiesToContributors,
   mergeWithDefaultActions,
   mergeWithDefaultProps,
   PropType,
   ToolbarAction,
   useExtensions,
 } from '@lsw-abpvue/components';
-import { defineToken } from '@lsw-abpvue/core';
+import { defineToken, getCurrentInjector } from '@lsw-abpvue/core';
 import { Validators } from '@lsw-abpvue/theme-shared';
 import type { IdentityRoleDto } from '../proxy/volo/abp/identity';
 // abpv:end imports
@@ -105,11 +107,36 @@ export const IDENTITY_ROLE_TOOLBAR_ACTIONS = ToolbarAction.createMany<readonly I
 // abpv:begin register
 /** Puts all of it on the page. The page calls it once, from its `setup`. */
 export function registerIdentityRolesExtensions(): void {
+  const injector = getCurrentInjector();
+  if (!injector) return;
+
   const extensions = useExtensions();
 
-  mergeWithDefaultProps(extensions.entityProps, { [IDENTITY_ROLES]: IDENTITY_ROLE_ENTITY_PROPS });
-  mergeWithDefaultProps(extensions.createFormProps, { [IDENTITY_ROLES]: IDENTITY_ROLE_FORM_PROPS });
-  mergeWithDefaultProps(extensions.editFormProps, { [IDENTITY_ROLES]: IDENTITY_ROLE_FORM_PROPS });
+  // Whatever the backend declares in `ObjectExtensions` for this entity becomes a
+  // column and a form field here, with no regeneration: it arrives in the
+  // application configuration at runtime.
+  const entities = getObjectExtensionEntities(injector, 'Identity');
+  const fromBackend = mapEntitiesToContributors<IdentityRoleDto>(
+    injector,
+    { [IDENTITY_ROLES]: entities.Role },
+    'BookStore',
+  );
+
+  mergeWithDefaultProps(
+    extensions.entityProps,
+    { [IDENTITY_ROLES]: IDENTITY_ROLE_ENTITY_PROPS },
+    fromBackend.prop,
+  );
+  mergeWithDefaultProps(
+    extensions.createFormProps,
+    { [IDENTITY_ROLES]: IDENTITY_ROLE_FORM_PROPS },
+    fromBackend.createForm,
+  );
+  mergeWithDefaultProps(
+    extensions.editFormProps,
+    { [IDENTITY_ROLES]: IDENTITY_ROLE_FORM_PROPS },
+    fromBackend.editForm,
+  );
   mergeWithDefaultActions(extensions.entityActions, {
     [IDENTITY_ROLES]: IDENTITY_ROLE_ENTITY_ACTIONS,
   });

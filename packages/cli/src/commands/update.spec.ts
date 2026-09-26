@@ -146,7 +146,9 @@ describe('update', () => {
 
   it('says what to do when the registry cannot be reached', async () => {
     const cwd = await project({ dependencies: { '@lsw-abpvue/core': '^0.1.0' } });
-    const fetch = vi.fn(() => Promise.reject(new Error('offline'))) as unknown as typeof fetch;
+    const fetch = vi.fn(() =>
+      Promise.reject(new Error('offline')),
+    ) as unknown as typeof globalThis.fetch;
 
     await expect(runUpdate({ cwd, fetch })).rejects.toThrow(/--to/);
   });

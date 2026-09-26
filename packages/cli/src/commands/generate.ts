@@ -27,6 +27,7 @@ export interface GenerateArgs {
   routes: string;
   router?: boolean | undefined;
   resource?: string | undefined;
+  'extension-module'?: string | undefined;
   route?: string | undefined;
   menu?: string | undefined;
   policy?: string | undefined;
@@ -115,6 +116,7 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
     entity,
     module: args.module,
     resource,
+    extensionModule: args['extension-module'],
     route: args.route,
     menu: args.menu,
     icon: args.icon,
@@ -265,6 +267,10 @@ export const generateCommand = defineCommand({
     resource: {
       type: 'string',
       description: "The localization resource; the backend's default when absent",
+    },
+    'extension-module': {
+      type: 'string',
+      description: 'The module the backend registers this entity’s object extensions under',
     },
     route: { type: 'string', description: 'The path the page is served at' },
     menu: { type: 'string', description: 'Localization key of the menu entry' },
