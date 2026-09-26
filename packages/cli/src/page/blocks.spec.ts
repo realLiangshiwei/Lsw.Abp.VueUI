@@ -57,4 +57,18 @@ describe('mergeBlocks', () => {
   it('a second run with nothing to change says nothing changed', () => {
     expect(mergeBlocks(generated, generated).changed).toBe(false);
   });
+
+  it('refuses a file whose marker was left open rather than eating what follows', () => {
+    const edited = [
+      '// abpv:begin props',
+      'export const COLUMNS = [1];',
+      '// somebody deleted the end marker',
+      '',
+      'export const MINE = 2;',
+    ].join('\n');
+
+    // Without this, everything after the unclosed marker is dropped on the floor: the
+    // merge is looking for an end that never comes and keeps skipping to the last line.
+    expect(() => mergeBlocks(edited, generated)).toThrow(/abpv:end props/);
+  });
 });

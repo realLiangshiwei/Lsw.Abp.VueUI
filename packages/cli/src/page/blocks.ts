@@ -1,3 +1,5 @@
+import { CliError } from '../errors.js';
+
 const BEGIN = /^[ \t]*\/\/ abpv:begin ([a-z0-9:-]+)[ \t]*$/;
 const END = /^[ \t]*\/\/ abpv:end ([a-z0-9:-]+)[ \t]*$/;
 
@@ -73,6 +75,16 @@ export function mergeBlocks(existing: string, generated: string): MergeResult {
 
     if (end && end[1] === skipping) skipping = undefined;
     if (!skipping) lines.push(line);
+  }
+
+  if (skipping) {
+    // Everything after the marker that was never closed has been skipped looking for an
+    // end that does not come. Writing that out would delete whatever the file had below
+    // it, so nothing is written at all.
+    throw new CliError(
+      `The "${skipping}" block is opened but never closed: there is no "// abpv:end ` +
+        `${skipping}" after it. Put the marker back, or delete the file and generate it again.`,
+    );
   }
 
   const source = lines.join('\n');

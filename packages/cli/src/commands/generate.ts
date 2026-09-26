@@ -1,5 +1,5 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, isAbsolute, join, resolve } from 'node:path';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import process from 'node:process';
 import * as prompts from '@clack/prompts';
 import { defineCommand } from 'citty';
@@ -15,7 +15,20 @@ import { generateProxy } from '../generator/generate.js';
 import { GenerationReport } from '../generator/report.js';
 import { generatePage, pagePathsOf, type GeneratedFile } from '../page/generate.js';
 import { readEntityPage, type EntityPage } from '../page/entity.js';
+import { Rollback } from '../system/rollback.js';
 import { formatSource } from '../writer.js';
+
+/**
+ * Whether a path the flags gave stays inside the project. The three of them name
+ * directories, and a mistyped one would otherwise write outside the project entirely.
+ */
+function assertInside(cwd: string, path: string, flag: string): void {
+  const inside = relative(cwd, resolve(cwd, path));
+
+  if (inside === '' || inside.startsWith('..') || isAbsolute(inside)) {
+    throw new CliError(`${flag} has to be inside the project, and "${path}" is not.`);
+  }
+}
 
 /** The options of `abpvue generate`, as the flags spell them. */
 export interface GenerateArgs {
@@ -68,7 +81,12 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
   if (!entity) throw new CliError('Which entity? Pass a name, e.g. `abpv generate Book`.');
 
   const cwd = args.cwd ?? process.cwd();
-  const proxyTarget = isAbsolute(args.proxy) ? args.proxy : resolve(cwd, args.proxy);
+
+  assertInside(cwd, args.target, '--target');
+  assertInside(cwd, args.proxy, '--proxy');
+  if (args.router !== false) assertInside(cwd, args.routes, '--routes');
+
+  const proxyTarget = resolve(cwd, args.proxy);
   const proxyConfig = await readProxyConfig(proxyTarget);
 
   if (args.insecure) {
@@ -124,6 +142,14 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
     report,
   });
 
+  if (!modules.includes(page.module)) {
+    throw new CliError(
+      `${page.entity} is in the "${page.module}" module, and the proxy in ${args.proxy} was ` +
+        `generated from ${modules.join(', ')}. The page imports the generated service and its ` +
+        `DTOs, so generate that module first:\n\n  abpv proxy add --module ${page.module}`,
+    );
+  }
+
   const paths = pagePathsOf(page, args.target);
   const existing: Record<string, string> = {};
 
@@ -153,17 +179,43 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
     }),
   );
 
-  if (!args['dry-run']) {
+  if (!args['dry-run']) await write(cwd, files);
+
+  return { page, files, report, dryRun: args['dry-run'] === true };
+}
+
+/**
+ * Writes what changed, and takes it all back if one of them fails. A page whose
+ * extensions file was written and whose own file was not is worse than neither: the
+ * next run would leave the extensions alone as "already there".
+ */
+async function write(cwd: string, files: readonly GeneratedFile[]): Promise<void> {
+  const rollback = new Rollback();
+
+  try {
     for (const file of files) {
       if (file.action === 'kept' || file.action === 'unchanged') continue;
 
       const path = join(cwd, file.path);
+      const before = file.action === 'created' ? undefined : await readIfPresent(path);
+
       await mkdir(dirname(path), { recursive: true });
       await writeFile(path, file.content, 'utf8');
-    }
-  }
 
-  return { page, files, report, dryRun: args['dry-run'] === true };
+      rollback.add(
+        before === undefined ? `removed ${file.path}` : `put ${file.path} back as it was`,
+        () => (before === undefined ? rm(path, { force: true }) : writeFile(path, before, 'utf8')),
+      );
+    }
+  } catch (cause) {
+    const undone = await rollback.run();
+
+    throw new CliError(
+      `Could not write the page: ${(cause as Error).message}.` +
+        (undone.length > 0 ? `\nTaken back: ${undone.join(', ')}` : ''),
+      { cause },
+    );
+  }
 }
 
 /** The localization resource the backend puts its own texts in. */

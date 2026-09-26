@@ -120,7 +120,13 @@ export async function writeUpgrade(
     );
   }
 
-  if (applied.length > 0) await writeFile(path, text, 'utf8');
+  if (applied.length > 0) {
+    try {
+      await writeFile(path, text, 'utf8');
+    } catch (cause) {
+      throw new CliError(`Could not write ${path}: ${(cause as Error).message}.`, { cause });
+    }
+  }
 
   return applied;
 }

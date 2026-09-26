@@ -114,7 +114,17 @@ export async function latestVersion(options: RegistryOptions = {}): Promise<stri
     );
   }
 
-  const manifest = (await response.json()) as { version?: string };
+  let manifest: { version?: string };
+
+  try {
+    manifest = (await response.json()) as { version?: string };
+  } catch (cause) {
+    throw new RegistryError(
+      `${url} did not answer with JSON. If a proxy or a private registry is in the way, ` +
+        'pass --to with the version to upgrade to.',
+      { cause },
+    );
+  }
 
   if (!manifest.version) throw new RegistryError(`${url} named no version.`);
 

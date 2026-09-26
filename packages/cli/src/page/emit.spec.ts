@@ -5,6 +5,7 @@ import type { EntityPage } from './entity.js';
 
 /** A book, which is the entity the design documents measure this generator against. */
 const book: EntityPage = {
+  module: 'app',
   entity: 'Book',
   plural: 'Books',
   fileBase: 'books',

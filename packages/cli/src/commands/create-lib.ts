@@ -1,4 +1,4 @@
-import { stat } from 'node:fs/promises';
+import { rm, stat } from 'node:fs/promises';
 import { isAbsolute, resolve } from 'node:path';
 import process from 'node:process';
 import * as prompts from '@clack/prompts';
@@ -70,25 +70,35 @@ export async function runCreateLib(args: CreateLibArgs): Promise<CreateLibResult
   }
 
   const source = args.template ?? templateRoot('lib');
+  let written: string[];
 
-  const { written } = await renderTemplate({
-    source,
-    target,
-    packageName,
-    blocks: [],
-    version: cliVersion(),
-    dryRun: args['dry-run'],
-    values: {},
-    ...(args.description ? { description: args.description } : {}),
-    // The template's example module is called `Sample` in its code, its file names and
-    // its localization keys; a name that has to keep compiling cannot be a placeholder.
-    renames: {
-      [SAMPLE_PACKAGE]: packageName,
-      [SAMPLE]: name,
-      [SAMPLE.toLowerCase()]: kebab,
-      [SAMPLE.toUpperCase()]: kebab.replace(/-/g, '_').toUpperCase(),
-    },
-  });
+  try {
+    ({ written } = await renderTemplate({
+      source,
+      target,
+      packageName,
+      blocks: [],
+      version: cliVersion(),
+      dryRun: args['dry-run'],
+      values: {},
+      ...(args.description ? { description: args.description } : {}),
+      // The template's example module is called `Sample` in its code, its file names and
+      // its localization keys; a name that has to keep compiling cannot be a placeholder.
+      renames: {
+        [SAMPLE_PACKAGE]: packageName,
+        [SAMPLE]: name,
+        [SAMPLE.toLowerCase()]: kebab,
+        [SAMPLE.toUpperCase()]: kebab.replace(/-/g, '_').toUpperCase(),
+      },
+    }));
+  } catch (cause) {
+    // The directory did not exist a moment ago, so taking the whole of it back is safe
+    // -- and half a package is worse than none, because the next run would refuse to
+    // write over what is there.
+    if (!args['dry-run']) await rm(target, { recursive: true, force: true });
+
+    throw new CliError(`Could not write the package: ${(cause as Error).message}.`, { cause });
+  }
 
   return { name, packageName, target: relative, files: written, dryRun: args['dry-run'] === true };
 }

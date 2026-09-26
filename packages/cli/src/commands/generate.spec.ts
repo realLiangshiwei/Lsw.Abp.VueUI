@@ -144,6 +144,16 @@ describe('generate', () => {
     expect(await read(cwd, 'src/routes.ts')).toBe(ROUTES);
   });
 
+  it('refuses an entity whose module has no proxy, rather than importing a directory that is not there', async () => {
+    const cwd = await project('identity');
+
+    // The type pool describes every module, so the names resolve; the files only exist
+    // for the modules the proxy was generated from.
+    await expect(runGenerate(args(cwd, { entity: 'Book' }))).rejects.toThrow(
+      /abpv proxy add --module app/,
+    );
+  });
+
   it('refuses to generate a page onto a proxy that is not there', async () => {
     const cwd = await mkdtemp(join(tmpdir(), 'abpvue-generate-'));
     projects.push(cwd);
@@ -193,5 +203,25 @@ describe('generate', () => {
     await runGenerate(args(cwd, { entity: 'IdentityUser', module: 'identity' }));
 
     expect(await read(cwd, 'src/pages/IdentityUsersPage.vue')).toContain('IdentityUserService');
+  });
+
+  it('refuses a path that would write outside the project', async () => {
+    const cwd = await project();
+
+    for (const extra of [{ target: '../elsewhere' }, { proxy: '/tmp' }, { routes: '../r.ts' }]) {
+      await expect(runGenerate(args(cwd, extra))).rejects.toThrow(/inside the project/);
+    }
+  });
+
+  it('takes back what it wrote when one of the files cannot be written', async () => {
+    const cwd = await project();
+
+    // A directory where the extensions file has to go: writing it fails, and the page
+    // written before it has to go back.
+    await mkdir(join(cwd, 'src/pages/tenants.extensions.ts'), { recursive: true });
+
+    await expect(runGenerate(args(cwd))).rejects.toThrow(/Could not write the page/);
+    await expect(read(cwd, 'src/pages/TenantsPage.vue')).rejects.toThrow();
+    expect(await read(cwd, 'src/routes.ts')).toBe(ROUTES);
   });
 });

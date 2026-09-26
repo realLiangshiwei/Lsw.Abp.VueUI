@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -105,6 +105,24 @@ describe('create-lib', () => {
 
     expect(result.files.length).toBeGreaterThan(0);
     await expect(read(cwd, 'blogging/package.json')).rejects.toThrow();
+  });
+
+  it('leaves nothing behind when it cannot finish', async () => {
+    const cwd = await workspace();
+
+    // A template with a file the renderer cannot fill in: it fails half way through.
+    const broken = join(cwd, 'broken-template');
+    await mkdir(broken, { recursive: true });
+    await writeFile(join(broken, 'template.json'), '{"blocks":{}}', 'utf8');
+    await writeFile(join(broken, 'a.ts'), 'export const a = 1;\n', 'utf8');
+    await writeFile(join(broken, 'b.ts'), 'export const b = __NOT_A_VALUE__;\n', 'utf8');
+
+    await expect(runCreateLib({ cwd, name: 'Blogging', template: broken })).rejects.toThrow(
+      /Could not write the package/,
+    );
+
+    // Half a package is worse than none: the next run would refuse to write over it.
+    await expect(readFile(join(cwd, 'blogging/a.ts'), 'utf8')).rejects.toThrow();
   });
 
   it('says what to pass when it is given no name', async () => {

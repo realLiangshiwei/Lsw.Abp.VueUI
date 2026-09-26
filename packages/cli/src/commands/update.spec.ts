@@ -191,6 +191,15 @@ describe('update', () => {
     expect(run).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true }));
   });
 
+  it('says what to do when the registry answers with something that is not JSON', async () => {
+    const cwd = await project({ dependencies: { '@lsw-abpvue/core': '^0.1.0' } });
+    const fetch = vi.fn(() =>
+      Promise.resolve(new Response('<html>a proxy login page</html>', { status: 200 })),
+    ) as unknown as typeof globalThis.fetch;
+
+    await expect(runUpdate({ cwd, fetch })).rejects.toThrow(/--to/);
+  });
+
   it('refuses a version it cannot parse', async () => {
     const cwd = await project({ dependencies: { '@lsw-abpvue/core': '^0.1.0' } });
 

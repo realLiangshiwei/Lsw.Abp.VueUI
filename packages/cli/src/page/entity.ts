@@ -81,6 +81,9 @@ export interface EntityPolicies {
 
 /** Everything the two generated files and the route need to say. */
 export interface EntityPage {
+  /** The api-definition module the controller came from, which is what the proxy is
+   * generated per. */
+  module: string;
   /** `Book` */
   entity: string;
   /** `Books` */
@@ -204,13 +207,33 @@ export function readActions(controller: ControllerDefinition, entity: string): E
 
   if (!getList) throw new NotACrudControllerError(entity, 'endpoint that lists records');
 
-  return {
+  const actionsOf = {
     getList,
     get: method('GET').find(action => takesId(action) && action !== getList),
-    create: method('POST').find(action => !takesId(action)),
+    // The POST that creates is the one on the list's own URL, as `CrudAppService`
+    // lays it out. A POST somewhere else under the controller -- an import, a bulk
+    // action -- is not it, and taking the first one found would make it one.
+    create:
+      method('POST').find(action => action.url === getList.url) ??
+      method('POST').find(
+        action => !takesId(action) && action.url.startsWith(getList.url) === false,
+      ),
     update: method('PUT').find(takesId),
     delete: method('DELETE').find(takesId),
   };
+
+  // The page calls all three, so a controller missing one would produce a page that
+  // does not compile. Saying which ones are missing is more use than that.
+  const missing = (['create', 'update', 'delete'] as const).filter(name => !actionsOf[name]);
+
+  if (missing.length > 0) {
+    throw new NotACrudControllerError(
+      entity,
+      `endpoint that ${missing.map(name => `${name}s`).join(', no endpoint that ')}`,
+    );
+  }
+
+  return actionsOf;
 }
 
 /** The type of the records a list endpoint answers with. */
@@ -366,7 +389,7 @@ export interface EntityPageOptions {
  */
 export function readEntityPage(options: EntityPageOptions): EntityPage {
   const { definition, report } = options;
-  const { controller } = findController(definition, options.entity, options.module);
+  const { module, controller } = findController(definition, options.entity, options.module);
   const actions = readActions(controller, options.entity);
 
   const recordType = recordTypeOf(actions.getList);
@@ -382,6 +405,14 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
   const updateType = bodyTypeOf(actions.update) ?? createType;
   const columns = propsOf(registry, types, recordType, resource, report);
   const fields = propsOf(registry, types, createType, resource, report);
+
+  if (columns.length === 0) {
+    report.add(
+      'skipped',
+      `${shortName(recordType)} has no property a column can show, so the table has only its ` +
+        'row buttons. Add the columns by hand in the extensions file.',
+    );
+  }
   // ABP reports a bound query parameter under the CLR property's own name, `Filter`.
   const listInput = actions.getList.parameters.some(
     parameter => (parameter.jsonName ?? parameter.name).toLowerCase() === 'filter',
@@ -402,6 +433,7 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
       };
 
   return {
+    module,
     entity,
     plural,
     fileBase: kebabCase(plural),

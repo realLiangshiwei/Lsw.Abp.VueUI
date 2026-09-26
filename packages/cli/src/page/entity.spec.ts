@@ -101,7 +101,19 @@ describe('readEntityPage', () => {
 
   it('takes the permissions off the controller when the backend puts them there', () => {
     // ABP's own modules authorize elsewhere; an application's controllers say so here.
-    expect(read('File').page.policies.list).toBe('BookStore.Files');
+    expect(read('Book').page.policies).toEqual({
+      list: 'BookStore.Books',
+      create: 'BookStore.Books.Create',
+      update: 'BookStore.Books.Update',
+      delete: 'BookStore.Books.Delete',
+    });
+  });
+
+  it('refuses a controller that lists but cannot create, update or delete', () => {
+    // The file store lists and uploads; a page calling `service.create` on it would not
+    // compile, so saying which endpoints are missing is the more useful answer.
+    expect(() => read('File')).toThrow(NotACrudControllerError);
+    expect(() => read('File')).toThrow(/that creates.*that updates.*that deletes/);
   });
 
   it('derives the four permissions from --policy', () => {
