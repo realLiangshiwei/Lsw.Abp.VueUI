@@ -10,7 +10,7 @@ import {
 import { FeaturesService } from '@lsw-abpvue/feature-management/proxy';
 import { TenantService, type TenantDto } from '@lsw-abpvue/tenant-management/proxy';
 import { ConfirmationService, ConfirmationStatus } from '@lsw-abpvue/theme-shared';
-import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
+import { expectAccessiblePage, plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { tenantManagementExtensionsResolver } from '../resolvers/extensions.resolver.js';
@@ -183,6 +183,12 @@ describe('TenantsPage', () => {
       { messageLocalizationParams: ['globex'] },
     );
     expect(remove).toHaveBeenCalledWith('tenant-2');
+  });
+
+  it('is accessible with a page of records on it', async () => {
+    const wrapper = await renderPage(injectorWith([tenantService()]));
+
+    await expectAccessiblePage(wrapper.element);
   });
 
   it('leaves out a row action whose permission is not granted', async () => {

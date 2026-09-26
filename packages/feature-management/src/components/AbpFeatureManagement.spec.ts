@@ -10,7 +10,7 @@ import {
   type IStringValueType,
 } from '@lsw-abpvue/feature-management/proxy';
 import { ConfirmationService, ConfirmationStatus } from '@lsw-abpvue/theme-shared';
-import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
+import { expectAccessible, plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AbpFeatureManagement from './AbpFeatureManagement.vue';
@@ -132,6 +132,12 @@ describe('AbpFeatureManagement', () => {
     expect(dialog().querySelectorAll('input[type="checkbox"]').length).toBe(2);
     expect(dialog().querySelector('input[type="number"]')).not.toBeNull();
     expect(dialog().querySelector('select')).not.toBeNull();
+  });
+
+  it('is accessible', async () => {
+    await render(createInjector([...plainTheme.providers, featuresService()]));
+
+    await expectAccessible(dialog());
   });
 
   it('bounds the numeric box the way the validator does', async () => {

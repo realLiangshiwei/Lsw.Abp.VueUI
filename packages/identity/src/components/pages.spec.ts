@@ -16,7 +16,7 @@ import {
 } from '@lsw-abpvue/identity/proxy';
 import { PermissionsService } from '@lsw-abpvue/permission-management/proxy';
 import { ConfirmationService } from '@lsw-abpvue/theme-shared';
-import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
+import { expectAccessiblePage, plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Component } from 'vue';
@@ -265,6 +265,12 @@ describe('UsersPage', () => {
     expect(rows[1]?.text()).toContain('AbpUi::Delete');
   });
 
+  it('is accessible with a page of records on it', async () => {
+    const wrapper = await render(UsersPage, injectorWith([userService(), permissionsService]));
+
+    await expectAccessiblePage(wrapper.element);
+  });
+
   it('leaves out a row action whose permission is not granted', async () => {
     const injector = injectorWith([userService(), permissionsService], ['AbpIdentity.Users']);
     const wrapper = await render(UsersPage, injector);
@@ -314,6 +320,17 @@ describe('RolesPage', () => {
 
     expect(create).toHaveBeenCalledOnce();
     expect(create.mock.calls[0]?.[0]).toMatchObject({ name: 'editor', isDefault: false });
+  });
+
+  it('is accessible, dialog open', async () => {
+    const wrapper = await render(RolesPage, injectorWith([roleService(), permissionsService]));
+
+    await expectAccessiblePage(wrapper.element);
+
+    buttonsSaying('AbpIdentity::NewRole')[0]?.click();
+    await wrapper.vm.$nextTick();
+
+    await expectAccessiblePage(document.body);
   });
 
   it('asks before deleting, and does nothing until the answer comes back', async () => {

@@ -12,7 +12,7 @@ import {
   type ProviderInput,
 } from '@lsw-abpvue/core';
 import { ToasterService } from '@lsw-abpvue/theme-shared';
-import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
+import { expectAccessiblePage, plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Component } from 'vue';
@@ -195,6 +195,13 @@ describe('LoginPage', () => {
     await new Promise(resolve => setTimeout(resolve));
 
     expect(injector.get(ToasterService).toasts.value).toHaveLength(1);
+  });
+
+  it('is accessible', async () => {
+    const injector = injectorWith([authService(vi.fn(() => Promise.resolve()))]);
+    const wrapper = await render(LoginPage, injector, await routerAt('/account/login'));
+
+    await expectAccessiblePage(wrapper.element);
   });
 
   it('offers registration only while the backend allows it', async () => {

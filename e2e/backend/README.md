@@ -59,6 +59,23 @@ Refresh them after upgrading ABP or changing the object extensions:
 A scheduled CI job runs the same script against a live backend and fails on a diff, so the
 fixtures cannot drift silently.
 
+### The contract matrix
+
+The contract tests run against every captured backend: `../fixtures` itself, plus any
+subdirectory of it that has an `api-definition.json` in it. The directory name is the
+version that row reports, so a second ABP version is one command:
+
+```bash
+ABP_BACKEND_URL=https://localhost:44399 ./scripts/capture-fixtures.sh --into e2e/fixtures/10.7
+```
+
+There is one row today, ABP 10.6, because 10.6 is the current minor and the Studio CLI
+generates that one only. Generating a 10.5 solution by pinning the package versions down
+does not work either: the LeptonXLite the host project carries requires 10.6. So the plan's
+"the current minor and the one before it" is a row short until 10.7 ships, and
+`abpv doctor` says it is tested against 10.6 rather than claiming a version nothing was
+run on.
+
 ## The spec that needs the official CLI
 
 `specs/abp-new.spec.ts` answers the M8 stop-loss question -- whether wrapping `abp new`

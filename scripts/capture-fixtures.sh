@@ -3,8 +3,18 @@
 # Run against a live test backend, then commit the result.
 set -euo pipefail
 
+# `--into <dir>` captures a second ABP version next to the default one: the contract
+# matrix runs against every directory under `e2e/fixtures` that has an api-definition in
+# it, and the directory name is the version it reports.
 HOST="${ABP_BACKEND_URL:-https://localhost:44384}"
 OUT="$(cd "$(dirname "$0")/.." && pwd)/e2e/fixtures"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --into) OUT="$2"; shift 2 ;;
+    *) echo "Unknown option: $1" >&2; exit 1 ;;
+  esac
+done
 
 if ! curl -sk --max-time 5 -o /dev/null "$HOST/api/abp/api-definition"; then
   echo "Backend not reachable at $HOST"

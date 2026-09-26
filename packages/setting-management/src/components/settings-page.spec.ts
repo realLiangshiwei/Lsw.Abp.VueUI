@@ -7,7 +7,7 @@ import {
   type ProviderInput,
 } from '@lsw-abpvue/core';
 import { SettingTabsService } from '@lsw-abpvue/setting-management/config';
-import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
+import { expectAccessiblePage, plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it } from 'vitest';
 import { defineComponent, h, type Component } from 'vue';
@@ -84,6 +84,12 @@ describe('SettingsPage', () => {
     await tabs[1]?.trigger('click');
     expect(page.text()).toContain('second body');
     expect(tabs[1]?.attributes('aria-selected')).toBe('true');
+  });
+
+  it('is accessible', async () => {
+    const wrapper = await render(SettingsPage, injectorWith([]));
+
+    await expectAccessiblePage(wrapper.element);
   });
 
   it('labels a tab by its text when it has one', async () => {

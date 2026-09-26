@@ -11,7 +11,7 @@ import {
   type UpdatePermissionsDto,
 } from '@lsw-abpvue/permission-management/proxy';
 import { ToasterService } from '@lsw-abpvue/theme-shared';
-import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
+import { expectAccessible, plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { computed } from 'vue';
@@ -128,6 +128,12 @@ describe('AbpPermissionManagement', () => {
     expect(tabs()).toEqual(['Identity management', 'Tenant management (1)']);
     expect(document.body.textContent).toContain('Role management');
     expect(document.body.textContent).not.toContain('Tenants');
+  });
+
+  it('is accessible', async () => {
+    await open();
+
+    await expectAccessible(document.body);
   });
 
   it('shows the permissions of the tab that is picked', async () => {

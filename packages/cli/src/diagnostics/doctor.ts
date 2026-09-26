@@ -12,8 +12,13 @@ import { checkEnvironment } from './environment.js';
 import { extensionCoverage } from './object-extensions.js';
 import type { Check } from './checks.js';
 
-/** The ABP versions this release is tested against (contract test matrix, roadmap §5). */
-const SUPPORTED_ABP = ['10.6', '10.7'];
+/**
+ * The ABP versions this release is tested against -- one per captured fixture set the
+ * contract matrix runs against, which is what "tested against" has to mean. The plan
+ * asks for two, the current minor and the one before it; 10.6 is the current minor and
+ * the Studio CLI only generates that one, so there is one row until 10.7 ships.
+ */
+const SUPPORTED_ABP = ['10.6'];
 
 export interface DoctorOptions {
   /** The application root. */

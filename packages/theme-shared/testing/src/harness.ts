@@ -239,21 +239,44 @@ export function accessibleName(element: Element): string {
   return (element.getAttribute('aria-label') ?? element.textContent ?? '').trim();
 }
 
+async function expectNoSeriousViolations(element: Element, options: axe.RunOptions): Promise<void> {
+  const results = await axe.run(element, options);
+
+  const serious = results.violations.filter(
+    violation => violation.impact === 'serious' || violation.impact === 'critical',
+  );
+
+  expect(
+    serious.map(
+      violation =>
+        `${violation.id}: ${violation.help} (${violation.nodes
+          .map(node => node.target.join(' '))
+          .join(', ')})`,
+    ),
+  ).toEqual([]);
+}
+
 /**
  * Fails on anything axe rates serious or critical. Moderate and minor findings are left
  * out on purpose: they are worth fixing and not worth a red build on every theme.
  * @param element The mounted component
  */
 export async function expectAccessible(element: Element): Promise<void> {
-  const results = await axe.run(element, {
+  await expectNoSeriousViolations(element, {
     // A component is not a page. Landmark and heading rules are about the page it will
-    // be mounted into, and the playground is where they are checked.
+    // be mounted into, and `expectAccessiblePage` is where they are checked.
     rules: { region: { enabled: false }, 'page-has-heading-one': { enabled: false } },
   });
+}
 
-  const serious = results.violations.filter(
-    violation => violation.impact === 'serious' || violation.impact === 'critical',
-  );
-
-  expect(serious.map(violation => `${violation.id}: ${violation.help}`)).toEqual([]);
+/**
+ * The same, for something mounted as a whole page: the landmark and heading rules that
+ * `expectAccessible` leaves to the page apply here.
+ * @param element The mounted page
+ */
+export async function expectAccessiblePage(element: Element): Promise<void> {
+  // A module page is rendered inside the theme's layout, which is what carries `main`
+  // and the page's own `h1` is `AbpPage`'s. Mounted alone there is no landmark to be
+  // inside of, so the rule that asks for one is not this page's to satisfy.
+  await expectNoSeriousViolations(element, { rules: { region: { enabled: false } } });
 }

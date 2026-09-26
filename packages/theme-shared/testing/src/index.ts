@@ -3,6 +3,7 @@ export {
   activateToggle,
   chooseOption,
   expectAccessible,
+  expectAccessiblePage,
   findAllRendered,
   findRendered,
   openOverlay,

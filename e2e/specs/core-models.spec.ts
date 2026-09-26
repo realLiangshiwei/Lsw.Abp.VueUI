@@ -2,20 +2,34 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { generateProxy, readApiDefinition, type ApiDefinition } from '@lsw-abpvue/cli';
 import { describe, expect, it } from 'vitest';
+import { fixtureSets } from './fixtures.js';
 
 const BACKEND = process.env.ABP_BACKEND_URL ?? 'https://localhost:44384';
-const FIXTURE = resolve(import.meta.dirname, '..', 'fixtures', 'api-definition.json');
 const CORE_MODELS = resolve(import.meta.dirname, '../../packages/core/src/proxy/models.ts');
 
 const strictTls = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-async function definition(): Promise<ApiDefinition> {
+/**
+ * What to compare against: the live backend when there is one, and every captured
+ * version either way. Two rows of the same version are one row -- a live 10.6 backend
+ * says the same thing its own capture does.
+ */
+async function subjects(): Promise<{ version: string; definition: ApiDefinition }[]> {
+  const captured = fixtureSets();
+  const rows = await Promise.all(
+    captured.map(async set => ({
+      version: `${set.version} (captured)`,
+      definition: await readApiDefinition({ file: set.apiDefinition }),
+    })),
+  );
+
   try {
-    return await readApiDefinition({ url: BACKEND });
+    const live = await readApiDefinition({ url: BACKEND });
+    return [{ version: 'the running backend', definition: live }, ...rows];
   } catch {
-    console.info(`[core] No ABP backend at ${BACKEND}; comparing against the captured definition.`);
-    return readApiDefinition({ file: FIXTURE });
+    console.info(`[core] No ABP backend at ${BACKEND}; comparing against the captures only.`);
+    return rows;
   } finally {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = strictTls ?? '1';
   }
@@ -68,20 +82,17 @@ function interfacesIn(source: string): Map<string, Map<string, Property>> {
   return interfaces;
 }
 
-const generated = interfacesIn(
-  generateProxy({
-    definition: await definition(),
-    modules: ['abp'],
-    validators: false,
-    policyNames: false,
-  })
-    .files.filter(file => file.path.endsWith('models.ts'))
-    .map(file => file.content)
-    .join('\n'),
-);
+function generatedFrom(definition: ApiDefinition): Map<string, Map<string, Property>> {
+  return interfacesIn(
+    generateProxy({ definition, modules: ['abp'], validators: false, policyNames: false })
+      .files.filter(file => file.path.endsWith('models.ts'))
+      .map(file => file.content)
+      .join('\n'),
+  );
+}
 
 const handWritten = interfacesIn(await readFile(CORE_MODELS, 'utf8'));
-const shared = [...handWritten.keys()].filter(name => generated.has(name));
+const matrix = await subjects();
 
 /**
  * `core` writes the DTOs of ABP's framework endpoints by hand rather than generating
@@ -101,45 +112,58 @@ const DECLARED_ON_PURPOSE: Record<string, string[]> = {
   ExtensionPropertyDto: ['formText'],
 };
 
-describe('the framework DTOs core writes by hand', () => {
-  it('covers the same types the generator produces for the abp module', () => {
-    expect(shared.length).toBeGreaterThan(30);
-  });
-
-  it.each(shared)('%s declares no property the backend does not have', name => {
-    const ours = handWritten.get(name) as Map<string, Property>;
-    const theirs = generated.get(name) as Map<string, Property>;
-    const allowed = DECLARED_ON_PURPOSE[name] ?? [];
-
-    expect(
-      [...ours.keys()].filter(property => !theirs.has(property) && !allowed.includes(property)),
-    ).toEqual([]);
-  });
-
-  it.each(shared)('%s declares every property the backend has', name => {
-    const ours = handWritten.get(name) as Map<string, Property>;
-    const theirs = generated.get(name) as Map<string, Property>;
-
-    expect([...theirs.keys()].filter(property => !ours.has(property))).toEqual([]);
-  });
-
-  it.each(shared)('%s admits null wherever the backend says the value may be null', name => {
-    const ours = handWritten.get(name) as Map<string, Property>;
-    const theirs = generated.get(name) as Map<string, Property>;
-
-    const missing = [...theirs]
-      .filter(([property, { type }]) => {
-        const mine = ours.get(property);
-        // `unknown` already covers null, and saying `unknown | null` says nothing more.
-        return (
-          type.includes('| null') &&
-          mine !== undefined &&
-          !mine.type.includes('| null') &&
-          mine.type !== 'unknown'
-        );
-      })
-      .map(([property]) => property);
-
-    expect(missing).toEqual([]);
+describe('the contract matrix', () => {
+  it('has a row per captured ABP version, and one for a live backend', () => {
+    expect(matrix.length).toBeGreaterThan(0);
+    console.info(`[core] contract matrix: ${matrix.map(row => row.version).join(', ')}`);
   });
 });
+
+describe.each(matrix)(
+  'the framework DTOs core writes by hand, against $version',
+  ({ definition }) => {
+    const generated = generatedFrom(definition);
+    const shared = [...handWritten.keys()].filter(name => generated.has(name));
+
+    it('covers the same types the generator produces for the abp module', () => {
+      expect(shared.length).toBeGreaterThan(30);
+    });
+
+    it.each(shared)('%s declares no property the backend does not have', name => {
+      const ours = handWritten.get(name) as Map<string, Property>;
+      const theirs = generated.get(name) as Map<string, Property>;
+      const allowed = DECLARED_ON_PURPOSE[name] ?? [];
+
+      expect(
+        [...ours.keys()].filter(property => !theirs.has(property) && !allowed.includes(property)),
+      ).toEqual([]);
+    });
+
+    it.each(shared)('%s declares every property the backend has', name => {
+      const ours = handWritten.get(name) as Map<string, Property>;
+      const theirs = generated.get(name) as Map<string, Property>;
+
+      expect([...theirs.keys()].filter(property => !ours.has(property))).toEqual([]);
+    });
+
+    it.each(shared)('%s admits null wherever the backend says the value may be null', name => {
+      const ours = handWritten.get(name) as Map<string, Property>;
+      const theirs = generated.get(name) as Map<string, Property>;
+
+      const missing = [...theirs]
+        .filter(([property, { type }]) => {
+          const mine = ours.get(property);
+          // `unknown` already covers null, and saying `unknown | null` says nothing more.
+          return (
+            type.includes('| null') &&
+            mine !== undefined &&
+            !mine.type.includes('| null') &&
+            mine.type !== 'unknown'
+          );
+        })
+        .map(([property]) => property);
+
+      expect(missing).toEqual([]);
+    });
+  },
+);
