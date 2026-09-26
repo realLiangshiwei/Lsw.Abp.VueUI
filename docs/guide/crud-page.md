@@ -57,7 +57,7 @@ const editor = useRecordEditor<BookDto>({
 </template>
 ```
 
-Seventy lines, against the 438 of the React template's hand-written `BooksPage.tsx`. The
+Sixty-six lines, against the 438 of the React template's hand-written `BooksPage.tsx`. The
 difference is not cleverness in the generator — paging, sorting, validation, the
 permission checks on every button, the deletion question, the toasts and the server-side
 validation errors all belong to `AbpExtensibleTable`, `AbpExtensibleForm` and

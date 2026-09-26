@@ -166,7 +166,7 @@ src/pages/books.extensions.ts    the columns, the form fields and the buttons
 src/routes.ts                    one entry, wrapped in `abpv:begin` markers
 ```
 
-The page is about seventy lines because the work is in the extension system: paging,
+The page is sixty-six lines because the work is in the extension system: paging,
 sorting, validation, the permission checks on the buttons, the deletion question and the
 server-side validation errors all belong to `AbpExtensibleTable`, `AbpExtensibleForm` and
 `useRecordEditor`. What is generated is a description of the entity, not a page.
