@@ -9,17 +9,24 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const source = join(repoRoot, 'templates/app');
-const target = join(repoRoot, 'packages/cli/dist/template/app');
 
 const SKIPPED = new Set(['node_modules', 'dist', '.turbo']);
 
-rmSync(target, { recursive: true, force: true });
-mkdirSync(dirname(target), { recursive: true });
-cpSync(source, target, {
-  recursive: true,
-  filter: path => !SKIPPED.has(path.slice(source.length + 1).split(/[\\/]/)[0]),
-});
+/** One template, copied into the CLI's build output under its own name. */
+function bundle(name) {
+  const source = join(repoRoot, 'templates', name);
+  const target = join(repoRoot, 'packages/cli/dist/template', name);
+
+  rmSync(target, { recursive: true, force: true });
+  mkdirSync(dirname(target), { recursive: true });
+  cpSync(source, target, {
+    recursive: true,
+    filter: path => !SKIPPED.has(path.slice(source.length + 1).split(/[\\/]/)[0]),
+  });
+
+  hideDotfiles(target);
+  console.log(`  template: ${readdirSync(target).length} entries in dist/template/${name}`);
+}
 
 /** Every dotfile, at any depth, under the name npm will carry. */
 function hideDotfiles(dir) {
@@ -32,6 +39,5 @@ function hideDotfiles(dir) {
   }
 }
 
-hideDotfiles(target);
-
-console.log(`  template: ${readdirSync(target).length} entries in dist/template/app`);
+bundle('app');
+bundle('lib');

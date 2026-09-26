@@ -1,5 +1,6 @@
 import { defineCommand } from 'citty';
 import { addPackageCommand, ejectCommand } from './add-package.js';
+import { createLibCommand } from './create-lib.js';
 import { doctorCommand } from './doctor.js';
 import { generateCommand } from './generate.js';
 import { newCommand } from './new.js';
@@ -13,6 +14,7 @@ export const main = defineCommand({
   },
   subCommands: {
     'add-package': addPackageCommand,
+    'create-lib': createLibCommand,
     doctor: doctorCommand,
     eject: ejectCommand,
     generate: generateCommand,

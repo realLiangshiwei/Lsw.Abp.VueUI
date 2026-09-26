@@ -502,6 +502,42 @@ importers:
         specifier: ^3.3.9
         version: 3.3.11(typescript@6.0.3)
 
+  templates/lib:
+    devDependencies:
+      '@lsw-abpvue/components':
+        specifier: workspace:*
+        version: link:../../packages/components
+      '@lsw-abpvue/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@lsw-abpvue/theme-shared':
+        specifier: workspace:*
+        version: link:../../packages/theme-shared
+      '@lsw-abpvue/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@vitejs/plugin-vue':
+        specifier: ^6.0.8
+        version: 6.0.8(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.6.1))(vue@3.5.41(typescript@6.0.3))
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vite:
+        specifier: ^8.2.1
+        version: 8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.6.1)
+      vitest:
+        specifier: ^4.1.10
+        version: 4.1.11(@types/node@24.13.3)(@vitest/coverage-v8@4.1.11)(happy-dom@20.11.6)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.6.1))
+      vue:
+        specifier: ^3.5.41
+        version: 3.5.41(typescript@6.0.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.6.4(vue@3.5.41(typescript@6.0.3))
+      vue-tsc:
+        specifier: ^3.3.9
+        version: 3.3.11(typescript@6.0.3)
+
 packages:
 
   '@andrewbranch/untar.js@1.0.4':

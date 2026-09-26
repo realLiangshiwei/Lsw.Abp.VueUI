@@ -80,3 +80,7 @@ jobs:
       # Releasing a package's source into a project that installed it, then compiling and
       # building that project. The frontend template is exercised end to end on the way.
       - run: pnpm check:source-code-release
+      # A package `abpv create-lib` writes is a repository of its own: it has to install,
+      # type check and build with the ABP Vue packages coming from a registry rather than
+      # from this workspace.
+      - run: pnpm check:create-lib

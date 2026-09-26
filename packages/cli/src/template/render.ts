@@ -24,7 +24,21 @@ export interface RenderOptions {
   source: string;
   /** Where the application is written. */
   target: string;
-  values: TemplateValues;
+  /** Every `__SCREAMING_SNAKE__` token in the template, by its camelCase name. */
+  values: TemplateValues | Record<string, string>;
+  /**
+   * The name the rendered `package.json` takes; the project name turned into an npm
+   * name when absent.
+   */
+  packageName?: string | undefined;
+  /** Replaces the template's own `description`, when the command was given one. */
+  description?: string | undefined;
+  /**
+   * Substrings replaced everywhere -- in the sources, in the configuration and in the
+   * file names. A library template has a sample module whose name is part of its code,
+   * and a name cannot be spelled `__LIKE_THIS__` in code that has to keep compiling.
+   */
+  renames?: Record<string, string> | undefined;
   /** The optional blocks to keep; every other one is dropped, its files included. */
   blocks: readonly string[];
   /** What the `workspace:*` ranges become: the version of the CLI doing the rendering. */
@@ -52,7 +66,7 @@ function placeholderOf(key: string): string {
   return `__${key.replace(/[A-Z]/g, letter => `_${letter}`).toUpperCase()}__`;
 }
 
-function replacements(values: TemplateValues): Map<string, string> {
+function replacements(values: Record<string, string>): Map<string, string> {
   return new Map(Object.entries(values).map(([key, value]) => [placeholderOf(key), String(value)]));
 }
 
@@ -101,6 +115,15 @@ function fill(text: string, values: Map<string, string>, file: string): string {
   });
 }
 
+/** Applies the identifier renames to a piece of text, longest match first. */
+function renamed(text: string, renames: Record<string, string> | undefined): string {
+  if (!renames) return text;
+
+  return Object.entries(renames)
+    .sort(([left], [right]) => right.length - left.length)
+    .reduce((current, [from, to]) => current.split(from).join(to), text);
+}
+
 /** `Acme.BookStore` is `acme-bookstore` to npm, which has no room for capitals or dots. */
 export function packageNameOf(projectName: string): string {
   return projectName.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
@@ -114,21 +137,44 @@ export function packageNameOf(projectName: string): string {
 function renderManifest(text: string, options: RenderOptions): string {
   const manifest = JSON.parse(text) as {
     name: string;
+    description?: string;
     private?: boolean;
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string>;
   };
 
-  manifest.name = packageNameOf(options.values.projectName);
+  manifest.name =
+    options.packageName ?? packageNameOf((options.values as TemplateValues).projectName);
+  if (options.description) manifest.description = options.description;
   delete manifest.private;
 
-  for (const group of [manifest.dependencies, manifest.devDependencies]) {
+  const groups = [manifest.dependencies, manifest.devDependencies, manifest.peerDependencies];
+
+  for (const group of groups) {
     for (const [name, range] of Object.entries(group ?? {})) {
-      if (range.startsWith('workspace:')) (group as Record<string, string>)[name] = options.version;
+      const rewritten = versionOf(range, options.version);
+      if (rewritten) (group as Record<string, string>)[name] = rewritten;
     }
   }
 
   return `${JSON.stringify(manifest, null, 2)}\n`;
+}
+
+/**
+ * What a `workspace:` range becomes outside the workspace, the way `pnpm pack` resolves
+ * it: the modifier is kept, so a peer range stays a range. Shipping the protocol itself
+ * would break every consumer's install.
+ *
+ * @param range The range as the template wrote it
+ * @param version The version of the CLI doing the rendering
+ */
+function versionOf(range: string, version: string): string | undefined {
+  if (!range.startsWith('workspace:')) return undefined;
+
+  const modifier = range.slice('workspace:'.length);
+
+  return modifier === '^' || modifier === '~' ? `${modifier}${version}` : version;
 }
 
 /** Every file under `dir`, relative to it, depth first and in a stable order. */
@@ -187,14 +233,14 @@ export async function renderTemplate(options: RenderOptions): Promise<RenderResu
     }
   }
 
-  const values = replacements(options.values);
+  const values = replacements(options.values as Record<string, string>);
   const dropped = droppedFiles(manifest, keep);
   const written: string[] = [];
 
   for (const path of await walk(options.source)) {
     if (path === TEMPLATE_MANIFEST_FILE || dropped.has(path)) continue;
 
-    const output = outputPath(path);
+    const output = renamed(outputPath(path), options.renames);
     written.push(output);
     if (options.dryRun) continue;
 
@@ -213,7 +259,7 @@ export async function renderTemplate(options: RenderOptions): Promise<RenderResu
         ? renderManifest(source, options)
         : fill(filterBlocks(source, keep, path), values, path);
 
-    await writeFile(to, body, 'utf8');
+    await writeFile(to, renamed(body, options.renames), 'utf8');
   }
 
   return { written: written.sort() };

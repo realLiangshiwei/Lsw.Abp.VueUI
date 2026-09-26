@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "check:create-lib": "./scripts/check-create-lib.sh",
     "check:external-install": "./scripts/check-external-install.sh",
     "check:published-types": "./scripts/check-published-types.sh",
     "check:resolution": "./scripts/check-resolution.sh",

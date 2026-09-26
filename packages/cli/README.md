@@ -186,6 +186,31 @@ or a column you added outside them survives. A backend that grows an `ObjectExte
 property needs no regeneration at all: the extension system puts the column and the field
 on the page at runtime.
 
+## A package for a third-party module
+
+```bash
+abpv create-lib Blogging                                  # ./blogging, abp-vue-blogging
+abpv create-lib Blogging --package @acme/blogging-vue     # under your own scope
+```
+
+ABP has a lot of third-party modules and none of them has a Vue UI yet. This writes the
+package that gives one: three entry points as the package layout wants them --
+
+```
+src/          the pages, the extension points, the routes
+config/src/   the menu entries and the permission names, imported at startup
+proxy/src/    where `abpv proxy add --target proxy/src` writes the generated services
+```
+
+-- with the five extension points already wired up, so a host adds a column to your page
+without touching your package. The example page talks to the backend through
+`RestService` so the package compiles before a proxy exists; generate one and inject the
+service it writes instead.
+
+The `config` entry point is separate because an application needs your menu at startup
+and your pages only when someone navigates into them. It imports no component, so an
+application that never opens your module pays a few hundred bytes for it.
+
 ## Permission names
 
 ```ts
@@ -241,6 +266,15 @@ the application service behind them. Pass `--token` and the names are read from
 | `--route <path>` / `--menu <key>` / `--icon <class>` | Override what is inferred |
 | `--policy <name>` | The base permission; `.Create`, `.Update` and `.Delete` follow from it |
 | `--force` | Write the generated blocks of files that are already there |
+
+`abpv create-lib` takes:
+
+| | |
+| --- | --- |
+| `--package <name>` | npm package name; `abp-vue-<name>` by default |
+| `--target <dir>` | Where to write it; `./<name>` by default |
+| `--description <text>` | The package's description |
+| `--dry-run` | Say what would be written and write nothing |
 
 ## Compared with Angular
 

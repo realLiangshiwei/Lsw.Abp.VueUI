@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "jsx": "preserve",
+    "types": [],
+    "noEmit": true,
+
+    // The package's own secondary entry points, so a type check needs no build first.
+    // The declaration builds clear this and reach the built `dist` instead.
+    "paths": {
+      "@lsw-abpvue/template-lib/config": ["./config/src/index.ts"],
+      "@lsw-abpvue/template-lib/proxy": ["./proxy/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue", "config/src/**/*.ts", "proxy/src/**/*.ts"]
+}

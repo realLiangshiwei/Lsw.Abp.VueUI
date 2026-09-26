@@ -228,6 +228,9 @@ export default tseslint.config(
   {
     files: [
       'scripts/**/*.{ts,mts,mjs,js}',
+      // The library template carries its own copy of the declaration rewriter: a package
+      // `abpv create-lib` writes cannot reach into this repository's scripts.
+      'templates/*/scripts/**/*.{mjs,js}',
       '*.config.{js,ts}',
       '**/vite.config.ts',
       '**/vitest.config.ts',
