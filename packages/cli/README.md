@@ -211,6 +211,28 @@ The `config` entry point is separate because an application needs your menu at s
 and your pages only when someone navigates into them. It imports no component, so an
 application that never opens your module pays a few hundred bytes for it.
 
+## Upgrading
+
+```bash
+abpv update                 # to whatever the registry publishes as latest
+abpv update --to 0.2.0
+abpv update --dry-run
+```
+
+Every `@lsw-abpvue/*` range in `package.json` moves to one version, with the modifier the
+project chose kept: `^0.1.0` becomes `^0.2.0`, `0.1.0` becomes `0.2.0`. A range that is
+not a plain version -- a `file:` path, a tag, a git URL -- is a decision the project made
+on purpose and is left alone, and it says which ones and why.
+
+A package whose source has been released into the project is not upgraded either: the
+upgrade cannot reach source that lives in `packages/`. Those are listed, with the version
+they were released at, so the changes can be brought over by hand.
+
+Breaking changes come with a migration that runs here. There have been none, which is
+what an empty list means rather than a missing feature.
+
+Install again afterwards; this command edits the manifest and nothing else.
+
 ## Permission names
 
 ```ts
@@ -266,6 +288,8 @@ the application service behind them. Pass `--token` and the names are read from
 | `--route <path>` / `--menu <key>` / `--icon <class>` | Override what is inferred |
 | `--policy <name>` | The base permission; `.Create`, `.Update` and `.Delete` follow from it |
 | `--force` | Write the generated blocks of files that are already there |
+
+`abpv update` takes `--to`, `--tag` and `--dry-run`.
 
 `abpv create-lib` takes:
 

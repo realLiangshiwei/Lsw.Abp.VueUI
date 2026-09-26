@@ -6,6 +6,7 @@ import { generateCommand } from './generate.js';
 import { newCommand } from './new.js';
 import { proxyCommand } from './proxy.js';
 import { switchUiCommand } from './switch-ui.js';
+import { updateCommand } from './update.js';
 
 export const main = defineCommand({
   meta: {
@@ -21,5 +22,6 @@ export const main = defineCommand({
     new: newCommand,
     proxy: proxyCommand,
     'switch-ui': switchUiCommand,
+    update: updateCommand,
   },
 });
