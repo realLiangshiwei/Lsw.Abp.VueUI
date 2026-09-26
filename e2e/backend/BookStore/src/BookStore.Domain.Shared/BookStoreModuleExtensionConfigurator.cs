@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Volo.Abp.Identity;
 using Volo.Abp.ObjectExtending;
+using Volo.Abp.ObjectExtending.Modularity;
 using Volo.Abp.TenantManagement;
 using Volo.Abp.Threading;
 
@@ -33,6 +34,20 @@ public static class BookStoreModuleExtensionConfigurator
 
     private static void ConfigureExtraProperties()
     {
+        // The application's own module. `BookStore` is the name a generated page passes
+        // to `getObjectExtensionEntities`, and one property on Book is what proves a
+        // page picks an extension up without being generated again.
+        ObjectExtensionManager.Instance.Modules()
+            .ConfigureModule<ModuleExtensionConfiguration>("BookStore", module =>
+                module.ConfigureEntity("Book", entity =>
+                    entity.AddOrUpdateProperty<string>("Isbn", property =>
+                    {
+                        property.Attributes.Add(new StringLengthAttribute(32));
+                        property.UI.OnTable.IsVisible = true;
+                        property.UI.OnCreateForm.IsVisible = true;
+                        property.UI.OnEditForm.IsVisible = true;
+                    })));
+
         ObjectExtensionManager.Instance.Modules()
             .ConfigureIdentity(identity =>
             {

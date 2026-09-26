@@ -1,6 +1,16 @@
 {
   "generated": [
     "README.md",
+    "book-store/books/book-type.enum.ts",
+    "book-store/books/book.service.ts",
+    "book-store/books/index.ts",
+    "book-store/books/models.ts",
+    "book-store/books/validators.ts",
+    "book-store/files/file.service.ts",
+    "book-store/files/index.ts",
+    "book-store/files/models.ts",
+    "book-store/files/validators.ts",
+    "book-store/index.ts",
     "index.ts",
     "object-extension-validators.ts",
     "policy-names.ts",
@@ -17,6 +27,10 @@
   ],
   "removed": [],
   "modules": {
+    "app": {
+      "rootPath": "app",
+      "remoteServiceName": "Default"
+    },
     "identity": {
       "rootPath": "identity",
       "remoteServiceName": "AbpIdentity"

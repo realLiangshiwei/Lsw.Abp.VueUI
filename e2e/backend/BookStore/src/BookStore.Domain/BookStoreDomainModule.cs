@@ -6,6 +6,7 @@ using System;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.MultiTenancy;
+using Volo.Abp.ObjectExtending.Modularity;
 using Volo.Abp.PermissionManagement.Identity;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.BlobStoring.Database;
@@ -37,6 +38,17 @@ namespace BookStore;
     typeof(BlobStoringDatabaseDomainModule)    )]
 public class BookStoreDomainModule : AbpModule
 {
+    public override void PreConfigureServices(ServiceConfigurationContext context)
+    {
+        // The entity side of the object extensions the domain shared module declared:
+        // without a definition on `Book`, `MapExtraPropertiesTo` refuses to copy the
+        // property onto it and a saved value is dropped on the floor.
+        ModuleExtensionConfigurationHelper.ApplyEntityConfigurationToEntity(
+            "BookStore",
+            "Book",
+            typeof(Books.Book));
+    }
+
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
         Configure<AbpMultiTenancyOptions>(options =>

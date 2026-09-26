@@ -47,14 +47,16 @@ export const routes: RouteRecordRaw[] = [
   lazyRoutes('/setting-management', () =>
     import('@lsw-abpvue/setting-management').then(module => module.createSettingManagementRoutes()),
   ),
-  // abpv:begin route:identity-roles
+
+  // abpv:begin route:books
   {
-    path: '/generated/roles',
-    component: () => import('./pages/IdentityRolesPage.vue'),
+    path: '/books',
+    component: () => import('./pages/BooksPage.vue'),
     meta: {
-      title: 'Generated roles',
-      routes: { name: 'Generated roles', order: 4, iconClass: 'bi bi-magic' },
+      title: 'BookStore::Menu:Books',
+      requiredPolicy: 'BookStore.Books',
+      routes: { name: 'BookStore::Menu:Books', order: 5 },
     },
   },
-  // abpv:end route:identity-roles
+  // abpv:end route:books
 ];

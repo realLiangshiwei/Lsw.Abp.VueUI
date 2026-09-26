@@ -303,6 +303,75 @@
     },
     "objectExtensions": {
         "modules": {
+            "BookStore": {
+                "entities": {
+                    "Book": {
+                        "properties": {
+                            "Isbn": {
+                                "type": "System.String",
+                                "typeSimple": "string",
+                                "displayName": null,
+                                "api": {
+                                    "onGet": {
+                                        "isAvailable": true
+                                    },
+                                    "onCreate": {
+                                        "isAvailable": true
+                                    },
+                                    "onUpdate": {
+                                        "isAvailable": true
+                                    }
+                                },
+                                "ui": {
+                                    "onTable": {
+                                        "isVisible": true
+                                    },
+                                    "onCreateForm": {
+                                        "isVisible": true
+                                    },
+                                    "onEditForm": {
+                                        "isVisible": true
+                                    },
+                                    "lookup": {
+                                        "url": null,
+                                        "resultListPropertyName": null,
+                                        "displayPropertyName": null,
+                                        "valuePropertyName": null,
+                                        "filterParamName": null
+                                    }
+                                },
+                                "policy": {
+                                    "globalFeatures": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "features": {
+                                        "features": [],
+                                        "requiresAll": false
+                                    },
+                                    "permissions": {
+                                        "permissionNames": [],
+                                        "requiresAll": false
+                                    }
+                                },
+                                "attributes": [
+                                    {
+                                        "typeSimple": "stringLength",
+                                        "config": {
+                                            "maximumLength": 32,
+                                            "minimumLength": 0
+                                        }
+                                    }
+                                ],
+                                "configuration": {},
+                                "defaultValue": null
+                            }
+                        },
+                        "configuration": {}
+                    }
+                },
+                "configuration": {}
+            },
             "Identity": {
                 "entities": {
                     "User": {

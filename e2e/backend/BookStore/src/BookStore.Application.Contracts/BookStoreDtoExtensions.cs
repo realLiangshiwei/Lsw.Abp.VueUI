@@ -1,5 +1,6 @@
-using Volo.Abp.Identity;
+using BookStore.Books;
 using Volo.Abp.ObjectExtending;
+using Volo.Abp.ObjectExtending.Modularity;
 using Volo.Abp.Threading;
 
 namespace BookStore;
@@ -12,17 +13,16 @@ public static class BookStoreDtoExtensions
     {
         OneTimeRunner.Run(() =>
         {
-                /* You can add extension properties to DTOs
-                 * defined in the depended modules.
-                 *
-                 * Example:
-                 *
-                 * ObjectExtensionManager.Instance
-                 *   .AddOrUpdateProperty<IdentityRoleDto, string>("Title");
-                 *
-                 * See the documentation for more:
-                 * https://docs.abp.io/en/abp/latest/Object-Extensions
-                 */
+            // What `BookStoreModuleExtensionConfigurator` declared for BookStore.Book,
+            // applied to the DTOs the API answers with. Without this the property is on
+            // the entity and invisible to any client, which is exactly the case the
+            // frontend's object extension mapping exists for.
+            ModuleExtensionConfigurationHelper.ApplyEntityConfigurationToApi(
+                "BookStore",
+                "Book",
+                getApiTypes: new[] { typeof(BookDto) },
+                createApiTypes: new[] { typeof(CreateUpdateBookDto) },
+                updateApiTypes: new[] { typeof(CreateUpdateBookDto) });
         });
     }
 }

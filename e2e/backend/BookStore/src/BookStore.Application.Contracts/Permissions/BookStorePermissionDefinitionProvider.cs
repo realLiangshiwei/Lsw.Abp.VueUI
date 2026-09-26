@@ -13,6 +13,11 @@ public class BookStorePermissionDefinitionProvider : PermissionDefinitionProvide
 
         var files = myGroup.AddPermission(BookStorePermissions.Files, L("Permission:Files"));
         files.AddChild(BookStorePermissions.FilesUpload, L("Permission:Files.Upload"));
+
+        var books = myGroup.AddPermission(BookStorePermissions.Books, L("Permission:Books"));
+        books.AddChild(BookStorePermissions.BooksCreate, L("Permission:Books.Create"));
+        books.AddChild(BookStorePermissions.BooksUpdate, L("Permission:Books.Update"));
+        books.AddChild(BookStorePermissions.BooksDelete, L("Permission:Books.Delete"));
     }
 
     private static LocalizableString L(string name)

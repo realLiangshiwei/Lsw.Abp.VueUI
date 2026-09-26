@@ -1,6 +1,11 @@
 {
   "generated": [
     "README.md",
+    "book-store/books/book-type.enum.ts",
+    "book-store/books/book.service.ts",
+    "book-store/books/index.ts",
+    "book-store/books/models.ts",
+    "book-store/books/validators.ts",
     "book-store/files/file.service.ts",
     "book-store/files/index.ts",
     "book-store/files/models.ts",

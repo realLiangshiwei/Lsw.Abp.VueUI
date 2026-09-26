@@ -43,6 +43,10 @@ export type AbpTenantManagementPolicyName =
   (typeof AbpTenantManagementPolicyNames)[keyof typeof AbpTenantManagementPolicyNames];
 
 export const BookStorePolicyNames = {
+  Books: 'BookStore.Books',
+  BooksCreate: 'BookStore.Books.Create',
+  BooksDelete: 'BookStore.Books.Delete',
+  BooksUpdate: 'BookStore.Books.Update',
   Files: 'BookStore.Files',
   FilesUpload: 'BookStore.Files.Upload',
 } as const;

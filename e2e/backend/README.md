@@ -44,6 +44,24 @@ Two things that will bite you:
 
 `includeTypes=true` is not optional. Without it the type pool comes back empty.
 
+## The Book entity
+
+`src/BookStore.Application/Books` is what the CRUD page generator is measured against: the
+same shape as the entity in ABP's own BookStore tutorial, so the generated page can be
+compared with the React template's hand-written one. It is written out rather than
+inherited from `CrudAppService` -- the shape of the API is what the generator reads, and
+writing it out keeps that shape in one file.
+
+`ObjectExtensions` declares one property on it, `Isbn`. A generated page has to show it as
+a column without being generated again, which is the whole claim of the extension system
+and now has something to check it against.
+
+The admin role is granted the application's own permissions by
+`BookStorePermissionDataSeedContributor`: ABP seeds a role with the permissions that
+existed when it was created, so one added later reaches nobody. **The permission cache is
+per process** -- after seeding, restart the host or every request is a 403 that has
+nothing to do with what is being tested.
+
 ## Fixtures
 
 `../fixtures` holds captured responses for the three framework endpoints. Tests use the
