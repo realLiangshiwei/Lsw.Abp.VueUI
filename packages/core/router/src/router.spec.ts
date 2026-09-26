@@ -120,6 +120,30 @@ describe('provideAbpRouter', () => {
     expect(tree[0]?.children[0]).toMatchObject({ name: 'Identity.Users', path: '/identity/users' });
   });
 
+  it('a menu entry inherits the permission its route requires', async () => {
+    const app = await start([
+      {
+        path: '/books',
+        component: Page('books'),
+        meta: { requiredPolicy: 'BookStore.Books', routes: { name: 'Books' } },
+      },
+      {
+        path: '/authors',
+        component: Page('authors'),
+        // Says so itself: visible to everyone, and the guard still turns them away.
+        meta: {
+          requiredPolicy: 'BookStore.Authors',
+          routes: { name: 'Authors', requiredPolicy: undefined },
+        },
+      },
+    ]);
+
+    const tree = app.injector.get(RoutesService).tree.value;
+
+    expect(tree.find(node => node.name === 'Books')?.requiredPolicy).toBe('BookStore.Books');
+    expect(tree.find(node => node.name === 'Authors')?.requiredPolicy).toBeUndefined();
+  });
+
   it('the document title follows the route', async () => {
     // Through the platform service rather than `document`: that is the rule core lives by,
     // and it makes the assertion independent of the DOM.
