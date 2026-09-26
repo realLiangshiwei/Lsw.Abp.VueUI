@@ -55,7 +55,7 @@ export const routes: RouteRecordRaw[] = [
     meta: {
       title: 'BookStore::Menu:Books',
       requiredPolicy: 'BookStore.Books',
-      routes: { name: 'BookStore::Menu:Books', order: 5 },
+      routes: { name: 'BookStore::Menu:Books', order: 4 },
     },
   },
   // abpv:end route:books

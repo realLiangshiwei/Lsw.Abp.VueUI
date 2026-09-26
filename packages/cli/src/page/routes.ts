@@ -134,7 +134,14 @@ export function insertRoute(source: string, page: EntityPage): RouteInsertion {
     if (end < 0) throw new CliError(`${marker} is opened in the routes file but never closed.`);
 
     const existing = source.slice(begin, end + endMarker.length);
-    const entry = routeEntry(page, nextOrder(source.slice(0, begin))).trimStart();
+    // The order the entry already has: regenerating a page is not a reason to move it
+    // in the menu, and a page deleted from somewhere else in the file would otherwise
+    // pull every later one up.
+    const order = /\border:\s*(\d+)/.exec(existing)?.[1];
+    const entry = routeEntry(
+      page,
+      order === undefined ? nextOrder(source.slice(0, begin)) : Number(order),
+    ).trimStart();
     const next = source.slice(0, begin) + entry + source.slice(end + endMarker.length);
 
     return { source: next, changed: existing !== entry, replaced: true };

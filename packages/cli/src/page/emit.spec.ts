@@ -80,8 +80,8 @@ describe('emitPage', () => {
   });
 
   it('puts a search box on a list endpoint that takes a filter, and not otherwise', () => {
-    expect(emitPage(book)).toContain('v-model="list.filter.value"');
-    expect(emitPage({ ...book, filter: false })).not.toContain('v-model="list.filter.value"');
+    expect(emitPage(book)).toContain('searchable');
+    expect(emitPage({ ...book, filter: false })).not.toContain('searchable');
   });
 
   it('re-reads the record before editing it when there is an endpoint for one', () => {

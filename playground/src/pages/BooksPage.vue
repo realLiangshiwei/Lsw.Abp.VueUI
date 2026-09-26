@@ -54,6 +54,7 @@ const editor = useRecordEditor<BookDto>({
       :list="list"
       record-key="id"
       caption="BookStore::Menu:Books"
+      searchable
     />
 
     <AbpRecordModal

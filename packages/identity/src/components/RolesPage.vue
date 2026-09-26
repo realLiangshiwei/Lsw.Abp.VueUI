@@ -14,7 +14,6 @@ import {
   type IdentityRoleUpdateDto,
 } from '@lsw-abpvue/identity/proxy';
 import { AbpPermissionManagement } from '@lsw-abpvue/permission-management';
-import { AbpInput } from '@lsw-abpvue/theme-shared';
 import { ref, shallowRef } from 'vue';
 import { IdentityComponents } from '../enums/components.js';
 import { ROLES_PAGE } from '../tokens/extensions.token.js';
@@ -63,15 +62,13 @@ const editor = useRecordEditor<IdentityRoleDto>({
       <AbpPageToolbar :data="items" />
     </template>
 
-    <AbpInput
-      v-model="list.filter.value"
-      type="search"
-      class="mb-3"
-      :placeholder="$t('AbpUi::PagerSearch')"
-      :aria-label="$t('AbpUi::PagerSearch')"
+    <AbpExtensibleTable
+      :data="items"
+      :list="list"
+      record-key="id"
+      caption="AbpIdentity::Roles"
+      searchable
     />
-
-    <AbpExtensibleTable :data="items" :list="list" record-key="id" caption="AbpIdentity::Roles" />
 
     <AbpRecordModal
       :editor="editor"

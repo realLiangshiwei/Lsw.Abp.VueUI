@@ -17,7 +17,7 @@ import {
   type IdentityUserUpdateDto,
 } from '@lsw-abpvue/identity/proxy';
 import { AbpPermissionManagement } from '@lsw-abpvue/permission-management';
-import { AbpInput, AbpToggle } from '@lsw-abpvue/theme-shared';
+import { AbpToggle } from '@lsw-abpvue/theme-shared';
 import { ref, shallowRef } from 'vue';
 import { IdentityComponents } from '../enums/components.js';
 import { USERS_PAGE } from '../tokens/extensions.token.js';
@@ -120,15 +120,13 @@ function toggleRole(name: string, granted: boolean): void {
       <AbpPageToolbar :data="items" />
     </template>
 
-    <AbpInput
-      v-model="list.filter.value"
-      type="search"
-      class="mb-3"
-      :placeholder="$t('AbpUi::PagerSearch')"
-      :aria-label="$t('AbpUi::PagerSearch')"
+    <AbpExtensibleTable
+      :data="items"
+      :list="list"
+      record-key="id"
+      caption="AbpIdentity::Users"
+      searchable
     />
-
-    <AbpExtensibleTable :data="items" :list="list" record-key="id" caption="AbpIdentity::Users" />
 
     <AbpRecordModal
       :editor="editor"

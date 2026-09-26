@@ -382,7 +382,10 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
   const updateType = bodyTypeOf(actions.update) ?? createType;
   const columns = propsOf(registry, types, recordType, resource, report);
   const fields = propsOf(registry, types, createType, resource, report);
-  const listInput = actions.getList.parameters.some(parameter => parameter.name === 'filter');
+  // ABP reports a bound query parameter under the CLR property's own name, `Filter`.
+  const listInput = actions.getList.parameters.some(
+    parameter => (parameter.jsonName ?? parameter.name).toLowerCase() === 'filter',
+  );
 
   const policies: EntityPolicies = options.policy
     ? {

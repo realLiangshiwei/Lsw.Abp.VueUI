@@ -161,6 +161,33 @@ describe('generate', () => {
     );
   });
 
+  it('generates the page ABP’s own BookStore tutorial entity gets', async () => {
+    const cwd = await project('app');
+    await runGenerate(args(cwd, { entity: 'Book' }));
+
+    const page = await read(cwd, 'src/pages/BooksPage.vue');
+    const extensions = await read(cwd, 'src/pages/books.extensions.ts');
+
+    // The number the whole extension system is measured by: the React template's
+    // hand-written BooksPage.tsx is 438 lines (design 09).
+    expect(page.split('\n').length).toBeLessThan(438 / 6);
+
+    expect(page).toContain("import { BookService } from '../proxy/book-store/books'");
+    expect(page).toContain("deletionMessage: 'BookStore::BookDeletionConfirmationMessage'");
+    expect(page).toContain('searchable');
+
+    // Four columns, the enum among them, localized the way ABP names enum members.
+    expect(extensions).toContain("name: 'publishDate'");
+    expect(extensions).toContain('`BookStore::Enum:BookType.${value}`');
+    expect(extensions).toContain('Validators.range(0, 1000)');
+
+    // The permissions the controller carries, and the object extensions the backend
+    // declares for the entity.
+    expect(extensions).toContain("permission: 'BookStore.Books.Create'");
+    expect(extensions).toContain("getObjectExtensionEntities(injector, 'BookStore')");
+    expect(extensions).toContain('{ [BOOKS]: entities.Book }');
+  });
+
   it('finds an entity in another module when told which one', async () => {
     const cwd = await project('identity,multi-tenancy');
     await runGenerate(args(cwd, { entity: 'IdentityUser', module: 'identity' }));

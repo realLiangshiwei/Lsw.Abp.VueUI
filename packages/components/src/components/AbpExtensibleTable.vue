@@ -6,9 +6,9 @@ import {
   useListPreferences,
   type ListService,
 } from '@lsw-abpvue/core';
-import { AbpPagination } from '@lsw-abpvue/theme-shared';
+import { AbpInput, AbpPagination } from '@lsw-abpvue/theme-shared';
 import { computed, watch, watchEffect, type Ref } from 'vue';
-import { ACTIONS, NO, PAGER_INFO, PAGINATION, YES } from '../defaults/texts.js';
+import { ACTIONS, NO, PAGER_INFO, PAGER_SEARCH, PAGINATION, YES } from '../defaults/texts.js';
 import { PropType } from '../enums/prop-type.js';
 import type { EntityProp, PropValue } from '../models/entity-props.js';
 import { unwrapResolvable, type PropData } from '../models/prop-data.js';
@@ -36,6 +36,12 @@ const props = withDefaults(
     caption?: string | undefined;
     selectable?: boolean | undefined;
     expandable?: boolean | undefined;
+    /**
+     * A search box above the table, bound to the list's filter. Only for a backend whose
+     * list endpoint takes one; the filter is sent either way, and an endpoint that
+     * ignores it would leave the box doing nothing.
+     */
+    searchable?: boolean | undefined;
     /** Where the hidden columns are remembered; the list's own key when there is none. */
     persistKey?: string | undefined;
   }>(),
@@ -47,6 +53,7 @@ const props = withDefaults(
     persistKey: undefined,
     selectable: false,
     expandable: false,
+    searchable: false,
   },
 );
 
@@ -224,6 +231,15 @@ const pageInfo = computed(() => {
 <template>
   <!-- eslint-disable vue/no-mutating-props -- see the note in the script block -->
   <div class="abp-extensible-table">
+    <AbpInput
+      v-if="searchable"
+      v-model="list.filter.value"
+      type="search"
+      class="abp-extensible-table__search"
+      :placeholder="$t(PAGER_SEARCH)"
+      :aria-label="$t(PAGER_SEARCH)"
+    />
+
     <AbpDataTable
       v-model:sort-key="list.sortKey.value"
       v-model:sort-order="list.sortOrder.value"

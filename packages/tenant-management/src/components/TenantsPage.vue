@@ -14,7 +14,6 @@ import {
   type TenantDto,
   type TenantUpdateDto,
 } from '@lsw-abpvue/tenant-management/proxy';
-import { AbpInput } from '@lsw-abpvue/theme-shared';
 import { ref, shallowRef } from 'vue';
 import AbpTenantConnectionString from './AbpTenantConnectionString.vue';
 import { TenantManagementComponents } from '../enums/components.js';
@@ -72,14 +71,6 @@ const editor = useRecordEditor<TenantDto>({
     <template #toolbar>
       <AbpPageToolbar :data="items" />
     </template>
-
-    <AbpInput
-      v-model="list.filter.value"
-      type="search"
-      class="mb-3"
-      :placeholder="$t('AbpUi::PagerSearch')"
-      :aria-label="$t('AbpUi::PagerSearch')"
-    />
 
     <AbpExtensibleTable
       :data="items"
