@@ -13,7 +13,9 @@
     // The generated proxy and the tests that call a real backend through it: what a
     // consumer compiles is what is checked here (M3 V1).
     "e2e/proxy/**/*.ts",
-    "e2e/specs/**/*.ts"
+    "e2e/specs/**/*.ts",
+    // The documentation site's own configuration; its pages are markdown.
+    "docs/.vitepress/**/*.ts"
   ],
   "exclude": ["node_modules", "**/dist", "e2e/backend", "playground", "templates"]
 }

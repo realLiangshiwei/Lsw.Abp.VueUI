@@ -10,9 +10,12 @@
         "proxy/src/**",
         "index.html",
         "vite.config.ts",
-        "tsconfig*.json"
+        "tsconfig*.json",
+        "*.md",
+        "**/*.md",
+        ".vitepress/**"
       ],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**", ".vitepress/dist/**"]
     },
     "typecheck": {
       "dependsOn": ["^build"],

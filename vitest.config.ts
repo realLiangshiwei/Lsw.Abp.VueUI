@@ -12,7 +12,10 @@ export default defineConfig({
       'packages/*',
       {
         // Tests for the build tooling itself: the architecture lint rules, the alias
-        // resolution the playground depends on.
+        // resolution the playground depends on, and whether the documentation site's
+        // examples import things that exist -- which needs the packages resolvable.
+        plugins: [vue()],
+        resolve: { alias: workspaceAliases(resolve(root, 'packages')) },
         test: {
           name: 'tooling',
           root,
