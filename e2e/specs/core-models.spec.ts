@@ -113,8 +113,16 @@ const DECLARED_ON_PURPOSE: Record<string, string[]> = {
 };
 
 describe('the contract matrix', () => {
+  it('keeps both tested ABP minors in the captured matrix', () => {
+    expect(fixtureSets().map(set => set.version)).toEqual(
+      expect.arrayContaining(['10.5.0', '10.6.0']),
+    );
+  });
+
   it('has a row per captured ABP version, and one for a live backend', () => {
-    expect(matrix.length).toBeGreaterThan(0);
+    for (const set of fixtureSets()) {
+      expect(matrix.map(row => row.version)).toContain(`${set.version} (captured)`);
+    }
     console.info(`[core] contract matrix: ${matrix.map(row => row.version).join(', ')}`);
   });
 });

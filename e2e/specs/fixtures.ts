@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { abpVersionIn } from '../../packages/cli/src/solution/abp-version.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '..', 'fixtures');
@@ -19,11 +20,7 @@ function defaultVersion(): string {
   const solution = resolve(here, '../backend/BookStore/BookStore.abpsln');
 
   try {
-    const parsed = JSON.parse(readFileSync(solution, 'utf8')) as {
-      versions?: { AbpFramework?: string };
-    };
-
-    return parsed.versions?.AbpFramework ?? 'unknown';
+    return abpVersionIn(readFileSync(solution, 'utf8')) ?? 'unknown';
   } catch {
     return 'unknown';
   }

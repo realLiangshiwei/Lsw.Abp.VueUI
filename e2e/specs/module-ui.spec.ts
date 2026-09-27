@@ -118,9 +118,10 @@ async function application(accessToken: string): Promise<Injector> {
 
 const unique = () => `m6-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-// Built here rather than in the suite: the configuration has to be loaded before
-// anything reads it, and only the module's top level may await.
-const injector = token ? await application(token) : (undefined as unknown as Injector);
+// A skipped describe still collects its callbacks and resolves their services.
+const injector = token
+  ? await application(token)
+  : createInjector([provideAbpCore(withOptions({ environment }))]);
 
 describe.skipIf(!token)('the module pages against the backend they are for', () => {
   describe('identity, assembled the way a route entering the module assembles it', () => {
