@@ -103,6 +103,14 @@ const report = await rest.request<never, ReportDto>(
 how a module on its own host is reached. `skipAuthorization` leaves the bearer token off
 while keeping the tenant header — what a call to the token endpoint needs.
 
+REST requests also carry `X-Requested-With: XMLHttpRequest`. ABP's cookie authentication
+uses it to return 401 or 403 for an API failure instead of redirecting to an HTML login
+page. An explicit header of the same name takes precedence, regardless of casing.
+
+For an external API that should not receive the framework's headers, pass
+`skipAddingHeader: true`. This leaves off the AJAX, tenant, language and timezone headers;
+use `skipAuthorization: true` as well when that API should not receive the bearer token.
+
 ## When the proxy goes stale
 
 ```bash

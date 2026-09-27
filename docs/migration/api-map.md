@@ -40,6 +40,7 @@ reason for every difference. This is the working subset.
 | `HttpErrorResponse` | `AbpHttpError` | ≈ `error` is the inner envelope object; `isTransportFailure` for `status === 0` |
 | Unsubscribing cancels a request | `RestConfig.signal` | Δ a promise has no subscription to drop |
 | `RestService.request<In, Out>()` | same | = |
+| HTTP requests have no extra AJAX marker | `RestService` adds `X-Requested-With: XMLHttpRequest` | Δ+ cookie authentication returns 401/403 rather than login-page HTML; an explicit header wins, and `skipAddingHeader` opts out |
 | `IS_EXTERNAL_REQUEST` (drops every header) | `RestConfig.skipAuthorization` (drops only the bearer) | Δ+ the token endpoint needs `__tenant` but not `Authorization` |
 | `HTTP_INTERCEPTORS` | same | = |
 
@@ -113,6 +114,7 @@ reason for every difference. This is the working subset.
 | `theme-shared` depends on ng-bootstrap | `theme-shared` has no UI dependency | Δ+ |
 | `ToasterService`, `ConfirmationService` | same names | = |
 | Toast timing lives in the component | It lives in the service | Δ+ every theme would otherwise reimplement it |
+| `DateTimeAdapter` converts a string to browser-local time | Native date inputs display the calendar date and time written in the ISO string | Δ no browser-timezone conversion; an unedited value keeps its original ISO representation |
 | — | `runThemeContractTests(theme)`: 70 behavioural assertions plus axe | Δ+ |
 | — | Tables carry a `<caption>`; `aria-sort` is set | Δ+ a11y baseline |
 

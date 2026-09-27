@@ -50,7 +50,17 @@ Acme.BookStore/
 
 ## Running it
 
-Three terminals, in this order:
+From the generated solution's root, install the backend's client-side libraries:
+
+```bash
+cd Acme.BookStore
+abp install-libs
+```
+
+The backend still needs these libraries with `no-ui`. If this step was skipped or an
+ABP post-action failed, requests can return 500 with "The Libs Folder is Missing".
+
+Then start the database, seed the application and run both hosts, in this order:
 
 ```bash
 # 1. the database, if the template needs one
@@ -68,9 +78,12 @@ Run the migrator from inside its own project directory. From anywhere else it re
 ```bash
 # 3. the backend
 cd ../Acme.BookStore.HttpApi.Host && dotnet run
+```
 
-# 4. the frontend
-cd ../../vue && pnpm install && pnpm dev
+In a new terminal, from the generated solution's root:
+
+```bash
+cd vue && pnpm install && pnpm dev
 ```
 
 The frontend is on <http://localhost:4200>, the backend on whatever port the template

@@ -29,3 +29,10 @@ property by property. If it names one, it is our bug.
 
 Without a token the permission names are skipped, and it says so — anonymous
 `grantedPolicies` is empty, and comparing against nothing would look like agreement.
+
+The tested ABP minor versions are 10.5 and 10.6. A different version produces a warning;
+it does not prevent the application from starting.
+
+Solution metadata accepts comments and trailing commas, including those left by ABP's
+template. Malformed metadata or a missing version produces a warning so the remaining
+diagnostics can still run.
