@@ -4,6 +4,12 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      publish_preview:
+        description: Publish preview packages after verification
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -34,9 +40,9 @@ jobs:
       - run: pnpm --filter playground bench:build
       - run: pnpm size
 
-      # Preview builds for every commit and PR, installable straight from the URL
-      # pkg.pr.new prints. Nothing goes to npm; entries are purged after a month.
-      - run: pnpm exec pkg-pr-new publish './packages/*' --pnpm
+      # Publication requires an explicit choice when starting a manual run.
+      - if: github.event_name == 'workflow_dispatch' && inputs.publish_preview
+        run: pnpm exec pkg-pr-new publish './packages/*' --pnpm
 
   # The CLI writes files and joins paths, which is the one part of this repository whose
   # behaviour differs per platform. Everything else runs in a browser.
