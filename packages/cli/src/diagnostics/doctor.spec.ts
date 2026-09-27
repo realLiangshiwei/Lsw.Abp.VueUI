@@ -131,6 +131,38 @@ describe('abpv doctor', () => {
     expect(checks.find(check => check.name === 'configuration')?.fix).toContain('dynamic-env');
   });
 
+  it('reads the ABP version from solution metadata containing comments and trailing commas', async () => {
+    await writeFile(
+      join(root, 'Acme.BookStore.abpsln'),
+      '{ /* ABP solution */ "versions": { "AbpFramework": "10.6.0", }, "languages": ["English",], }',
+      'utf8',
+    );
+
+    const { checks } = await runDoctor({
+      project,
+      solution: root,
+      offline: true,
+      environment: false,
+    });
+
+    expect(status(checks, 'versions')).toBe('ok');
+    expect(detail(checks, 'versions')).toContain('ABP 10.6.0');
+  });
+
+  it('reports an unreadable version instead of crashing on malformed solution metadata', async () => {
+    await writeFile(join(root, 'Acme.BookStore.abpsln'), '{ "versions":', 'utf8');
+
+    const { checks } = await runDoctor({
+      project,
+      solution: root,
+      offline: true,
+      environment: false,
+    });
+
+    expect(status(checks, 'versions')).toBe('warn');
+    expect(detail(checks, 'versions')).toContain('no ABP version found');
+  });
+
   it('reports a backend that does not answer', async () => {
     await configure({ apis: { default: { url: 'http://127.0.0.1:1' } } });
 

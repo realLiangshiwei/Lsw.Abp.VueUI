@@ -6,6 +6,7 @@ import { readProjectEnvironment, type ProjectEnvironment } from '../config/proje
 import { readProxyConfig } from '../config/proxy-config.js';
 import { generateProxy } from '../generator/generate.js';
 import { readSourceCodeRecord } from '../source-code/record.js';
+import { abpVersionIn } from '../solution/abp-version.js';
 import { findSolutionUpwards, readSolution, type Solution } from '../solution/locate.js';
 import { reachBackend, type ReachResult } from './backend.js';
 import { checkEnvironment } from './environment.js';
@@ -239,9 +240,7 @@ async function abpVersionOf(solution: Solution): Promise<string | undefined> {
   );
   if (!text) return undefined;
 
-  const parsed = JSON.parse(text) as { versions?: { AbpFramework?: string } };
-
-  return parsed.versions?.AbpFramework;
+  return abpVersionIn(text);
 }
 
 /**
