@@ -50,7 +50,7 @@ Acme.BookStore/
 
 ## Running it
 
-From the generated solution's root, install the backend's client-side libraries:
+After generation, enter the solution directory and install the backend's client-side libraries:
 
 ```bash
 cd Acme.BookStore

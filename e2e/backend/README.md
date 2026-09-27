@@ -13,16 +13,21 @@ subscription produces the commercial variant. Keep it on any regeneration.
 
 ## Run it
 
+From the repository root:
+
 ```bash
 docker run -d --name abpvue-mongo -p 27017:27017 --restart unless-stopped mongo:8
 
-cd BookStore
+cd e2e/backend/BookStore
 abp install-libs
 cd src/BookStore.DbMigrator
 dotnet run
 cd ../BookStore.HttpApi.Host
 dotnet run
 ```
+
+If the MongoDB container already exists, use `docker start abpvue-mongo` instead of
+`docker run`.
 
 Swagger is at <https://localhost:44384/swagger>. Admin user is `admin` / `1q2w3E*`.
 
