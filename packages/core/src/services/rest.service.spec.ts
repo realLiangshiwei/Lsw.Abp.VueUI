@@ -97,6 +97,39 @@ describe('query parameters', () => {
   });
 });
 
+describe('AJAX requests', () => {
+  it('identifies an API call so cookie authentication returns a status instead of HTML', async () => {
+    const send = vi.fn<FetchLike>(() => Promise.resolve(json({})));
+    await context(send).get(RestService).request({ method: 'GET', url: '/api/books' });
+
+    expect(send.mock.calls[0]?.[1]?.headers).toMatchObject({
+      'X-Requested-With': 'XMLHttpRequest',
+    });
+  });
+
+  it('preserves an explicit header regardless of casing', async () => {
+    const send = vi.fn<FetchLike>(() => Promise.resolve(json({})));
+    await context(send)
+      .get(RestService)
+      .request({
+        method: 'GET',
+        url: '/api/books',
+        headers: { 'x-requested-with': 'custom' },
+      });
+
+    expect(send.mock.calls[0]?.[1]?.headers).toEqual({ 'x-requested-with': 'custom' });
+  });
+
+  it('does not add the marker to a request that opts out of framework headers', async () => {
+    const send = vi.fn<FetchLike>(() => Promise.resolve(json({})));
+    await context(send)
+      .get(RestService)
+      .request({ method: 'GET', url: 'https://other.example.com/x' }, { skipAddingHeader: true });
+
+    expect(send.mock.calls[0]?.[1]?.headers).toEqual({});
+  });
+});
+
 describe('what comes back', () => {
   it('only the body is returned by default', async () => {
     const rest = context(() => Promise.resolve(json({ id: '1' }))).get(RestService);

@@ -52,6 +52,13 @@ export const RestService = defineService('RestService', () => {
     config: RestConfig,
   ): Promise<HttpResponse> {
     const base = request.url.startsWith('http') ? '' : environment.getApiUrl(config.apiName);
+    const hasAjaxHeader = Object.keys(request.headers ?? {}).some(
+      name => name.toLowerCase() === 'x-requested-with',
+    );
+    const headers =
+      config.skipAddingHeader || hasAjaxHeader
+        ? request.headers
+        : { ...request.headers, 'X-Requested-With': 'XMLHttpRequest' };
     const done = wait.start();
 
     try {
@@ -59,6 +66,7 @@ export const RestService = defineService('RestService', () => {
         ...request,
         url: removeDuplicateSlashes(base + request.url),
         params: filterParams(request.params),
+        headers,
         context: config,
         ...(config.signal ? { signal: config.signal } : {}),
       });

@@ -26,7 +26,7 @@ export interface RestConfig {
   apiName?: string | undefined;
   /** Keeps the error away from `HttpErrorReporterService`, for a caller that handles it. */
   skipHandleError?: boolean | undefined;
-  /** Skips the tenant, language and timezone headers. */
+  /** Skips the AJAX, tenant, language and timezone headers. */
   skipAddingHeader?: boolean | undefined;
   /**
    * Keeps the authentication package out of this request: no bearer token, and no
