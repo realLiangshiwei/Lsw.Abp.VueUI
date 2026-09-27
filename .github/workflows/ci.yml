@@ -31,6 +31,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:coverage
       - run: pnpm build
+      - run: pnpm --filter playground bench:build
       - run: pnpm size
 
       # Preview builds for every commit and PR, installable straight from the URL
