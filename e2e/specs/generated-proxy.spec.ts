@@ -11,7 +11,7 @@ import {
   type HttpInterceptor,
 } from '@lsw-abpvue/core';
 import { generateProxy, readApiDefinition, readApplicationConfiguration } from '@lsw-abpvue/cli';
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { IdentityRoleService } from '../proxy/volo/abp/identity/identity-role.service.js';
 import { IdentityUserService } from '../proxy/volo/abp/identity/identity-user.service.js';
 import { TenantService } from '../proxy/volo/abp/tenant-management/tenant.service.js';
@@ -21,6 +21,7 @@ import { EmailSettingsService } from '../proxy/volo/abp/setting-management/email
 import { ProfileService } from '../proxy/volo/abp/account/profile.service.js';
 import { AbpTenantService } from '../proxy/pages/abp/multi-tenancy/abp-tenant.service.js';
 import { FileService } from '../proxy/book-store/files/file.service.js';
+import { BookService } from '../proxy/book-store/books/book.service.js';
 import { BookStorePolicyNames } from '../proxy/policy-names.js';
 
 const BACKEND = process.env.ABP_BACKEND_URL ?? 'https://localhost:44384';
@@ -92,6 +93,93 @@ function application() {
 
 describe.skipIf(!token)('what the generated proxy does against the backend it came from', () => {
   const injector = application();
+
+  describe('books', () => {
+    const books = injector.get(BookService);
+    const filter = `book-${Date.now()}`;
+    const ids: string[] = [];
+    const names = ['A', 'B', 'C'].map(suffix => `${filter}-${suffix}`);
+
+    beforeAll(async () => {
+      for (const [index, name] of names.entries()) {
+        const created = await books.create({
+          name,
+          type: 8,
+          publishDate: ['2020-01-01', '2022-01-01', '2021-01-01'][index] as string,
+          price: [20, 10, 30][index] as number,
+          extraProperties: { Isbn: `${filter}-${index}` },
+        });
+        if (created.id) ids.push(created.id);
+      }
+    });
+
+    afterAll(async () => {
+      for (const id of ids) await books.delete(id);
+    });
+
+    it.each([
+      ['name asc', [0, 1, 2]],
+      ['name desc', [2, 1, 0]],
+      ['price asc', [1, 0, 2]],
+      ['price desc', [2, 0, 1]],
+      ['publishDate asc', [0, 2, 1]],
+      ['publishDate desc', [1, 2, 0]],
+    ] as const)('sorts by %s before paging', async (sorting, order) => {
+      const page = await books.getList({ filter, sorting, skipCount: 1, maxResultCount: 2 });
+
+      expect(page.totalCount).toBe(3);
+      expect(page.items.map(book => book.name)).toEqual(order.slice(1).map(index => names[index]));
+    });
+
+    it('keeps an object extension when a book is read and updated', async () => {
+      const id = ids[0] as string;
+      const read = await books.get(id);
+      expect(read.extraProperties?.Isbn).toBe(`${filter}-0`);
+
+      const updated = await books.update(id, {
+        name: read.name as string,
+        type: read.type,
+        publishDate: read.publishDate,
+        price: read.price,
+        extraProperties: { ...read.extraProperties, Isbn: `${filter}-updated` },
+      });
+
+      expect(updated.extraProperties?.Isbn).toBe(`${filter}-updated`);
+      expect(updated.publishDate).toBe(read.publishDate);
+    });
+
+    it('refuses book reads and writes without authentication', async () => {
+      const anonymous = createInjector([provideAbpCore(withOptions({ environment }))]).get(
+        BookService,
+      );
+
+      await expect(anonymous.getList({ maxResultCount: 1 })).rejects.toMatchObject({ status: 401 });
+      await expect(
+        anonymous.create({
+          name: `${filter}-anonymous`,
+          type: 8,
+          publishDate: '2026-10-02',
+          price: 1,
+        }),
+      ).rejects.toMatchObject({ status: 401 });
+    });
+
+    it('removes only the book addressed by its id', async () => {
+      const created = await books.create({
+        name: `${filter}-delete`,
+        type: 8,
+        publishDate: '2026-10-02',
+        price: 1,
+      });
+      const id = created.id as string;
+      ids.push(id);
+      await books.delete(id);
+      ids.splice(ids.indexOf(id), 1);
+
+      await expect(books.get(id)).rejects.toThrow();
+      expect((await books.getList({ filter, maxResultCount: 10 })).totalCount).toBe(3);
+    });
+  });
 
   describe('identity', () => {
     const users = injector.get(IdentityUserService);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using BookStore.Permissions;
 using Microsoft.AspNetCore.Authorization;
@@ -38,12 +39,19 @@ public class BookAppService : BookStoreAppService, IBookAppService
         }
 
         var total = query.Count();
-        var sorting = string.IsNullOrWhiteSpace(input.Sorting) ? "Name" : input.Sorting;
+        var sorting = (input.Sorting ?? "Name").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var property = sorting.FirstOrDefault()?.ToLowerInvariant() switch
+        {
+            "price" => nameof(Book.Price),
+            "publishdate" => nameof(Book.PublishDate),
+            _ => nameof(Book.Name),
+        };
+        var direction = sorting.Length > 1 && sorting[1].Equals("desc", StringComparison.OrdinalIgnoreCase)
+            ? "desc"
+            : "asc";
 
         var items = query
-            .OrderBy(book => sorting.StartsWith("Price", StringComparison.OrdinalIgnoreCase)
-                ? (object)book.Price
-                : book.Name)
+            .OrderBy($"{property} {direction}, Id")
             .Skip(input.SkipCount)
             .Take(input.MaxResultCount)
             .ToList();

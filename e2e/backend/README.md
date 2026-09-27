@@ -18,8 +18,10 @@ docker run -d --name abpvue-mongo -p 27017:27017 --restart unless-stopped mongo:
 
 cd BookStore
 abp install-libs
-dotnet run --project src/BookStore.DbMigrator
-dotnet run --project src/BookStore.HttpApi.Host
+cd src/BookStore.DbMigrator
+dotnet run
+cd ../BookStore.HttpApi.Host
+dotnet run
 ```
 
 Swagger is at <https://localhost:44384/swagger>. Admin user is `admin` / `1q2w3E*`.
@@ -56,11 +58,11 @@ writing it out keeps that shape in one file.
 a column without being generated again, which is the whole claim of the extension system
 and now has something to check it against.
 
-The admin role is granted the application's own permissions by
-`BookStorePermissionDataSeedContributor`: ABP seeds a role with the permissions that
-existed when it was created, so one added later reaches nobody. **The permission cache is
-per process** -- after seeding, restart the host or every request is a 403 that has
-nothing to do with what is being tested.
+The migrator loads the application contracts, including the application's permission
+definitions. ABP's `PermissionDataSeedContributor` grants those permissions to the admin
+role on each seed run, including permissions added after the role was created. After
+adding a permission, run the migrator again and restart the host to refresh its permission
+cache. This was checked against a separate database with an existing admin role.
 
 ## Fixtures
 
@@ -84,15 +86,12 @@ subdirectory of it that has an `api-definition.json` in it. The directory name i
 version that row reports, so a second ABP version is one command:
 
 ```bash
-ABP_BACKEND_URL=https://localhost:44399 ./scripts/capture-fixtures.sh --into e2e/fixtures/10.7
+ABP_BACKEND_URL=https://localhost:44385 ./scripts/capture-fixtures.sh --into e2e/fixtures/10.5.0
 ```
 
-There is one row today, ABP 10.6, because 10.6 is the current minor and the Studio CLI
-generates that one only. Generating a 10.5 solution by pinning the package versions down
-does not work either: the LeptonXLite the host project carries requires 10.6. So the plan's
-"the current minor and the one before it" is a row short until 10.7 ships, and
-`abpv doctor` says it is tested against 10.6 rather than claiming a version nothing was
-run on.
+The matrix covers ABP 10.5.0 and 10.6.0. Both sets were captured from running backends;
+the [10.5.0 capture notes](../fixtures/10.5.0/README.md) explain how to reproduce the older
+host with matching dependencies. `abpv doctor` reports both tested minor versions.
 
 ## The spec that needs the official CLI
 
