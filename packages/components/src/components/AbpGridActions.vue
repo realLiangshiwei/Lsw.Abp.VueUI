@@ -81,8 +81,13 @@ onScopeDispose(() => {
   window.removeEventListener('resize', closeOnScroll);
 });
 
-function run(action: EntityAction<R>): void {
+function closeMenu(): void {
+  toggle.value?.focus();
   open.value = false;
+}
+
+function run(action: EntityAction<R>): void {
+  closeMenu();
   void action.action(data.value);
 }
 
@@ -117,7 +122,7 @@ function closeOnLeave(event: FocusEvent): void {
     :open="open"
     @toggle="onToggle(($event.target as HTMLDetailsElement).open)"
     @focusout="closeOnLeave"
-    @keydown.esc="open = false"
+    @keydown.esc.prevent.stop="closeMenu"
   >
     <summary ref="toggle" class="abp-grid-actions-toggle">{{ $t(text ?? ACTIONS) }}</summary>
     <ul class="abp-grid-actions-menu" :style="position">

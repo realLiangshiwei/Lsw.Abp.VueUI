@@ -246,6 +246,45 @@ describe('custom rendering', () => {
 describe('row actions', () => {
   const edit = EntityAction.create<Book>({ text: 'AbpUi::Edit', action: () => {} });
 
+  it('leaves a visible focus target before an action opens a dialog', async () => {
+    let focused: Element | null = null;
+    const { wrapper } = render({
+      actions: [
+        EntityAction.create<Book>({
+          text: 'Edit',
+          action: () => {
+            focused = document.activeElement;
+          },
+        }),
+        EntityAction.create<Book>({ text: 'Delete', action: () => {} }),
+      ],
+    });
+    document.body.appendChild(wrapper.element);
+    const menu = wrapper.find('td[data-column="__actions"] details');
+    await menu.get('summary').trigger('click');
+    (menu.get('button').element as HTMLButtonElement).focus();
+    await menu.get('button').trigger('click');
+
+    expect(focused).toBe(menu.get('summary').element);
+    expect(menu.attributes('open')).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it('returns keyboard focus to the row toggle when Escape closes the menu', async () => {
+    const { wrapper } = render({
+      actions: [edit, EntityAction.create<Book>({ text: 'Delete', action: () => {} })],
+    });
+    document.body.appendChild(wrapper.element);
+    const menu = wrapper.find('td[data-column="__actions"] details');
+    await menu.get('summary').trigger('click');
+    (menu.get('button').element as HTMLButtonElement).focus();
+    await menu.get('button').trigger('keydown', { key: 'Escape' });
+
+    expect(document.activeElement).toBe(menu.get('summary').element);
+    expect(menu.attributes('open')).toBeUndefined();
+    wrapper.unmount();
+  });
+
   it('moving focus into the menu does not close it', async () => {
     const { wrapper } = render({
       actions: [edit, EntityAction.create<Book>({ text: 'AbpUi::Delete', action: () => {} })],
