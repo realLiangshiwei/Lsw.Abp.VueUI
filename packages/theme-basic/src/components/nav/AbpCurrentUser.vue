@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { useCurrentUser, useLocalization } from '@lsw-abpvue/core';
+import {
+  AuthService,
+  inject as injectAbp,
+  useCurrentUser,
+  useLocalization,
+} from '@lsw-abpvue/core';
 import { useUserMenu, type NavItem } from '@lsw-abpvue/theme-shared';
 import {
   DropdownMenuContent,
@@ -12,6 +17,7 @@ import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const currentUser = useCurrentUser();
+const auth = injectAbp(AuthService, { optional: true });
 const userMenu = useUserMenu();
 const localization = useLocalization();
 const router = useRouter();
@@ -50,6 +56,11 @@ async function activate(item: NavItem): Promise<void> {
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenuRoot>
+  </li>
+  <li v-else-if="auth" class="nav-item">
+    <button type="button" class="btn btn-link nav-link" @click="auth.navigateToLogin()">
+      {{ localization.t('AbpAccount::Login') }}
+    </button>
   </li>
 </template>
 
