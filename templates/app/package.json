@@ -32,6 +32,7 @@
     "@lsw-abpvue/cli": "workspace:*",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "6.0.3",
     "vite": "^8.2.1",
     "vite-tsconfig-paths": "^6.1.1",
     "vue-tsc": "^3.3.9"

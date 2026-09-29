@@ -46,12 +46,6 @@ with open(manifest_path, 'w') as file:
     json.dump(manifest, file, indent=2)
 PY
 
-# `vue-demi`, under reka-ui, writes its Vue 2 / Vue 3 shim in a postinstall.
-cat > "$app/pnpm-workspace.yaml" <<'YAML'
-allowBuilds:
-  vue-demi: true
-YAML
-
 echo "Installing"
 (cd "$app" && pnpm install --silent >/dev/null)
 

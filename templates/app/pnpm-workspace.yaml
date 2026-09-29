@@ -1,0 +1,8 @@
+# reka-ui depends on vue-demi, which initializes its Vue 3 entry point in a postinstall.
+allowBuilds:
+  vue-demi: true
+
+peerDependencyRules:
+  allowedVersions:
+    # tsconfck only parses tsconfig files; TypeScript 6 works despite its older peer range.
+    tsconfck>typescript: '6'

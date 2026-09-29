@@ -127,6 +127,21 @@ describe('renderTemplate', () => {
     expect(Object.values(manifest.dependencies)).not.toContain('workspace:*');
   });
 
+  it('allows the Vue compatibility shim to initialize on a clean pnpm install', async () => {
+    await render();
+
+    expect(await read('pnpm-workspace.yaml')).toMatch(/allowBuilds:\s+vue-demi: true/);
+  });
+
+  it('pins the TypeScript version supported by its Vue type checker', async () => {
+    await render();
+    const manifest = JSON.parse(await read('package.json')) as {
+      devDependencies: Record<string, string>;
+    };
+
+    expect(manifest.devDependencies.typescript).toBe('6.0.3');
+  });
+
   it('points the application at the backend it was told about', async () => {
     await render();
 
