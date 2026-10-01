@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Releases the source of two packages into a project that installed them from a tarball,
+# Releases module and theme source into a project that installed them from tarballs,
 # and checks the three things the milestone asks for (M8 V5):
 #   - the project still compiles
 #   - not one import in its own `src` had to change
@@ -47,7 +47,7 @@ with open(manifest_path, 'w') as file:
 PY
 
 echo "Installing"
-(cd "$app" && pnpm install --silent >/dev/null)
+(cd "$app" && pnpm install)
 
 before="$(cd "$app/src" && find . -type f | sort | xargs shasum | shasum)"
 
@@ -83,7 +83,8 @@ echo "  still on npm: $remaining"
 # The released source imports what its package depended on, and the release added those
 # to the project. A user does the same thing the note tells them to.
 echo "Installing again, for what the release added"
-(cd "$app" && pnpm install --silent >/dev/null)
+# CI freezes existing lockfiles by default, but the release just changed the manifest.
+(cd "$app" && pnpm install --no-frozen-lockfile)
 
 echo "Type-checking the project"
 (cd "$app" && ./node_modules/.bin/vue-tsc -p tsconfig.json)

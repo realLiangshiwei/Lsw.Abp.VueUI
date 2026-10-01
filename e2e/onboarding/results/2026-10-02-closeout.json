@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-02",
+  "mode": "M9 technical closeout verification",
+  "candidateBaseCommit": "ef953ffc0a73549f8d21ca364e3c30f65d7f9c29",
+  "verifiedChanges": [
+    "source-code release checker permits its changed manifest to update the lockfile under CI=true",
+    "installation failures remain visible in the checker output",
+    "generated library checker no longer inserts build permissions into the consumer project"
+  ],
+  "failureReproduction": {
+    "command": "CI=true pnpm check:source-code-release",
+    "error": "ERR_PNPM_OUTDATED_LOCKFILE",
+    "cause": "source-code release adds reka-ui to package.json; CI defaults to freezing the existing lockfile"
+  },
+  "liveBackend": {
+    "version": "10.6.0",
+    "url": "https://localhost:44384",
+    "recovery": "started the stopped abpvue-mongo container; OpenID discovery returned HTTP 200",
+    "coverage": {
+      "passedTests": 2051,
+      "skippedTests": 1,
+      "typeErrors": 0,
+      "statementsPercent": 90.61,
+      "branchesPercent": 81.1,
+      "functionsPercent": 87.38,
+      "linesPercent": 92
+    }
+  },
+  "backendUnavailableCoverage": {
+    "passedTests": 2010,
+    "skippedTests": 42,
+    "typeErrors": 0,
+    "statementsPercent": 90.59,
+    "branchesPercent": 81.1,
+    "functionsPercent": 87.34,
+    "linesPercent": 91.99
+  },
+  "checks": {
+    "lint": "passed",
+    "typecheck": "passed",
+    "buildIncludingDocumentation": "passed",
+    "benchmarkBuild": "passed",
+    "sizeLimits": "passed",
+    "publishedTypesWithTypeScript5_9": "passed",
+    "entryPointResolution": "passed",
+    "externalInstallation": "passed; one physical copy of each of the 14 packages",
+    "sourceCodeReleaseUnderCI": "passed",
+    "generatedLibraryUnderCI": "passed without checker-provided build permissions"
+  },
+  "browser": {
+    "url": "http://localhost:4200/books",
+    "result": "Login action visible; admin login succeeded; three seeded books and ISBN column visible",
+    "screenshot": "2026-10-02-closeout-books.png"
+  },
+  "humanThirtyMinuteAcceptanceSatisfied": false,
+  "independentHumanParticipants": 0,
+  "newcomerTrialInstructions": "e2e/onboarding/README.md",
+  "packagePublicationPerformed": false,
+  "issuesClosed": false
+}

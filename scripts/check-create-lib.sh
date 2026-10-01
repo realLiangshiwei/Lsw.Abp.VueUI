@@ -24,7 +24,6 @@ cd "$work"
 node "$root/packages/cli/dist/bin.js" create-lib Blogging --package @acme/blogging-vue
 
 cd blogging
-printf 'allowBuilds:\n  esbuild: true\n' > pnpm-workspace.yaml
 
 # The ABP Vue packages are not on npm before 0.1, so the versions the renderer wrote
 # resolve to nothing. Point the development dependencies at the tarballs instead, which
