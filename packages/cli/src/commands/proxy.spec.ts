@@ -1,6 +1,6 @@
 import { mkdtemp, readdir, readFile, rm, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { runProxy, type ProxyArgs } from './proxy.js';
 import { readProxyConfig } from '../config/proxy-config.js';
@@ -37,7 +37,12 @@ async function filesIn(directory: string): Promise<string[]> {
 
   return entries
     .filter(entry => entry.isFile())
-    .map(entry => join(entry.parentPath, entry.name).slice(directory.length + 1))
+    .map(entry =>
+      join(entry.parentPath, entry.name)
+        .slice(directory.length + 1)
+        .split(sep)
+        .join('/'),
+    )
     .sort();
 }
 
