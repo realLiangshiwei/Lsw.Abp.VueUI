@@ -43,7 +43,7 @@ If it names a property, it is our bug, not yours.
 | | |
 | --- | --- |
 | A blank page and a network error | The backend is not running, or the certificate is not trusted |
-| Backend requests return 500 with "The Libs Folder is Missing" | Run `abp install-libs` from the backend solution's root, then restart its host |
+| Backend requests return 500 with "The Libs Folder is Missing" | Run `abp install-libs` from the HttpApi.Host project directory, then restart its host |
 | Sign-in loops back to the login page | The redirect URI does not match what the OpenIddict client was seeded with. `abpv switch-ui --port <yours>`, then run the DbMigrator again |
 | Every request is 401 after switching tenants | Expected once: the token was minted for the other tenant and is discarded. If it keeps happening, the tenant's own client is not seeded |
 | The menu is empty after signing in | The user has no permissions, or `application-configuration` is being served from cache. Hard reload |

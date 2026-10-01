@@ -4,9 +4,17 @@ Your own entities are not npm packages — they are your domain model. `abpv gen
 writes their pages.
 
 ```bash
-abpv proxy add --module app       # the typed service the page is built on
-abpv generate Book
+pnpm abpv proxy add --module app       # the typed service the page is built on
+pnpm abpv generate Book
 ```
+
+Run these from the frontend directory. If a local backend serves an ASP.NET development
+certificate that Node does not trust, append `--insecure` to both commands. The CLI also
+prints this hint when certificate validation fails.
+
+Generate the proxy and page before starting `pnpm dev`. If the dev server is already
+running, stop it and restart after generation so Vite can scan the new dependencies
+before the first page navigation.
 
 Three things land:
 
@@ -110,7 +118,7 @@ a page that bypasses it:
 ## Regenerating
 
 ```bash
-abpv generate Book --force
+pnpm abpv generate Book --force
 ```
 
 Without `--force` a file that is already there is left alone. With it, only what is

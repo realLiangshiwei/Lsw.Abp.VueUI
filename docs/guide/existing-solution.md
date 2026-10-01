@@ -3,10 +3,10 @@
 `abpv switch-ui` adds a Vue UI to an ABP solution that already has one, or has none.
 
 ```bash
-abpv switch-ui                  # renames angular/ to angular.bak/ and adds vue/
-abpv switch-ui --mode keep      # leaves the old UI where it is
-abpv switch-ui --port 5173
-abpv switch-ui --dry-run        # says what it would do to your files
+npx @lsw-abpvue/cli switch-ui                  # renames angular/ to angular.bak/ and adds vue/
+npx @lsw-abpvue/cli switch-ui --mode keep      # leaves the old UI where it is
+npx @lsw-abpvue/cli switch-ui --port 5173
+npx @lsw-abpvue/cli switch-ui --dry-run        # says what it would do to your files
 ```
 
 ## It is deliberately timid
@@ -50,9 +50,20 @@ page by page.
 ## Afterwards
 
 ```bash
-cd vue && pnpm install && pnpm dev
-npx abpv doctor
+cd vue
+pnpm install
+pnpm abpv doctor
+pnpm dev
 ```
 
 If sign-in fails, `doctor` names which of the ten usual mismatches it is and prints the
 command that fixes it.
+
+Open the frontend URL printed by Vite, then click **Login** in the top-right navbar.
+The default flow opens the backend's login page and returns to Vue after authentication.
+
+To add a page for an entity already on the backend, follow [A CRUD page](./crud-page).
+The BookStore sample uses `pnpm abpv proxy add --module app` and `pnpm abpv generate Book`
+from `vue/`, before starting `pnpm dev`. If the server is already running, stop and
+restart it after generation. Append `--insecure` to each command for a local development
+certificate that Node does not trust.

@@ -1,10 +1,10 @@
 # A new solution
 
 One command creates both halves: the backend by the official ABP CLI, the frontend by
-this one.
+this one. This example uses MongoDB in Docker and includes the Books sample:
 
 ```bash
-npx @lsw-abpvue/cli new Acme.BookStore
+npx @lsw-abpvue/cli new Acme.BookStore -d mongodb --sample-crud
 ```
 
 ## Before you start
@@ -15,8 +15,11 @@ npx @lsw-abpvue/cli new Acme.BookStore
 | pnpm | Any recent version; npm and yarn work too |
 | .NET SDK | Whatever the ABP version you are creating needs |
 | The ABP CLI | `dotnet tool install -g Volo.Abp.Studio.Cli` |
+| Docker | For the MongoDB example below; an existing MongoDB server also works |
 
-`abpv doctor --offline` checks all four and prints the command that fixes each one.
+`new` checks the toolchain before it writes anything. Run `pnpm abpv doctor --offline`
+from the generated `vue/` directory after installation to check the project too. In an
+empty directory, `doctor` reports missing project configuration.
 
 Skip the last two if you already have a backend: `abpv new Acme.BookStore --no-backend
 --backend https://localhost:44305` writes only the frontend.
@@ -50,21 +53,27 @@ Acme.BookStore/
 
 ## Running it
 
-After generation, enter the solution directory and install the backend's client-side libraries:
+After generation, install the backend's client-side libraries from its host project:
 
 ```bash
-cd Acme.BookStore
+cd Acme.BookStore/src/Acme.BookStore.HttpApi.Host
 abp install-libs
+cd ../..
 ```
 
 The backend still needs these libraries with `no-ui`. If this step was skipped or an
 ABP post-action failed, requests can return 500 with "The Libs Folder is Missing".
+Running this command from the solution root also scans `vue/` and invokes Yarn there;
+the host directory keeps it scoped to backend libraries.
 
 Then start the database, seed the application and run both hosts, in this order:
 
 ```bash
-# 1. the database, if the template needs one
-docker start bookstore-db
+# 1. create the example's database container on the first run
+docker run -d --name bookstore-db -p 27017:27017 mongo:8
+
+# On later runs, use: docker start bookstore-db
+# If MongoDB already listens on port 27017, use that server instead.
 
 # 2. create the schema and seed the first user
 cd src/Acme.BookStore.DbMigrator && dotnet run
@@ -87,8 +96,10 @@ cd vue && pnpm install && pnpm dev
 ```
 
 The frontend is on <http://localhost:4200>, the backend on whatever port the template
-picked — `abpv doctor` prints it. Sign in with `admin` and the password the migrator
-seeded, which the template prints and is `1q2w3E*` unless you changed it.
+picked — `abpv doctor` prints it. Click **Login** in the top-right navbar. The default
+authorization code flow opens the backend's login page and returns to the frontend.
+Sign in with `admin` and the password the migrator seeded, which the template prints
+and is `1q2w3E*` unless you changed it. The **Books** menu opens the sample CRUD page.
 
 ## The options worth knowing
 
