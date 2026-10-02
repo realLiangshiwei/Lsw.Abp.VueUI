@@ -8,7 +8,8 @@ human usability trials. Package publication is paused at the user's request.
 
 1. Start the test backend and playground, then sign in with the test administrator.
 2. Open Roles at a width above 992px. Collapse the sidebar and verify the content fills
-   the available width. Reopen it and verify the selected route is visible.
+   the available width and the navbar places the logo before the menu toggle. Verify
+   the same order at 390px width. Reopen the sidebar and verify the selected route is visible.
 3. Open Language and the current-user menu. Verify their end edges align with their
    triggers and the lists remain inside the viewport. Press End in the language menu
    and verify the focused item scrolls into view. Repeat at 390px width and in Arabic.

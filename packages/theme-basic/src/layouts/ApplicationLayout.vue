@@ -81,6 +81,8 @@ function toggleSidebar(): void {
 
     <div class="abp-shell__main">
       <nav class="abp-shell__navbar navbar navbar-expand flex-nowrap">
+        <component :is="logo" v-if="narrow || collapsed" />
+
         <button
           type="button"
           class="abp-shell__menu-toggle btn btn-link"
@@ -91,7 +93,6 @@ function toggleSidebar(): void {
           <i class="bi bi-list" aria-hidden="true" />
         </button>
 
-        <component :is="logo" v-if="narrow || collapsed" />
         <component :is="navItems" />
       </nav>
 
