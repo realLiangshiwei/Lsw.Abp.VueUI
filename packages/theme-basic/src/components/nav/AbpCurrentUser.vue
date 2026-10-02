@@ -15,12 +15,14 @@ import {
 } from 'reka-ui';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDirection } from '../../services/direction.service.js';
 
 const currentUser = useCurrentUser();
 const auth = injectAbp(AuthService, { optional: true });
 const userMenu = useUserMenu();
 const localization = useLocalization();
 const router = useRouter();
+const { direction } = useDirection();
 
 const name = computed(() => currentUser.user.value.userName ?? '');
 
@@ -36,14 +38,19 @@ async function activate(item: NavItem): Promise<void> {
 
 <template>
   <li v-if="currentUser.isAuthenticated.value" class="nav-item">
-    <DropdownMenuRoot>
+    <DropdownMenuRoot :dir="direction">
       <DropdownMenuTrigger class="btn btn-link nav-link">
         <i class="bi bi-person-circle" aria-hidden="true" />
         <span class="ms-1">{{ name }}</span>
       </DropdownMenuTrigger>
 
       <DropdownMenuPortal>
-        <DropdownMenuContent class="abp-menu dropdown-menu show" align="end" :side-offset="4">
+        <DropdownMenuContent
+          class="abp-menu abp-nav-menu dropdown-menu show"
+          align="end"
+          :side-offset="8"
+          :collision-padding="12"
+        >
           <DropdownMenuItem
             v-for="item in userMenu.visible.value"
             :key="item.name"
@@ -63,9 +70,3 @@ async function activate(item: NavItem): Promise<void> {
     </button>
   </li>
 </template>
-
-<style scoped>
-.abp-menu {
-  z-index: 1085;
-}
-</style>

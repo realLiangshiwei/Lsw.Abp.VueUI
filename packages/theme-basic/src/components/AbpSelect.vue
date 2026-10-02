@@ -17,12 +17,14 @@ import {
   SelectViewport,
 } from 'reka-ui';
 import { computed } from 'vue';
+import { useDirection } from '../services/direction.service.js';
 import { defined } from '../utils/defined.js';
 
 const props = defineProps<AbpSelectProps>();
 
 const emit = defineEmits<AbpSelectEmits>();
 defineSlots<AbpSelectSlots>();
+const { direction } = useDirection();
 
 /**
  * reka-ui keys its items by the value it is given, and `null` is not a key. Options are
@@ -69,12 +71,13 @@ function onChange(next: unknown): void {
 <template>
   <SelectRoot
     v-bind="defined({ modelValue: selectedKey, multiple, name })"
+    :dir="direction"
     :disabled="Boolean(disabled || readonly)"
     @update:model-value="onChange"
   >
     <SelectTrigger
       :id="id"
-      class="form-select text-start"
+      class="abp-select__trigger form-select"
       :class="invalid ? 'is-invalid' : null"
       :aria-describedby="ariaDescribedby"
       :aria-label="ariaLabel"

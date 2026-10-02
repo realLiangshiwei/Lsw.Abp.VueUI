@@ -14,6 +14,7 @@ import {
   AbpButton,
   AbpInput,
   AbpModal,
+  AbpSelect,
   AbpSpinner,
   AbpToggle,
   useToaster,
@@ -75,6 +76,9 @@ const title = computed(() =>
 const shown = computed(() =>
   working.value.filter(permission => permission.groupName === selectedGroup.value),
 );
+const selectedGroupName = computed(
+  () => groups.value.find(group => group.name === selectedGroup.value)?.displayName ?? '',
+);
 
 const allState = computed(() => checkboxState(working.value));
 const groupState = computed(() => checkboxState(shown.value));
@@ -84,6 +88,15 @@ const groupDisabled = computed(() => isSelectAllDisabled(shown.value, props.prov
 /** The group tabs, named the way `AbpTabList` names a tab. */
 const tabs = computed(() =>
   groups.value.map(group => ({ name: group.name ?? '', displayName: group.displayName })),
+);
+const groupOptions = computed(() =>
+  tabs.value.map(item => {
+    const count = grantedCount(item.name);
+    return {
+      value: item.name,
+      label: `${item.displayName ?? item.name}${count ? ` (${count})` : ''}`,
+    };
+  }),
 );
 
 function grantedCount(groupName: string): number {
@@ -171,7 +184,13 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <AbpModal v-model:visible="visible" size="lg" :busy="busy" suppress-unsaved-changes-warning>
+  <AbpModal
+    v-model:visible="visible"
+    size="lg"
+    centered
+    :busy="busy"
+    suppress-unsaved-changes-warning
+  >
     <template #header>
       <h2 class="h5 mb-0">{{ title }}</h2>
     </template>
@@ -180,13 +199,16 @@ async function save(): Promise<void> {
 
     <div v-else class="abp-permissions">
       <div class="abp-permissions__header">
-        <AbpInput
-          v-model="filter"
-          class="abp-permissions__filter"
-          type="search"
-          :aria-label="$t('AbpPermissionManagement::Filter')"
-          :placeholder="$t('AbpPermissionManagement::Filter')"
-        />
+        <div class="abp-permissions__search">
+          <span class="abp-permissions__search-icon" aria-hidden="true" />
+          <AbpInput
+            v-model="filter"
+            class="abp-permissions__filter"
+            type="search"
+            :aria-label="$t('AbpPermissionManagement::Filter')"
+            :placeholder="$t('AbpPermissionManagement::Filter')"
+          />
+        </div>
 
         <AbpToggle
           class="abp-permissions__all"
@@ -199,53 +221,72 @@ async function save(): Promise<void> {
       </div>
 
       <div class="abp-permissions__body">
-        <AbpTabList
-          v-model="selectedGroup"
-          :items="tabs"
-          :aria-label="$t('AbpPermissionManagement::PermissionGroup')"
-        >
-          <template #label="{ item }">
-            {{ item.displayName }}
-            <span v-if="grantedCount(item.name) > 0" class="abp-permissions__count">
-              ({{ grantedCount(item.name) }})
-            </span>
-          </template>
-        </AbpTabList>
-
-        <div class="abp-permissions__list" role="tabpanel">
-          <AbpToggle
-            v-if="shown.length"
-            class="abp-permissions__all"
-            :model-value="groupState.checked"
-            :indeterminate="groupState.indeterminate"
-            :disabled="groupDisabled"
-            :label="$t('AbpPermissionManagement::SelectAllInThisTab')"
-            @update:model-value="setAllInGroup"
-          />
-
-          <hr />
-
-          <div
-            v-for="permission in shown"
-            :key="permission.name"
-            class="abp-permissions__permission"
-            :style="{ marginInlineStart: `${permission.depth * INDENT_STEP}px` }"
-          >
-            <AbpToggle
-              :model-value="permission.isGranted"
-              :disabled="isGrantedElsewhere(permission, providerName)"
-              :label="permission.displayName"
-              @update:model-value="working = toggle(working, permission.name ?? '')"
+        <div class="abp-permissions__groups">
+          <h3 class="abp-permissions__group-title">
+            {{ $t('AbpPermissionManagement::PermissionGroup') }}
+          </h3>
+          <div class="abp-permissions__group-selector">
+            <AbpSelect
+              :model-value="selectedGroup"
+              :options="groupOptions"
+              :aria-label="$t('AbpPermissionManagement::PermissionGroup')"
+              @update:model-value="selectedGroup = String($event)"
             />
-            <template v-if="!hideBadges">
-              <span
-                v-for="granted in permission.grantedProviders"
-                :key="`${granted.providerName}:${granted.providerKey}`"
-                class="abp-permissions__badge"
-              >
-                {{ granted.providerName }}: {{ granted.providerKey }}
+          </div>
+          <AbpTabList
+            v-model="selectedGroup"
+            :items="tabs"
+            :aria-label="$t('AbpPermissionManagement::PermissionGroup')"
+          >
+            <template #label="{ item }">
+              <span class="abp-permissions__group-name">{{ item.displayName }}</span>
+              <span v-if="grantedCount(item.name) > 0" class="abp-permissions__count">
+                ({{ grantedCount(item.name) }})
               </span>
             </template>
+          </AbpTabList>
+        </div>
+
+        <div class="abp-permissions__panel" role="tabpanel" :aria-label="selectedGroupName">
+          <div v-if="shown.length" class="abp-permissions__panel-header">
+            <h3 class="abp-permissions__panel-title">{{ selectedGroupName }}</h3>
+            <AbpToggle
+              class="abp-permissions__all"
+              :model-value="groupState.checked"
+              :indeterminate="groupState.indeterminate"
+              :disabled="groupDisabled"
+              :label="$t('AbpPermissionManagement::SelectAllInThisTab')"
+              @update:model-value="setAllInGroup"
+            />
+          </div>
+
+          <div class="abp-permissions__list">
+            <p v-if="!shown.length" class="abp-permissions__empty">
+              {{ $t('AbpUi::NoDataAvailableInDatatable') }}
+            </p>
+            <div
+              v-for="permission in shown"
+              :key="permission.name"
+              class="abp-permissions__permission"
+              :class="{ 'abp-permissions__permission--root': permission.depth === 0 }"
+              :style="{ marginInlineStart: `${permission.depth * INDENT_STEP}px` }"
+            >
+              <AbpToggle
+                :model-value="permission.isGranted"
+                :disabled="isGrantedElsewhere(permission, providerName)"
+                :label="permission.displayName"
+                @update:model-value="working = toggle(working, permission.name ?? '')"
+              />
+              <div v-if="!hideBadges" class="abp-permissions__providers">
+                <span
+                  v-for="granted in permission.grantedProviders"
+                  :key="`${granted.providerName}:${granted.providerKey}`"
+                  class="abp-permissions__badge"
+                >
+                  {{ granted.providerName }}: {{ granted.providerKey }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

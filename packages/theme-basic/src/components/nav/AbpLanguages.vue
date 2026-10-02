@@ -8,8 +8,10 @@ import {
   DropdownMenuTrigger,
 } from 'reka-ui';
 import { computed } from 'vue';
+import { useDirection } from '../../services/direction.service.js';
 
 const localization = useLocalization();
+const { direction } = useDirection();
 
 const others = computed(() =>
   localization.languages.value.filter(
@@ -27,14 +29,19 @@ const currentName = computed(
 
 <template>
   <li v-if="others.length > 0" class="nav-item">
-    <DropdownMenuRoot>
+    <DropdownMenuRoot :dir="direction">
       <DropdownMenuTrigger class="btn btn-link nav-link" :aria-label="$t('AbpUi::Language')">
         <i class="bi bi-translate" aria-hidden="true" />
         <span class="ms-1">{{ currentName }}</span>
       </DropdownMenuTrigger>
 
       <DropdownMenuPortal>
-        <DropdownMenuContent class="abp-menu dropdown-menu show" align="end" :side-offset="4">
+        <DropdownMenuContent
+          class="abp-menu abp-nav-menu dropdown-menu show"
+          align="end"
+          :side-offset="8"
+          :collision-padding="12"
+        >
           <DropdownMenuItem
             v-for="language in others"
             :key="language.cultureName ?? language.displayName ?? ''"
@@ -48,9 +55,3 @@ const currentName = computed(
     </DropdownMenuRoot>
   </li>
 </template>
-
-<style scoped>
-.abp-menu {
-  z-index: 1085;
-}
-</style>
