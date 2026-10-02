@@ -25,26 +25,8 @@ mkdir -p "$work/project"
 
 app="$work/project/Acme.BookStore"
 
-# The packages are not on npm before 0.1, so the project installs the tarballs that were
-# just built. Everything else it depends on comes from the registry, as a user's would.
-python3 - "$app/package.json" "$work/tarballs" <<'PY'
-import json, os, sys
-manifest_path, tarballs = sys.argv[1], sys.argv[2]
-with open(manifest_path) as file:
-    manifest = json.load(file)
-
-available = {}
-for name in os.listdir(tarballs):
-    available[name.rsplit('-', 1)[0].replace('lsw-abpvue-', '@lsw-abpvue/')] = os.path.join(tarballs, name)
-
-for group in ('dependencies', 'devDependencies'):
-    for name in list(manifest.get(group, {})):
-        if name in available:
-            manifest[group][name] = f"file:{available[name]}"
-
-with open(manifest_path, 'w') as file:
-    json.dump(manifest, file, indent=2)
-PY
+# Install the candidate tarballs; every other dependency comes from the registry.
+(cd "$app" && python3 "$root/scripts/local-tarball-deps.py" "$work/tarballs")
 
 echo "Installing"
 (cd "$app" && pnpm install)
