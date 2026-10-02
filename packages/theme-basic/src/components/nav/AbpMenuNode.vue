@@ -1,20 +1,34 @@
 <script setup lang="ts">
 import { useLocalization, type AbpRoute, type TreeNode } from '@lsw-abpvue/core';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 /**
  * One entry of the sidebar, and everything under it. Recursive because ABP's own menus
  * are three levels deep -- administration, then identity management, then users -- and a
  * middle entry has no path of its own to link to.
  */
-defineProps<{ node: TreeNode<AbpRoute> }>();
+const props = defineProps<{ node: TreeNode<AbpRoute> }>();
 
 const localization = useLocalization();
+const route = useRoute();
 const expanded = ref(false);
+
+function containsPath(node: TreeNode<AbpRoute>, path: string): boolean {
+  return node.path === path || node.children.some(child => containsPath(child, path));
+}
+
+watch(
+  () => route.path,
+  path => {
+    if (containsPath(props.node, path)) expanded.value = true;
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
-  <li class="nav-item">
+  <li class="abp-menu-node nav-item">
     <RouterLink v-if="node.isLeaf && node.path" class="nav-link" :to="node.path">
       <i v-if="node.iconClass" :class="node.iconClass" aria-hidden="true" />
       <span class="ms-2">{{ localization.t(node.name) }}</span>
@@ -47,17 +61,35 @@ const expanded = ref(false);
 .nav-link {
   display: flex;
   align-items: center;
+  gap: 0.25rem;
+  min-height: 2.625rem;
+  padding: 0.625rem 0.75rem;
+  margin-block: 0.125rem;
+  border-radius: var(--abp-control-radius);
   color: var(--abp-sidebar-link-fg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
 }
 
 .nav-link:hover,
 .nav-link:focus-visible {
   color: var(--abp-sidebar-link-active-fg);
+  background: var(--abp-sidebar-link-active-bg);
 }
 
 .router-link-active {
   color: var(--abp-sidebar-link-active-fg);
   background: var(--abp-sidebar-link-active-bg);
-  border-radius: var(--bs-border-radius);
+  font-weight: 600;
+}
+
+.abp-menu-node > ul {
+  padding-inline-start: 0.5rem;
+  border-inline-start: 1px solid var(--abp-border);
+}
+
+.nav-link > .bi:last-child {
+  font-size: 0.625rem;
 }
 </style>

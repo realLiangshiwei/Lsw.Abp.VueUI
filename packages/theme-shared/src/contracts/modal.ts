@@ -4,6 +4,8 @@ export interface AbpModalProps {
   busy?: boolean | undefined;
   size?: 'sm' | 'md' | 'lg' | 'xl' | undefined;
   centered?: boolean | undefined;
+  /** Marks changes made by controls that do not emit native input events. */
+  dirty?: boolean | undefined;
   /** Lets an unsaved form close without the "are you sure" step. */
   suppressUnsavedChangesWarning?: boolean | undefined;
   /**
@@ -24,5 +26,6 @@ export interface AbpModalEmits {
 export interface AbpModalSlots {
   header?: () => unknown;
   default?: () => unknown;
-  footer?: () => unknown;
+  /** Requests a user close, including the unsaved changes confirmation. */
+  footer?: (context: { close: () => Promise<void> }) => unknown;
 }

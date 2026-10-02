@@ -25,12 +25,14 @@ const readFromCallback = () => {
 </script>
 
 <template>
-  <section>
-    <h2>Component-level override</h2>
-    <output>{{ greeting }}</output>
+  <section class="border-top pt-4">
+    <h3 class="h6 mb-3">Component-level override</h3>
+    <output class="d-block text-body-secondary">{{ greeting }}</output>
     <LeafGreeting :name="name" />
 
-    <button type="button" @click="readFromCallback">Resolve from a callback</button>
-    <output v-if="fromCallback">{{ fromCallback }}</output>
+    <button type="button" class="btn btn-outline-secondary mt-3" @click="readFromCallback">
+      Resolve from a callback
+    </button>
+    <output v-if="fromCallback" class="d-block mt-3">{{ fromCallback }}</output>
   </section>
 </template>

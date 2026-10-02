@@ -1,3 +1,6 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import '@lsw-abpvue/theme-basic/style.css';
 import {
   createAbpApp,
   loadRuntimeConfig,
@@ -24,9 +27,6 @@ import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/c
 // abpv:begin feature-management
 import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/config';
 // abpv:end feature-management
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '@lsw-abpvue/theme-basic/style.css';
 import App from './App.vue';
 import { defaultEnvironment } from './env';
 import { routes } from './routes';

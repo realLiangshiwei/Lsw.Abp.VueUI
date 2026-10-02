@@ -182,6 +182,7 @@ async function save(): Promise<void> {
       <div class="abp-permissions__header">
         <AbpInput
           v-model="filter"
+          class="abp-permissions__filter"
           type="search"
           :aria-label="$t('AbpPermissionManagement::Filter')"
           :placeholder="$t('AbpPermissionManagement::Filter')"
@@ -205,7 +206,9 @@ async function save(): Promise<void> {
         >
           <template #label="{ item }">
             {{ item.displayName }}
-            <span v-if="grantedCount(item.name) > 0">({{ grantedCount(item.name) }})</span>
+            <span v-if="grantedCount(item.name) > 0" class="abp-permissions__count">
+              ({{ grantedCount(item.name) }})
+            </span>
           </template>
         </AbpTabList>
 
@@ -248,8 +251,8 @@ async function save(): Promise<void> {
       </div>
     </div>
 
-    <template #footer>
-      <AbpButton variant="secondary" outline :disabled="busy" @click="visible = false">
+    <template #footer="{ close }">
+      <AbpButton variant="secondary" outline :disabled="busy" @click="close">
         {{ $t('AbpUi::Cancel') }}
       </AbpButton>
       <AbpButton variant="primary" :loading="busy" @click="save">

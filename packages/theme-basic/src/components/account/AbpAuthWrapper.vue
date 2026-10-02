@@ -23,7 +23,7 @@ const showTenantBox = computed(
   <div class="abp-auth-wrapper mx-auto">
     <component :is="tenantBox" v-if="showTenantBox" />
 
-    <div v-if="wrapper.isLocalLoginEnabled.value" class="card shadow-sm">
+    <div v-if="wrapper.isLocalLoginEnabled.value" class="abp-auth-wrapper__card card">
       <div class="card-body p-4 p-md-5">
         <slot />
       </div>
@@ -40,5 +40,9 @@ const showTenantBox = computed(
 .abp-auth-wrapper {
   width: 100%;
   max-width: 28rem;
+}
+
+.abp-auth-wrapper__card {
+  box-shadow: var(--abp-shadow);
 }
 </style>

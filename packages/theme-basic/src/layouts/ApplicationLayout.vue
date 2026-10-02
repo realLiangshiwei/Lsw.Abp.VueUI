@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLocalization, useReplaceableComponents, WindowService } from '@lsw-abpvue/core';
 import { inject as injectAbp, StorageService } from '@lsw-abpvue/core';
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import AbpBreadcrumb from '../components/AbpBreadcrumb.vue';
 import AbpConfirmHost from '../components/AbpConfirmHost.vue';
@@ -36,6 +36,7 @@ const onResize = () => {
     (windowService.nativeWindow?.innerWidth ?? Number.POSITIVE_INFINITY) < DRAWER_WIDTH;
 };
 windowService.nativeWindow?.addEventListener('resize', onResize);
+onBeforeUnmount(() => windowService.nativeWindow?.removeEventListener('resize', onResize));
 
 watch(collapsed, value => storage.setItem(COLLAPSED_KEY, String(value)));
 // A drawer that stayed open over the page it just navigated to would hide it.
@@ -65,6 +66,7 @@ function toggleSidebar(): void {
       :class="{ 'abp-shell__sidebar--drawer': narrow, 'abp-shell__sidebar--open': drawerOpen }"
       :inert="narrow && !drawerOpen ? true : undefined"
     >
+      <div class="abp-shell__brand"><component :is="logo" /></div>
       <component :is="routes" />
     </aside>
 
@@ -78,12 +80,10 @@ function toggleSidebar(): void {
     />
 
     <div class="abp-shell__main">
-      <!-- `navbar-expand` keeps `navbar-nav` a row: without it Bootstrap stacks it and
-           the navbar wraps the whole right-hand side onto a second line. -->
-      <nav class="navbar navbar-expand flex-nowrap bg-body-tertiary px-3">
+      <nav class="abp-shell__navbar navbar navbar-expand flex-nowrap">
         <button
           type="button"
-          class="btn btn-link"
+          class="abp-shell__menu-toggle btn btn-link"
           :aria-expanded="narrow ? drawerOpen : !collapsed"
           :aria-label="localization.t(MENU)"
           @click="toggleSidebar"
@@ -91,11 +91,11 @@ function toggleSidebar(): void {
           <i class="bi bi-list" aria-hidden="true" />
         </button>
 
-        <component :is="logo" />
+        <component :is="logo" v-if="narrow || collapsed" />
         <component :is="navItems" />
       </nav>
 
-      <main class="p-3" @keydown.esc="drawerOpen = false">
+      <main class="abp-shell__content" @keydown.esc="drawerOpen = false">
         <AbpPageAlerts />
         <AbpBreadcrumb />
         <slot />
@@ -111,12 +111,12 @@ function toggleSidebar(): void {
 <style scoped>
 .abp-shell {
   display: grid;
-  grid-template-columns: var(--abp-sidebar-width) 1fr;
+  grid-template-columns: var(--abp-sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
 }
 
 .abp-shell--collapsed {
-  grid-template-columns: 0 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* Zero width still leaves the padding and the border showing as a sliver. */
@@ -125,10 +125,41 @@ function toggleSidebar(): void {
 }
 
 .abp-shell__sidebar {
+  position: sticky;
+  inset-block-start: 0;
+  height: 100vh;
   overflow: hidden auto;
-  padding: 1rem;
+  padding: 0 1rem 1.5rem;
   background: var(--abp-sidebar-bg);
   border-inline-end: 1px solid var(--abp-sidebar-border);
+}
+
+.abp-shell__brand {
+  display: flex;
+  align-items: center;
+  min-height: 4.5rem;
+  padding-inline: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.abp-shell__navbar {
+  min-height: 4.5rem;
+  gap: 0.75rem;
+  padding: 0.75rem var(--abp-content-padding);
+  border-bottom: 1px solid var(--abp-border);
+  background: var(--abp-navbar-bg);
+}
+
+.abp-shell__menu-toggle {
+  width: 2.5rem;
+  padding: 0;
+  color: var(--abp-muted);
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.abp-shell__content {
+  padding: var(--abp-content-padding);
 }
 
 .abp-shell__sidebar--drawer {

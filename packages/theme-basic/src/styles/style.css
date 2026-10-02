@@ -1,54 +1,273 @@
-/*
- * Everything themable is a custom property. Component styles read these and never a
- * colour of their own, which is what lets dark mode and a host's branding both be a
- * matter of redefining a handful of values.
- *
- * Dark mode rides on Bootstrap's `data-bs-theme`, set by `ThemeModeService`, so every
- * Bootstrap component follows without a stylesheet of ours in between.
- */
-:root {
+/* Bootstrap and the semantic component classes share the same theme tokens. */
+:root,
+[data-bs-theme='light'] {
+  --abp-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --abp-accent: #5145cd;
+  --abp-accent-rgb: 81, 69, 205;
+  --abp-accent-hover: #4437b7;
+  --abp-accent-fg: #fff;
+  --abp-accent-soft: #eeedfc;
+  --abp-link: #5145cd;
+  --abp-surface: #fff;
+  --abp-surface-muted: #f8f9fc;
+  --abp-canvas: #f4f6fa;
+  --abp-text: #1c273e;
+  --abp-muted: #59677d;
+  --abp-border: #e3e7ef;
+  --abp-radius: 0.875rem;
+  --abp-control-radius: 0.5rem;
+  --abp-shadow: 0 3px 14px rgb(26 39 63 / 4%);
+  --abp-overlay-shadow: 0 16px 48px rgb(26 39 63 / 16%);
+  --bs-body-font-family: var(--abp-font-family);
+  --bs-body-bg: var(--abp-canvas);
+  --bs-body-color: var(--abp-text);
+  --bs-emphasis-color: var(--abp-text);
+  --bs-secondary-color: var(--abp-muted);
+  --bs-tertiary-bg: var(--abp-surface-muted);
+  --bs-secondary-bg: var(--abp-surface-muted);
+  --bs-border-color: var(--abp-border);
+  --bs-border-radius: var(--abp-control-radius);
+  --bs-link-color: var(--abp-link);
+  --bs-link-hover-color: var(--abp-link);
+  --bs-primary: var(--abp-accent);
+  --bs-primary-rgb: var(--abp-accent-rgb);
   --abp-sidebar-width: 16rem;
-  --abp-sidebar-bg: var(--bs-tertiary-bg);
-  --abp-sidebar-fg: var(--bs-body-color);
-  --abp-sidebar-border: var(--bs-border-color);
-  /*
-   * Bootstrap's link blue on the sidebar's ground is 4.26:1, just under the 4.5:1 axe
-   * asks for. Menu entries read as body text and the active one carries the emphasis
-   * colour, which clears it in both modes.
-   */
-  --abp-sidebar-link-fg: var(--bs-body-color);
-  --abp-sidebar-link-active-fg: var(--bs-primary-text-emphasis);
-  --abp-sidebar-link-active-bg: var(--bs-secondary-bg);
-  --abp-navbar-bg: var(--bs-tertiary-bg);
-  --abp-loader-bar-color: var(--bs-primary);
+  --abp-sidebar-bg: var(--abp-surface);
+  --abp-sidebar-fg: var(--abp-text);
+  --abp-sidebar-border: var(--abp-border);
+  --abp-sidebar-link-fg: var(--abp-muted);
+  --abp-sidebar-link-active-fg: var(--abp-link);
+  --abp-sidebar-link-active-bg: var(--abp-accent-soft);
+  --abp-navbar-bg: var(--abp-surface);
+  --abp-loader-bar-color: var(--abp-accent);
   --abp-toast-offset: 1rem;
-  --abp-content-padding: 1rem;
-  --abp-menu-group-fg: var(--bs-secondary-color);
-  --abp-overlay-bg: var(--bs-body-bg);
-  --abp-scrim: rgb(0 0 0 / 50%);
+  --abp-content-padding: clamp(1rem, 3vw, 2rem);
+  --abp-menu-group-fg: var(--abp-muted);
+  --abp-overlay-bg: var(--abp-surface);
+  --abp-scrim: rgb(15 23 42 / 48%);
 }
 
-/*
- * Only what does not follow from Bootstrap's own dark palette. The sidebar is one shade
- * away from the body in both modes, and `--bs-tertiary-bg` already moves with the theme,
- * so most of the table above needs no dark twin at all.
- */
 [data-bs-theme='dark'] {
-  --abp-sidebar-bg: var(--bs-body-bg);
-  --abp-sidebar-border: var(--bs-border-color-translucent);
+  --abp-accent: #6b5ce7;
+  --abp-accent-rgb: 107, 92, 231;
+  --abp-accent-hover: #5c4ed4;
+  --abp-accent-soft: #2b294a;
+  --abp-link: #b3b9ff;
+  --abp-surface: #192233;
+  --abp-surface-muted: #202b3e;
+  --abp-canvas: #111827;
+  --abp-text: #e8edf6;
+  --abp-muted: #aab7cd;
+  --abp-border: #313d51;
+  --abp-shadow: 0 3px 14px rgb(0 0 0 / 12%);
+  --abp-overlay-shadow: 0 16px 48px rgb(0 0 0 / 32%);
+  --bs-body-bg: var(--abp-canvas);
+  --bs-body-color: var(--abp-text);
+  --bs-emphasis-color: var(--abp-text);
+  --bs-secondary-color: var(--abp-muted);
+  --bs-tertiary-bg: var(--abp-surface-muted);
+  --bs-secondary-bg: var(--abp-surface-muted);
+  --bs-border-color: var(--abp-border);
+  --bs-link-color: var(--abp-link);
+  --bs-link-hover-color: var(--abp-link);
+  --bs-primary: var(--abp-accent);
+  --bs-primary-rgb: var(--abp-accent-rgb);
 }
 
-/*
- * Bootstrap's outline buttons keep the flat `--bs-secondary` in dark mode, which is
- * 3.28:1 on the dark body -- below the 4.5:1 axe asks for. The emphasis colours are the
- * ones Bootstrap already ships for reading against that ground.
- */
-[data-bs-theme='dark'] .btn-outline-secondary {
-  --bs-btn-color: var(--bs-secondary-text-emphasis);
-  --bs-btn-border-color: var(--bs-secondary-border-subtle);
-  --bs-btn-hover-color: var(--bs-body-color);
-  --bs-btn-hover-bg: var(--bs-secondary-bg);
-  --bs-btn-hover-border-color: var(--bs-secondary-border-subtle);
+.btn {
+  --bs-btn-border-radius: var(--abp-control-radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 2.5rem;
+  padding-inline: 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.btn-sm {
+  min-height: 2.125rem;
+  padding-inline: 0.75rem;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--abp-accent);
+  --bs-btn-border-color: var(--abp-accent);
+  --bs-btn-hover-bg: var(--abp-accent-hover);
+  --bs-btn-hover-border-color: var(--abp-accent-hover);
+  --bs-btn-active-bg: var(--abp-accent-hover);
+  --bs-btn-active-border-color: var(--abp-accent-hover);
+  --bs-btn-disabled-bg: var(--abp-accent);
+  --bs-btn-disabled-border-color: var(--abp-accent);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--abp-text);
+  --bs-btn-border-color: var(--abp-border);
+  --bs-btn-hover-color: var(--abp-text);
+  --bs-btn-hover-bg: var(--abp-surface-muted);
+  --bs-btn-hover-border-color: var(--abp-muted);
+  --bs-btn-active-color: var(--abp-text);
+  --bs-btn-active-bg: var(--abp-surface-muted);
+  --bs-btn-active-border-color: var(--abp-muted);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--abp-link);
+  --bs-btn-border-color: var(--abp-accent);
+  --bs-btn-hover-bg: var(--abp-accent);
+  --bs-btn-hover-border-color: var(--abp-accent);
+  --bs-btn-active-bg: var(--abp-accent);
+  --bs-btn-active-border-color: var(--abp-accent);
+}
+
+.navbar-nav {
+  gap: 0.375rem;
+}
+
+.navbar-nav .nav-link {
+  min-height: 2.5rem;
+  padding-inline: 0.625rem;
+  border-radius: var(--abp-control-radius);
+  color: var(--abp-muted);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link[data-state='open'] {
+  background: var(--abp-surface-muted);
+  color: var(--abp-text);
+}
+
+.pagination {
+  --bs-pagination-color: var(--abp-muted);
+  --bs-pagination-bg: var(--abp-surface);
+  --bs-pagination-border-color: var(--abp-border);
+  --bs-pagination-hover-color: var(--abp-link);
+  --bs-pagination-hover-bg: var(--abp-accent-soft);
+  --bs-pagination-hover-border-color: var(--abp-border);
+  --bs-pagination-active-bg: var(--abp-accent);
+  --bs-pagination-active-border-color: var(--abp-accent);
+  --bs-pagination-disabled-bg: var(--abp-surface-muted);
+  --bs-pagination-disabled-border-color: var(--abp-border);
+  gap: 0.375rem;
+}
+
+.pagination .page-link {
+  min-width: 2.125rem;
+  border-radius: var(--abp-control-radius);
+  font-size: 0.8125rem;
+}
+
+.form-control,
+.form-select {
+  min-height: 2.625rem;
+  border-color: var(--abp-border);
+  border-radius: var(--abp-control-radius);
+  background-color: var(--abp-surface);
+  color: var(--abp-text);
+  font-size: 0.875rem;
+}
+
+.form-control::placeholder {
+  color: var(--abp-muted);
+  opacity: 1;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--abp-accent);
+  background-color: var(--abp-surface);
+  color: var(--abp-text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--abp-accent) 18%, transparent);
+}
+
+.form-label {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.form-check-input:checked {
+  background-color: var(--abp-accent);
+  border-color: var(--abp-accent);
+}
+
+.card,
+.modal-content,
+.dropdown-menu {
+  border-color: var(--abp-border);
+  border-radius: var(--abp-radius);
+  background-color: var(--abp-surface);
+  color: var(--abp-text);
+}
+
+.card .table {
+  --bs-table-bg: var(--abp-surface);
+}
+
+.modal-content,
+.dropdown-menu {
+  box-shadow: var(--abp-overlay-shadow);
+}
+
+.abp-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  background: var(--abp-scrim);
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.modal-footer {
+  background: var(--abp-surface-muted);
+  border-end-start-radius: var(--abp-radius);
+  border-end-end-radius: var(--abp-radius);
+}
+
+.dropdown-menu {
+  padding: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.dropdown-item {
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.375rem;
+  color: var(--abp-text);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item[data-highlighted] {
+  background: var(--abp-accent-soft);
+  color: var(--abp-link);
+}
+
+.breadcrumb {
+  margin-bottom: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--abp-muted);
+}
+
+.breadcrumb-item.active {
+  color: var(--abp-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--abp-link);
+  outline-offset: 3px;
 }
 
 /*
@@ -86,19 +305,25 @@
 }
 
 .abp-table-caption {
-  caption-side: top;
-  padding-bottom: 0.5rem;
-  color: var(--bs-secondary-color);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 .abp-table th,
 .abp-table td {
-  padding: 0.5rem 0.75rem;
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--bs-border-color);
+  font-size: 0.875rem;
 }
 
 .abp-table-head th {
-  background-color: var(--bs-tertiary-bg);
+  padding-block: 0.875rem;
+  background-color: var(--abp-surface-muted);
+  color: var(--abp-muted);
+  font-size: 0.8125rem;
   font-weight: 600;
   text-align: start;
   white-space: nowrap;
@@ -164,6 +389,46 @@
 
 .abp-table-wrapper {
   position: relative;
+  border: 1px solid var(--abp-border);
+  border-radius: var(--abp-radius);
+  background: var(--abp-surface);
+  box-shadow: var(--abp-shadow);
+}
+
+.abp-table-scroll {
+  border-radius: inherit;
+  scrollbar-width: thin;
+}
+
+.abp-table tbody tr:last-child > td {
+  border-bottom: 0;
+}
+
+.abp-table td {
+  white-space: nowrap;
+}
+
+.abp-table tbody tr:hover > td {
+  background-color: var(--abp-surface-muted);
+}
+
+.abp-extensible-table {
+  overflow: hidden;
+  border: 1px solid var(--abp-border);
+  border-radius: var(--abp-radius);
+  background: var(--abp-surface);
+  box-shadow: var(--abp-shadow);
+}
+
+.abp-extensible-table .abp-table-wrapper {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.abp-extensible-table__search {
+  width: min(22rem, calc(100% - 2.5rem));
+  margin: 1.25rem;
 }
 
 .abp-table-loading {
@@ -194,12 +459,14 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .abp-page-title {
-  font-size: 1.5rem;
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
   margin: 0;
 }
 
@@ -215,8 +482,9 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--abp-border);
 }
 
 .abp-table-info {
@@ -246,11 +514,14 @@
 .abp-grid-actions-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  gap: 0.5rem;
+  min-height: 2rem;
+  padding: 0.375rem 0.625rem;
   border: 1px solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
-  background-color: var(--bs-body-bg);
+  background-color: var(--abp-surface);
+  color: var(--abp-text);
+  font-size: 0.8125rem;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -287,9 +558,9 @@
   padding: 0.25rem 0;
   list-style: none;
   border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
+  border-radius: var(--abp-control-radius);
   background-color: var(--abp-overlay-bg);
-  box-shadow: var(--bs-box-shadow);
+  box-shadow: var(--abp-overlay-shadow);
 }
 
 .abp-grid-actions-item {
@@ -319,39 +590,80 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.abp-permissions__filter {
+  flex: 1 1 16rem;
+  width: auto;
 }
 
 .abp-permissions__body {
   display: grid;
-  grid-template-columns: minmax(10rem, 1fr) 2fr;
-  gap: 1rem;
-  align-items: start;
+  grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
+  gap: 0;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid var(--abp-border);
+  border-radius: var(--abp-control-radius);
+}
+
+.abp-permissions__body > .abp-tabs {
+  padding: 0.75rem;
+  border-inline-end: 1px solid var(--abp-border);
+  background: var(--abp-surface-muted);
+}
+
+.abp-permissions__count {
+  margin-inline-start: auto;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--bs-border-radius-pill);
+  background: var(--abp-surface);
+  color: var(--abp-muted);
+  font-size: 0.75rem;
 }
 
 .abp-permissions__list {
   max-height: min(60vh, 30rem);
   overflow-y: auto;
+  padding: 1.25rem;
+  min-height: 20rem;
+  scrollbar-width: thin;
+}
+
+.abp-permissions__list hr {
+  margin-block: 1rem;
+  border-color: var(--abp-border);
+  opacity: 1;
 }
 
 .abp-permissions__permission {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+  padding-block: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .abp-permissions__badge {
   padding: 0.15rem 0.4rem;
   border-radius: var(--bs-border-radius-pill);
-  background-color: var(--bs-secondary-bg);
+  background-color: var(--abp-accent-soft);
+  color: var(--abp-link);
   font-size: 0.75rem;
 }
 
 @media (max-width: 767.98px) {
   .abp-permissions__body {
     grid-template-columns: 1fr;
+  }
+
+  .abp-permissions__body > .abp-tabs {
+    max-height: 10rem;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--abp-border);
   }
 }
 
@@ -436,19 +748,29 @@
   gap: 0.5rem;
   color: inherit;
   text-align: start;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .abp-tabs--vertical .abp-tabs__tab {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--bs-border-color);
-  border-radius: var(--bs-border-radius);
-  background-color: var(--bs-body-bg);
+  padding: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--abp-control-radius);
+  background-color: transparent;
+  color: var(--abp-muted);
 }
 
-.abp-tabs--vertical .abp-tabs__tab--active {
-  border-color: var(--bs-primary);
-  background-color: var(--bs-primary);
-  color: var(--bs-white);
+.abp-tabs--vertical .abp-tabs__tab:hover {
+  background-color: var(--abp-surface-muted);
+  color: var(--abp-text);
+}
+
+.abp-tabs--vertical .abp-tabs__tab--active,
+.abp-tabs--vertical .abp-tabs__tab--active:hover {
+  border-color: transparent;
+  background-color: var(--abp-accent-soft);
+  color: var(--abp-link);
+  font-weight: 600;
 }
 
 .abp-tabs--horizontal .abp-tabs__tab {
@@ -466,14 +788,69 @@
 /* The settings page, laid out the way the profile page above is. */
 .abp-settings {
   display: grid;
-  grid-template-columns: minmax(12rem, 1fr) 3fr;
+  grid-template-columns: minmax(12rem, 15rem) minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
 
+.abp-settings > .abp-tabs {
+  padding: 0.5rem;
+  border: 1px solid var(--abp-border);
+  border-radius: var(--abp-radius);
+  background: var(--abp-surface);
+  box-shadow: var(--abp-shadow);
+}
+
+.abp-settings__panel {
+  min-width: 0;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--abp-border);
+  border-radius: var(--abp-radius);
+  background: var(--abp-surface);
+  box-shadow: var(--abp-shadow);
+}
+
+.abp-settings__form {
+  max-width: 48rem;
+}
+
+.abp-settings__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1.5rem;
+}
+
+.abp-settings__fields > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.abp-settings__options {
+  padding-block: 1.25rem 0.25rem;
+  margin-bottom: 1.25rem;
+  border-block-start: 1px solid var(--abp-border);
+}
+
+.abp-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--abp-border);
+}
+
+.abp-settings__options + .abp-settings__actions {
+  margin-top: 0;
+}
+
 @media (max-width: 767.98px) {
-  .abp-settings {
+  .abp-settings,
+  .abp-settings__fields {
     grid-template-columns: 1fr;
+  }
+
+  .abp-settings > .abp-tabs {
+    max-height: none;
   }
 }
 
@@ -486,4 +863,29 @@
   border-radius: var(--bs-border-radius);
   background-color: var(--bs-danger-bg-subtle);
   color: var(--bs-danger-text-emphasis);
+}
+
+.abp-account h1 {
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.abp-account p,
+.abp-account form {
+  font-size: 0.875rem;
+}
+
+@media (max-width: 575.98px) {
+  .abp-shell__navbar .navbar-nav .nav-link span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .abp-table th,
+  .abp-table td {
+    padding-inline: 1rem;
+  }
 }

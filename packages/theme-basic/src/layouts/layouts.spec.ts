@@ -100,6 +100,18 @@ describe('ApplicationLayout', () => {
     expect(wrapper.find('.abp-routes').text()).not.toContain('Secrets');
   });
 
+  it('expands the menu ancestors of the current page', async () => {
+    router.addRoute({ path: '/identity/users', component: page });
+    injector.get(RoutesService).add([
+      { name: '::Menu:Administration', order: 100 },
+      { name: '::Menu:Identity', parentName: '::Menu:Administration', order: 1 },
+      { path: '/identity/users', name: '::Users', parentName: '::Menu:Identity', order: 1 },
+    ]);
+    const wrapper = await render(ApplicationLayout, injector, router, '/identity/users');
+
+    expect(wrapper.find('.abp-routes a[href="/identity/users"]').isVisible()).toBe(true);
+  });
+
   it('remembers a collapsed sidebar', async () => {
     const wrapper = await render(ApplicationLayout, injector, router);
 

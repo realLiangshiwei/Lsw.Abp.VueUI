@@ -142,76 +142,80 @@ async function sendTest(): Promise<void> {
   <template v-else>
     <h2 class="h5 mb-3">{{ $t('AbpSettingManagement::Menu:Emailing') }}</h2>
 
-    <form novalidate @submit.prevent="submit">
-      <AbpFormField
-        :label="localization.t('AbpSettingManagement::DefaultFromDisplayName')"
-        required
-        :errors="displayNameErrors"
-      >
-        <template #default="{ id, describedBy, invalid }">
-          <AbpInput
-            :id="id"
-            v-model="form.controls.defaultFromDisplayName.value"
-            :invalid="invalid"
-            :aria-describedby="describedBy"
-            @blur="form.controls.defaultFromDisplayName.markAsTouched()"
-          />
-        </template>
-      </AbpFormField>
+    <form class="abp-settings__form" novalidate @submit.prevent="submit">
+      <div class="abp-settings__fields">
+        <AbpFormField
+          :label="localization.t('AbpSettingManagement::DefaultFromDisplayName')"
+          required
+          :errors="displayNameErrors"
+        >
+          <template #default="{ id, describedBy, invalid }">
+            <AbpInput
+              :id="id"
+              v-model="form.controls.defaultFromDisplayName.value"
+              :invalid="invalid"
+              :aria-describedby="describedBy"
+              @blur="form.controls.defaultFromDisplayName.markAsTouched()"
+            />
+          </template>
+        </AbpFormField>
 
-      <AbpFormField
-        :label="localization.t('AbpSettingManagement::DefaultFromAddress')"
-        required
-        :errors="addressErrors"
-      >
-        <template #default="{ id, describedBy, invalid }">
-          <AbpInput
-            :id="id"
-            v-model="form.controls.defaultFromAddress.value"
-            type="email"
-            :invalid="invalid"
-            :aria-describedby="describedBy"
-            @blur="form.controls.defaultFromAddress.markAsTouched()"
-          />
-        </template>
-      </AbpFormField>
+        <AbpFormField
+          :label="localization.t('AbpSettingManagement::DefaultFromAddress')"
+          required
+          :errors="addressErrors"
+        >
+          <template #default="{ id, describedBy, invalid }">
+            <AbpInput
+              :id="id"
+              v-model="form.controls.defaultFromAddress.value"
+              type="email"
+              :invalid="invalid"
+              :aria-describedby="describedBy"
+              @blur="form.controls.defaultFromAddress.markAsTouched()"
+            />
+          </template>
+        </AbpFormField>
 
-      <AbpFormField :label="localization.t('AbpSettingManagement::SmtpHost')">
-        <template #default="{ id }">
-          <AbpInput :id="id" v-model="form.controls.smtpHost.value" />
-        </template>
-      </AbpFormField>
+        <AbpFormField :label="localization.t('AbpSettingManagement::SmtpHost')">
+          <template #default="{ id }">
+            <AbpInput :id="id" v-model="form.controls.smtpHost.value" />
+          </template>
+        </AbpFormField>
 
-      <AbpFormField
-        :label="localization.t('AbpSettingManagement::SmtpPort')"
-        required
-        :errors="portErrors"
-      >
-        <template #default="{ id, describedBy, invalid }">
-          <AbpInput
-            :id="id"
-            v-model="form.controls.smtpPort.value"
-            type="number"
-            :invalid="invalid"
-            :aria-describedby="describedBy"
-            @blur="form.controls.smtpPort.markAsTouched()"
-          />
-        </template>
-      </AbpFormField>
+        <AbpFormField
+          :label="localization.t('AbpSettingManagement::SmtpPort')"
+          required
+          :errors="portErrors"
+        >
+          <template #default="{ id, describedBy, invalid }">
+            <AbpInput
+              :id="id"
+              v-model="form.controls.smtpPort.value"
+              type="number"
+              :invalid="invalid"
+              :aria-describedby="describedBy"
+              @blur="form.controls.smtpPort.markAsTouched()"
+            />
+          </template>
+        </AbpFormField>
+      </div>
 
-      <AbpToggle
-        v-model="form.controls.smtpEnableSsl.value"
-        class="mb-2"
-        :label="$t('AbpSettingManagement::SmtpEnableSsl')"
-      />
+      <div class="abp-settings__options">
+        <AbpToggle
+          v-model="form.controls.smtpEnableSsl.value"
+          class="mb-2"
+          :label="$t('AbpSettingManagement::SmtpEnableSsl')"
+        />
 
-      <AbpToggle
-        v-model="form.controls.smtpUseDefaultCredentials.value"
-        class="mb-3"
-        :label="$t('AbpSettingManagement::SmtpUseDefaultCredentials')"
-      />
+        <AbpToggle
+          v-model="form.controls.smtpUseDefaultCredentials.value"
+          class="mb-0"
+          :label="$t('AbpSettingManagement::SmtpUseDefaultCredentials')"
+        />
+      </div>
 
-      <template v-if="credentialsShown">
+      <div v-if="credentialsShown" class="abp-settings__fields">
         <AbpFormField :label="localization.t('AbpSettingManagement::SmtpDomain')">
           <template #default="{ id }">
             <AbpInput :id="id" v-model="form.controls.smtpDomain.value" />
@@ -236,22 +240,22 @@ async function sendTest(): Promise<void> {
             />
           </template>
         </AbpFormField>
-      </template>
+      </div>
 
-      <hr />
-
-      <AbpButton type="submit" variant="primary" :loading="busy">
-        {{ $t('AbpSettingManagement::Save') }}
-      </AbpButton>
-
-      <AbpPermission :policy="SettingManagementPolicyNames.EmailingTest">
-        <AbpButton class="ms-2" variant="secondary" outline @click="openTest">
-          {{ $t('AbpSettingManagement::SendTestEmail') }}
+      <div class="abp-settings__actions">
+        <AbpButton type="submit" variant="primary" :loading="busy">
+          {{ $t('AbpSettingManagement::Save') }}
         </AbpButton>
-      </AbpPermission>
+
+        <AbpPermission :policy="SettingManagementPolicyNames.EmailingTest">
+          <AbpButton variant="secondary" outline @click="openTest">
+            {{ $t('AbpSettingManagement::SendTestEmail') }}
+          </AbpButton>
+        </AbpPermission>
+      </div>
     </form>
 
-    <AbpModal v-model:visible="testOpen" size="lg" :busy="testBusy">
+    <AbpModal v-model:visible="testOpen" size="lg" :busy="testBusy" :dirty="testForm.dirty">
       <template #header>
         <h2 class="h5 mb-0">{{ $t('AbpSettingManagement::SendTestEmail') }}</h2>
       </template>
@@ -312,8 +316,8 @@ async function sendTest(): Promise<void> {
         </template>
       </AbpFormField>
 
-      <template #footer>
-        <AbpButton variant="secondary" outline :disabled="testBusy" @click="testOpen = false">
+      <template #footer="{ close }">
+        <AbpButton variant="secondary" outline :disabled="testBusy" @click="close">
           {{ $t('AbpUi::Close') }}
         </AbpButton>
         <AbpButton variant="primary" :loading="testBusy" @click="sendTest">

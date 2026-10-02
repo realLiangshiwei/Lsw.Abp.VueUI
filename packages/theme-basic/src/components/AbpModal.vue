@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { AbpModalEmits, AbpModalProps, AbpModalSlots } from '@lsw-abpvue/theme-shared';
+import { useModal } from '@lsw-abpvue/theme-shared';
 import {
   DialogContent,
   DialogOverlay,
@@ -14,6 +15,7 @@ const props = withDefaults(defineProps<AbpModalProps>(), { size: 'md' });
 
 const emit = defineEmits<AbpModalEmits>();
 const slots = defineSlots<AbpModalSlots>();
+const { requestClose, markDirty } = useModal(props, () => emit('update:visible', false));
 
 const titleId = useId();
 const hasHeader = computed(() => Boolean(useSlots().header));
@@ -41,10 +43,8 @@ watch(
   { immediate: true },
 );
 
-/** reka-ui reports every close the same way; `busy` is what refuses them. */
 function onOpenChange(open: boolean): void {
-  if (!open && props.busy) return;
-  emit('update:visible', open);
+  if (!open) void requestClose();
 }
 </script>
 
@@ -63,9 +63,10 @@ function onOpenChange(open: boolean): void {
         @escape-key-down="busy && $event.preventDefault()"
         @pointer-down-outside="busy && $event.preventDefault()"
         @interact-outside="busy && $event.preventDefault()"
+        @click.self="requestClose"
       >
         <div
-          class="modal-dialog"
+          class="modal-dialog modal-dialog-scrollable"
           :class="[SIZE_CLASS[size], centered ? 'modal-dialog-centered' : null]"
         >
           <div class="modal-content">
@@ -83,16 +84,16 @@ function onOpenChange(open: boolean): void {
                 class="btn-close"
                 :disabled="busy"
                 :aria-label="$t('AbpUi::Close')"
-                @click="onOpenChange(false)"
+                @click="requestClose"
               />
             </div>
 
-            <div class="modal-body">
+            <div class="modal-body" @input="markDirty" @change="markDirty">
               <slot />
             </div>
 
             <div v-if="slots.footer" class="modal-footer">
-              <slot name="footer" />
+              <slot name="footer" :close="requestClose" />
             </div>
           </div>
         </div>

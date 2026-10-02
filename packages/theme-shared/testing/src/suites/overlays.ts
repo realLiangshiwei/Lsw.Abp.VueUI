@@ -1,4 +1,5 @@
 import { ConfirmationService, ToasterService } from '@lsw-abpvue/theme-shared';
+import { WindowService } from '@lsw-abpvue/core';
 import { AbpConfirmHost, AbpModal, AbpToastHost } from '@lsw-abpvue/theme-shared';
 import { describe, expect, it } from 'vitest';
 import { defineComponent, h, ref } from 'vue';
@@ -105,6 +106,110 @@ export function testModal(theme: ThemeUnderTest): void {
 
       expect(rendered.emitted('update:visible')).toHaveLength(0);
       expect(findRendered(rendered, '[role="dialog"]')?.attributes('aria-busy')).toBe('true');
+    });
+
+    for (const source of ['dirty prop', 'native input'] as const) {
+      it(`asks before discarding changes from ${source}`, async () => {
+        const rendered = renderContract(theme, AbpModal, {
+          props: { visible: true, dirty: source === 'dirty prop' },
+          slots: { default: '<input aria-label="Name" />' },
+          events: ['update:visible'],
+        });
+        await settle(rendered);
+        if (source === 'native input') await findRendered(rendered, 'input')?.setValue('Edited');
+        const dialog = findRendered(rendered, '[role="dialog"]');
+        const confirmation = rendered.injector.get(ConfirmationService);
+
+        await dialog?.trigger('keydown', { key: 'Escape' });
+        expect(confirmation.current.value?.message).toBe(
+          'AbpUi::AreYouSureYouWantToCancelEditingWarningMessage',
+        );
+        expect(rendered.emitted('update:visible')).toHaveLength(0);
+        confirmation.clear('reject');
+        await settle(rendered);
+        expect(rendered.emitted('update:visible')).toHaveLength(0);
+
+        await dialog?.trigger('keydown', { key: 'Escape' });
+        confirmation.clear('confirm');
+        await settle(rendered);
+        expect(rendered.emitted('update:visible')).toEqual([[false]]);
+      });
+    }
+
+    it('lets a footer request the same guarded close', async () => {
+      const rendered = renderContract(theme, AbpModal, {
+        props: { visible: true, dirty: true },
+        slots: {
+          footer: ({ close }: { close: () => Promise<void> }) =>
+            h('button', { onClick: close }, 'Cancel editing'),
+        },
+        events: ['update:visible'],
+      });
+      await settle(rendered);
+      const button = findAllRendered(rendered, 'button').find(
+        item => item.text() === 'Cancel editing',
+      );
+      await button?.trigger('click');
+      const confirmation = rendered.injector.get(ConfirmationService);
+      expect(confirmation.current.value).not.toBeNull();
+      expect(rendered.emitted('update:visible')).toHaveLength(0);
+      confirmation.clear('confirm');
+      await settle(rendered);
+      expect(rendered.emitted('update:visible')).toEqual([[false]]);
+    });
+
+    it('can suppress the unsaved changes confirmation', async () => {
+      const rendered = renderContract(theme, AbpModal, {
+        props: { visible: true, dirty: true, suppressUnsavedChangesWarning: true },
+        events: ['update:visible'],
+      });
+      await settle(rendered);
+      await findRendered(rendered, '[role="dialog"]')?.trigger('keydown', { key: 'Escape' });
+      expect(rendered.injector.get(ConfirmationService).current.value).toBeNull();
+      expect(rendered.emitted('update:visible')).toEqual([[false]]);
+    });
+
+    it('clears a pending confirmation when the parent closes the modal', async () => {
+      const rendered = renderContract(theme, AbpModal, {
+        props: { visible: true, dirty: true },
+        events: ['update:visible'],
+      });
+      await settle(rendered);
+      await findRendered(rendered, '[role="dialog"]')?.trigger('keydown', { key: 'Escape' });
+      await rendered.wrapper.setProps({ visible: false });
+      await settle(rendered);
+      expect(rendered.injector.get(ConfirmationService).current.value).toBeNull();
+      expect(rendered.emitted('update:visible')).toHaveLength(0);
+    });
+
+    it('warns before leaving a dirty modal and removes the listener on unmount', async () => {
+      const rendered = renderContract(theme, AbpModal, {
+        props: { visible: true, dirty: true },
+      });
+      await settle(rendered);
+      const nativeWindow = rendered.injector.get(WindowService).nativeWindow;
+      const leaving = new Event('beforeunload', { cancelable: true });
+      nativeWindow?.dispatchEvent(leaving);
+      expect(leaving.defaultPrevented).toBe(true);
+
+      rendered.wrapper.unmount();
+      const afterUnmount = new Event('beforeunload', { cancelable: true });
+      nativeWindow?.dispatchEvent(afterUnmount);
+      expect(afterUnmount.defaultPrevented).toBe(false);
+    });
+
+    it('does not ask the same unsaved changes question twice', async () => {
+      const rendered = renderContract(theme, AbpModal, {
+        props: { visible: true, dirty: true },
+      });
+      await settle(rendered);
+      const dialog = findRendered(rendered, '[role="dialog"]');
+      const confirmation = rendered.injector.get(ConfirmationService);
+      await dialog?.trigger('keydown', { key: 'Escape' });
+      const first = confirmation.current.value;
+      await dialog?.trigger('keydown', { key: 'Escape' });
+      expect(confirmation.current.value).toBe(first);
+      confirmation.clear('reject');
     });
 
     it('moves focus into itself and gives it back to whatever opened it', async () => {

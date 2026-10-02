@@ -92,8 +92,8 @@ async function save(): Promise<void> {
       </AbpFormField>
     </template>
 
-    <template #footer>
-      <AbpButton variant="secondary" outline :disabled="busy" @click="visible = false">
+    <template #footer="{ close }">
+      <AbpButton variant="secondary" outline :disabled="busy" @click="close">
         {{ $t('AbpUi::Cancel') }}
       </AbpButton>
       <AbpButton variant="primary" :loading="busy" @click="save">

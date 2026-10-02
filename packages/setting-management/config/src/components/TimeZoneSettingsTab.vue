@@ -49,7 +49,7 @@ async function submit(): Promise<void> {
   <template v-else>
     <h2 class="h5 mb-3">{{ $t('AbpSettingManagement::Menu:TimeZone') }}</h2>
 
-    <form novalidate @submit.prevent="submit">
+    <form class="abp-settings__form" novalidate @submit.prevent="submit">
       <AbpFormField
         :label="localization.t('AbpSettingManagement::DisplayName:Timezone')"
         :hint="localization.t('AbpSettingManagement::TimezoneHelpText')"
@@ -64,9 +64,11 @@ async function submit(): Promise<void> {
         </template>
       </AbpFormField>
 
-      <AbpButton type="submit" variant="primary" :loading="busy">
-        {{ $t('AbpSettingManagement::Save') }}
-      </AbpButton>
+      <div class="abp-settings__actions">
+        <AbpButton type="submit" variant="primary" :loading="busy">
+          {{ $t('AbpSettingManagement::Save') }}
+        </AbpButton>
+      </div>
     </form>
   </template>
 </template>

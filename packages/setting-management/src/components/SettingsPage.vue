@@ -24,7 +24,7 @@ watch(
 
 <template>
   <AbpPage title="AbpSettingManagement::Settings">
-    <p v-if="!visible.length" class="text-body-secondary">
+    <p v-if="!visible.length" class="abp-settings__panel text-body-secondary">
       {{ $t('AbpSettingManagement::NoSettingsAvailable') }}
     </p>
 

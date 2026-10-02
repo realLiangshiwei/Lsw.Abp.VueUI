@@ -25,7 +25,7 @@ defineSlots<{
   /** The dialog's body; the extensible form unless the page says otherwise. */
   default?: () => unknown;
   header?: () => unknown;
-  footer?: () => unknown;
+  footer?: (context: { close: () => Promise<void> }) => unknown;
 }>();
 
 /**
@@ -39,14 +39,16 @@ const submit = (): void => {
   if (props.save) props.save();
   else void props.editor.save();
 };
-
-const close = (): void => {
-  open.value = false;
-};
 </script>
 
 <template>
-  <AbpModal v-model:visible="open" :busy="busy" :size="size" :aria-label="$t(label)">
+  <AbpModal
+    v-model:visible="open"
+    :busy="busy"
+    :dirty="form?.form.dirty"
+    :size="size"
+    :aria-label="$t(label)"
+  >
     <template #header>
       <slot name="header">
         <h2 class="h5 mb-0">
@@ -59,8 +61,8 @@ const close = (): void => {
       <AbpExtensibleForm v-if="form" :form="form" :record="editing" />
     </slot>
 
-    <template #footer>
-      <slot name="footer">
+    <template #footer="{ close }">
+      <slot name="footer" :close="close">
         <AbpButton variant="secondary" outline :disabled="busy" @click="close">
           {{ $t('AbpUi::Cancel') }}
         </AbpButton>

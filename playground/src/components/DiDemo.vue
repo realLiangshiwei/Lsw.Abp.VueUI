@@ -9,15 +9,15 @@ const greeting = computed(() => greeter.greet(name.value));
 </script>
 
 <template>
-  <section>
-    <h2>Dependency injection</h2>
-
-    <label>
-      Name
-      <input v-model="name" />
-    </label>
-
-    <output>{{ greeting }}</output>
-    <ScopedGreeting :name="name" />
+  <section class="card">
+    <div class="card-body p-4">
+      <h2 class="h5 mb-3">Dependency injection</h2>
+      <label class="form-label d-block">
+        Name
+        <input v-model="name" class="form-control mt-2" />
+      </label>
+      <output class="d-block text-body-secondary mb-4">{{ greeting }}</output>
+      <ScopedGreeting :name="name" />
+    </div>
   </section>
 </template>

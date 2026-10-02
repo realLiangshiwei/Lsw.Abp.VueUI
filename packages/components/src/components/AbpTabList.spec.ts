@@ -58,6 +58,19 @@ describe('AbpTabList', () => {
     expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['second']);
   });
 
+  it('selects tabs with arrow keys, Home and End', async () => {
+    const wrapper = render([{ name: 'first' }, { name: 'second' }, { name: 'third' }], 'first');
+    const tabs = wrapper.findAll('[role="tab"]');
+    await tabs[0]?.trigger('keydown', { key: 'ArrowDown' });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['second']);
+    await tabs[2]?.trigger('keydown', { key: 'ArrowDown' });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['first']);
+    await tabs[0]?.trigger('keydown', { key: 'End' });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['third']);
+    await tabs[2]?.trigger('keydown', { key: 'Home' });
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['first']);
+  });
+
   it('says which way it runs, for the theme and for a screen reader', () => {
     const vertical = render([{ name: 'first' }]);
     expect(vertical.find('[role="tablist"]').attributes('aria-orientation')).toBe('vertical');

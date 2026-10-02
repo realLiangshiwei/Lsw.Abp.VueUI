@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-02",
+  "mode": "Bootstrap UI review and modal behavior verification",
+  "baseCommit": "e140b796f463f291b7ac38be1270f0765350b435",
+  "style": "Modern administration UI using Bootstrap and existing theme tokens",
+  "browser": {
+    "application": "http://localhost:4200",
+    "desktopViewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "mobileViewport": {
+      "width": 390,
+      "height": 844
+    },
+    "collapsedSidebar": {
+      "beforeMainWidth": 0,
+      "afterMainWidth": 1280,
+      "pageOverflow": false
+    },
+    "permissionDialog": {
+      "lightAndDark": "reviewed",
+      "mobileFooterVisible": true,
+      "pageOverflow": false
+    },
+    "settings": {
+      "lightAndDark": "reviewed",
+      "mobileSingleColumn": true,
+      "arabicRTL": "reviewed",
+      "pageOverflow": false
+    },
+    "modalUserClosePaths": ["Cancel", "header Close", "Escape", "outside content click"],
+    "unsavedChanges": {
+      "rejectKeepsInput": true,
+      "confirmCloses": true,
+      "focusReturnsToTrigger": true,
+      "cleanModalClosesImmediately": true
+    },
+    "tabKeyboard": "ArrowDown and Home selected and focused the requested settings tabs",
+    "viewportOverrideReset": true,
+    "testEntitiesCreated": 0,
+    "permissionsOrSettingsSaved": false,
+    "testEmailsSent": false
+  },
+  "verification": {
+    "lint": "passed without warnings",
+    "typecheckTasks": 31,
+    "focusedTestsPassed": 211,
+    "fullTestsPassed": 2069,
+    "fullTestsSkipped": 1,
+    "typeErrors": 0,
+    "coverage": {
+      "statements": 90.9,
+      "branches": 81.02,
+      "functions": 87.71,
+      "lines": 92.23
+    },
+    "nativeBeforeUnload": "event prevention and listener cleanup verified in both theme contract suites"
+  },
+  "angularBehavior": {
+    "permissionAndFeatureDialogsSuppressUnsavedWarning": true,
+    "programmaticCloseAfterSaveBypassesConfirmation": true
+  },
+  "publication": {
+    "status": "paused by user",
+    "npmPublished": false,
+    "gitPushed": false,
+    "issuesClosed": false
+  },
+  "screenshots": [
+    "2026-10-02-collapsed-roles.png",
+    "2026-10-02-dark-books.png",
+    "2026-10-02-dark-permissions.png",
+    "2026-10-02-dark-settings.png",
+    "2026-10-02-light-books.png",
+    "2026-10-02-light-home.png",
+    "2026-10-02-light-login.png",
+    "2026-10-02-light-modal.png",
+    "2026-10-02-light-permissions.png",
+    "2026-10-02-light-settings.png",
+    "2026-10-02-light-users.png",
+    "2026-10-02-mobile-login.png",
+    "2026-10-02-mobile-modal.png",
+    "2026-10-02-mobile-permissions.png",
+    "2026-10-02-mobile-rtl-settings.png",
+    "2026-10-02-mobile-rtl-users.png",
+    "2026-10-02-mobile-settings.png",
+    "2026-10-02-mobile-users.png",
+    "2026-10-02-unsaved-confirmation.png"
+  ]
+}

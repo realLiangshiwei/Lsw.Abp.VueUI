@@ -1,8 +1,12 @@
 # M9 newcomer trials
 
-M9 requires two ABP users who have not worked on this project to get it running from
-the documentation within 30 minutes each. The automated checks and the agent-operated
-trials in `results/2026-10-02.json` do not satisfy this requirement.
+The user withdrew the two-participant, 30-minute acceptance requirement on 2026-10-02.
+The procedure below is retained for optional future usability work and is no longer
+an M9 release gate.
+
+The original criterion asked two ABP users who had not worked on this project to get it
+running from the documentation within 30 minutes each. The automated checks and the
+agent-operated trials in `results/2026-10-02.json` are technical verification records.
 
 ## Prepare the trial
 
@@ -11,8 +15,8 @@ trials in `results/2026-10-02.json` do not satisfy this requirement.
   before timing starts. Record the OS, tool versions and this preparation.
 - Give each participant a clean directory and a separate database. For the existing
   solution trial, provide a working ABP BookStore backend with its Book API and seed data.
-- While publication is paused, provide the candidate packages through a local package
-  feed. Record this installation source; it does not verify installation from public npm.
+- Before publication, provide the candidate packages through a local package feed.
+  Record this installation source; it does not verify installation from public npm.
 - Give participants the guides and candidate installation instructions. Do not provide
   additional commands or a completed Vue project.
 
@@ -43,8 +47,8 @@ For each participant, retain:
 - Commands, errors, confusing steps and fixes required.
 - A screenshot showing the authenticated user and Books list.
 
-Both independent trials must succeed within 1,800 seconds before the M9 newcomer
-checkbox is checked. A local-feed trial must remain labelled as such; public package
+If this optional trial is run, report whether each independent attempt succeeded within
+1,800 seconds. A local-feed trial must remain labelled as such; public package
 installation is a separate release check.
 
 | Participant | Date | Candidate | Elapsed | Help needed | Result |

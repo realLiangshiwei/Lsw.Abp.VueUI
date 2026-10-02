@@ -28,10 +28,11 @@ const localization = useLocalization();
 
 <style scoped>
 .abp-routes__group {
-  margin: 1rem 0 0.25rem;
-  font-size: 0.75rem;
+  margin: 1.75rem 0.75rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.09em;
   color: var(--abp-menu-group-fg);
 }
 </style>

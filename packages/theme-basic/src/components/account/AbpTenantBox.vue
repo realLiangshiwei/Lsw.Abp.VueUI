@@ -40,13 +40,13 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <div class="card shadow-sm mb-3">
+  <div class="abp-tenant-box card mb-3">
     <div class="card-body d-flex align-items-center justify-content-between gap-3">
       <div>
         <small class="text-uppercase text-body-secondary">
           {{ $t('AbpUiMultiTenancy::Tenant') }}
         </small>
-        <h2 class="h6 m-0 fst-italic">
+        <h2 class="h6 mb-0 mt-1">
           {{ tenantBox.currentTenant.value?.name || $t('AbpUiMultiTenancy::NotSelected') }}
         </h2>
       </div>
@@ -72,8 +72,8 @@ async function save(): Promise<void> {
       <p class="text-body-secondary mb-0">{{ $t('AbpUiMultiTenancy::SwitchTenantHint') }}</p>
     </form>
 
-    <template #footer>
-      <AbpButton variant="secondary" outline :disabled="busy" @click="open = false">
+    <template #footer="{ close }">
+      <AbpButton variant="secondary" outline :disabled="busy" @click="close">
         {{ $t('AbpUi::Cancel') }}
       </AbpButton>
       <AbpButton variant="primary" :loading="busy" @click="save">
@@ -82,3 +82,19 @@ async function save(): Promise<void> {
     </template>
   </AbpModal>
 </template>
+
+<style scoped>
+.abp-tenant-box {
+  box-shadow: var(--abp-shadow);
+}
+
+.abp-tenant-box small {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.075em;
+}
+
+.abp-tenant-box h2 {
+  font-size: 0.875rem;
+}
+</style>

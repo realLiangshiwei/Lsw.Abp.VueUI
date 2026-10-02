@@ -142,6 +142,15 @@ describe('renderTemplate', () => {
     expect(manifest.devDependencies.typescript).toBe('6.0.3');
   });
 
+  it('loads Bootstrap before the theme can initialize its stylesheet', async () => {
+    await render();
+    const main = await read('src/main.ts');
+
+    expect(main.indexOf("import 'bootstrap/dist/css/bootstrap.min.css'")).toBeLessThan(
+      main.indexOf("from '@lsw-abpvue/theme-basic'"),
+    );
+  });
+
   it('points the application at the backend it was told about', async () => {
     await render();
 

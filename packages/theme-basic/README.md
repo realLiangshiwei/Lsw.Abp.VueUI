@@ -21,13 +21,12 @@ allowBuilds:
 ## Setup
 
 ```ts
-import { createAbpApp, provideAbpCore, withOptions } from '@lsw-abpvue/core';
-import { provideAbpRouter } from '@lsw-abpvue/core/router';
-import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '@lsw-abpvue/theme-basic/style.css';
+import { createAbpApp, provideAbpCore, withOptions } from '@lsw-abpvue/core';
+import { provideAbpRouter } from '@lsw-abpvue/core/router';
+import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
 
 const { mount } = await createAbpApp(App, {
   providers: [
@@ -51,6 +50,9 @@ The application component is the layout switch and nothing else:
 Bootstrap's CSS only. Its JavaScript is never loaded — dialogs, dropdowns, selects and
 pagination are reka-ui, which brings the focus management, the ARIA and the keyboard
 handling with it.
+
+Keep the stylesheet imports before the theme's JavaScript import. This also preserves
+the cascade when consuming the theme directly from source during development.
 
 ## The three layouts
 
@@ -99,11 +101,17 @@ Everything themable is a custom property, and no component style names a colour:
 
 ```css
 :root {
+  --abp-accent: #5145cd;
+  --abp-accent-rgb: 81, 69, 205;
   --abp-sidebar-width: 18rem;
   --abp-sidebar-bg: var(--bs-body-bg);
   --abp-loader-bar-color: rebeccapurple;
 }
 ```
+
+The Bootstrap controls and semantic table classes share `--abp-surface`,
+`--abp-canvas`, `--abp-border`, `--abp-text` and `--abp-muted`. Override these variables
+for each `data-bs-theme` when customizing both modes.
 
 ## Contract tests
 

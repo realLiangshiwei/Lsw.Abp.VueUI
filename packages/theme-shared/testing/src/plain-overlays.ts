@@ -2,6 +2,7 @@ import { useLocalization } from '@lsw-abpvue/core';
 import {
   ConfirmationStatus,
   useConfirmation,
+  useModal,
   useToaster,
   type AbpOption,
   type AbpTypeaheadItem,
@@ -32,11 +33,13 @@ export const PlainModal = defineComponent({
     busy: Boolean,
     size: { type: String, default: undefined },
     centered: Boolean,
+    dirty: Boolean,
     suppressUnsavedChangesWarning: Boolean,
     ariaLabel: { type: String, default: undefined },
   },
   emits: ['update:visible', 'init', 'appear', 'disappear'],
   setup(props, { slots, emit }) {
+    const { requestClose, markDirty } = useModal(props, () => emit('update:visible', false));
     const dialog = ref<HTMLElement | null>(null);
     const headerId = useId();
     let returnFocusTo: HTMLElement | null = null;
@@ -77,13 +80,13 @@ export const PlainModal = defineComponent({
               'aria-busy': props.busy ? 'true' : undefined,
               tabindex: -1,
               onKeydown: (event: KeyboardEvent) => {
-                if (event.key === 'Escape' && !props.busy) emit('update:visible', false);
+                if (event.key === 'Escape') void requestClose();
               },
             },
             [
               h('header', { id: headerId }, slots.header?.()),
-              h('div', slots.default?.()),
-              h('footer', slots.footer?.()),
+              h('div', { onInput: markDirty, onChange: markDirty }, slots.default?.()),
+              h('footer', slots.footer?.({ close: requestClose })),
             ],
           )
         : null;

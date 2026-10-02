@@ -40,10 +40,10 @@ function inspect(): void {
 </script>
 
 <template>
-  <section class="card mb-3">
-    <div class="card-body">
-      <h2 class="h5">Extensions</h2>
-      <p class="mb-2">
+  <section class="card">
+    <div class="card-body p-4">
+      <h2 class="h5 mb-3">Extensions</h2>
+      <p class="text-body-secondary mb-3">
         The
         <RouterLink to="/identity/users">users page</RouterLink>
         belongs to a module. Everything the host adds to it -- a column, a row button, a toolbar

@@ -32,6 +32,7 @@ export type {
 } from './contracts/form-field.js';
 export type { AbpInputEmits, AbpInputProps, AbpInputType } from './contracts/input.js';
 export type { AbpModalEmits, AbpModalProps, AbpModalSlots } from './contracts/modal.js';
+export { useModal } from './utils/use-modal.js';
 export type { AbpPaginationEmits, AbpPaginationProps } from './contracts/pagination.js';
 export type { AbpSelectEmits, AbpSelectProps, AbpSelectSlots } from './contracts/select.js';
 export type { AbpSpinnerProps } from './contracts/spinner.js';

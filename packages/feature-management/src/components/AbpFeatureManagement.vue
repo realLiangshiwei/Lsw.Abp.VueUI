@@ -218,8 +218,8 @@ async function resetToDefault(): Promise<void> {
       </div>
     </div>
 
-    <template #footer>
-      <AbpButton variant="secondary" outline :disabled="busy" @click="visible = false">
+    <template #footer="{ close }">
+      <AbpButton variant="secondary" outline :disabled="busy" @click="close">
         {{ $t('AbpUi::Cancel') }}
       </AbpButton>
       <AbpButton

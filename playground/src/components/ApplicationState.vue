@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useConfigState, useHttpWait } from '@lsw-abpvue/core';
+import { AbpButton } from '@lsw-abpvue/theme-shared';
 import { computed } from 'vue';
 const configState = useConfigState();
 const { loading } = useHttpWait();
@@ -24,22 +25,27 @@ const rows = computed(() => [
 </script>
 
 <template>
-  <section>
-    <h2>Application configuration</h2>
-
-    <table>
-      <tbody>
-        <tr v-for="[name, value] in rows" :key="name">
-          <th scope="row">{{ name }}</th>
-          <td>{{ value }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p>
-      <button type="button" :disabled="loading" @click="configState.refreshAppState()">
-        {{ loading ? 'Loading…' : 'Refresh application state' }}
-      </button>
-    </p>
+  <section class="card">
+    <div class="card-body p-4">
+      <h2 class="h5 mb-3">Application configuration</h2>
+      <div class="table-responsive mb-3">
+        <table class="table table-sm align-middle">
+          <tbody>
+            <tr v-for="[name, value] in rows" :key="name">
+              <th scope="row" class="small fw-normal py-2">{{ name }}</th>
+              <td class="small py-2">{{ value }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <AbpButton
+        variant="secondary"
+        outline
+        :loading="loading"
+        @click="configState.refreshAppState()"
+      >
+        Refresh application state
+      </AbpButton>
+    </div>
   </section>
 </template>

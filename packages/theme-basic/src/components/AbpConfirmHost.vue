@@ -43,7 +43,7 @@ const title = computed(() => {
 <template>
   <AlertDialogRoot :open="current !== null" @update:open="!$event && confirmation.clear()">
     <AlertDialogPortal>
-      <AlertDialogOverlay class="modal-backdrop show" />
+      <AlertDialogOverlay class="abp-confirm__backdrop" />
       <AlertDialogContent
         v-if="current"
         class="modal d-block abp-confirm"
@@ -99,5 +99,12 @@ const title = computed(() => {
 /* Above a modal: a confirmation is usually asked from inside one. */
 .abp-confirm {
   z-index: 1065;
+}
+
+.abp-confirm__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1060;
+  background: var(--abp-scrim);
 }
 </style>

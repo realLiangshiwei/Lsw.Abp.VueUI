@@ -22,7 +22,7 @@ const authWrapper = computed(
   <AbpLoaderBar />
 
   <div class="abp-account d-flex flex-column align-items-center justify-content-center">
-    <header class="d-flex align-items-center gap-3 mb-3">
+    <header class="abp-account__header d-flex align-items-center justify-content-between">
       <AbpLogo />
       <ul class="navbar-nav">
         <AbpLanguages />
@@ -47,7 +47,14 @@ const authWrapper = computed(
 <style scoped>
 .abp-account {
   min-height: 100vh;
-  padding: 1rem;
+  padding: 2rem 1rem;
+  background: var(--abp-canvas);
+}
+
+.abp-account__header {
+  width: 100%;
+  max-width: 28rem;
+  margin-bottom: 1.5rem;
 }
 
 .abp-account__main {

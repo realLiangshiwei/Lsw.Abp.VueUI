@@ -77,3 +77,27 @@ A theme that passes them is a theme every module UI works on.
 Both are the theme's, and `theme-basic` has them. Dark mode follows the OS by default and
 can be set explicitly; RTL follows the culture's direction from the localization
 configuration, so switching to Arabic switches the layout.
+
+## Closing a modal
+
+`AbpModal` asks before discarding changes made in its body. Pass `dirty` when a custom
+control updates a form without emitting a native input event. `busy` blocks user closes;
+`suppressUnsavedChangesWarning` permits closing without confirmation.
+
+Use the footer's `close()` for Cancel. Set `visible` to false after a successful save.
+
+```vue
+<AbpModal v-model:visible="open" :dirty="form.dirty" :busy="saving">
+  <template #header><h2>Edit record</h2></template>
+  <MyForm :form="form" />
+  <template #footer="{ close }">
+    <AbpButton variant="secondary" outline @click="close">Cancel</AbpButton>
+    <AbpButton :loading="saving" @click="save">Save</AbpButton>
+  </template>
+</AbpModal>
+```
+
+Refusing the confirmation keeps the form open with its values. A dirty, visible modal
+also requests the browser's native warning when leaving the document. Theme authors
+can use `useModal(props, close)` for this shared behavior and provide its `requestClose`
+to their footer slot.
