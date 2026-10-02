@@ -4,6 +4,9 @@ The 2026-10-02 results record a browser review of the running playground and com
 tests for the shared modal behavior. They are technical verification, not independent
 human usability trials. Package publication is paused at the user's request.
 
+Keep generated JSON records and screenshots in the local `results/` directory, which
+is ignored by Git. This repository retains the reproduction steps below.
+
 ## Reproduce the browser review
 
 1. Start the test backend and playground, then sign in with the test administrator.
@@ -29,6 +32,6 @@ The review creates no entities, saves no permission or settings changes, and sen
 test email. Native beforeunload prevention and listener cleanup are covered by both
 theme contract suites. Reset temporary viewport overrides after reviewing.
 
-The JSON records list the screenshots and verification results. The menu-permissions
+The local JSON records list the screenshots and verification results. The menu-permissions
 record covers the follow-up alignment fix and the refined permission layout. The permission and
 feature dialogs retain ABP's explicit suppression of unsaved changes warnings.

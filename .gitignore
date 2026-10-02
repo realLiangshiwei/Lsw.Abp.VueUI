@@ -10,6 +10,21 @@ coverage/
 .env.local
 .env.*.local
 
+# Local agent instructions and configuration
+AGENTS.md
+CLAUDE.md
+.claude/
+
+# Generated E2E records, screenshots and reports
+e2e/**/results/
+e2e/**/artifacts/
+e2e/**/reports/
+e2e/**/screenshots/
+e2e/**/videos/
+playwright-report/
+test-results/
+blob-report/
+
 # 后端产物：克隆后跑 abp install-libs 与 dotnet build 补回
 e2e/backend/**/bin/
 e2e/backend/**/obj/

@@ -6,7 +6,8 @@ an M9 release gate.
 
 The original criterion asked two ABP users who had not worked on this project to get it
 running from the documentation within 30 minutes each. The automated checks and the
-agent-operated trials in `results/2026-10-02.json` are technical verification records.
+agent-operated trials are technical verification records. Keep generated records and
+screenshots in the local `results/` directory, which is ignored by Git.
 
 ## Prepare the trial
 
