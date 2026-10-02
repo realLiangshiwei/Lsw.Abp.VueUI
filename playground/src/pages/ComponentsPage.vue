@@ -176,8 +176,8 @@ function submit(): void {
   <AbpModal v-model:visible="modalOpen" size="lg">
     <template #header><h2 class="h5 mb-0">A dialog</h2></template>
     <p>Focus is trapped here, Escape closes it, and focus goes back to the button.</p>
-    <template #footer>
-      <AbpButton variant="secondary" @click="modalOpen = false">Close</AbpButton>
+    <template #footer="{ close }">
+      <AbpButton variant="secondary" @click="close">Close</AbpButton>
     </template>
   </AbpModal>
 </template>
