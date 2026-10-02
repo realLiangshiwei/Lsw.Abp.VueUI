@@ -192,14 +192,13 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
           .revokeTokens()
           .catch(() => undefined);
         await userManager().removeUser();
-        // Nothing navigates away here, so the configuration has to be asked again; the
-        // menu would otherwise keep the shape it had while somebody was signed in.
+        await navigation.go('/');
         await configState.refreshAppState();
         return;
       }
 
       await userManager().signoutRedirect({
-        extraQueryParams: cultureParams(session.getLanguage()),
+        extraQueryParams: { ...cultureParams(session.getLanguage()), ...queryParams },
       });
     },
 

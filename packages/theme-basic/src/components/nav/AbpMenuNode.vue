@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useLocalization, type AbpRoute, type TreeNode } from '@lsw-abpvue/core';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { hasNavigationTarget } from './menu.js';
 
 /**
  * One entry of the sidebar, and everything under it. Recursive because ABP's own menus
@@ -13,6 +14,7 @@ const props = defineProps<{ node: TreeNode<AbpRoute> }>();
 const localization = useLocalization();
 const route = useRoute();
 const expanded = ref(false);
+const hasChildren = computed(() => props.node.children.some(hasNavigationTarget));
 
 function containsPath(node: TreeNode<AbpRoute>, path: string): boolean {
   return node.path === path || node.children.some(child => containsPath(child, path));
@@ -28,8 +30,8 @@ watch(
 </script>
 
 <template>
-  <li class="abp-menu-node nav-item">
-    <RouterLink v-if="node.isLeaf && node.path" class="nav-link" :to="node.path">
+  <li v-if="hasNavigationTarget(node)" class="abp-menu-node nav-item">
+    <RouterLink v-if="!hasChildren && node.path" class="nav-link" :to="node.path">
       <i v-if="node.iconClass" :class="node.iconClass" aria-hidden="true" />
       <span class="ms-2">{{ localization.t(node.name) }}</span>
     </RouterLink>

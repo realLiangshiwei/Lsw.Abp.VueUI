@@ -7,6 +7,18 @@ localization keys, DTO fields and permission names compatible.
 Packages use the `@lsw-abpvue/*` scope. The implementation uses Vue 3, TypeScript and
 Vue Router; applications can replace the theme and extend module pages.
 
+## Alpha
+
+The first alpha candidate is `0.0.1-alpha.0` across all fourteen public packages.
+Use the `alpha` tag when trying the CLI:
+
+```bash
+npx @lsw-abpvue/cli@alpha new Acme.BookStore -d mongodb --sample-crud
+```
+
+Follow [the new solution guide](docs/guide/new-solution.md) for backend setup, or
+[the existing solution guide](docs/guide/existing-solution.md) to add Vue to a backend.
+
 ## Run the playground
 
 Use Node 24 (the CI version), pnpm 11.22.0, the .NET 10 SDK, Docker and the official ABP

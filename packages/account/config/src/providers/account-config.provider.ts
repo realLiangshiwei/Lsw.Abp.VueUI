@@ -21,7 +21,11 @@ export function provideAccountConfig(): EnvironmentProviders {
       provide: NAVIGATE_TO_MANAGE_PROFILE,
       useFactory: () => {
         const router = inject(ABP_ROUTER);
-        return () => void router.push('/account/manage');
+        const routes = inject(RoutesService);
+        return () => {
+          const path = routes.find(route => route.name === AccountRouteNames.ManageProfile)?.path;
+          if (path) void router.push(path);
+        };
       },
     },
 

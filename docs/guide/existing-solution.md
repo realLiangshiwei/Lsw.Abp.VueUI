@@ -3,10 +3,10 @@
 `abpv switch-ui` adds a Vue UI to an ABP solution that already has one, or has none.
 
 ```bash
-npx @lsw-abpvue/cli switch-ui                  # renames angular/ to angular.bak/ and adds vue/
-npx @lsw-abpvue/cli switch-ui --mode keep      # leaves the old UI where it is
-npx @lsw-abpvue/cli switch-ui --port 5173
-npx @lsw-abpvue/cli switch-ui --dry-run        # says what it would do to your files
+npx @lsw-abpvue/cli@alpha switch-ui                  # renames angular/ to angular.bak/ and adds vue/
+npx @lsw-abpvue/cli@alpha switch-ui --mode keep      # leaves the old UI where it is
+npx @lsw-abpvue/cli@alpha switch-ui --port 5173
+npx @lsw-abpvue/cli@alpha switch-ui --dry-run        # says what it would do to your files
 ```
 
 ## It is deliberately timid

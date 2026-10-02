@@ -5,7 +5,7 @@ The command line tool of [Lsw.Abp.VueUI](https://github.com/realLiangshiwei/Lsw.
 generates typed proxies from a running backend.
 
 ```bash
-npx @lsw-abpvue/cli new Acme.BookStore
+npx @lsw-abpvue/cli@alpha new Acme.BookStore
 ```
 
 Both `abpvue` and `abpv` run it.

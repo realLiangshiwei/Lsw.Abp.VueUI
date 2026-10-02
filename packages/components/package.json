@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/components",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "The extension system of the ABP Vue UI: five extension points, the object extension mapping, and the extensible table and form.",
   "license": "MIT",
   "type": "module",

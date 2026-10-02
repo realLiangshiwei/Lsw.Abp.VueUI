@@ -61,7 +61,7 @@ function checkAccessToken(): CheckAuthenticationStateFn {
   };
 }
 
-/** ABP has no API for changing a password or managing two-factor: its own page has. */
+/** The OAuth default opens the identity server's profile page; account config overrides it. */
 function navigateToManageProfile(): () => void {
   const environment = inject(EnvironmentService);
   const windowService = inject(WindowService);

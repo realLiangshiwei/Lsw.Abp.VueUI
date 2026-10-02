@@ -51,14 +51,11 @@ async function activate(item: NavItem): Promise<void> {
           :side-offset="8"
           :collision-padding="12"
         >
-          <DropdownMenuItem
-            v-for="item in userMenu.visible.value"
-            :key="item.name"
-            class="dropdown-item"
-            @select="activate(item)"
-          >
-            <i v-if="item.iconClass" :class="item.iconClass" aria-hidden="true" />
-            <span class="ms-1">{{ localization.t(item.text ?? item.name) }}</span>
+          <DropdownMenuItem v-for="item in userMenu.visible.value" :key="item.name" as-child>
+            <button type="button" class="dropdown-item" @click="activate(item)">
+              <i v-if="item.iconClass" :class="item.iconClass" aria-hidden="true" />
+              <span class="ms-1">{{ localization.t(item.text ?? item.name) }}</span>
+            </button>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenuPortal>

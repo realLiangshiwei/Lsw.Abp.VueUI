@@ -4,7 +4,7 @@ One command creates both halves: the backend by the official ABP CLI, the fronte
 this one. This example uses MongoDB in Docker and includes the Books sample:
 
 ```bash
-npx @lsw-abpvue/cli new Acme.BookStore -d mongodb --sample-crud
+npx @lsw-abpvue/cli@alpha new Acme.BookStore -d mongodb --sample-crud
 ```
 
 ## Before you start

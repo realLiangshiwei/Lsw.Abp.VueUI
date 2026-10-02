@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/theme-basic",
-  "version": "0.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "The default theme of the ABP Vue UI: the twelve contracts on reka-ui, the three layouts, and Bootstrap 5 for looks.",
   "license": "MIT",
   "type": "module",
