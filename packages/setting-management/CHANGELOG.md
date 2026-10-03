@@ -1,5 +1,14 @@
 # @lsw-abpvue/setting-management
 
+## 0.0.1-alpha.4
+
+### Patch Changes
+
+- @lsw-abpvue/components@0.0.1-alpha.4
+- @lsw-abpvue/core@0.0.1-alpha.4
+- @lsw-abpvue/theme-shared@0.0.1-alpha.4
+- @lsw-abpvue/utils@0.0.1-alpha.4
+
 ## 0.0.1-alpha.3
 
 ### Patch Changes

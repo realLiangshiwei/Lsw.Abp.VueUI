@@ -29,6 +29,7 @@
     "document-language-synchronization",
     "language-cookie-and-generated-permissions",
     "m9-alpha",
+    "preserve-existing-page-routes",
     "release-verification"
   ]
 }

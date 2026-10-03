@@ -1,5 +1,12 @@
 # @lsw-abpvue/cli
 
+## 0.0.1-alpha.4
+
+### Patch Changes
+
+- e556960: Preserve existing template and application routes when generating their pages, and reject conflicting route changes.
+  - @lsw-abpvue/core@0.0.1-alpha.4
+
 ## 0.0.1-alpha.3
 
 ### Patch Changes
