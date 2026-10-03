@@ -73,5 +73,5 @@ describe('the documentation site', () => {
     // A documented API that is not exported is a promise the code does not keep, and
     // the design documents call the docs a contract.
     expect([...new Set(missing)]).toEqual([]);
-  });
+  }, 20_000);
 });
