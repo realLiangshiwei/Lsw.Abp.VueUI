@@ -1,5 +1,15 @@
 # @lsw-abpvue/theme-basic
 
+## 0.0.1-alpha.5
+
+### Patch Changes
+
+- a63ede6: Use dropdowns for multiple application row actions and buttons for a single action. Show localized pagination summaries and align page links with the page size selector.
+  - @lsw-abpvue/account-core@0.0.1-alpha.5
+  - @lsw-abpvue/core@0.0.1-alpha.5
+  - @lsw-abpvue/theme-shared@0.0.1-alpha.5
+  - @lsw-abpvue/utils@0.0.1-alpha.5
+
 ## 0.0.1-alpha.4
 
 ### Patch Changes

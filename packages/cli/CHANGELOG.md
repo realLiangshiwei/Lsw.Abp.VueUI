@@ -1,5 +1,13 @@
 # @lsw-abpvue/cli
 
+## 0.0.1-alpha.5
+
+### Patch Changes
+
+- a63ede6: Use dropdowns for multiple application row actions and buttons for a single action. Show localized pagination summaries and align page links with the page size selector.
+- 5052859: Resolve generated service and page imports relative to custom page, proxy and route output directories.
+  - @lsw-abpvue/core@0.0.1-alpha.5
+
 ## 0.0.1-alpha.4
 
 ### Patch Changes
