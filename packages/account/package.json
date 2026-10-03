@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/account",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "The account pages of the ABP Vue UI: login, register, the two ways to a new password, and the profile page.",
   "license": "MIT",
   "type": "module",

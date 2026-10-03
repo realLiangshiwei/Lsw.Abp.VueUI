@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/oauth",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "Authentication for the ABP Vue UI: the authorization code flow over oidc-client-ts, and ABP's password flow.",
   "license": "MIT",
   "type": "module",

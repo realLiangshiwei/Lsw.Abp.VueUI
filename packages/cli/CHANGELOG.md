@@ -1,5 +1,16 @@
 # @lsw-abpvue/cli
 
+## 0.0.1-alpha.3
+
+### Patch Changes
+
+- 86747fc: Generate solutions with sibling aspnet-core and vue directories, matching ABP's Angular layout. Support this layout when adding Vue to an existing solution and diagnosing it, including custom output paths, previews and failure cleanup.
+- 8e63363: Prebundle installed application entry points before automatic imports discover them, while preserving one dependency injection instance for released package sources.
+- 86747fc: Generate application CRUD pages with explicit table columns, form controls and CRUD methods instead of module extension registration and record editors. Put templates before scripts, simplify the optional Books example, and preserve existing legacy extension files during regeneration.
+- 8e63363: Require complete verification before publishing, including tests, coverage, builds, and clean external consumer checks.
+- Updated dependencies [8e63363]
+  - @lsw-abpvue/core@0.0.1-alpha.3
+
 ## 0.0.1-alpha.2
 
 ### Patch Changes

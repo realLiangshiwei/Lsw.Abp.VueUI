@@ -1,5 +1,24 @@
 # @lsw-abpvue/template-app
 
+## 0.0.1-alpha.3
+
+### Patch Changes
+
+- Updated dependencies [8e63363]
+  - @lsw-abpvue/core@0.0.1-alpha.3
+  - @lsw-abpvue/account@0.0.1-alpha.3
+  - @lsw-abpvue/account-core@0.0.1-alpha.3
+  - @lsw-abpvue/components@0.0.1-alpha.3
+  - @lsw-abpvue/feature-management@0.0.1-alpha.3
+  - @lsw-abpvue/identity@0.0.1-alpha.3
+  - @lsw-abpvue/oauth@0.0.1-alpha.3
+  - @lsw-abpvue/permission-management@0.0.1-alpha.3
+  - @lsw-abpvue/setting-management@0.0.1-alpha.3
+  - @lsw-abpvue/tenant-management@0.0.1-alpha.3
+  - @lsw-abpvue/theme-basic@0.0.1-alpha.3
+  - @lsw-abpvue/theme-shared@0.0.1-alpha.3
+  - @lsw-abpvue/utils@0.0.1-alpha.3
+
 ## 0.0.1-alpha.2
 
 ### Patch Changes

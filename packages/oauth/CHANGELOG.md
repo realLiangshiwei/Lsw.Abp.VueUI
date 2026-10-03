@@ -1,5 +1,13 @@
 # @lsw-abpvue/oauth
 
+## 0.0.1-alpha.3
+
+### Patch Changes
+
+- Updated dependencies [8e63363]
+  - @lsw-abpvue/core@0.0.1-alpha.3
+  - @lsw-abpvue/utils@0.0.1-alpha.3
+
 ## 0.0.1-alpha.2
 
 ### Patch Changes

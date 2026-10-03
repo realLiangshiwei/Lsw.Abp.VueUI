@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/tenant-management",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "The tenant management UI of the ABP Vue UI: the list, the connection string of a tenant, and the features it is given.",
   "license": "MIT",
   "type": "module",

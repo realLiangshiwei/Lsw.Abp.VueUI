@@ -22,8 +22,13 @@
     "@lsw-abpvue/template-lib": "0.0.0"
   },
   "changesets": [
+    "angular-solution-layout",
     "automatic-imports-and-integration",
+    "dependency-prebundling",
+    "direct-business-pages",
+    "document-language-synchronization",
     "language-cookie-and-generated-permissions",
-    "m9-alpha"
+    "m9-alpha",
+    "release-verification"
   ]
 }

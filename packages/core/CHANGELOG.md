@@ -1,5 +1,15 @@
 # @lsw-abpvue/core
 
+## 0.0.1-alpha.3
+
+### Patch Changes
+
+- 8e63363: Keep the HTML language synchronized with the selected culture when restoring a session,
+  changing languages or receiving a session update from another tab. Add an optional
+  DocumentService language setter that remains safe without a browser and compatible
+  with existing platform replacements.
+  - @lsw-abpvue/utils@0.0.1-alpha.3
+
 ## 0.0.1-alpha.2
 
 ### Patch Changes

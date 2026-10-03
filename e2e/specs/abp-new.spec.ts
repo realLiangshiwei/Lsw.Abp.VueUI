@@ -71,14 +71,26 @@ describe.skipIf(!ENABLED)('the backend abpv new leaves behind', () => {
     await mkdir(wrapped);
 
     try {
-      const abp = ['new', NAME, '-t', 'app', '-u', 'no-ui', '-uost', '-csf', ...OPTIONS];
+      const abp = [
+        'new',
+        NAME,
+        '-t',
+        'app',
+        '-u',
+        'no-ui',
+        '-uost',
+        '-o',
+        join(NAME, 'aspnet-core'),
+        ...OPTIONS,
+      ];
       expect(await execute('abp', abp, official)).toBe(0);
 
       const abpv = ['new', NAME, ...OPTIONS, '--skip-install', '--skip-proxy'];
       expect(await execute(process.execPath, [CLI, ...abpv], wrapped)).toBe(0);
 
-      const left = join(official, NAME);
-      const right = join(wrapped, NAME);
+      const left = join(official, NAME, 'aspnet-core');
+      const right = join(wrapped, NAME, 'aspnet-core');
+      expect(await readdir(join(wrapped, NAME))).toEqual(['aspnet-core', 'vue']);
 
       expect(await filesOf(right)).toEqual(await filesOf(left));
 

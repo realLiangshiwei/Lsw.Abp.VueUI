@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/identity",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "The user and role management UI of the ABP Vue UI, built entirely on the extension system.",
   "license": "MIT",
   "type": "module",

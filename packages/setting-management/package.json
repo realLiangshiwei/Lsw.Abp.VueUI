@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/setting-management",
-  "version": "0.0.1-alpha.2",
+  "version": "0.0.1-alpha.3",
   "description": "The settings page of the ABP Vue UI: the tab tree other modules add to, and the email and time zone tabs this module brings.",
   "license": "MIT",
   "type": "module",
