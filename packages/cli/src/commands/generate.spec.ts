@@ -147,6 +147,25 @@ describe('generate', () => {
     expect(await read(cwd, 'src/routes.ts')).toBe(before);
   });
 
+  it('keeps a template route when generating its existing page, including with force', async () => {
+    const cwd = await project('app');
+    const originalRoutes = ROUTES.replace(
+      '];',
+      "  { path: '/books', component: () => import('./pages/BooksPage.vue'), meta: { routes: { name: 'My books', order: 2 } } },\n];",
+    );
+    await writeFile(join(cwd, 'src/routes.ts'), originalRoutes);
+    await mkdir(join(cwd, 'src/pages'), { recursive: true });
+    await writeFile(join(cwd, 'src/pages/BooksPage.vue'), '<!-- template page -->\n');
+
+    for (const force of [false, true]) {
+      await runGenerate(args(cwd, { entity: 'Book', force }));
+      const source = await read(cwd, 'src/routes.ts');
+      expect([...source.matchAll(/path: '\/books'/g)]).toHaveLength(1);
+      expect(source).toContain("name: 'My books'");
+      expect(source).not.toContain('abpv:begin route:books');
+    }
+  });
+
   it('--no-router leaves the routes file out of it', async () => {
     const cwd = await project();
     const result = await runGenerate(args(cwd, { router: false }));

@@ -64,6 +64,67 @@ function endOfString(source: string, open: number): number {
   return source.length;
 }
 
+function skipTrivia(source: string, start: number): number {
+  let index = start;
+  while (index < source.length) {
+    if (/\s/.test(source[index] as string)) {
+      index += 1;
+    } else if (source.startsWith('//', index)) {
+      const end = source.indexOf('\n', index + 2);
+      index = end < 0 ? source.length : end + 1;
+    } else if (source.startsWith('/*', index)) {
+      const end = source.indexOf('*/', index + 2);
+      index = end < 0 ? source.length : end + 2;
+    } else {
+      break;
+    }
+  }
+  return index;
+}
+
+function literalPath(source: string, index: number): string | undefined {
+  if (/[\w$]/.test(source[index - 1] ?? '')) return undefined;
+  const key = /^(?:path\b|['"]path['"])/.exec(source.slice(index));
+  if (!key) return undefined;
+  const colon = skipTrivia(source, index + key[0].length);
+  if (source[colon] !== ':') return undefined;
+  const start = skipTrivia(source, colon + 1);
+  if (!['"', "'", '`'].includes(source[start] ?? '')) return undefined;
+  const end = endOfString(source, start);
+  return source.slice(start + 1, end).replace(/\\([\\'"`/])/g, '$1');
+}
+
+function hasRoute(
+  source: string,
+  open: number,
+  close: number,
+  path: string,
+  excluded?: readonly [number, number],
+): boolean {
+  const brackets = ['['];
+  for (let index = open + 1; index < close; index += 1) {
+    index = skipTrivia(source, index);
+    if (index >= close) break;
+    const character = source[index];
+    if (
+      brackets.length === 2 &&
+      brackets[1] === '{' &&
+      !(excluded && index >= excluded[0] && index < excluded[1]) &&
+      literalPath(source, index) === path
+    ) {
+      return true;
+    }
+    if (character === "'" || character === '"' || character === '`') {
+      index = endOfString(source, index);
+    } else if (character === '[' || character === '{' || character === '(') {
+      brackets.push(character);
+    } else if (character === ']' || character === '}' || character === ')') {
+      brackets.pop();
+    }
+  }
+  return false;
+}
+
 /** `// abpv:begin route:books` … `// abpv:end route:books`. */
 function markerOf(page: EntityPage): string {
   return `route:${page.fileBase}`;
@@ -124,6 +185,17 @@ export interface RouteInsertion {
  * @param page The page whose route to write
  */
 export function insertRoute(source: string, page: EntityPage): RouteInsertion {
+  const declaration = ROUTES.exec(source);
+
+  if (!declaration) {
+    throw new CliError(
+      'No `export const routes = [` in the routes file. Pass --routes with the file that ' +
+        'declares them, or --no-router and add the route by hand.',
+    );
+  }
+
+  const open = declaration.index + declaration[0].length - 1;
+  const close = closingBracket(source, open);
   const marker = markerOf(page);
   const begin = source.indexOf(`// abpv:begin ${marker}`);
 
@@ -132,6 +204,13 @@ export function insertRoute(source: string, page: EntityPage): RouteInsertion {
     const end = source.indexOf(endMarker, begin);
 
     if (end < 0) throw new CliError(`${marker} is opened in the routes file but never closed.`);
+
+    if (hasRoute(source, open, close, page.route, [begin, end + endMarker.length])) {
+      throw new CliError(
+        `A route for ${page.route} already exists outside this generated entry. ` +
+          'Choose another --route, or use --no-router and update the route by hand.',
+      );
+    }
 
     const existing = source.slice(begin, end + endMarker.length);
     // The order the entry already has: regenerating a page is not a reason to move it
@@ -147,17 +226,9 @@ export function insertRoute(source: string, page: EntityPage): RouteInsertion {
     return { source: next, changed: existing !== entry, replaced: true };
   }
 
-  const declaration = ROUTES.exec(source);
-
-  if (!declaration) {
-    throw new CliError(
-      'No `export const routes = [` in the routes file. Pass --routes with the file that ' +
-        'declares them, or --no-router and add the route by hand.',
-    );
+  if (hasRoute(source, open, close, page.route)) {
+    return { source, changed: false, replaced: false };
   }
-
-  const open = declaration.index + declaration[0].length - 1;
-  const close = closingBracket(source, open);
   const before = source.slice(0, close);
   const entry = routeEntry(page, nextOrder(source));
 

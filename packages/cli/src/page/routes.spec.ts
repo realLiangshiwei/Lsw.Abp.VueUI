@@ -52,6 +52,41 @@ describe('insertRoute', () => {
     expect([...twice.source.matchAll(/path: '\/books'/g)]).toHaveLength(1);
   });
 
+  it.each(["path: '/books'", '"path": "/books"', 'path /* route */: `/books`'])(
+    'preserves an existing unmarked route declared as %s',
+    property => {
+      const existing = routes.replace(
+        '];',
+        `  { ${property}, component: BooksPage, meta: { routes: { name: 'My books', order: 7 } } },\n];`,
+      );
+      expect(insertRoute(existing, page)).toEqual({
+        source: existing,
+        changed: false,
+        replaced: false,
+      });
+    },
+  );
+
+  it('ignores paths inside comments, strings, nested objects and lazy route calls', () => {
+    const existing = routes.replace(
+      '];',
+      [
+        "  // { path: '/books' }",
+        "  /* { path: '/books' } */",
+        `  { path: '/other', meta: { path: '/books', note: "path: '/books'" } },`,
+        "  lazyRoutes('/module', () => [{ path: '/books' }]),",
+        '];',
+      ].join('\n'),
+    );
+    expect(insertRoute(existing, page).changed).toBe(true);
+  });
+
+  it('refuses to move a generated route onto another existing route', () => {
+    const existing = routes.replace('];', "  { path: '/library', component: LibraryPage },\n];");
+    const once = insertRoute(existing, page).source;
+    expect(() => insertRoute(once, { ...page, route: '/library' })).toThrow(/already exists/);
+  });
+
   it('brings its own entry up to date when the page has changed', () => {
     const once = insertRoute(routes, page).source;
     const moved = insertRoute(once, { ...page, route: '/library' } as EntityPage);
