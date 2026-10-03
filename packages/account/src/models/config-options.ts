@@ -1,6 +1,7 @@
 import type { FormPropContributorCallback } from '@lsw-abpvue/components';
 import type { ProfileDto } from '@lsw-abpvue/account-core/proxy';
 import type { AccountComponents } from '@lsw-abpvue/account-core';
+import type { TwoFactorService } from '../services/two-factor.service.js';
 
 /** What a host may contribute to the personal settings form, keyed by component key. */
 export type AccountFormPropContributors = Partial<{
@@ -9,6 +10,8 @@ export type AccountFormPropContributors = Partial<{
 
 /** Named as `@abp/ng.account` names it, so a migrated configuration reads the same. */
 export interface AccountConfigOptions {
+  /** Lists second factors and sends email or SMS codes through the host's backend. */
+  twoFactorService?: TwoFactorService | undefined;
   /**
    * Where a successful login goes when the route carried no `returnUrl`.
    * @default '/'

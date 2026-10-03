@@ -23,6 +23,43 @@ export interface ListPreferenceStore {
   patch(preferences: ListPreferences): void;
 }
 
+function validPreferences(value: unknown): ListPreferences {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const stored = value as Record<string, unknown>;
+  return {
+    ...(typeof stored.maxResultCount === 'number' &&
+    Number.isInteger(stored.maxResultCount) &&
+    stored.maxResultCount > 0
+      ? { maxResultCount: stored.maxResultCount }
+      : {}),
+    ...(typeof stored.sortKey === 'string' ? { sortKey: stored.sortKey } : {}),
+    ...(stored.sortOrder === '' || stored.sortOrder === 'asc' || stored.sortOrder === 'desc'
+      ? { sortOrder: stored.sortOrder }
+      : {}),
+    ...(Array.isArray(stored.hiddenColumns)
+      ? {
+          hiddenColumns: [
+            ...new Set(
+              stored.hiddenColumns.filter((key): key is string => typeof key === 'string'),
+            ),
+          ],
+        }
+      : {}),
+  };
+}
+
+/** Clears this user's list preferences when their session ends. */
+export function clearListPreferences(storage: StorageService, userId?: string | null): void {
+  if (!userId) return;
+  try {
+    for (const key of storage.keys()) {
+      if (key.startsWith('abpvue.list.') && key.endsWith(`.${userId}`)) storage.removeItem(key);
+    }
+  } catch {
+    // Blocked storage must not prevent a session from ending.
+  }
+}
+
 /**
  * The stored preferences of one list. Call it in an injection context.
  * @param persistKey Names the list; by convention the component key, e.g. `Identity.Users`
@@ -37,11 +74,8 @@ export function useListPreferences(persistKey: string): ListPreferenceStore {
   const read = (): ListPreferences => {
     try {
       const stored = storage.getItem(keyOf());
-      return stored ? (JSON.parse(stored) as ListPreferences) : {};
-    } catch (error) {
-      // A preference nobody can read is not worth failing a page over.
-      if (isDevMode())
-        console.warn(`[abp] Could not read the preferences of "${persistKey}".`, error);
+      return stored ? validPreferences(JSON.parse(stored)) : {};
+    } catch {
       return {};
     }
   };
@@ -51,7 +85,7 @@ export function useListPreferences(persistKey: string): ListPreferenceStore {
 
     patch: preferences => {
       try {
-        storage.setItem(keyOf(), JSON.stringify({ ...read(), ...preferences }));
+        storage.setItem(keyOf(), JSON.stringify(validPreferences({ ...read(), ...preferences })));
       } catch (error) {
         if (isDevMode()) {
           console.warn(`[abp] Could not store the preferences of "${persistKey}".`, error);

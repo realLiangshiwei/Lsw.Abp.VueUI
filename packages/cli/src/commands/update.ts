@@ -6,6 +6,7 @@ import { readSourceCodeRecord, type ReleasedPackage } from '../source-code/recor
 import { planUpgrade, readManifest, writeUpgrade, type PlannedChange } from '../update/manifest.js';
 import { migrationsBetween, type Migration } from '../update/migrations.js';
 import { ANCHOR, compareVersions, latestVersion, parseRange } from '../update/versions.js';
+import { releasedChangelog, type ReleasedChangelog } from '../update/changelog.js';
 
 /** The options of `abpvue update`, as the flags spell them. */
 export interface UpdateArgs {
@@ -20,6 +21,7 @@ export interface UpdateArgs {
 }
 
 export interface UpdateResult {
+  changelogs: ReleasedChangelog[];
   /** What the project was on, as its `@lsw-abpvue/core` range names it. */
   from: string | undefined;
   to: string;
@@ -68,6 +70,9 @@ export async function runUpdate(args: UpdateArgs): Promise<UpdateResult> {
     version: to,
     released: new Set(released.map(entry => entry.name)),
   });
+  const changelogs = await Promise.all(
+    released.map(entry => releasedChangelog(project, entry, to, args.fetch)),
+  );
 
   const dryRun = args['dry-run'] === true;
   const written = dryRun
@@ -93,6 +98,7 @@ export async function runUpdate(args: UpdateArgs): Promise<UpdateResult> {
         : { ...change, skipped: change.skipped ?? 'already on that version' },
     ),
     released,
+    changelogs,
     migrations,
     dryRun,
   };
@@ -130,6 +136,22 @@ function print(result: UpdateResult): void {
         'Bring the changes over by hand, or delete the released source and install again.',
       ].join('\n'),
     );
+    for (const changelog of result.changelogs) {
+      prompts.log.info(
+        [
+          `${changelog.name}: changes after ${changelog.from}, through ${changelog.to}`,
+          ...changelog.entries.map(entry => `${entry.version}\n${entry.summary}`),
+          ...(changelog.unavailable
+            ? [
+                `Changelog unavailable: ${changelog.unavailable} Review the package's CHANGELOG.md before merging by hand.`,
+              ]
+            : []),
+          ...(!changelog.unavailable && changelog.entries.length === 0
+            ? ['No newer release notes.']
+            : []),
+        ].join('\n'),
+      );
+    }
   }
 
   if (moved.length > 0 && !result.dryRun) {

@@ -1,10 +1,12 @@
 import {
   AbpHttpError,
   AuthErrorFilterService,
+  clearListPreferences,
   ConfigStateService,
   defineService,
   EnvironmentService,
   inject,
+  StorageService,
   type AuthService,
   type LoginParams,
   type ServiceOf,
@@ -25,6 +27,7 @@ export const AbpOAuthService = defineService('AbpOAuthService', () => {
   const state = inject(AuthStateService);
   const configState = inject(ConfigStateService);
   const filters = inject(AuthErrorFilterService);
+  const storage = inject(StorageService);
   const code = inject(AuthCodeFlowStrategy);
   const password = inject(PasswordFlowStrategy);
 
@@ -40,7 +43,10 @@ export const AbpOAuthService = defineService('AbpOAuthService', () => {
     init: (): Promise<void> => strategy().init(),
     navigateToLogin: (returnUrl?: string): Promise<void> => strategy().navigateToLogin(returnUrl),
     login: (params: LoginParams): Promise<void> => strategy().login(params),
-    logout: (queryParams?: Record<string, string>): Promise<void> => strategy().logout(queryParams),
+    logout: (queryParams?: Record<string, string>): Promise<void> => {
+      clearListPreferences(storage, configState.snapshot().currentUser.id);
+      return strategy().logout(queryParams);
+    },
 
     getAccessToken: (): string | null => state.getAccessToken(),
     getRefreshToken: (): string | null => state.getRefreshToken(),
@@ -56,6 +62,7 @@ export const AbpOAuthService = defineService('AbpOAuthService', () => {
       } catch (error) {
         if (error instanceof AbpHttpError && filters.run(error)) throw error;
 
+        clearListPreferences(storage, configState.snapshot().currentUser.id);
         await strategy().clear();
         await configState.refreshAppState();
         await strategy().navigateToLogin();

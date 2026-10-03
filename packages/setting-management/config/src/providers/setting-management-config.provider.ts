@@ -16,9 +16,10 @@ import { SettingManagementRouteNames } from '../enums/route-names.js';
 import { SettingManagementTabNames } from '../enums/tab-names.js';
 import { SettingManagementVisibilityService } from '../services/setting-management-visibility.service.js';
 import { SettingTabsService } from '../services/setting-tabs.service.js';
+import { AccountSettingsService } from '../services/account-settings.service.js';
 
 /**
- * The menu entry and the two tabs this module brings, registered at startup. The tab
+ * The menu entry and the tabs this module brings, registered at startup. The tab
  * components are asked for when a tab is opened rather than imported here, which is what
  * keeps this entry point to the size design 03 §2 asks of it.
  */
@@ -37,6 +38,7 @@ export function provideSettingManagementConfig(): EnvironmentProviders {
       ]);
 
       const configState = inject(ConfigStateService);
+      const accountSettings = inject(AccountSettingsService);
       const feature = inject(FeatureService);
       const mayChangeEmail = feature.isEnabled(
         SettingManagementFeatures.AllowChangingEmailSettings,
@@ -51,6 +53,15 @@ export function provideSettingManagementConfig(): EnvironmentProviders {
           // The endpoints behind this tab check the feature, but only inside a tenant.
           visible: () =>
             configState.getOne('currentTenant').value.id == null || mayChangeEmail.value,
+        },
+        {
+          name: SettingManagementTabNames.AccountSettingGroup,
+          order: 150,
+          component: defineAsyncComponent(() => import('../components/AccountSettingsTab.vue')),
+          requiredPolicy:
+            accountSettings.requiredPolicy ??
+            (accountSettings.update ? 'AbpAccount.SettingManagement' : undefined),
+          visible: () => configState.snapshot().currentUser.isAuthenticated,
         },
         {
           name: SettingManagementTabNames.TimeZoneSettingGroup,

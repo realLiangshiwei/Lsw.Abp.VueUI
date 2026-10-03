@@ -84,9 +84,13 @@ export function testDatePicker(theme: ThemeUnderTest): void {
     it('reports what was picked, still as a string', async () => {
       const rendered = picker({ modelValue: '2026-09-03' });
 
-      await findRendered(rendered, 'input')?.setValue('2026-10-01');
+      const month = findAllRendered(rendered, '[role="spinbutton"]').find(
+        segment => segment.attributes('aria-valuemax') === '12',
+      );
+      if (month) await month.trigger('keydown', { key: 'ArrowUp' });
+      else await findRendered(rendered, 'input')?.setValue('2026-10-03');
 
-      expect(rendered.emitted('update:modelValue').at(-1)).toEqual(['2026-10-01']);
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual(['2026-10-03']);
     });
 
     it('reports null rather than an empty string when it is cleared', async () => {

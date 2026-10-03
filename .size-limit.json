@@ -1,5 +1,10 @@
 [
   {
+    "name": "@lsw-abpvue/core/object-extensions",
+    "path": "packages/core/dist/object-extensions/index.js",
+    "limit": "1 kB"
+  },
+  {
     "name": "@lsw-abpvue/utils",
     "path": "packages/utils/dist/index.js",
     "limit": "1.5 kB"
@@ -50,9 +55,10 @@
       "@lsw-abpvue/core",
       "@lsw-abpvue/theme-shared",
       "@lsw-abpvue/account-core",
-      "reka-ui"
+      "reka-ui",
+      "@internationalized/date"
     ],
-    "limit": "12 kB"
+    "limit": "12.5 kB"
   },
   {
     "name": "@lsw-abpvue/account-core",
@@ -125,7 +131,8 @@
       "@lsw-abpvue/core",
       "@lsw-abpvue/theme-shared",
       "../chunks/EmailSettingsTab-*",
-      "../chunks/TimeZoneSettingsTab-*"
+      "../chunks/TimeZoneSettingsTab-*",
+      "../chunks/AccountSettingsTab-*"
     ],
     "limit": "3 kB"
   },

@@ -15,6 +15,7 @@ import { renderTemplate } from '../template/render.js';
 import { Rollback } from '../system/rollback.js';
 import { run } from '../system/run.js';
 import { cliVersion } from '../system/version.js';
+import { unifiedDiff } from '../system/diff.js';
 
 /** The options of `abpv switch-ui`. */
 export interface SwitchUiArgs {
@@ -41,6 +42,7 @@ export interface Renamed {
 }
 
 export interface SwitchUiResult {
+  diff: string[];
   solution: Solution;
   frontend: string;
   files: string[];
@@ -87,12 +89,14 @@ async function assertCommitted(root: string, args: SwitchUiArgs, notes: string[]
 }
 
 /** Moves a directory aside under a name that is free, and says how to move it back. */
-async function moveAside(path: string, rollback: Rollback): Promise<Renamed> {
+async function moveAside(path: string, rollback: Rollback, dryRun: boolean): Promise<Renamed> {
   let target = `${path}.bak`;
-  if (await exists(target)) target = `${path}.${Date.now()}.bak`;
+  for (let suffix = 1; await exists(target); suffix += 1) target = `${path}.${suffix}.bak`;
 
-  await rename(path, target);
-  rollback.add(`put ${basename(path)} back`, () => rename(target, path));
+  if (!dryRun) {
+    await rename(path, target);
+    rollback.add(`put ${basename(path)} back`, () => rename(target, path));
+  }
 
   return { from: path, to: target };
 }
@@ -170,17 +174,15 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
       const path = join(root, name);
       if (!(await exists(path))) continue;
 
-      renamed.push(dryRun ? { from: path, to: `${path}.bak` } : await moveAside(path, rollback));
+      renamed.push(await moveAside(path, rollback, dryRun));
     }
 
     // A second run, or a directory that was already called `vue`. Never deleted (S6).
     if (await exists(frontend)) {
-      renamed.push(
-        dryRun ? { from: frontend, to: `${frontend}.bak` } : await moveAside(frontend, rollback),
-      );
+      renamed.push(await moveAside(frontend, rollback, dryRun));
     }
 
-    const { written } = await renderTemplate({
+    const { written, contents, binary } = await renderTemplate({
       source,
       target: frontend,
       blocks,
@@ -196,6 +198,24 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
       },
     });
 
+    const diff = dryRun
+      ? [
+          ...renamed.map(({ from, to }) =>
+            [
+              `diff --git a/${relative(root, from)} b/${relative(root, to)}`,
+              `rename from ${relative(root, from)}`,
+              `rename to ${relative(root, to)}`,
+            ].join('\n'),
+          ),
+          ...Object.entries(contents).map(([file, body]) =>
+            unifiedDiff(relative(root, join(frontend, file)), '', body),
+          ),
+          ...binary.map(
+            file => `Binary files /dev/null and b/${relative(root, join(frontend, file))} differ`,
+          ),
+        ]
+      : [];
+
     if (!dryRun) {
       rollback.add(`removed ${relative(root, frontend)}`, () =>
         rm(frontend, { recursive: true, force: true }),
@@ -205,7 +225,16 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
     const edits =
       args['skip-backend-config'] === true
         ? []
-        : await configureBackend({ solution, appUrl, dryRun, backup: true, rollback });
+        : await configureBackend({
+            solution,
+            appUrl,
+            dryRun,
+            backup: true,
+            rollback,
+            preview: (file, before, after) => {
+              if (dryRun) diff.push(unifiedDiff(file, before, after));
+            },
+          });
 
     if (edits.length > 0) {
       notes.push('The backend configuration changed, so the DbMigrator has to run again.');
@@ -233,7 +262,7 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
 
     rollback.commit();
 
-    return { solution, frontend, files: written, renamed, edits, notes };
+    return { solution, frontend, files: written, renamed, edits, notes, diff };
   } catch (error) {
     const undone = await rollback.run();
     if (undone.length > 0) prompts.log.warn(['Taken back:', ...undone].join('\n  '));
@@ -258,6 +287,7 @@ function print(result: SwitchUiResult, args: SwitchUiArgs): void {
   }
 
   prompts.log.info([dryRun ? 'What would change:' : 'What changed:', ...lines].join('\n'));
+  if (dryRun && result.diff.length > 0) prompts.log.info(result.diff.join('\n\n'));
   if (result.notes.length > 0) prompts.log.info(result.notes.join('\n'));
 
   prompts.log.success(

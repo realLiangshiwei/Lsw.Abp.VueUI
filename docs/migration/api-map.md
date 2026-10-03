@@ -114,7 +114,7 @@ reason for every difference. This is the working subset.
 | `theme-shared` depends on ng-bootstrap | `theme-shared` has no UI dependency | Δ+ |
 | `ToasterService`, `ConfirmationService` | same names | = |
 | Toast timing lives in the component | It lives in the service | Δ+ every theme would otherwise reimplement it |
-| `DateTimeAdapter` converts a string to browser-local time | Native date inputs display the calendar date and time written in the ISO string | Δ no browser-timezone conversion; an unedited value keeps its original ISO representation |
+| `DateTimeAdapter` converts a string to browser-local time | Reka calendar and time segments display the calendar date and time written in the ISO string, using ABP culture patterns | Δ no browser-timezone conversion; an unedited value keeps its original ISO representation |
 | — | `runThemeContractTests(theme)`: 70 behavioural assertions plus axe | Δ+ |
 | — | Tables carry a `<caption>`; `aria-sort` is set | Δ+ a11y baseline |
 
@@ -125,6 +125,7 @@ reason for every difference. This is the working subset.
 | `AuthService.navigateToLogin/login/logout` | same | = |
 | `LoginParams` | plus `twoFactorProvider`, `twoFactorCode`, `recoveryCode` | Δ+ the open source token endpoint takes them already |
 | Failure is an `HttpErrorResponse` | `AuthError`, `TwoFactorRequiredError` | Δ+ typed |
+| Account module two-factor delivery | `TwoFactorService` host adapter | Δ open-source ABP exposes no email/SMS delivery API; provider selection and send/resend are supported when the host supplies one |
 | Token storage is `localStorage` | `TokenStorage` is a token: `BrowserTokenStorage`, `MemoryTokenStorage`, `ServerTokenStorage` | ≈ |
 | A domain tenant that does not resolve is ignored | `TenantNotFoundError` | Δ+ otherwise a tenant host shows the host's data |
 | Switching tenants keeps the token | The token is discarded when its `tenantid` disagrees | Δ+ |
@@ -136,4 +137,5 @@ reason for every difference. This is the working subset.
 | `ng generate @abp/ng.schematics:generate-proxy` | `abpv proxy add` | ≈ same algorithm, plus validators, permission names and `--dry-run` |
 | `ng generate @abp/ng.schematics:create-lib` | `abpv create-lib` | Δ writes a standalone repository, not a workspace project |
 | `ng update` | `abpv update` | Δ moves versions and runs migrations; no code mods |
+| — | Pure `core/object-extensions` entry shared by runtime and doctor | Δ+ no Vue import in Node |
 | — | `abpv new`, `abpv switch-ui`, `abpv doctor`, `abpv generate` | Δ+ |

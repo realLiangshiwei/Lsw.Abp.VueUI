@@ -2,5 +2,9 @@ import { defineAbpLibConfig } from '../../scripts/vite-lib-preset.ts';
 
 export default defineAbpLibConfig({
   packageUrl: import.meta.url,
-  entries: { index: 'src/index.ts', 'router/index': 'router/src/index.ts' },
+  entries: {
+    index: 'src/index.ts',
+    'router/index': 'router/src/index.ts',
+    'object-extensions/index': 'object-extensions/src/index.ts',
+  },
 });

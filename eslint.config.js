@@ -43,13 +43,20 @@ const NODE_BUILTINS = [
   'node:path',
   'node:process',
   'node:url',
+  'node:zlib',
 ];
 
 const ALLOWED_IMPORTS = {
   utils: [],
-  // A build-time tool, not part of any application bundle: no framework, no workspace
-  // package, and the Node APIs it needs listed one by one.
-  cli: [...NODE_BUILTINS, '@clack/prompts', 'citty', 'jsonc-parser', 'prettier'],
+  // The CLI may use the pure mapping entry, but never the Vue or DI entry points.
+  cli: [
+    ...NODE_BUILTINS,
+    '@clack/prompts',
+    'citty',
+    'jsonc-parser',
+    'prettier',
+    '@lsw-abpvue/core/object-extensions',
+  ],
   core: [...FRAMEWORK, UTILS],
   oauth: [...FRAMEWORK, UTILS, CORE, 'oidc-client-ts'],
   'theme-shared': [...FRAMEWORK, UTILS, CORE],
@@ -63,6 +70,7 @@ const ALLOWED_IMPORTS = {
     COMPONENTS,
     ACCOUNT_CORE,
     'reka-ui',
+    '@internationalized/date',
     'bootstrap',
     'bootstrap-icons',
   ],

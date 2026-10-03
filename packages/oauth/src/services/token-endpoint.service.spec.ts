@@ -1,5 +1,6 @@
 import {
   AuthError,
+  EnvironmentService,
   createInjector,
   HTTP_FETCH,
   provideAbpCore,
@@ -91,6 +92,45 @@ describe('the token endpoint', () => {
     await service.refresh('r-token');
 
     expect(exchanges.filter(exchange => exchange.url.includes('.well-known'))).toHaveLength(1);
+  });
+  it('sends token and revocation requests through configured development endpoints', async () => {
+    const { exchanges, injector, service } = endpoint(ok);
+    injector.get(EnvironmentService).setState({
+      ...environment,
+      oAuthConfig: {
+        ...environment.oAuthConfig,
+        metadataSeed: {
+          token_endpoint: 'http://localhost:4200/connect/token',
+          revocation_endpoint: 'http://localhost:4200/connect/revocat',
+        },
+      },
+    });
+    await service.password({ username: 'admin', password: 'password' });
+    await service.revoke('refresh', 'refresh_token');
+    expect(exchanges.map(exchange => exchange.url)).toEqual([
+      'http://localhost:4200/connect/token',
+      'http://localhost:4200/connect/revocat',
+    ]);
+  });
+  it('reloads discovery when the metadata URL changes without changing the issuer', async () => {
+    const { exchanges, injector, service } = endpoint(ok);
+    await service.refresh('refresh');
+    injector.get(EnvironmentService).setState({
+      ...environment,
+      oAuthConfig: {
+        ...environment.oAuthConfig,
+        metadataUrl: 'http://localhost:4200/.well-known/openid-configuration',
+      },
+    });
+    await service.refresh('refresh');
+    expect(
+      exchanges
+        .filter(exchange => exchange.url.includes('.well-known'))
+        .map(exchange => exchange.url),
+    ).toEqual([
+      `${ISSUER}/.well-known/openid-configuration`,
+      'http://localhost:4200/.well-known/openid-configuration',
+    ]);
   });
 
   it('a failed metadata lookup is not remembered -- the next attempt tries again', async () => {

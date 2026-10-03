@@ -8,7 +8,8 @@
   "files": [
     "dist",
     "src",
-    "router/src"
+    "router/src",
+    "object-extensions/src"
   ],
   "exports": {
     ".": {
@@ -19,10 +20,14 @@
       "types": "./dist/router/index.d.ts",
       "import": "./dist/router/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./object-extensions": {
+      "types": "./dist/object-extensions/index.d.ts",
+      "import": "./dist/object-extensions/index.js"
+    }
   },
   "scripts": {
-    "build": "vite build && vue-tsc -p tsconfig.build.json && vue-tsc -p tsconfig.build.router.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
+    "build": "vite build && vue-tsc -p tsconfig.build.json && vue-tsc -p tsconfig.build.router.json && vue-tsc -p tsconfig.build.object-extensions.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
     "typecheck": "vue-tsc -p tsconfig.json",
     "test": "vitest run",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"

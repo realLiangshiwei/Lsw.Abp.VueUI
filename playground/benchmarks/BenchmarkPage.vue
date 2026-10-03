@@ -1,13 +1,23 @@
 <script setup lang="ts">
-import { inject, RoutesService, useListService } from '@lsw-abpvue/core';
+import {
+  getCurrentInjector,
+  inject,
+  RoutesService,
+  runInInjectionContext,
+  useListService,
+} from '@lsw-abpvue/core';
 import {
   AbpExtensibleTable,
+  AbpExtensibleForm,
   EntityAction,
   EntityProp,
   ExtensionsService,
   mergeWithDefaultActions,
   mergeWithDefaultProps,
   PropType,
+  FormProp,
+  useExtensibleForm,
+  type ExtensibleForm,
 } from '@lsw-abpvue/components';
 import { nextTick, ref, shallowRef } from 'vue';
 import AbpRoutes from '../../packages/theme-basic/src/components/nav/AbpRoutes.vue';
@@ -19,11 +29,13 @@ interface RecordRow {
   price: number;
   published: boolean;
   date: string;
+  extraProperties?: Record<string, unknown> | undefined;
 }
 
 interface Result {
   scenario: string;
   rendered: number;
+  cells: number;
   mountMs: number;
   medianMs: number;
   p95Ms: number;
@@ -31,16 +43,16 @@ interface Result {
 }
 
 const extensions = inject(ExtensionsService);
-mergeWithDefaultProps(extensions.entityProps, {
-  'Benchmarks.Records': [
-    EntityProp.create<RecordRow>({ name: 'id', type: PropType.String }),
-    EntityProp.create<RecordRow>({ name: 'name', type: PropType.String }),
-    EntityProp.create<RecordRow>({ name: 'category', type: PropType.String }),
-    EntityProp.create<RecordRow>({ name: 'price', type: PropType.Number }),
-    EntityProp.create<RecordRow>({ name: 'published', type: PropType.Boolean }),
-    EntityProp.create<RecordRow>({ name: 'date', type: PropType.Date }),
-  ],
-});
+const injector = getCurrentInjector();
+const baseProps = [
+  EntityProp.create<RecordRow>({ name: 'id', type: PropType.String }),
+  EntityProp.create<RecordRow>({ name: 'name', type: PropType.String }),
+  EntityProp.create<RecordRow>({ name: 'category', type: PropType.String }),
+  EntityProp.create<RecordRow>({ name: 'price', type: PropType.Number }),
+  EntityProp.create<RecordRow>({ name: 'published', type: PropType.Boolean }),
+  EntityProp.create<RecordRow>({ name: 'date', type: PropType.Date }),
+];
+mergeWithDefaultProps(extensions.entityProps, { 'Benchmarks.Records': baseProps });
 mergeWithDefaultActions(extensions.entityActions, {
   'Benchmarks.Records': [
     EntityAction.create<RecordRow>({ text: 'Edit', action: () => {} }),
@@ -51,7 +63,8 @@ mergeWithDefaultActions(extensions.entityActions, {
 const routes = inject(RoutesService);
 const list = useListService();
 const rows = shallowRef<RecordRow[]>([]);
-const phase = ref<'table' | 'menu' | undefined>();
+const phase = ref<'table' | 'menu' | 'form' | undefined>();
+const extraForm = shallowRef<ExtensibleForm<RecordRow>>();
 const surface = ref<HTMLElement>();
 const results = shallowRef<Result[]>([]);
 const busy = ref(false);
@@ -87,7 +100,14 @@ async function measure(scenario: string, prepare: () => void, update: (turn: num
   return {
     scenario,
     rendered:
-      surface.value?.querySelectorAll(phase.value === 'table' ? 'tbody tr' : 'li').length ?? 0,
+      surface.value?.querySelectorAll(
+        phase.value === 'table'
+          ? 'tbody tr'
+          : phase.value === 'form'
+            ? 'input[name^="extra"]'
+            : 'li',
+      ).length ?? 0,
+    cells: surface.value?.querySelectorAll('tbody td').length ?? 0,
     mountMs,
     medianMs: ((sorted[9] ?? 0) + (sorted[10] ?? 0)) / 2,
     p95Ms: sorted[18] ?? 0,
@@ -103,6 +123,7 @@ async function run(): Promise<void> {
   await nextTick();
 
   try {
+    mergeWithDefaultProps(extensions.entityProps, { 'Benchmarks.Records': baseProps });
     for (const size of [50, 1000]) {
       const records = Array.from({ length: size }, (_, index) => ({
         id: String(index),
@@ -128,6 +149,73 @@ async function run(): Promise<void> {
       phase.value = undefined;
       await nextTick();
     }
+
+    const wideProps = Array.from({ length: 44 }, (_, index) =>
+      EntityProp.create<RecordRow>({
+        name: `extra${index}`,
+        displayName: `Extra ${index}`,
+        type: PropType.Number,
+        isExtra: true,
+        columnWidth: 120,
+      }),
+    );
+    const wideRecords = Array.from({ length: 50 }, (_, index) => ({
+      id: String(index),
+      name: `Record ${index}`,
+      category: 'Books',
+      price: index / 10,
+      published: index % 2 === 0,
+      date: '2026-10-03',
+      extraProperties: Object.fromEntries(wideProps.map(prop => [prop.name, index])),
+    }));
+    const wideResult = await measure(
+      '50 table rows, 50 data columns and row actions',
+      () => {
+        mergeWithDefaultProps(extensions.entityProps, {
+          'Benchmarks.Records': [...baseProps, ...wideProps],
+        });
+        rows.value = wideRecords;
+        list.totalCount.value = 50;
+        list.maxResultCount.value = 50;
+        phase.value = 'table';
+      },
+      turn => {
+        rows.value = wideRecords.map(record => ({
+          ...record,
+          extraProperties: Object.fromEntries(wideProps.map(prop => [prop.name, turn])),
+        }));
+      },
+    );
+    results.value = [...results.value, wideResult];
+    phase.value = undefined;
+    await nextTick();
+
+    const formProps = Array.from({ length: 100 }, (_, index) =>
+      FormProp.create<RecordRow>({
+        name: `extra${index}`,
+        displayName: `Extra ${index}`,
+        type: PropType.String,
+        isExtra: true,
+      }),
+    );
+    const formResult = await measure(
+      '100 extra properties in an extensible form',
+      () => {
+        if (!injector) throw new Error('The benchmark application has no injector.');
+        mergeWithDefaultProps(extensions.createFormProps, { 'Benchmarks.Records': formProps });
+        extraForm.value = runInInjectionContext(injector, () => useExtensibleForm<RecordRow>());
+        phase.value = 'form';
+      },
+      turn => {
+        for (const prop of formProps) {
+          const control = extraForm.value?.form.get(prop.name);
+          if (control) control.value = `Value ${turn}`;
+        }
+      },
+    );
+    results.value = [...results.value, formResult];
+    phase.value = undefined;
+    await nextTick();
 
     routes.remove(routes.flat.value.map(route => route.name));
     const result = await measure(
@@ -177,6 +265,7 @@ async function run(): Promise<void> {
         <tr>
           <th>Scenario</th>
           <th>Rendered</th>
+          <th>Cells</th>
           <th>Mount</th>
           <th>Median update</th>
           <th>p95 update</th>
@@ -186,6 +275,7 @@ async function run(): Promise<void> {
         <tr v-for="result in results" :key="result.scenario">
           <td>{{ result.scenario }}</td>
           <td>{{ result.rendered }}</td>
+          <td>{{ result.cells }}</td>
           <td>{{ result.mountMs.toFixed(2) }}</td>
           <td>{{ result.medianMs.toFixed(2) }}</td>
           <td>{{ result.p95Ms.toFixed(2) }}</td>
@@ -205,6 +295,7 @@ async function run(): Promise<void> {
         caption="Records"
       />
       <AbpRoutes v-if="phase === 'menu'" />
+      <AbpExtensibleForm v-if="phase === 'form' && extraForm" :form="extraForm" />
     </div>
   </main>
 </template>

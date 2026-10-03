@@ -155,6 +155,10 @@ importers:
       prettier:
         specifier: ^3.9.6
         version: 3.9.6
+    devDependencies:
+      '@lsw-abpvue/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/components:
     dependencies:
@@ -316,6 +320,9 @@ importers:
 
   packages/theme-basic:
     dependencies:
+      '@internationalized/date':
+        specifier: ^3.12.4
+        version: 3.12.4
       reka-ui:
         specifier: ^2.10.4
         version: 2.10.4(vue@3.5.41(typescript@6.0.3))

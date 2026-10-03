@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "rootDir": "object-extensions/src",
+    "paths": {},
+    "outDir": "dist/object-extensions"
+  },
+  "include": ["object-extensions/src/**/*.ts"],
+  "exclude": ["object-extensions/src/**/*.spec.ts", "object-extensions/src/**/*.test-d.ts"]
+}

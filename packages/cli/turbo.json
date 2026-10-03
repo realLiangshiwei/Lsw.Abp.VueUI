@@ -9,7 +9,8 @@
         "tsconfig*.json",
         "vite.config.ts",
         "$TURBO_ROOT$/scripts/bundle-template.mjs",
-        "$TURBO_ROOT$/templates/app/**"
+        "$TURBO_ROOT$/templates/app/**",
+        "$TURBO_ROOT$/templates/lib/**"
       ],
       "outputs": ["dist/**"]
     }

@@ -56,3 +56,10 @@ than it returns, given that it is replaced wholesale rather than mutated.
 There is no Pinia and no Vuex. A store around a server-owned object that is only ever
 replaced would be ceremony with no payoff; a bridge package for applications that already
 use Pinia is on the list for after 1.0.
+
+## List preferences
+
+`useListPreferences(key)` stores page size, sort and hidden columns per user. Page number
+and filters are never persisted. Corrupt or incompatible stored values are ignored
+silently. Logout and failed token renewal remove preferences for the current user only;
+`clearListPreferences(storage, userId)` provides the same cleanup for custom authentication.

@@ -1,3 +1,4 @@
+import { mapExtensionProperty } from '@lsw-abpvue/core/object-extensions';
 import {
   ConfigStateService,
   FeatureService,
@@ -32,8 +33,6 @@ import { readValue } from './record.js';
 
 /** ABP's lookup extension keeps the display text of a lookup in a second property. */
 const TYPEAHEAD_TEXT_SUFFIX = '_Text';
-
-const PROP_TYPES = new Set<string>(Object.values(PropType));
 
 /** What the mapping produces: one contributor set per extension point. */
 export interface ObjectExtensionContributors<R = unknown> {
@@ -98,31 +97,6 @@ function permittedProperties(
   return Object.fromEntries(
     Object.entries(properties).filter(([, property]) => policyHolds(injector, property.policy)),
   );
-}
-
-/** `System.String?` is `string`, and anything we do not know renders as text. */
-function propTypeOf(property: ExtensionPropertyDto, name: string): PropType {
-  const simple = (property.typeSimple ?? '').replace(/\?$/, '');
-  if (PROP_TYPES.has(simple)) return simple as PropType;
-
-  if (isDevMode() && simple) {
-    console.warn(
-      `[abp] The extension property "${name}" has type "${simple}", which is not one of PropType. It is rendered as text.`,
-    );
-  }
-
-  return PropType.String;
-}
-
-function typeaheadTypeOf(
-  lookup: ExtensionPropertyUiLookupDto | undefined,
-  name: string,
-): PropType | undefined {
-  if (lookup?.url) return PropType.Typeahead;
-
-  // The `_Text` half of a lookup carries the display text; the typeahead writes it, and
-  // the user never edits it directly.
-  return name.endsWith(TYPEAHEAD_TEXT_SUFFIX) ? PropType.Hidden : undefined;
 }
 
 /**
@@ -232,7 +206,10 @@ export function mapEntitiesToContributors<R = unknown>(
 
     for (const [name, property] of Object.entries(properties)) {
       const lookup = property.ui.lookup;
-      const type = typeaheadTypeOf(lookup, name) ?? propTypeOf(property, name);
+      const mapped = mapExtensionProperty(name, property, enums);
+      const type = mapped.type;
+      if (!mapped.recognised && isDevMode())
+        console.warn(`[abp] The extension property "${name}" ${mapped.reason}.`);
       const enumeration = property.type ? enums[property.type] : undefined;
 
       // A `_Text` property is labelled after the property it belongs to, so the pair
@@ -247,13 +224,13 @@ export function mapEntitiesToContributors<R = unknown>(
         { name: labelledAs, resource: localizationResource },
       );
 
-      if (property.ui.onTable.isVisible) {
+      if (mapped.onTable) {
         const column = EntityProp.create<R>({
           type,
           name,
           displayName,
           isExtra: true,
-          sortable: property.ui.onTable.isSortable === true,
+          sortable: mapped.sortable,
           columnWidth: type === PropType.Boolean ? 150 : 250,
           ...(enumeration && property.type
             ? {
@@ -284,8 +261,8 @@ export function mapEntitiesToContributors<R = unknown>(
         );
       }
 
-      const onCreateForm = property.ui.onCreateForm.isVisible;
-      const onEditForm = property.ui.onEditForm.isVisible;
+      const onCreateForm = mapped.onCreateForm;
+      const onEditForm = mapped.onEditForm;
       if (!onCreateForm && !onEditForm) continue;
 
       const field = FormProp.create<R>({

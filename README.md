@@ -54,6 +54,11 @@ pnpm --filter @lsw-abpvue/docs dev
 The [documentation index](docs/index.md) links to setup, configuration, extension points,
 the CLI and the [Angular migration guide](docs/migration/from-angular.md).
 
+Documentation CI builds the site independently of deployment. GitHub Pages deployment
+is opt-in through the repository variable `DOCS_PAGES_ENABLED=true`, with Pages configured
+to use GitHub Actions. The current private repository's GitHub plan does not support
+Pages, so deployment remains disabled until the repository becomes eligible.
+
 ## Verification
 
 ```bash
@@ -67,3 +72,8 @@ pnpm size
 Framework contract tests cover captured ABP 10.5.0 and 10.6.0 responses even when the
 backend is unavailable. Tests needing authentication report why they are skipped.
 With the test backend running, the generated service and module tests use its real API.
+
+Size budgets measure each package's own code with shared framework and UI dependencies
+excluded. The basic theme's budget is 12.5 kB after replacing its native date input with
+the calendar and segmented date/time fields; the pure object-extension mapping entry has
+a separate 1 kB budget.

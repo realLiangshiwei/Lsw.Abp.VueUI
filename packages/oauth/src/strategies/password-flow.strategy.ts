@@ -1,10 +1,12 @@
 import {
   ConfigStateService,
+  clearListPreferences,
   defineService,
   defineToken,
   inject,
   onServiceDestroy,
   PIPE_TO_LOGIN_FN,
+  StorageService,
   type LoginParams,
   type ServiceOf,
 } from '@lsw-abpvue/core';
@@ -42,6 +44,7 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
   const rememberMe = inject(RememberMeService);
   const navigation = inject(AuthNavigationService);
   const configState = inject(ConfigStateService);
+  const storage = inject(StorageService);
   const pipeToLogin = inject(PIPE_TO_LOGIN_FN);
   const loginRoute = inject(LOGIN_ROUTE);
   let renewal: ReturnType<typeof setTimeout> | undefined;
@@ -49,6 +52,7 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
   onServiceDestroy(() => clearTimeout(renewal));
 
   function forget(): void {
+    clearListPreferences(storage, configState.snapshot().currentUser.id);
     clearTimeout(renewal);
     state.persist(null);
     rememberMe.remove();

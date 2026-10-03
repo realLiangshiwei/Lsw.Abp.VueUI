@@ -1,37 +1,7 @@
-import type {
-  ApplicationConfiguration,
-  ExtensionProperty,
-} from '../api-definition/object-extensions.js';
+import { mapExtensionProperty } from '@lsw-abpvue/core/object-extensions';
+import type { ApplicationConfiguration } from '../api-definition/object-extensions.js';
 
-/**
- * The property types the extension system renders, which is `PropType` in
- * `@lsw-abpvue/components` and the same list ABP's `ePropType` declares. A `typeSimple`
- * outside it falls back to text, and the property the backend configured is not the one
- * the user sees.
- *
- * `scripts/extension-mapping.spec.ts` holds this against the runtime's own list: the two
- * cannot be one module -- a Node tool may not depend on a Vue package (design 03 §1) --
- * so what keeps them together is a test that fails the day they differ.
- */
-export const RECOGNISED_TYPES = [
-  'boolean',
-  'date',
-  'datetime',
-  'email',
-  'enum',
-  'hidden',
-  'multiselect',
-  'number',
-  'password',
-  'passwordinputgroup',
-  'string',
-  'text',
-  'time',
-  'typeahead',
-];
-
-/** ABP's lookup extension keeps the display text of a lookup in a second property. */
-const TYPEAHEAD_TEXT_SUFFIX = '_Text';
+export { OBJECT_EXTENSION_TYPES as RECOGNISED_TYPES } from '@lsw-abpvue/core/object-extensions';
 
 export interface ExtensionPropertyReport {
   /** `Identity.User.HireDate`, as the report names it. */
@@ -47,45 +17,6 @@ export interface ExtensionCoverage {
   recognised: number;
   /** Only the ones with something to say; the rest are covered and unremarkable. */
   reported: ExtensionPropertyReport[];
-}
-
-function classify(
-  path: string,
-  property: ExtensionProperty,
-  enums: Record<string, unknown>,
-): ExtensionPropertyReport {
-  const simple = (property.typeSimple ?? '').replace(/\?$/, '');
-  const lookup = property.ui?.lookup?.url;
-
-  if (!lookup && !path.endsWith(TYPEAHEAD_TEXT_SUFFIX) && !RECOGNISED_TYPES.includes(simple)) {
-    return {
-      path,
-      recognised: false,
-      reason: `${simple || 'no type'} is not one the mapping knows, so it renders as text`,
-    };
-  }
-
-  if (simple === 'enum' && !(property.type && property.type in enums)) {
-    return {
-      path,
-      recognised: false,
-      reason: `no enum called ${property.type ?? '(none)'} in the configuration, so the raw value is shown`,
-    };
-  }
-
-  const ui = property.ui;
-  const shows =
-    ui?.onTable?.isVisible === true ||
-    ui?.onCreateForm?.isVisible === true ||
-    ui?.onEditForm?.isVisible === true;
-
-  return shows
-    ? { path, recognised: true }
-    : {
-        path,
-        recognised: true,
-        reason: 'hidden on the table and both forms, so it is configured to show nowhere',
-      };
 }
 
 /**
@@ -107,7 +38,12 @@ export function extensionCoverage(configuration: ApplicationConfiguration): Exte
   for (const [module, definition] of Object.entries(extensions?.modules ?? {})) {
     for (const [entity, properties] of Object.entries(definition.entities ?? {})) {
       for (const [name, property] of Object.entries(properties.properties ?? {})) {
-        const report = classify(`${module}.${entity}.${name}`, property, enums);
+        const mapped = mapExtensionProperty(name, property, enums);
+        const report: ExtensionPropertyReport = {
+          path: `${module}.${entity}.${name}`,
+          recognised: mapped.recognised,
+          ...(mapped.reason ? { reason: mapped.reason } : {}),
+        };
 
         declared += 1;
         if (report.recognised) recognised += 1;

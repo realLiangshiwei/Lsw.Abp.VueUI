@@ -18,6 +18,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Component } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 import { ACCOUNT_APP_NAME } from '../tokens/config-options.token.js';
+import { TwoFactorService } from '../services/two-factor.service.js';
 import ForgotPasswordPage from './ForgotPasswordPage.vue';
 import LoginPage from './LoginPage.vue';
 import RegisterPage from './RegisterPage.vue';
@@ -180,6 +181,73 @@ describe('LoginPage', () => {
     expect(login).toHaveBeenLastCalledWith(
       expect.objectContaining({ twoFactorProvider: 'Authenticator', twoFactorCode: '123456' }),
     );
+  });
+
+  it('lets the user choose a provider, send and resend its code, and retry the same credentials', async () => {
+    const challenge = new TwoFactorRequiredError('user-1', 'delivery-token');
+    const login = vi.fn().mockRejectedValueOnce(challenge).mockResolvedValueOnce(undefined);
+    const sendCode = vi.fn(() => Promise.resolve());
+    const wrapper = await render(
+      LoginPage,
+      injectorWith([
+        authService(login),
+        {
+          provide: TwoFactorService,
+          useValue: {
+            getProviders: () =>
+              Promise.resolve([
+                { name: 'Authenticator', requiresCodeDelivery: false },
+                { name: 'Email', displayName: 'Email code', requiresCodeDelivery: true },
+              ]),
+            sendCode,
+          },
+        },
+      ]),
+      await routerAt('/account/login'),
+    );
+    type('username', 'admin');
+    type('password', '1q2w3E*');
+    await wrapper.vm.$nextTick();
+    await submit(wrapper);
+    await wrapper.get('select[name="twoFactorProvider"]').setValue('Email');
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Send code')
+      ?.trigger('click');
+    await new Promise(resolve => setTimeout(resolve));
+    expect(sendCode).toHaveBeenCalledWith(challenge, 'Email');
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'Resend code')
+      ?.trigger('click');
+    await new Promise(resolve => setTimeout(resolve));
+    expect(sendCode).toHaveBeenCalledTimes(2);
+    type('twoFactorCode', '654321');
+    await wrapper.vm.$nextTick();
+    await submit(wrapper);
+    expect(login).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        username: 'admin',
+        password: '1q2w3E*',
+        twoFactorProvider: 'Email',
+        twoFactorCode: '654321',
+      }),
+    );
+  });
+
+  it('does not retry a second factor with an empty verification code', async () => {
+    const login = vi.fn().mockRejectedValue(new TwoFactorRequiredError('user-1', 'token'));
+    const wrapper = await render(
+      LoginPage,
+      injectorWith([authService(login)]),
+      await routerAt('/account/login'),
+    );
+    type('username', 'admin');
+    type('password', '1q2w3E*');
+    await wrapper.vm.$nextTick();
+    await submit(wrapper);
+    await submit(wrapper);
+    expect(login).toHaveBeenCalledTimes(1);
   });
 
   it('says what the token endpoint refused with', async () => {

@@ -38,6 +38,17 @@ export interface Apis {
  * package owns the rest and reads it from here.
  */
 export interface OAuthConfig {
+  /** Discovery URL for a development proxy; the issuer remains the identity server. */
+  metadataUrl?: string | undefined;
+  /** Overrides back-channel endpoints without moving login and logout redirects. */
+  metadataSeed?:
+    | {
+        token_endpoint?: string | undefined;
+        revocation_endpoint?: string | undefined;
+        userinfo_endpoint?: string | undefined;
+        jwks_uri?: string | undefined;
+      }
+    | undefined;
   issuer?: string | undefined;
   clientId?: string | undefined;
   scope?: string | undefined;

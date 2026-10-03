@@ -43,5 +43,11 @@
   "homepage": "https://github.com/realLiangshiwei/Lsw.Abp.VueUI",
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependencies": {
+    "@lsw-abpvue/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@lsw-abpvue/core": "workspace:*"
   }
 }

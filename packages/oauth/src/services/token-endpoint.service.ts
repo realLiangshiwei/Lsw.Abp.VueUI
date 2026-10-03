@@ -56,7 +56,7 @@ function toAuthError(error: unknown): unknown {
  * exactly where ABP puts `userId` and `twoFactorToken`.
  */
 interface Discovery {
-  issuer: string;
+  url: string;
   document: Promise<DiscoveryDocument>;
 }
 
@@ -67,17 +67,18 @@ export const TokenEndpointService = defineService('TokenEndpointService', () => 
 
   const config = () => environment.getEnvironment().oAuthConfig ?? {};
 
-  /** Cached per issuer: switching tenants can move the identity server. */
+  /** Switching tenants or development proxies can change the metadata URL. */
   function discover(): Promise<DiscoveryDocument> {
     const issuer = withoutTrailingSlash(config().issuer ?? '');
+    const url = config().metadataUrl ?? `${issuer}/.well-known/openid-configuration`;
 
-    if (discovered?.issuer !== issuer) {
+    if (discovered?.url !== url) {
       const entry: Discovery = {
-        issuer,
+        url,
         document: http
           .request<DiscoveryDocument>({
             method: 'GET',
-            url: `${issuer}/.well-known/openid-configuration`,
+            url,
             context: { skipAuthorization: true, skipHandleError: true },
           })
           .then(response => response.body),
@@ -95,7 +96,10 @@ export const TokenEndpointService = defineService('TokenEndpointService', () => 
   }
 
   async function endpoint(name: keyof DiscoveryDocument): Promise<string> {
-    const url = (await discover())[name];
+    const overrides = config().metadataSeed;
+    const url =
+      (overrides && name in overrides ? overrides[name as keyof typeof overrides] : undefined) ??
+      (await discover())[name];
     if (!url) throw new OAuthEndpointMissingError(name, config().issuer ?? '');
 
     return url;
@@ -157,7 +161,8 @@ export const TokenEndpointService = defineService('TokenEndpointService', () => 
 
     /** Revocation is optional in OAuth, so a provider that has no endpoint for it is not an error. */
     revoke: async (token: string, hint: 'access_token' | 'refresh_token'): Promise<void> => {
-      const { revocation_endpoint } = await discover();
+      const revocation_endpoint =
+        config().metadataSeed?.revocation_endpoint ?? (await discover()).revocation_endpoint;
       if (!revocation_endpoint) return;
 
       await post(revocation_endpoint, { token, token_type_hint: hint, ...client() });

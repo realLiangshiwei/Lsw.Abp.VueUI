@@ -35,6 +35,7 @@
       "@lsw-abpvue/components/extensible": ["./packages/components/extensible/src/index.ts"],
       "@lsw-abpvue/core": ["./packages/core/src/index.ts"],
       "@lsw-abpvue/core/router": ["./packages/core/router/src/index.ts"],
+      "@lsw-abpvue/core/object-extensions": ["./packages/core/object-extensions/src/index.ts"],
       "@lsw-abpvue/feature-management": ["./packages/feature-management/src/index.ts"],
       "@lsw-abpvue/feature-management/config": [
         "./packages/feature-management/config/src/index.ts"

@@ -15,9 +15,19 @@ the project chose: `^0.1.0` becomes `^0.2.0`, `0.1.0` becomes `0.2.0`.
 | | |
 | --- | --- |
 | A range that is not a plain version | `file:` paths, tags, git URLs. Somebody chose those on purpose |
-| A package whose source was released | There is nothing under `node_modules` left for an upgrade to reach |
+| A package whose source was released | The local source copy belongs to the application; changing its package range would not update that copy |
 
 Both are listed with the reason, rather than silently skipped.
+
+## Released source summaries
+
+For each released package, the result includes changelog sections newer than its recorded
+release version and no newer than the target version. The CLI reads the installed
+`CHANGELOG.md` first, then the exact target version's registry archive when necessary.
+It reports missing notes or an unreachable registry without preventing other upgrades.
+
+Use the summary to update local source manually. The CLI does not overwrite that source
+or claim its release marker has moved to the target version.
 
 ## Migrations
 

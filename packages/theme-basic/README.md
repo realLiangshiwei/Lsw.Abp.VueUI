@@ -51,6 +51,11 @@ Bootstrap's CSS only. Its JavaScript is never loaded — dialogs, dropdowns, sel
 pagination are reka-ui, which brings the focus management, the ARIA and the keyboard
 handling with it.
 
+Date and date-time fields use reka-ui's calendar and keyboard-editable segments; time
+fields use its time field. ABP's culture patterns control order, separators and widths.
+An untouched ISO value retains its original precision and offset. Editing emits a local
+ISO date or time without applying a browser time-zone conversion.
+
 Keep the stylesheet imports before the theme's JavaScript import. This also preserves
 the cascade when consuming the theme directly from source during development.
 
@@ -134,4 +139,5 @@ Bootstrap Icons rather than Font Awesome, and none of Bootstrap's JavaScript is 
 
 ## Licence
 
-MIT. Bootstrap and Bootstrap Icons are MIT; reka-ui is MIT.
+MIT. Bootstrap and Bootstrap Icons are MIT; reka-ui is MIT. Its date companion,
+`@internationalized/date`, is Apache-2.0 and supplies calendar value parsing.

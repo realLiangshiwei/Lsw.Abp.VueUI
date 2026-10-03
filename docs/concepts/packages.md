@@ -14,7 +14,7 @@ then fails in a way that is very hard to see.
 | `oauth` | `core`, `oidc-client-ts` |
 | `theme-shared` | **`core` only.** No UI library, not even reka-ui |
 | `components` | `core`, `theme-shared` (peer), `@tanstack/vue-table` |
-| `theme-basic` | `theme-shared`, `account-core`, `reka-ui`, Bootstrap's CSS |
+| `theme-basic` | `theme-shared`, `account-core`, `reka-ui`, its `@internationalized/date` companion, Bootstrap's CSS |
 | Module UIs | the layers above, and each other; **never a theme implementation** |
 
 ## Secondary entry points
@@ -30,6 +30,10 @@ component, so an application that never opens the identity pages still gets thei
 for a few hundred bytes.
 
 `abpv create-lib` writes a package with the same three, for a module of your own.
+
+`@lsw-abpvue/core/object-extensions` is a pure mapping entry point with no Vue or DI
+imports. Runtime components and the Node CLI share it, so diagnostics use the same
+property mapping as the controls.
 
 ## What a consumer needs
 

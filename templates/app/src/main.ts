@@ -29,12 +29,16 @@ import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/c
 // abpv:end feature-management
 import App from './App.vue';
 import { defaultEnvironment } from './env';
+import { developmentEnvironment } from './development';
 import { routes } from './routes';
 import { describeStartupError, startupError } from './startup';
 
 // Resolved at runtime, not baked in: `public/dynamic-env.json` wins, then `VITE_API_URL`
 // and friends, then the defaults in `src/env.ts` (decision D11).
-const environment = await loadRuntimeConfig({ defaults: defaultEnvironment });
+const loadedEnvironment = await loadRuntimeConfig({ defaults: defaultEnvironment });
+const environment = import.meta.env.DEV
+  ? developmentEnvironment(loadedEnvironment, globalThis.location.origin)
+  : loadedEnvironment;
 
 const { mount } = await createAbpApp(App, {
   providers: [

@@ -50,6 +50,8 @@ export interface RenderOptions {
 export interface RenderResult {
   /** Every file of the application, relative to its root, sorted. */
   written: string[];
+  contents: Record<string, string>;
+  binary: string[];
 }
 
 /** Directories a checked-out template carries that no project should. */
@@ -236,20 +238,22 @@ export async function renderTemplate(options: RenderOptions): Promise<RenderResu
   const values = replacements(options.values as Record<string, string>);
   const dropped = droppedFiles(manifest, keep);
   const written: string[] = [];
+  const contents: Record<string, string> = {};
+  const binary: string[] = [];
 
   for (const path of await walk(options.source)) {
     if (path === TEMPLATE_MANIFEST_FILE || dropped.has(path)) continue;
 
     const output = renamed(outputPath(path), options.renames);
     written.push(output);
-    if (options.dryRun) continue;
 
     const from = join(options.source, path);
     const to = join(options.target, output);
-    await mkdir(dirname(to), { recursive: true });
+    if (!options.dryRun) await mkdir(dirname(to), { recursive: true });
 
     if (BINARY.test(path)) {
-      await copyFile(from, to);
+      binary.push(output);
+      if (!options.dryRun) await copyFile(from, to);
       continue;
     }
 
@@ -259,8 +263,9 @@ export async function renderTemplate(options: RenderOptions): Promise<RenderResu
         ? renderManifest(source, options)
         : fill(filterBlocks(source, keep, path), values, path);
 
-    await writeFile(to, renamed(body, options.renames), 'utf8');
+    contents[output] = renamed(body, options.renames);
+    if (!options.dryRun) await writeFile(to, contents[output], 'utf8');
   }
 
-  return { written: written.sort() };
+  return { written: written.sort(), contents, binary };
 }

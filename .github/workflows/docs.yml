@@ -1,4 +1,4 @@
-# The documentation site, built on every push to main and published to GitHub Pages.
+# The documentation site builds on every push; Pages deployment is enabled separately.
 # The build itself also runs in CI on a pull request, because a dead link or an example
 # that no longer compiles is a broken promise either way.
 name: docs
@@ -6,6 +6,7 @@ name: docs
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -30,18 +31,21 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - uses: actions/configure-pages@v5
       - run: pnpm --filter @lsw-abpvue/docs build
       - uses: actions/upload-pages-artifact@v4
         with:
           path: docs/.vitepress/dist
 
   deploy:
+    if: github.ref == 'refs/heads/main' && vars.DOCS_PAGES_ENABLED == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - id: deployment
         uses: actions/deploy-pages@v4

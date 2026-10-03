@@ -56,6 +56,16 @@ export function buildSettings(
     extraHeaders: tenant ? { [tenant.key]: tenant.id } : {},
     stateStore: new TokenStateStore(storage, 'oidc.'),
     userStore: new TokenStateStore(storage, 'oidc.user.'),
+    ...(config.metadataUrl ? { metadataUrl: config.metadataUrl } : {}),
+    ...(config.metadataSeed
+      ? {
+          metadataSeed: Object.fromEntries(
+            Object.entries(config.metadataSeed).filter(
+              (entry): entry is [string, string] => typeof entry[1] === 'string',
+            ),
+          ),
+        }
+      : {}),
     ...(config.scope ? { scope: config.scope } : {}),
     ...(config.postLogoutRedirectUri
       ? { post_logout_redirect_uri: config.postLogoutRedirectUri }
@@ -192,8 +202,8 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
           .revokeTokens()
           .catch(() => undefined);
         await userManager().removeUser();
-        await navigation.go('/');
         await configState.refreshAppState();
+        await navigation.go('/');
         return;
       }
 

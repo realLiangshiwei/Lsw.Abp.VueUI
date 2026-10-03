@@ -18,6 +18,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Component } from 'vue';
 import EmailSettingsTab from './EmailSettingsTab.vue';
 import TimeZoneSettingsTab from './TimeZoneSettingsTab.vue';
+import AccountSettingsTab from './AccountSettingsTab.vue';
+import { AccountSettingsService } from '../services/account-settings.service.js';
 
 const EMAIL: EmailSettingsDto = {
   smtpHost: 'smtp.abp.io',
@@ -82,6 +84,56 @@ async function render(page: Component, injector: Injector): Promise<VueWrapper> 
 
   return wrapper;
 }
+
+describe('AccountSettingsTab', () => {
+  it('shows the open-source account switches without pretending they can be saved', async () => {
+    const injector = injectorWith([]);
+    const config = injector.get(ConfigStateService);
+    config.setState({
+      ...config.snapshot(),
+      setting: {
+        values: {
+          'Abp.Account.IsSelfRegistrationEnabled': 'true',
+          'Abp.Account.EnableLocalLogin': 'false',
+        },
+      },
+    });
+    const page = await render(AccountSettingsTab, injector);
+    expect(
+      page.get<HTMLInputElement>('input[name="isSelfRegistrationEnabled"]').element.checked,
+    ).toBe(true);
+    expect(page.get<HTMLInputElement>('input[name="enableLocalLogin"]').element.checked).toBe(
+      false,
+    );
+    expect(page.get('input[name="enableLocalLogin"]').attributes('disabled')).toBeDefined();
+    expect(page.find('button[type="submit"]').exists()).toBe(false);
+  });
+
+  it('saves through the host adapter and reloads the configuration', async () => {
+    const update = vi.fn(() => Promise.resolve());
+    const injector = injectorWith([
+      {
+        provide: AccountSettingsService,
+        useValue: {
+          get: () => Promise.resolve({ isSelfRegistrationEnabled: false, enableLocalLogin: true }),
+          update,
+        },
+      },
+    ]);
+    const refresh = vi
+      .spyOn(injector.get(ConfigStateService), 'refreshAppState')
+      .mockResolvedValue(injector.get(ConfigStateService).snapshot());
+    const page = await render(AccountSettingsTab, injector);
+    await page.get('input[name="isSelfRegistrationEnabled"]').setValue(true);
+    await page.get('form').trigger('submit');
+    await new Promise(resolve => setTimeout(resolve));
+    expect(update).toHaveBeenCalledWith({
+      isSelfRegistrationEnabled: true,
+      enableLocalLogin: true,
+    });
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe('EmailSettingsTab', () => {
   const emailService = (update = vi.fn(() => Promise.resolve())): ProviderInput => ({

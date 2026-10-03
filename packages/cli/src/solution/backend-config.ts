@@ -15,6 +15,7 @@ export interface BackendEdit {
 }
 
 export interface ConfigureOptions {
+  preview?: ((file: string, before: string, after: string) => void) | undefined;
   solution: Solution;
   /** Where the frontend is served from; the only value any of these edits carries. */
   appUrl: string;
@@ -107,6 +108,10 @@ class ConfigFile {
 
     await writeFile(this.path, this.text, 'utf8');
   }
+
+  preview(options: ConfigureOptions): void {
+    if (this.edits.length > 0) options.preview?.(this.name, this.original, this.text);
+  }
 }
 
 /**
@@ -157,6 +162,7 @@ export async function configureBackend(options: ConfigureOptions): Promise<Backe
 
   for (const file of files) {
     edits.push(...file.edits);
+    file.preview(options);
     if (!options.dryRun) await file.write(options);
   }
 

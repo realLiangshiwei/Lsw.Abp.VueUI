@@ -15,8 +15,8 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
  * doctor` reports the difference, which only works while it knows the same rules the
  * runtime does.
  *
- * The two cannot be one module: a Node tool may not depend on a Vue package (design 03 §1).
- * So what holds them together is here, in the one place allowed to see both.
+ * The CLI and runtime share the pure core entry point. This checks that its property
+ * types still cover the controls exposed by the extension system.
  */
 describe('the object extension mapping the CLI reports on', () => {
   it('knows the property types the extension system renders', () => {

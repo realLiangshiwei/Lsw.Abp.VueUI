@@ -2,7 +2,7 @@ import vue from '@vitejs/plugin-vue';
 import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-/** Everything an ABP backend answers, for a project that prefers same-origin development. */
+/** API and OAuth back-channel requests stay on the frontend's development origin. */
 const BACKEND_PATHS = ['/api', '/connect', '/.well-known', '/getEnvConfig', '/Abp'];
 
 /** Where the dev server listens: the port of the URL the application is served from. */
@@ -15,6 +15,7 @@ function portOf(url: string): number {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'VITE_');
   const api = env.VITE_API_URL || '__API_URL__';
+  const auth = env.VITE_AUTH_URL || '__AUTH_URL__';
   const app = env.VITE_APP_URL || '__APP_URL__';
 
   return {
@@ -32,14 +33,15 @@ export default defineConfig(({ mode }) => {
     server: {
       port: portOf(app),
       proxy: Object.fromEntries(
-        // Only used when the environment points at relative URLs. The default points
-        // straight at the backend, the way an ABP Angular application does, and what
-        // makes that work is the CORS entry `abpv new` wrote.
         BACKEND_PATHS.map(path => [
           path,
           // The backend serves the ASP.NET development certificate, which Node does not
           // trust; the browser never sees it through here.
-          { target: api, changeOrigin: true, secure: false },
+          {
+            target: path === '/connect' || path === '/.well-known' ? auth : api,
+            changeOrigin: true,
+            secure: false,
+          },
         ]),
       ),
     },

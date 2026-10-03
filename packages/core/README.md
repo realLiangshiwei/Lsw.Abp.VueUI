@@ -71,6 +71,13 @@ Capture the injector before awaiting, or resolve everything up front.
 | `AuthService` / `TokenStorage` | The authentication contract, with nothing behind it: `@lsw-abpvue/oauth` provides the OIDC implementation, and a host with its own scheme provides another. |
 | `@lsw-abpvue/core/router` | `provideAbpRouter`, the auth and permission guards, `lazyRoutes`, the title strategy, `AbpDynamicLayout`. |
 
+## Object extension mapping
+
+`@lsw-abpvue/core/object-extensions` is a pure secondary entry point for
+`mapExtensionProperty` and `OBJECT_EXTENSION_TYPES`. It imports no Vue, router or DI code,
+so Node tools and runtime controls can use the same type, lookup, enum and visibility
+rules. The CLI's doctor and the extensible components consume this entry point.
+
 ## How it lines up with the Angular UI
 
 | ABP Angular | Here |

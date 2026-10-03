@@ -1,5 +1,6 @@
 import {
   AuthService,
+  ConfigStateService,
   createInjector,
   HTTP_FETCH,
   MemoryTokenStorage,
@@ -102,7 +103,10 @@ function flow(
       provide: WindowService,
       useValue: {
         nativeWindow: {
-          location: { href: options.href ?? 'https://app.abp.io/books' },
+          location: {
+            href: options.href ?? 'https://app.abp.io/books',
+            assign: (url: string) => replaced.push(url),
+          },
           history: { replaceState: (_s: unknown, _t: string, url: string) => replaced.push(url) },
         } as unknown as Window,
         open: () => {},
@@ -141,6 +145,25 @@ describe('the authorization code flow settings', () => {
     expect(settings.silent_redirect_uri).toBe(renewal);
     // Left out, the library renews at `redirect_uri`, which boots the whole application.
     expect(buildSettings({}, storage).silent_redirect_uri).toBeUndefined();
+  });
+  it('uses proxied metadata and request endpoints while retaining the real authority', () => {
+    const storage = createInjector([]).get(MemoryTokenStorage);
+    const settings = buildSettings(
+      {
+        issuer: ISSUER,
+        metadataUrl: 'http://localhost:4200/.well-known/openid-configuration',
+        metadataSeed: {
+          token_endpoint: 'http://localhost:4200/connect/token',
+          userinfo_endpoint: undefined,
+        },
+      },
+      storage,
+    );
+    expect(settings.authority).toBe(ISSUER);
+    expect(settings.metadataUrl).toBe('http://localhost:4200/.well-known/openid-configuration');
+    expect(settings.metadataSeed).toEqual({
+      token_endpoint: 'http://localhost:4200/connect/token',
+    });
   });
 
   it('the library sends the token request, so the tenant travels on the settings', () => {
@@ -318,14 +341,24 @@ describe('the authorization code flow', () => {
   });
 
   it('ends the local session without a trip through the identity server, but reloads the configuration', async () => {
-    const { fake, requests, auth } = flow({ stored: user() });
+    const { fake, requests, replaced, auth, injector } = flow({ stored: user() });
+    const config = injector.get(ConfigStateService);
+    config.setState({
+      ...config.snapshot(),
+      currentUser: { ...config.snapshot().currentUser, id: 'user-1', isAuthenticated: true },
+    });
+    const storage = injector.get(StorageService);
+    storage.setItem('abpvue.list.Books.user-1', '{"pageSize":50}');
+    storage.setItem('abpvue.list.Books.user-2', '{"pageSize":25}');
 
     await auth.logout({ noRedirectToLogoutUrl: 'true' });
 
     expect(called(fake.calls, 'signoutRedirect')).toHaveLength(0);
     expect(called(fake.calls, 'revokeTokens')).toHaveLength(1);
     expect(called(fake.calls, 'removeUser')).toHaveLength(1);
-    // Nothing navigates away here, so without it the menu would keep the signed-in shape.
     expect(requests.filter(url => url.includes('application-configuration'))).toHaveLength(1);
+    expect(replaced).toEqual(['/']);
+    expect(storage.getItem('abpvue.list.Books.user-1')).toBeNull();
+    expect(storage.getItem('abpvue.list.Books.user-2')).toBe('{"pageSize":25}');
   });
 });

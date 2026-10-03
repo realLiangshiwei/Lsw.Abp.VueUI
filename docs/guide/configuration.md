@@ -51,6 +51,8 @@ HTML where it expected JSON falls through to the next level silently, which look
 | `oAuthConfig.issuer` | The identity server. The same host as the API in a single-host template |
 | `oAuthConfig.responseType` | `code` hands the visitor to the identity server's login page. Anything else uses the account module's own form, over the password flow |
 | `oAuthConfig.scope` | `offline_access` is what makes a refresh token possible |
+| `oAuthConfig.metadataUrl` | Optional discovery URL; the development template points it at the same-origin proxy |
+| `oAuthConfig.metadataSeed` | Optional token, revocation, user-info and JWKS endpoint overrides |
 
 The field names are `angular-oauth2-oidc`'s, which is what the Angular UI uses — so an
 `environment.ts` from an Angular application can be moved over as it is.
@@ -77,6 +79,17 @@ VITE_APP_URL=http://localhost:4200
 
 They are read only where `dynamic-env.json` said nothing, so a deployment's file always
 wins.
+
+## Development proxy
+
+The generated Vite application sends default API requests through `/api` on its own
+origin. Discovery, token, revocation, user-info and JWKS requests use the frontend's
+`/.well-known` and `/connect` proxy routes. The real issuer remains unchanged, and browser
+login and logout redirects still go to the authentication server.
+
+`VITE_API_URL` and `VITE_AUTH_URL` select the proxy targets independently. Named APIs keep
+their explicitly configured URLs. This transformation runs only in Vite development;
+production builds use the runtime configuration's real service URLs.
 
 ## Changing the port
 

@@ -49,9 +49,29 @@ try {
 }
 ```
 
-The account module's login page does this for you — it shows the code field once the
-first attempt comes back with `TwoFactorRequiredError` — and the API is there for an
-application with its own login form.
+The account module's login page handles the challenge, provider selection, code entry
+and retry. It offers Authenticator by default. An application with email or SMS delivery
+supplies its backend adapter:
+
+```ts
+import { provideAccount, type TwoFactorService } from '@lsw-abpvue/account';
+import { twoFactorApi } from './two-factor-api';
+
+const twoFactorService: TwoFactorService = {
+  getProviders: challenge => twoFactorApi.getProviders(challenge),
+  sendCode: (challenge, provider) => twoFactorApi.sendCode(challenge, provider),
+};
+
+provideAccount({ twoFactorService });
+```
+
+Each provider has `name`, optional `displayName`, and `requiresCodeDelivery`. A provider
+requiring delivery shows send and resend actions. Changing the provider clears the code.
+Both adapter methods receive the original `userId` and `twoFactorToken` challenge; the
+second login sends `TwoFactorProvider` and `TwoFactorCode` under ABP's parameter names.
+The open-source account module has no email/SMS two-factor delivery endpoint, so the
+adapter calls the host's own API. Authorization-code login continues to use the identity
+server's account pages.
 
 ## Tokens
 
@@ -63,6 +83,10 @@ the tab, and `ServerTokenStorage` is the seam a server-side renderer needs.
 A 401 refreshes once and retries; a second failure ends the session and sends the visitor
 to the login page. Requests that were in flight while the refresh happened are queued
 rather than each triggering their own refresh.
+
+Logout and a failed token renewal clear the current user's saved list preferences.
+Other users' preferences remain intact. Local logout reloads anonymous application
+configuration before navigating home, so permission-dependent menus update immediately.
 
 ## Multi-tenancy
 

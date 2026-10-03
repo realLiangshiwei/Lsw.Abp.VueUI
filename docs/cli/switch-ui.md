@@ -15,6 +15,11 @@ abpv switch-ui --dry-run
 | `--force` | Proceed on an uncommitted working tree |
 | `--dry-run` | Every edit it would make, including to the backend's configuration |
 
+The dry run prints a full unified diff of generated text files and backend configuration
+edits, including comments and surrounding context. Renames and binary files are listed
+separately. Existing backups are preserved by choosing the next available `.1.bak`,
+`.2.bak` and so on. Previewing writes no files and runs no dependency installation.
+
 ## Seven rules it follows
 
 1. Stop on an uncommitted working tree unless `--force` — your diff is the undo button.

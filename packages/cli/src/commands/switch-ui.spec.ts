@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -40,6 +40,21 @@ describe('abpv switch-ui', () => {
     expect(await readFile(join(root, 'vue/public/dynamic-env.json'), 'utf8')).toContain(
       '"url": "https://localhost:44335"',
     );
+  });
+
+  it('previews every new file and backend edit without changing existing files', async () => {
+    const path = join(root, 'src/Acme.BookStore.HttpApi.Host/appsettings.json');
+    const before = await readFile(path, 'utf8');
+    const result = await switchUi({ 'dry-run': true });
+    const diff = result.diff.join('\n');
+    expect(diff).toContain('rename from angular');
+    expect(diff).toContain('+++ b/vue/src/main.ts');
+    expect(diff).toContain('+const loadedEnvironment = await loadRuntimeConfig');
+    expect(diff).toContain('+++ b/src/Acme.BookStore.HttpApi.Host/appsettings.json');
+    expect(diff).toContain('+');
+    expect(diff).toContain('http://localhost:4200');
+    expect(await readFile(path, 'utf8')).toBe(before);
+    await expect(stat(join(root, 'vue'))).rejects.toThrow();
   });
 
   it('moves the generated UI aside rather than deleting it', async () => {
@@ -124,6 +139,14 @@ describe('abpv switch-ui', () => {
     expect(done.edits.map(edit => `${edit.file} ${edit.key} ${edit.to}`)).toEqual(
       planned.edits.map(edit => `${edit.file} ${edit.key} ${edit.to}`),
     );
+  });
+  it('previews the available backup name when a previous backup already exists', async () => {
+    await mkdir(join(root, 'angular.bak'));
+    await mkdir(join(root, 'angular.1.bak'));
+    const planned = await switchUi({ 'dry-run': true });
+    const done = await switchUi();
+    expect(planned.renamed[0]?.to).toBe(join(root, 'angular.2.bak'));
+    expect(done.renamed).toEqual(planned.renamed);
   });
 
   it('puts the configuration back when a later step fails', async () => {

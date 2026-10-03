@@ -19,6 +19,11 @@ export { provideAccount } from './providers/account.provider.js';
 export { provideManageProfileTabs } from './providers/manage-profile-tabs.provider.js';
 
 export { accountExtensionsResolver } from './resolvers/extensions.resolver.js';
+export {
+  TwoFactorService,
+  TwoFactorDeliveryUnavailableError,
+} from './services/two-factor.service.js';
+export type { TwoFactorProvider } from './services/two-factor.service.js';
 
 export { createAccountRoutes } from './routes.js';
 

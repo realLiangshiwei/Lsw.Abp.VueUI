@@ -15,9 +15,8 @@ const packagesRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', 'pac
  */
 const ALLOWED = {
   utils: [],
-  // A development tool that runs on Node and ships no runtime code, so nothing from the
-  // workspace and nothing from the framework belongs in it.
-  cli: ['@clack/prompts', 'citty', 'jsonc-parser', 'prettier'],
+  // Only core's pure object-extension mapping is imported by this Node tool.
+  cli: ['@clack/prompts', 'citty', 'jsonc-parser', 'prettier', '@lsw-abpvue/core'],
   core: ['@lsw-abpvue/utils', 'vue', 'vue-router'],
   oauth: ['@lsw-abpvue/core', '@lsw-abpvue/utils', 'oidc-client-ts', 'vue', 'vue-router'],
   'theme-shared': [
@@ -105,6 +104,7 @@ const ALLOWED = {
     'bootstrap',
     'bootstrap-icons',
     'reka-ui',
+    '@internationalized/date',
     'vue',
     'vue-router',
   ],
@@ -157,6 +157,7 @@ describe('what each package declares', () => {
 
     for (const library of [
       'reka-ui',
+      '@internationalized/date',
       'bootstrap',
       '@fluentui/web-components',
       '@tanstack/vue-table',

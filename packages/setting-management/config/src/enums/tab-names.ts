@@ -5,6 +5,7 @@
 export const SettingManagementTabNames = {
   EmailSettingGroup: 'AbpSettingManagement::Menu:Emailing',
   TimeZoneSettingGroup: 'AbpSettingManagement::Menu:TimeZone',
+  AccountSettingGroup: 'AbpAccount::Menu:Account',
 } as const;
 
 export type SettingManagementTabName =

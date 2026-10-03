@@ -12,10 +12,12 @@ The build uses production Vue and the real extensible table, row actions and bas
 menu. It is separate from the playground's routes and authentication, and makes no
 backend requests.
 
-Three workloads:
+Five workloads:
 
 - 50 table rows, six data columns and two actions per row.
 - 1,000 table rows with the same columns and actions.
+- 50 table rows with 50 data columns, including 44 extra properties, and row actions.
+- 100 extra properties rendered through the extensible form.
 - 1,000 menu entries in 20 groups, moving one entry between the first and last position.
 
 Each workload reports its initial mount, then the median and p95 of 20 updates after one
@@ -31,14 +33,17 @@ whose shared runners cannot provide a stable rendering baseline.
 
 ## Recorded run
 
-[2026-10-02 raw measurements](results/2026-10-02.json), Apple M1 Pro, an in-app Chromium
-154 browser, 993 × 603 viewport:
+2026-10-03, Apple M1 Pro, an in-app Chromium 154 browser, 1075 × 859 viewport.
+Raw measurements and the screenshot are local ignored artifacts under
+`e2e/artifacts/m9-gaps/`.
 
 | Workload | Mount | Median update | p95 update |
 | --- | ---: | ---: | ---: |
-| 50 table rows | 52.60 ms | 7.60 ms | 15.00 ms |
-| 1,000 table rows | 224.30 ms | 75.65 ms | 102.20 ms |
-| 1,000 menu entries | 39.50 ms | 10.90 ms | 12.60 ms |
+| 50 table rows | 30.00 ms | 4.50 ms | 5.40 ms |
+| 1,000 table rows | 206.50 ms | 77.90 ms | 90.20 ms |
+| 50 rows, 50 data columns | 31.60 ms | 19.75 ms | 25.20 ms |
+| 100 extra form properties | 11.80 ms | 3.40 ms | 3.70 ms |
+| 1,000 menu entries | 42.00 ms | 11.85 ms | 13.50 ms |
 
 The larger table creates and updates every cell; backend paging limits that work in the
 module pages. This is one machine's baseline, rather than a cross-device performance

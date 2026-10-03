@@ -3,5 +3,11 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "router/src/**/*.ts", "router/src/**/*.vue"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "router/src/**/*.ts",
+    "router/src/**/*.vue",
+    "object-extensions/src/**/*.ts"
+  ]
 }

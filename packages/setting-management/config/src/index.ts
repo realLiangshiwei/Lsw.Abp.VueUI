@@ -13,3 +13,5 @@ export { provideSettingManagementConfig } from './providers/setting-management-c
 
 export { SettingManagementVisibilityService } from './services/setting-management-visibility.service.js';
 export { SettingTabsService, useSettingTabs } from './services/setting-tabs.service.js';
+export { AccountSettingsService } from './services/account-settings.service.js';
+export type { AccountSettings } from './services/account-settings.service.js';
