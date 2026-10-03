@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -59,6 +59,25 @@ function args(cwd: string, extra: Partial<GenerateArgs> = {}): GenerateArgs {
 const read = (cwd: string, path: string): Promise<string> => readFile(join(cwd, path), 'utf8');
 
 describe('generate', () => {
+  it('resolves page and proxy imports from custom output directories', async () => {
+    const cwd = await project();
+    await rename(join(cwd, 'src/proxy'), join(cwd, 'src/client'));
+    await mkdir(join(cwd, 'src/navigation'), { recursive: true });
+    await writeFile(join(cwd, 'src/navigation/routes.ts'), 'export const routes = [];\n');
+    await runGenerate(
+      args(cwd, {
+        target: 'src/features/tenants',
+        proxy: 'src/client',
+        routes: 'src/navigation/routes.ts',
+      }),
+    );
+    expect(await read(cwd, 'src/features/tenants/TenantsPage.vue')).toContain(
+      "from '../../client/volo/abp/tenant-management'",
+    );
+    expect(await read(cwd, 'src/navigation/routes.ts')).toContain(
+      "import('../features/tenants/TenantsPage.vue')",
+    );
+  });
   it('reports an invalid application manifest before writing a page', async () => {
     const cwd = await project();
     await writeFile(join(cwd, 'package.json'), '{');

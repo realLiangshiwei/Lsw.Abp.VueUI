@@ -1,4 +1,5 @@
 import { CliError } from '../errors.js';
+import { literal } from './emit-fields.js';
 import type { EntityPage } from './entity.js';
 
 /** The declaration a project's own routes are in, as the template writes it. */
@@ -144,8 +145,13 @@ function nextOrder(source: string): number {
  * The route of a generated page, as it is written into the routes file.
  * @param page The page
  * @param order Where it sits in the menu
+ * @param componentImport The page import relative to the routes file
  */
-export function routeEntry(page: EntityPage, order: number): string {
+export function routeEntry(
+  page: EntityPage,
+  order: number,
+  componentImport = `./pages/${page.plural}Page.vue`,
+): string {
   const meta = [
     `      title: '${page.menuKey}',`,
     ...(page.policies.list ? [`      requiredPolicy: '${page.policies.list}',`] : []),
@@ -158,7 +164,7 @@ export function routeEntry(page: EntityPage, order: number): string {
     `  // abpv:begin ${markerOf(page)}`,
     '  {',
     `    path: '${page.route}',`,
-    `    component: () => import('./pages/${page.plural}Page.vue'),`,
+    `    component: () => import(${literal(componentImport)}),`,
     '    meta: {',
     ...meta,
     '    },',
@@ -183,8 +189,13 @@ export interface RouteInsertion {
  *
  * @param source The routes file
  * @param page The page whose route to write
+ * @param componentImport The page import relative to the routes file
  */
-export function insertRoute(source: string, page: EntityPage): RouteInsertion {
+export function insertRoute(
+  source: string,
+  page: EntityPage,
+  componentImport?: string,
+): RouteInsertion {
   const declaration = ROUTES.exec(source);
 
   if (!declaration) {
@@ -220,6 +231,7 @@ export function insertRoute(source: string, page: EntityPage): RouteInsertion {
     const entry = routeEntry(
       page,
       order === undefined ? nextOrder(source.slice(0, begin)) : Number(order),
+      componentImport,
     ).trimStart();
     const next = source.slice(0, begin) + entry + source.slice(end + endMarker.length);
 
@@ -230,7 +242,7 @@ export function insertRoute(source: string, page: EntityPage): RouteInsertion {
     return { source, changed: false, replaced: false };
   }
   const before = source.slice(0, close);
-  const entry = routeEntry(page, nextOrder(source));
+  const entry = routeEntry(page, nextOrder(source), componentImport);
 
   // A trailing comma may or may not be there; the entry brings its own.
   const separator = /,\s*$/.test(before) || /\[\s*$/.test(before) ? '' : ',';

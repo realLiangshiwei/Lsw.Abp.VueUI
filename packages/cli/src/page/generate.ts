@@ -1,3 +1,4 @@
+import { dirname, join, relative } from 'node:path';
 import { GenerationReport } from '../generator/report.js';
 import { emitPage } from './emit-page.js';
 import type { EntityPage } from './entity.js';
@@ -28,6 +29,7 @@ export interface GeneratePageOptions {
   page: EntityPage;
   /** Where the page goes, relative to the project root. */
   target: string;
+  proxyPath?: string | undefined;
   /** The file that declares the project's routes; absent when `--no-router`. */
   routesPath?: string | undefined;
   /** What is on disk already, keyed by the same paths this returns. */
@@ -59,9 +61,13 @@ export function generatePage(options: GeneratePageOptions): GeneratePageResult {
   const report = options.report ?? new GenerationReport();
   const page = options.page;
   const paths = pagePathsOf(page, options.target);
+  const proxy = relativeImport(
+    paths.page,
+    join(options.proxyPath ?? 'src/proxy', page.service.directory),
+  );
 
   const files: GeneratedFile[] = [
-    resolve(paths.page, emitPage(page, options.autoImports), options),
+    resolve(paths.page, emitPage(page, options.autoImports, proxy), options),
   ];
 
   if (options.routesPath) {
@@ -73,7 +79,7 @@ export function generatePage(options: GeneratePageOptions): GeneratePageResult {
         `${options.routesPath} is not there, so no route was added. Pass --routes with the file that declares them.`,
       );
     } else {
-      const inserted = insertRoute(source, page);
+      const inserted = insertRoute(source, page, relativeImport(options.routesPath, paths.page));
 
       files.push({
         path: options.routesPath,
@@ -84,6 +90,11 @@ export function generatePage(options: GeneratePageOptions): GeneratePageResult {
   }
 
   return { page, files, report };
+}
+
+function relativeImport(from: string, to: string): string {
+  const path = relative(dirname(from), to).replace(/\\/g, '/');
+  return path.startsWith('../') ? path : `./${path}`;
 }
 
 /** What to do with one generated file, given what is on disk. */

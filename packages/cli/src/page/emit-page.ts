@@ -35,8 +35,13 @@ function guard(policy: string | undefined): string {
  * Emits an application-owned CRUD page with explicit controls and commands.
  * @param page The entity read from the API definition
  * @param autoImports Whether the application's build imports common APIs
+ * @param proxy The service import path relative to the page
  */
-export function emitPage(page: EntityPage, autoImports = false): string {
+export function emitPage(
+  page: EntityPage,
+  autoImports = false,
+  proxy = `../proxy/${page.service.directory}`,
+): string {
   const record = page.types.record;
   const service = camelCase(page.service.name);
   const methods = {
@@ -56,7 +61,6 @@ export function emitPage(page: EntityPage, autoImports = false): string {
   );
   const hasRecordFields = page.fields.some(field => field.recordProperty !== false);
   const imports = new ImportCollector();
-  const proxy = `../proxy/${page.service.directory}`;
   imports.addValue(proxy, page.service.name);
   for (const type of new Set(Object.values(page.types))) imports.addType(proxy, type);
 

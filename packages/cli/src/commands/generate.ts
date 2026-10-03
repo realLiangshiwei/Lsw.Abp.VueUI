@@ -178,6 +178,7 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
   const generated = generatePage({
     page,
     target: args.target,
+    proxyPath: args.proxy,
     routesPath,
     existing,
     force: args.force,
