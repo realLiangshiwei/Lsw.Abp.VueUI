@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/utils",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "Framework-agnostic helpers for the ABP Vue UI. No dependencies, not even Vue.",
   "license": "MIT",
   "type": "module",

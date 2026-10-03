@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/feature-management",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "The feature dialog of the ABP Vue UI: the grouped tabs, the three value types, and what a feature inherited from somewhere else looks like.",
   "license": "MIT",
   "type": "module",

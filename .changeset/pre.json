@@ -21,5 +21,9 @@
     "@lsw-abpvue/template-app": "0.0.0",
     "@lsw-abpvue/template-lib": "0.0.0"
   },
-  "changesets": ["automatic-imports-and-integration", "m9-alpha"]
+  "changesets": [
+    "automatic-imports-and-integration",
+    "language-cookie-and-generated-permissions",
+    "m9-alpha"
+  ]
 }

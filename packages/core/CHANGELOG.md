@@ -1,5 +1,14 @@
 # @lsw-abpvue/core
 
+## 0.0.1-alpha.2
+
+### Patch Changes
+
+- ffe8cd5: Synchronize the selected language with the backend culture cookie, including restored
+  sessions and changes from another tab. Preserve backend action policies under the
+  requested base permission when generating CRUD pages, including `.Edit` permissions.
+  - @lsw-abpvue/utils@0.0.1-alpha.2
+
 ## 0.0.1-alpha.1
 
 ### Patch Changes

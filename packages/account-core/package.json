@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/account-core",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "What the account pages and the theme both need, with no UI of its own: the tenant box, the login schemes a client allows, and the tabs of the profile page.",
   "license": "MIT",
   "type": "module",

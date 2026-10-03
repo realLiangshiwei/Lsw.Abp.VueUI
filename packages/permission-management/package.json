@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/permission-management",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "The permission grant dialog of the ABP Vue UI: the grouped tree, select all, and what a permission granted somewhere else looks like.",
   "license": "MIT",
   "type": "module",
