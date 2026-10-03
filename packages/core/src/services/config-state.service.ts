@@ -10,6 +10,7 @@ import type {
 } from '../proxy/models.js';
 import { InternalStore } from '../utils/internal-store.js';
 import { useLatest } from '../utils/use-latest.js';
+import { SessionStateService } from './session-state.service.js';
 
 /**
  * A complete but empty configuration, so everything reading it works before the first
@@ -69,6 +70,7 @@ function sameEntries(a: Record<string, string>, b: Record<string, string>): bool
 export const ConfigStateService = defineService('ConfigStateService', () => {
   const appConfiguration = inject(AbpApplicationConfigurationService);
   const appLocalization = inject(AbpApplicationLocalizationService);
+  const session = inject(SessionStateService);
   const store = new InternalStore<ApplicationConfigurationDto>(emptyConfiguration());
   const latest = useLatest<ApplicationConfigurationDto>();
 
@@ -153,7 +155,9 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
         );
         // Optional chaining against a required field: a gateway answering 200 with
         // something else must not take the application down.
-        const culture = application.localization?.currentCulture?.cultureName?.split(';')[0];
+        const culture =
+          session.getLanguage()?.split(';')[0] ||
+          application.localization?.currentCulture?.cultureName?.split(';')[0];
         if (!culture) return application;
 
         return {

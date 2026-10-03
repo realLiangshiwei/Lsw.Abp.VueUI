@@ -23,6 +23,6 @@ describe('the application development proxy', () => {
       },
     });
     expect(original.apis.default.url).toBe('https://api.example.test');
-    expect(environment.apis.reports.url).toBe('https://reports.example.test');
+    expect(environment.apis.reports?.url).toBe('https://reports.example.test');
   });
 });

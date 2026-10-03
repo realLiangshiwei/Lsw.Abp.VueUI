@@ -5,6 +5,7 @@ import { createInjector } from '../di/injector.js';
 import type { ApplicationConfigurationDto } from '../proxy/models.js';
 import { HTTP_FETCH, type FetchLike } from '../tokens/http.token.js';
 import { ConfigStateService } from './config-state.service.js';
+import { SessionStateService } from './session-state.service.js';
 
 /** The real answer of a running ABP backend, captured by `scripts/capture-fixtures.sh`. */
 const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
@@ -26,6 +27,37 @@ describe('before the configuration arrives', () => {
 });
 
 describe('refreshing the configuration', () => {
+  it('a saved UI culture wins over the backend request culture on refresh', async () => {
+    const urls: string[] = [];
+    const injector = createInjector([
+      {
+        provide: HTTP_FETCH,
+        useValue: (url: string) => {
+          urls.push(String(url));
+          return Promise.resolve(
+            json(
+              String(url).includes('application-localization')
+                ? {
+                    resources: fixture.localization.resources,
+                    currentCulture: { ...fixture.localization.currentCulture, cultureName: 'tr' },
+                  }
+                : fixture,
+            ),
+          );
+        },
+      },
+    ]);
+    injector.get(SessionStateService).setLanguage('tr');
+
+    await injector.get(ConfigStateService).refreshAppState();
+
+    expect(urls.find(url => url.includes('application-localization'))).toContain('cultureName=tr');
+    expect(
+      injector.get(ConfigStateService).snapshot().localization.currentCulture.cultureName,
+    ).toBe('tr');
+    injector.destroy();
+  });
+
   /** The configuration is asked to leave the texts out; they come from their own endpoint. */
   function backend() {
     const urls: string[] = [];

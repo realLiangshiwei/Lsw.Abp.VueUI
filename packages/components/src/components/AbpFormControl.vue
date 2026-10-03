@@ -25,6 +25,8 @@ const props = defineProps<{
   data: PropData<R>;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 defineSlots<{
   default?: (props: { prop: FormProp<R>; control: AbpFormControlModel }) => unknown;
 }>();
@@ -46,20 +48,16 @@ const required = computed(() =>
     .some(validate => validate('', { valueOf: () => undefined })?.rule === 'required'),
 );
 
-/**
- * The ref `unwrapResolvable` made for the current callback result. Two levels on
- * purpose: this one is rebuilt when the field or the record changes, and reading the
- * value it resolves to happens in the watcher below. Reading it here instead would let a
- * promise settling invalidate this computed, which would ask the callback again, which
- * would settle again -- a loop that issues a request per turn until the heap gives up.
- */
-const resolvedOptions = computed(() => unwrapResolvable(props.prop.options?.(props.data) ?? []));
-
 const options = shallowRef<readonly AbpOption[]>([]);
 
 watch(
-  () => resolvedOptions.value.value,
-  next => (options.value = next ?? []),
+  () => [props.prop, props.data] as const,
+  ([prop, data], _previous, onCleanup) => {
+    // A transport can read and update reactive loading state while starting a request.
+    // Calling it in a computed would turn its completion into another lookup.
+    const resolved = unwrapResolvable(prop.options?.(data) ?? []);
+    onCleanup(watch(resolved, next => (options.value = next ?? []), { immediate: true }));
+  },
   {
     immediate: true,
   },
@@ -125,6 +123,7 @@ async function search(term: string): Promise<AbpTypeaheadItem[]> {
   <template v-if="prop.type !== PropType.Hidden">
     <slot :prop="prop" :control="control">
       <AbpFormField
+        v-bind="$attrs"
         :label="prop.displayName ? $t(prop.displayName) : undefined"
         :for="prop.id"
         :required="required"

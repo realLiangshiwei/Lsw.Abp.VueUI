@@ -17,25 +17,24 @@ const HEADER = [
  * checks on the buttons -- is the extension system's.
  *
  * @param page What was read off the API definition
+ * @param autoImports Whether the application's build imports common APIs
  */
-export function emitPage(page: EntityPage): string {
+export function emitPage(page: EntityPage, autoImports = false): string {
   const names = namesOf(page);
   const record = page.types.record;
   const service = camelCase(page.service.name);
   const imports = new ImportCollector();
 
-  for (const name of [
-    'AbpExtensibleTable',
-    'AbpPage',
-    'AbpPageToolbar',
-    'AbpRecordModal',
-    'useRecordEditor',
-  ]) {
+  for (const name of autoImports
+    ? []
+    : ['AbpExtensibleTable', 'AbpPage', 'AbpPageToolbar', 'AbpRecordModal', 'useRecordEditor']) {
     imports.addValue(COMPONENTS, name);
   }
 
-  imports.addValue(CORE, 'inject as injectAbp');
-  imports.addValue(CORE, 'useListService');
+  if (!autoImports) {
+    imports.addValue(CORE, 'inject as injectAbp');
+    imports.addValue(CORE, 'useListService');
+  }
   const proxy = `../proxy/${page.service.directory}`;
 
   imports.addValue(proxy, page.service.name);

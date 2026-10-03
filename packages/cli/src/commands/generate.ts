@@ -52,6 +52,7 @@ export interface GenerateArgs {
   insecure?: boolean | undefined;
   force?: boolean | undefined;
   'dry-run'?: boolean | undefined;
+  'auto-imports'?: boolean | undefined;
 }
 
 export interface GenerateRunResult {
@@ -67,6 +68,22 @@ async function readIfPresent(path: string): Promise<string | undefined> {
     return await readFile(path, 'utf8');
   } catch {
     return undefined;
+  }
+}
+
+async function usesAutoImports(cwd: string): Promise<boolean> {
+  const source = await readIfPresent(join(cwd, 'package.json'));
+  if (source === undefined) return false;
+
+  try {
+    const manifest = JSON.parse(source) as {
+      abpVue?: { autoImports?: boolean | undefined } | undefined;
+    };
+    return manifest.abpVue?.autoImports === true;
+  } catch (cause) {
+    throw new CliError('Cannot read automatic import settings: fix the JSON in package.json.', {
+      cause,
+    });
   }
 }
 
@@ -164,6 +181,7 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
     routesPath,
     existing,
     force: args.force,
+    autoImports: args['auto-imports'] ?? (await usesAutoImports(cwd)),
     report,
   });
 
@@ -352,6 +370,10 @@ export const generateCommand = defineCommand({
       type: 'boolean',
       description: 'Say what would change and write nothing',
       default: false,
+    },
+    'auto-imports': {
+      type: 'boolean',
+      description: 'Omit common imports; defaults to abpVue.autoImports in package.json',
     },
   },
   run: ({ args }) => guarded(args as unknown as GenerateArgs),

@@ -4,7 +4,13 @@
  * suspends. Calling `inject()` afterwards fails at runtime with an error that points at
  * the wrong place, so it is worth catching while typing (design 02 §5).
  */
-const CONTEXT_BOUND = new Set(['inject', 'provideAbp', 'onServiceDestroy', 'getCurrentInjector']);
+const CONTEXT_BOUND = new Set([
+  'inject',
+  'injectAbp',
+  'provideAbp',
+  'onServiceDestroy',
+  'getCurrentInjector',
+]);
 
 /** @type {import('eslint').Rule.RuleModule} */
 export const noInjectAfterAwait = {

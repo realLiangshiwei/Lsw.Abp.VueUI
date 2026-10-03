@@ -8,7 +8,7 @@ import { Validators } from '@lsw-abpvue/theme-shared';
 import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
-import { defineComponent, h } from 'vue';
+import { defineComponent, h, ref } from 'vue';
 import { PropType } from '../enums/prop-type.js';
 import { FormProp } from '../models/form-props.js';
 import { ExtensionsService } from '../services/extensions.service.js';
@@ -203,6 +203,25 @@ describe('the control each type gets', () => {
     expect(wrapper.findAll('option').map(option => option.text())).toContain('Draft');
   });
 
+  it('unrelated request state does not reload asynchronous options', async () => {
+    const pending = ref(1);
+    const asked = vi.fn(async () => {
+      void pending.value;
+      return [{ value: 1, label: 'Draft' }];
+    });
+    const { wrapper } = render({
+      create: [field({ name: 'kind', type: PropType.Enum, options: asked })],
+    });
+    await wrapper.vm.$nextTick();
+    pending.value = 0;
+    await wrapper.vm.$nextTick();
+    await wrapper.vm.$nextTick();
+
+    expect(asked).toHaveBeenCalledTimes(1);
+    expect(wrapper.findAll('option').map(option => option.text())).toContain('Draft');
+    wrapper.unmount();
+  });
+
   it('a multi-select selects more than one', () => {
     const wrapper = controlFor(PropType.MultiSelect, { options: () => [] });
 
@@ -270,6 +289,12 @@ describe('validation', () => {
 });
 
 describe('grouping and custom controls', () => {
+  it('a field retains the layout class contributed to it', () => {
+    const { wrapper } = render({ create: [field({ className: 'col-md-6' })] });
+
+    expect(wrapper.find('.col-md-6 label').text()).toBe('name');
+  });
+
   it('fields of one group render inside a fieldset that names it', () => {
     const { wrapper } = render({
       create: [

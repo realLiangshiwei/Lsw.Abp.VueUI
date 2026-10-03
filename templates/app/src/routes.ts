@@ -1,4 +1,3 @@
-import { lazyRoutes } from '@lsw-abpvue/core/router';
 import type { RouteRecordRaw } from 'vue-router';
 import HomePage from './pages/HomePage.vue';
 

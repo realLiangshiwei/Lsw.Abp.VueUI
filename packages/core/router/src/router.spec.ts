@@ -4,6 +4,7 @@ import {
   AuthService,
   createAbpApp,
   DocumentService,
+  LocalizationService,
   provideAbpCore,
   RoutesService,
   withOptions,
@@ -200,6 +201,41 @@ describe('provideAbpRouter', () => {
     await router.push('/books');
 
     expect(titles.at(-1)).toBe('Home | BookStore');
+  });
+
+  it('the current page title follows language changes after a refused navigation', async () => {
+    const titles: string[] = [];
+    const app = await start(
+      [
+        { path: '/', component: Page('home'), meta: { title: 'Test::Home' } },
+        { path: '/books', component: Page('books'), meta: { title: 'Test::Books' } },
+      ],
+      {
+        providers: [
+          {
+            provide: DocumentService,
+            useValue: {
+              nativeDocument: undefined,
+              setTitle: (title: string) => void titles.push(title),
+              setDir: () => {},
+              getBaseUrl: () => '/',
+            },
+          },
+        ],
+      },
+    );
+    const localization = app.injector.get(LocalizationService);
+    localization.addLocalization([
+      { culture: 'tr', resources: [{ resourceName: 'Test', texts: { Home: 'Ana sayfa' } }] },
+    ]);
+    const router = app.injector.get(ABP_ROUTER);
+    router.beforeEach(to => to.path !== '/books');
+    await router.push('/books');
+
+    await localization.setLanguage('tr');
+
+    expect(titles.at(-1)).toBe('Ana sayfa | BookStore');
+    app.app.unmount();
   });
 });
 

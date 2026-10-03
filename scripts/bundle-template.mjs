@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-const SKIPPED = new Set(['node_modules', 'dist', '.turbo']);
+const SKIPPED = new Set(['node_modules', 'dist', '.turbo', 'CHANGELOG.md']);
 
 /** One template, copied into the CLI's build output under its own name. */
 function bundle(name) {

@@ -1,6 +1,9 @@
+import { fileURLToPath } from 'node:url';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig, loadEnv } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { abpAutoImports } from './abp-auto-imports';
+import { abpSourceResolution } from './vite-source-aliases';
 
 /** API and OAuth back-channel requests stay on the frontend's development origin. */
 const BACKEND_PATHS = ['/api', '/connect', '/.well-known', '/getEnvConfig', '/Abp'];
@@ -17,13 +20,19 @@ export default defineConfig(({ mode }) => {
   const api = env.VITE_API_URL || '__API_URL__';
   const auth = env.VITE_AUTH_URL || '__AUTH_URL__';
   const app = env.VITE_APP_URL || '__APP_URL__';
+  const source = abpSourceResolution(fileURLToPath(new URL('./tsconfig.json', import.meta.url)));
 
   return {
+    resolve: {
+      alias: source.alias,
+    },
+    optimizeDeps: { exclude: source.exclude },
     plugins: [
       vue(),
       // Reads the `paths` of tsconfig.json, which is where a package released with
       // `abpv add-package --with-source-code` is picked up from (design 08 §5).
       tsconfigPaths(),
+      ...abpAutoImports(fileURLToPath(new URL('.', import.meta.url))),
     ],
     build: {
       // The renewal iframe has a page of its own, and only the entry points named here

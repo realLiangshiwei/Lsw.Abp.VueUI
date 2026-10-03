@@ -113,6 +113,14 @@ describe('renderTemplate', () => {
     expect(written).not.toContain('template.json');
   });
 
+  it('does not copy the workspace changelog into an application', async () => {
+    const { written, contents } = await render();
+
+    expect(written).not.toContain('CHANGELOG.md');
+    expect(Object.values(contents).join('\n')).not.toContain('@lsw-abpvue/template-app');
+    await expect(read('CHANGELOG.md')).rejects.toThrow();
+  });
+
   it('turns the workspace ranges into the version doing the rendering', async () => {
     await render();
     const manifest = JSON.parse(await read('package.json')) as {

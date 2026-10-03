@@ -25,6 +25,41 @@ The last one is why the same build can be deployed to staging and production: ch
 JSON next to it, not the bundle. Serve it as `application/json` and keep the single-page
 fallback from rewriting it to `index.html`.
 
+## Automatic imports
+
+Common Vue, Vue Router and ABP page APIs can be used directly in `src/`:
+
+```vue
+<script setup lang="ts">
+const count = ref(0);
+const { t } = useLocalization();
+</script>
+
+<template>
+  <AbpPage title="AbpUi::Welcome">
+    <AbpButton @click="count++">{{ t('AbpUi::Save') }} ({{ count }})</AbpButton>
+  </AbpPage>
+</template>
+```
+
+`abp-auto-imports.ts` lists the supported APIs and components. Only used symbols receive
+static imports during development and builds. `injectAbp` is ABP's injector; `inject` is
+Vue's. Theme controls resolve through `theme-shared`, so replacing the theme still works.
+Business services and DTOs from `src/proxy` retain explicit imports.
+
+`auto-imports.d.ts` and `components.d.ts` provide editor completion and type checking.
+Initial declarations are included, so `pnpm typecheck` works before the first dev server
+or build. Vite updates them when the preset or local components change; keep them in Git.
+
+`abpv generate` reads `abpVue.autoImports` from `package.json` and omits common imports.
+Use `--no-auto-imports` to generate a page with explicit imports. When disabling the Vite
+plugins, also set that field to false and restore explicit imports in existing pages.
+The plugins only transform application `src/`, leaving released sources in `packages/`
+and library projects responsible for their own imports.
+
+The two build plugins, `unplugin-auto-import` and `unplugin-vue-components`, are MIT licensed
+development dependencies.
+
 ## The proxy
 
 `src/proxy` is generated from the backend's own `api-definition`:

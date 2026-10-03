@@ -181,6 +181,12 @@ export default tseslint.config(
 
   ...layerRules,
 
+  {
+    files: ['templates/app/src/**/*.{ts,vue}'],
+    // TypeScript checks the globals supplied by the application's auto-import preset.
+    rules: { 'no-undef': 'off' },
+  },
+
   // The `testing` entry point of theme-shared is the theme contract suite, so it imports
   // the test tools the way a spec does. That is what it is (design 06 §6).
   layerRule(

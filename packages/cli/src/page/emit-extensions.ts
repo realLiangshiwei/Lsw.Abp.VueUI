@@ -140,23 +140,26 @@ const HEADER = [
 /**
  * The `<entity>.extensions.ts` of a generated page.
  * @param page What was read off the API definition
+ * @param autoImports Whether the application's build imports common APIs
  */
-export function emitExtensions(page: EntityPage): string {
+export function emitExtensions(page: EntityPage, autoImports = false): string {
   const names = namesOf(page);
   const record = page.types.record;
   const enums = enumsOf(page);
   const imports = new ImportCollector();
 
-  for (const name of ['EntityProp', 'FormProp', 'PropType', 'mergeWithDefaultProps']) {
-    imports.addValue(COMPONENTS, name);
-  }
+  if (!autoImports) {
+    for (const name of ['EntityProp', 'FormProp', 'PropType', 'mergeWithDefaultProps']) {
+      imports.addValue(COMPONENTS, name);
+    }
 
-  imports.addValue(COMPONENTS, 'useExtensions');
-  imports.addValue(COMPONENTS, 'getObjectExtensionEntities');
-  imports.addValue(COMPONENTS, 'mapEntitiesToContributors');
-  imports.addValue(COMPONENTS, 'mergeWithDefaultProps');
-  imports.addValue(CORE, 'defineToken');
-  imports.addValue(CORE, 'getCurrentInjector');
+    imports.addValue(COMPONENTS, 'useExtensions');
+    imports.addValue(COMPONENTS, 'getObjectExtensionEntities');
+    imports.addValue(COMPONENTS, 'mapEntitiesToContributors');
+    imports.addValue(COMPONENTS, 'mergeWithDefaultProps');
+    imports.addValue(CORE, 'defineToken');
+    imports.addValue(CORE, 'getCurrentInjector');
+  }
   imports.addType(`../proxy/${page.service.directory}`, record);
 
   const actions = [
@@ -174,17 +177,19 @@ export function emitExtensions(page: EntityPage): string {
     ),
   ];
 
-  imports.addValue(COMPONENTS, 'EntityAction');
-  imports.addValue(COMPONENTS, 'ToolbarAction');
-  imports.addValue(COMPONENTS, 'mergeWithDefaultActions');
+  if (!autoImports) {
+    imports.addValue(COMPONENTS, 'EntityAction');
+    imports.addValue(COMPONENTS, 'ToolbarAction');
+    imports.addValue(COMPONENTS, 'mergeWithDefaultActions');
+  }
 
-  if (enums.length > 0) {
+  if (!autoImports && enums.length > 0) {
     imports.addValue(CORE, 'LocalizationService');
     imports.addType(COMPONENTS, 'PropData');
     imports.addType(THEME_SHARED, 'AbpOption');
   }
 
-  if (page.fields.some(field => field.validators.length > 0)) {
+  if (!autoImports && page.fields.some(field => field.validators.length > 0)) {
     imports.addValue(THEME_SHARED, 'Validators');
   }
 

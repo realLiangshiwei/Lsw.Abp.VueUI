@@ -20,6 +20,14 @@ afterEach(async () => {
 const read = (cwd: string, path: string): Promise<string> => readFile(join(cwd, path), 'utf8');
 
 describe('create-lib', () => {
+  it('does not copy the workspace changelog into a module', async () => {
+    const cwd = await workspace();
+    const { files } = await runCreateLib({ cwd, name: 'Blogging' });
+
+    expect(files).not.toContain('CHANGELOG.md');
+    await expect(read(cwd, 'blogging/CHANGELOG.md')).rejects.toThrow();
+  });
+
   it('writes the three entry points of design 03', async () => {
     const cwd = await workspace();
     const result = await runCreateLib({ cwd, name: 'Blogging' });

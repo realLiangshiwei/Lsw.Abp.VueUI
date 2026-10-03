@@ -242,7 +242,7 @@ export async function renderTemplate(options: RenderOptions): Promise<RenderResu
   const binary: string[] = [];
 
   for (const path of await walk(options.source)) {
-    if (path === TEMPLATE_MANIFEST_FILE || dropped.has(path)) continue;
+    if (path === TEMPLATE_MANIFEST_FILE || path === 'CHANGELOG.md' || dropped.has(path)) continue;
 
     const output = renamed(outputPath(path), options.renames);
     written.push(output);

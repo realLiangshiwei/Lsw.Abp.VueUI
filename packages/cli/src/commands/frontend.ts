@@ -1,6 +1,7 @@
 import process from 'node:process';
 import * as prompts from '@clack/prompts';
 import { reachBackend } from '../diagnostics/backend.js';
+import { UnknownModuleError } from '../generator/generate.js';
 import { releaseSourceCode } from '../source-code/release.js';
 import type { Rollback } from '../system/rollback.js';
 import { run } from '../system/run.js';
@@ -34,20 +35,28 @@ export async function generateProxy(options: FrontendOptions): Promise<void> {
 
   if (!reachable) {
     options.notes.push(
-      `${detail}, so no proxy was generated. Start the backend and run: abpv proxy add --module all`,
+      `${detail}, so no proxy was generated. Start the backend and run: abpv proxy add --module app`,
     );
     return;
   }
 
-  const result = await runProxy('add', {
-    module: 'all',
-    target: 'src/proxy',
-    cwd: options.frontend,
-    url: options.apiUrl,
-    insecure: developmentCertificate,
-  });
+  try {
+    const result = await runProxy('add', {
+      module: 'app',
+      target: 'src/proxy',
+      cwd: options.frontend,
+      url: options.apiUrl,
+      insecure: developmentCertificate,
+    });
 
-  options.notes.push(`Generated ${result.written.length} proxy files from ${options.apiUrl}.`);
+    options.notes.push(`Generated ${result.written.length} proxy files from ${options.apiUrl}.`);
+  } catch (error) {
+    if (!(error instanceof UnknownModuleError)) throw error;
+    options.notes.push(
+      'The backend has no app module, so no application proxy was generated. ' +
+        'Use the installed module clients, or run abpv proxy add --module <your-business-module>.',
+    );
+  }
 }
 
 export async function installDependencies(options: FrontendOptions): Promise<void> {

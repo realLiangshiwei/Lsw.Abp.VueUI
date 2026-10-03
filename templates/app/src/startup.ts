@@ -1,5 +1,4 @@
 import { AbpHttpError } from '@lsw-abpvue/core';
-import { ref } from 'vue';
 
 /** Filled in by the startup error handler, before any component exists to hold it. */
 export const startupError = ref<string | null>(null);

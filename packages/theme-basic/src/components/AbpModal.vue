@@ -9,7 +9,7 @@ import {
   DialogTitle,
   VisuallyHidden,
 } from 'reka-ui';
-import { computed, useId, useSlots, watch } from 'vue';
+import { computed, useSlots, watch } from 'vue';
 
 const props = withDefaults(defineProps<AbpModalProps>(), { size: 'md' });
 
@@ -17,7 +17,6 @@ const emit = defineEmits<AbpModalEmits>();
 const slots = defineSlots<AbpModalSlots>();
 const { requestClose, markDirty } = useModal(props, () => emit('update:visible', false));
 
-const titleId = useId();
 const hasHeader = computed(() => Boolean(useSlots().header));
 
 const SIZE_CLASS = {
@@ -58,7 +57,6 @@ function onOpenChange(open: boolean): void {
         aria-modal="true"
         :aria-busy="busy ? 'true' : undefined"
         :aria-label="hasHeader ? undefined : ariaLabel"
-        :aria-labelledby="hasHeader ? titleId : undefined"
         :aria-describedby="undefined"
         @escape-key-down="busy && $event.preventDefault()"
         @pointer-down-outside="busy && $event.preventDefault()"
@@ -76,7 +74,7 @@ function onOpenChange(open: boolean): void {
             </VisuallyHidden>
 
             <div v-if="slots.header" class="modal-header">
-              <DialogTitle :id="titleId" as="div" class="modal-title">
+              <DialogTitle as="div" class="modal-title">
                 <slot name="header" />
               </DialogTitle>
               <button

@@ -1,30 +1,4 @@
 <script setup lang="ts">
-import {
-  AbpExtensibleTable,
-  AbpPage,
-  AbpPageToolbar,
-  AbpRecordModal,
-  EntityAction,
-  EntityProp,
-  FormProp,
-  mergeWithDefaultActions,
-  mergeWithDefaultProps,
-  PropType,
-  ToolbarAction,
-  useExtensions,
-  useRecordEditor,
-} from '@lsw-abpvue/components';
-import {
-  defineToken,
-  inject as injectAbp,
-  RestService,
-  useListService,
-  useLocalization,
-  type PagedAndSortedResultRequestDto,
-  type PagedResultDto,
-} from '@lsw-abpvue/core';
-import { Validators, type AbpOption } from '@lsw-abpvue/theme-shared';
-
 /**
  * The sample entity `abp new --sample-crud-page` puts in the backend. Once
  * `abpv proxy add --module app` has run there is a generated `BookService` with these

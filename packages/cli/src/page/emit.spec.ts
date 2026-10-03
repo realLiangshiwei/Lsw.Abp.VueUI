@@ -66,6 +66,20 @@ const book: EntityPage = {
 };
 
 describe('emitPage', () => {
+  it('keeps business imports when common APIs are automatically imported', () => {
+    const source = emitPage(book, true);
+    expect(source).not.toContain("from '@lsw-abpvue/");
+    expect(source).toContain("import { BookService } from '../proxy/book-store/books';");
+    expect(source).toContain('import type { BookDto, CreateUpdateBookDto }');
+    expect(source).toContain('useRecordEditor<BookDto>');
+    expect(source).toContain('<AbpExtensibleTable');
+
+    const extensions = emitExtensions(book, true);
+    expect(extensions).not.toContain("from '@lsw-abpvue/");
+    expect(extensions).toContain("import type { BookDto } from '../proxy/book-store/books';");
+    expect(extensions).toContain('PropData<BookDto>');
+    expect(extensions).toContain('Validators.required()');
+  });
   it('hooks the list to the generated service', () => {
     const source = emitPage(book);
 

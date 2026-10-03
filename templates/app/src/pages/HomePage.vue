@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useCurrentUser } from '@lsw-abpvue/core';
-
 const { user, isAuthenticated } = useCurrentUser();
 </script>
 

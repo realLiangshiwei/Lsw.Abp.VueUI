@@ -59,6 +59,25 @@ function args(cwd: string, extra: Partial<GenerateArgs> = {}): GenerateArgs {
 const read = (cwd: string, path: string): Promise<string> => readFile(join(cwd, path), 'utf8');
 
 describe('generate', () => {
+  it('reports an invalid application manifest before writing a page', async () => {
+    const cwd = await project();
+    await writeFile(join(cwd, 'package.json'), '{');
+    await expect(runGenerate(args(cwd))).rejects.toThrow('fix the JSON in package.json');
+    await expect(read(cwd, 'src/pages/TenantsPage.vue')).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+  it('uses the application automatic import setting and allows explicit imports', async () => {
+    const cwd = await project();
+    await writeFile(join(cwd, 'package.json'), JSON.stringify({ abpVue: { autoImports: true } }));
+    await runGenerate(args(cwd));
+    expect(await read(cwd, 'src/pages/TenantsPage.vue')).not.toContain("from '@lsw-abpvue/");
+    expect(await read(cwd, 'src/pages/tenants.extensions.ts')).not.toContain("from '@lsw-abpvue/");
+
+    await runGenerate(args(cwd, { force: true, 'auto-imports': false }));
+    expect(await read(cwd, 'src/pages/TenantsPage.vue')).toContain("from '@lsw-abpvue/core'");
+    expect(await read(cwd, 'src/pages/tenants.extensions.ts')).toContain(
+      "from '@lsw-abpvue/components'",
+    );
+  });
   it('writes the page, its extensions and the route', async () => {
     const cwd = await project();
     const result = await runGenerate(args(cwd));

@@ -36,6 +36,7 @@ export interface GeneratePageOptions {
   existing: Record<string, string>;
   /** Rewrites the generated blocks of files that are already there. */
   force?: boolean | undefined;
+  autoImports?: boolean | undefined;
   report?: GenerationReport | undefined;
 }
 
@@ -67,8 +68,8 @@ export function generatePage(options: GeneratePageOptions): GeneratePageResult {
   const paths = pagePathsOf(page, options.target);
 
   const files: GeneratedFile[] = [
-    resolve(paths.page, emitPage(page), options, { merge: false }),
-    resolve(paths.extensions, emitExtensions(page), options, { merge: true }),
+    resolve(paths.page, emitPage(page, options.autoImports), options, { merge: false }),
+    resolve(paths.extensions, emitExtensions(page, options.autoImports), options, { merge: true }),
   ];
 
   if (options.routesPath) {

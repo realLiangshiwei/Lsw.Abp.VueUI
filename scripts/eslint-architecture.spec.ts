@@ -86,6 +86,15 @@ describe('SSR discipline', () => {
 describe('the injection context', () => {
   const inAsyncFn = (body: string) => `export async function load() {\n  ${body}\n}\n`;
 
+  it('an automatically imported ABP inject after an await is refused', async () => {
+    await expect(
+      ruleIdsFor(
+        'templates/app/src/pages/example.ts',
+        inAsyncFn('await Promise.resolve();\n  return injectAbp(RestService);'),
+      ),
+    ).resolves.toContain('abp/no-inject-after-await');
+  });
+
   it('an inject after an await is refused', async () => {
     await expect(
       ruleIdsFor(
