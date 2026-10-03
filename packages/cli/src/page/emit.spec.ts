@@ -65,6 +65,16 @@ const book: EntityPage = {
 };
 
 describe('emitPage', () => {
+  it('uses explicit row actions and a localized pagination summary', () => {
+    const source = emitPage(book);
+    expect(source).toContain('<AbpGridActions');
+    expect(source).toContain(':actions="rowActions"');
+    expect(source).toContain('action: editBook');
+    expect(source).toContain('action: deleteBook');
+    expect(source).toContain('RowAction<BookDto>');
+    expect(source).toContain('AbpUi::PagerInfo{0}{1}{2}');
+    expect(source).toContain('{{ pageInfo }}');
+  });
   it('puts the template first and keeps the page independent of module extensions', () => {
     const source = emitPage(book);
     expect(source.startsWith('<template>')).toBe(true);
@@ -119,7 +129,6 @@ describe('emitPage', () => {
     for (const policy of Object.values(book.policies).filter(
       policy => policy !== book.policies.list,
     )) {
-      expect(source).toContain(`policy="${policy}"`);
       expect(source).toContain(`permission.isGranted('${policy}')`);
     }
     expect(emitPage({ ...book, policies: {} })).not.toContain('permission.isGranted');

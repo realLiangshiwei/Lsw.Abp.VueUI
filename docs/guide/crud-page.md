@@ -38,6 +38,11 @@ The page includes these application methods:
 There is no page token, extension registration function or adjacent `.extensions.ts` file.
 Reusable module UIs continue to use the [extension system](../concepts/extensions.md).
 
+`rowActions` contains plain `RowAction<RecordDto>` objects with a label and a record callback.
+`AbpGridActions` displays several actions in a dropdown and one action as a button.
+The page filters actions by permission and disables them while a request is running.
+The footer shows the localized record range and total alongside the pagination controls.
+
 ## What it reads
 
 | Backend description                            | Page                         |
@@ -83,7 +88,8 @@ pnpm abpv generate Book --force
 ```
 
 **`--force` replaces the entire Vue page.** Save your custom changes before using it.
-The route is not added twice. Legacy `.extensions.ts` files are left on disk and are no
+Existing template and application routes are preserved; a generated route cannot be moved
+onto another existing path. Legacy `.extensions.ts` files are left on disk and are no
 longer imported by newly generated pages; review them before removing them yourself.
 
 ## Options

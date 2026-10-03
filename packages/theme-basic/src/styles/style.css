@@ -161,6 +161,14 @@
   font-size: 0.8125rem;
 }
 
+.abp-pagination .page-link,
+.abp-pagination .form-select {
+  height: 2.125rem;
+  min-height: 2.125rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
 .form-control,
 .form-select {
   min-height: 2.625rem;
@@ -566,6 +574,18 @@
   font-size: 0.8125rem;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.abp-grid-actions-toggle::after {
+  content: '';
+  border-top: 0.3em solid;
+  border-inline: 0.3em solid transparent;
+}
+
+.abp-grid-actions-toggle[aria-disabled='true'],
+.abp-grid-actions-item:disabled {
+  opacity: 0.65;
+  cursor: default;
 }
 
 /*

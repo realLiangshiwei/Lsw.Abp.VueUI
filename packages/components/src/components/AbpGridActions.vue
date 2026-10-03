@@ -3,17 +3,22 @@ import { provideAbp } from '@lsw-abpvue/core';
 import { AbpButton } from '@lsw-abpvue/theme-shared';
 import { computed, onScopeDispose, ref, toRef, useTemplateRef } from 'vue';
 import { ACTIONS } from '../defaults/texts.js';
-import type { EntityAction } from '../models/actions.js';
+import type { RowAction } from '../models/actions.js';
 import type { PropData } from '../models/prop-data.js';
 import { EXTENSIONS_ACTION_DATA, ROW_INDEX, ROW_RECORD } from '../tokens/extensions.token.js';
 import { useEntityActions, useGetInjected } from '../utils/use-action-list.js';
 
-const props = defineProps<{
-  record: R;
-  index: number;
-  /** Localization key of the label the menu opens under. */
-  text?: string | undefined;
-}>();
+const props = withDefaults(
+  defineProps<{
+    record: R;
+    index?: number | undefined;
+    actions?: readonly RowAction<R>[] | undefined;
+    disabled?: boolean | undefined;
+    /** Localization key of the label the menu opens under. */
+    text?: string | undefined;
+  }>(),
+  { index: 0, actions: undefined, disabled: false, text: undefined },
+);
 
 const { getInjected } = useGetInjected();
 
@@ -30,7 +35,16 @@ provideAbp([
   { provide: EXTENSIONS_ACTION_DATA, useValue: data },
 ]);
 
-const actions = useEntityActions<R>(() => data.value);
+const contributed = props.actions === undefined ? useEntityActions<R>(() => data.value) : undefined;
+const actions = computed<readonly RowAction<R>[]>(
+  () =>
+    props.actions ??
+    contributed?.value.map(action => ({
+      ...action,
+      action: () => action.action(data.value),
+    })) ??
+    [],
+);
 const open = ref(false);
 
 /**
@@ -63,9 +77,9 @@ function closeOnScroll(): void {
 }
 
 function onToggle(isOpen: boolean): void {
-  open.value = isOpen;
+  open.value = isOpen && !props.disabled;
 
-  if (isOpen) {
+  if (open.value) {
     place();
     window.addEventListener('scroll', closeOnScroll, true);
     window.addEventListener('resize', closeOnScroll);
@@ -86,9 +100,14 @@ function closeMenu(): void {
   open.value = false;
 }
 
-function run(action: EntityAction<R>): void {
+function run(action: RowAction<R>): void {
+  if (props.disabled || action.disabled) return;
   closeMenu();
-  void action.action(data.value);
+  void action.action(props.record);
+}
+
+function preventDisabledToggle(event: MouseEvent): void {
+  if (props.disabled) event.preventDefault();
 }
 
 /** Tabbing from the summary into the menu is not leaving it. */
@@ -110,6 +129,7 @@ function closeOnLeave(event: FocusEvent): void {
     :class="actions[0].btnClass"
     :style="actions[0].btnStyle"
     :icon-class="actions[0].icon"
+    :disabled="disabled || actions[0].disabled"
     :aria-label="actions[0].showOnlyIcon ? $t(actions[0].text) : undefined"
     @click="run(actions[0])"
   >
@@ -124,7 +144,15 @@ function closeOnLeave(event: FocusEvent): void {
     @focusout="closeOnLeave"
     @keydown.esc.prevent.stop="closeMenu"
   >
-    <summary ref="toggle" class="abp-grid-actions-toggle">{{ $t(text ?? ACTIONS) }}</summary>
+    <summary
+      ref="toggle"
+      class="abp-grid-actions-toggle"
+      :aria-disabled="disabled || undefined"
+      :aria-expanded="open"
+      @click="preventDisabledToggle"
+    >
+      {{ $t(text ?? ACTIONS) }}
+    </summary>
     <ul class="abp-grid-actions-menu" :style="position">
       <li v-for="action in actions" :key="action.text">
         <button
@@ -132,6 +160,7 @@ function closeOnLeave(event: FocusEvent): void {
           class="abp-grid-actions-item"
           :class="action.btnClass"
           :style="action.btnStyle"
+          :disabled="disabled || action.disabled"
           @click="run(action)"
         >
           <i v-if="action.icon" :class="action.icon" aria-hidden="true" />

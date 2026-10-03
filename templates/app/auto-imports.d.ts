@@ -174,7 +174,7 @@ declare global {
   export type { AbpNavItem, AbpNavTab, AbpPolicyName, AbpRoute, AuditedEntityDto, EntityDto, ExtensibleEntityDto, FullAuditedEntityDto, InjectionToken, ListResultDto, ListService, PagedAndSortedResultRequestDto, PagedResultDto, PagedResultRequestDto, Provider, RestConfig } from '@lsw-abpvue/core'
   import('@lsw-abpvue/core')
   // @ts-ignore
-  export type { AbpTableColumn, AbpTabItem, EntityActionOptions, EntityPropOptions, FormPropOptions, PropData, RecordEditor, RecordEditorOptions, ToolbarData } from '@lsw-abpvue/components'
+  export type { AbpTableColumn, AbpTabItem, EntityActionOptions, EntityPropOptions, FormPropOptions, PropData, RecordEditor, RecordEditorOptions, RowAction, ToolbarData } from '@lsw-abpvue/components'
   import('@lsw-abpvue/components')
   // @ts-ignore
   export type { AbpOption, AbpOptionValue, AbpSeverity, AbpSize, ToastOptions } from '@lsw-abpvue/theme-shared'

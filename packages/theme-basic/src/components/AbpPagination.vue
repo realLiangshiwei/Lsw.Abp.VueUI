@@ -32,6 +32,7 @@ const oneBased = computed(() => props.page + 1);
     :disabled="Boolean(disabled)"
     :aria-label="ariaLabel"
     as="nav"
+    class="abp-pagination"
     @update:page="emit('update:page', $event - 1)"
   >
     <div class="d-flex align-items-center gap-3">

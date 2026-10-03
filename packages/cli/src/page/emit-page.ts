@@ -68,8 +68,10 @@ export function emitPage(page: EntityPage, autoImports = false): string {
       imports.addValue(CORE, 'usePermission');
       imports.addValue(CORE, 'AbpPermission');
     }
-    for (const name of ['AbpDataTable', 'AbpPage']) imports.addValue(COMPONENTS, name);
+    for (const name of ['AbpDataTable', 'AbpGridActions', 'AbpPage'])
+      imports.addValue(COMPONENTS, name);
     imports.addType(COMPONENTS, 'AbpTableColumn');
+    imports.addType(COMPONENTS, 'RowAction');
     for (const name of [
       'AbpButton',
       'AbpModal',
@@ -91,9 +93,15 @@ export function emitPage(page: EntityPage, autoImports = false): string {
   const createName = `create${page.entity}`;
   const editName = `edit${page.entity}`;
   const deleteName = `delete${page.entity}`;
-  const showActions = [page.policies.update, page.policies.delete]
-    .map(policy => (policy ? `permission.isGranted(${literal(policy)})` : 'true'))
-    .join(' || ');
+  const rowActions = [
+    { policy: page.policies.update, text: 'AbpUi::Edit', method: editName },
+    { policy: page.policies.delete, text: 'AbpUi::Delete', method: deleteName },
+  ].map(action => {
+    const entry = `{ text: ${literal(action.text)}, action: ${action.method} }`;
+    return action.policy
+      ? `  ...(permission.isGranted(${literal(action.policy)}) ? [${entry}] : []),`
+      : `  ${entry},`;
+  });
   const columns = page.columns.map(prop => {
     let value = '';
     if (prop.type === PROP_TYPES.enum)
@@ -139,25 +147,11 @@ export function emitPage(page: EntityPage, autoImports = false): string {
     '        record-key="id"',
     '      >',
     '        <template #cell-__actions="{ row }">',
-    '          <div class="d-flex gap-2">',
-    ...permissionBlock(
-      page.policies.update,
-      [
-        `            <AbpButton size="sm" variant="secondary" outline :disabled="isBusy" @click="${editName}(row)">{{ t('AbpUi::Edit') }}</AbpButton>`,
-      ],
-      '            ',
-    ),
-    ...permissionBlock(
-      page.policies.delete,
-      [
-        `            <AbpButton size="sm" variant="danger" outline :disabled="isBusy" @click="${deleteName}(row)">{{ t('AbpUi::Delete') }}</AbpButton>`,
-      ],
-      '            ',
-    ),
-    '          </div>',
+    '          <AbpGridActions :record="row" :actions="rowActions" :disabled="isBusy" />',
     '        </template>',
     '      </AbpDataTable>',
-    '      <div class="card-footer">',
+    '      <div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-3">',
+    '        <p class="text-muted small mb-0">{{ pageInfo }}</p>',
     '        <AbpPagination v-model:page="list.page.value" v-model:page-size="list.maxResultCount.value" :total="list.totalCount.value" :disabled="list.requestStatus.value === \'loading\'" show-size-selector />',
     '      </div>',
     '    </div>',
@@ -193,6 +187,10 @@ export function emitPage(page: EntityPage, autoImports = false): string {
     `const list = useListService({ persistKey: ${literal(page.componentKey)} });`,
     `const { items } = list.hookToQuery(query => ${service}.${methods.getList}(query));`,
     'watch([list.sortKey, list.sortOrder, list.maxResultCount], () => { list.page.value = 0; });',
+    'const pageInfo = computed(() => {',
+    '  const first = list.page.value * list.maxResultCount.value;',
+    "  return t('AbpUi::PagerInfo{0}{1}{2}', items.value.length ? first + 1 : 0, Math.min(first + items.value.length, list.totalCount.value), list.totalCount.value);",
+    '});',
     '',
     'const isModalOpen = ref(false);',
     'const isBusy = ref(false);',
@@ -232,9 +230,11 @@ export function emitPage(page: EntityPage, autoImports = false): string {
           '',
         ]
       : []),
-    `const hasActions = computed(() => ${showActions});`,
+    `const rowActions = computed<RowAction<${record}>[]>(() => [`,
+    ...rowActions,
+    ']);',
     `const columns = computed<AbpTableColumn<${record}>[]>(() => [`,
-    "  ...(hasActions.value ? [{ id: '__actions', header: t('AbpUi::Actions') }] : []),",
+    "  ...(rowActions.value.length ? [{ id: '__actions', header: t('AbpUi::Actions') }] : []),",
     ...columns,
     ']);',
     '',

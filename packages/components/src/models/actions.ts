@@ -11,6 +11,17 @@ export type ActionPredicate<R> = (data?: PropData<R>) => boolean;
  */
 export type ActionCallback<R> = (data: PropData<R>) => unknown;
 
+/** An application row action whose callback receives the record directly. */
+export interface RowAction<R> {
+  text: string;
+  action: (record: R) => unknown;
+  icon?: string | undefined;
+  btnClass?: string | undefined;
+  btnStyle?: string | undefined;
+  showOnlyIcon?: boolean | undefined;
+  disabled?: boolean | undefined;
+}
+
 export interface ActionOptions<R> {
   /** Localization key of the label. */
   text: string;

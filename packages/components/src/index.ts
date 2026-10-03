@@ -37,6 +37,7 @@ export type {
   EntityActionContributorCallbacks,
   EntityActionDefaults,
   EntityActionOptions,
+  RowAction,
   EntityActions,
   ToolbarActionContributorCallback,
   ToolbarActionContributorCallbacks,

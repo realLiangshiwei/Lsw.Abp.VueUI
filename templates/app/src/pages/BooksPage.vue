@@ -20,31 +20,11 @@
         record-key="id"
       >
         <template #cell-actions="{ row }">
-          <div class="d-flex gap-2">
-            <AbpPermission policy="__APP_NAME__.Books.Edit">
-              <AbpButton
-                size="sm"
-                variant="secondary"
-                outline
-                :disabled="isBusy"
-                @click="editBook(row)"
-                >{{ t('AbpUi::Edit') }}</AbpButton
-              >
-            </AbpPermission>
-            <AbpPermission policy="__APP_NAME__.Books.Delete">
-              <AbpButton
-                size="sm"
-                variant="danger"
-                outline
-                :disabled="isBusy"
-                @click="deleteBook(row)"
-                >{{ t('AbpUi::Delete') }}</AbpButton
-              >
-            </AbpPermission>
-          </div>
+          <AbpGridActions :record="row" :actions="rowActions" :disabled="isBusy" />
         </template>
       </AbpDataTable>
-      <div class="card-footer">
+      <div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <p class="text-muted small mb-0">{{ pageInfo }}</p>
         <AbpPagination
           v-model:page="list.page.value"
           v-model:page-size="list.maxResultCount.value"
@@ -221,6 +201,16 @@ watch([list.sortKey, list.sortOrder, list.maxResultCount], () => {
   list.page.value = 0;
 });
 
+const pageInfo = computed(() => {
+  const first = list.page.value * list.maxResultCount.value;
+  return t(
+    'AbpUi::PagerInfo{0}{1}{2}',
+    items.value.length ? first + 1 : 0,
+    Math.min(first + items.value.length, list.totalCount.value),
+    list.totalCount.value,
+  );
+});
+
 const isModalOpen = ref(false);
 const isBusy = ref(false);
 const selected = shallowRef<BookDto>();
@@ -253,13 +243,16 @@ function formatDate(value: string | null | undefined): string {
     : new Intl.DateTimeFormat(currentLang.value).format(date);
 }
 
-const hasActions = computed(
-  () =>
-    permission.isGranted('__APP_NAME__.Books.Edit') ||
-    permission.isGranted('__APP_NAME__.Books.Delete'),
-);
+const rowActions = computed<RowAction<BookDto>[]>(() => [
+  ...(permission.isGranted('__APP_NAME__.Books.Edit')
+    ? [{ text: 'AbpUi::Edit', action: editBook }]
+    : []),
+  ...(permission.isGranted('__APP_NAME__.Books.Delete')
+    ? [{ text: 'AbpUi::Delete', action: deleteBook }]
+    : []),
+]);
 const columns = computed<AbpTableColumn<BookDto>[]>(() => [
-  ...(hasActions.value ? [{ id: 'actions', header: t('AbpUi::Actions') }] : []),
+  ...(rowActions.value.length ? [{ id: 'actions', header: t('AbpUi::Actions') }] : []),
   { id: 'name', header: t('__APP_NAME__::Name'), sortable: true },
   { id: 'authorName', header: t('__APP_NAME__::Author') },
   {

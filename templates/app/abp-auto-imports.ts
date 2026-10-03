@@ -151,6 +151,7 @@ const imports: Options['imports'] = [
       'PropData',
       'RecordEditor',
       'RecordEditorOptions',
+      'RowAction',
       'ToolbarData',
     ],
     type: true,
