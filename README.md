@@ -59,6 +59,26 @@ is opt-in through the repository variable `DOCS_PAGES_ENABLED=true`, with Pages 
 to use GitHub Actions. The current private repository's GitHub plan does not support
 Pages, so deployment remains disabled until the repository becomes eligible.
 
+## Publishing
+
+Keep using `pnpm exec changeset version` to update versions and changelogs. All public
+packages must have the same version. Build before publishing:
+
+```bash
+pnpm build
+pnpm release --dry-run
+pnpm release
+```
+
+The release script selects the npm tag from the version: `0.0.1-alpha.2` uses `alpha`,
+`0.0.1-beta.0` uses `beta`, `0.0.1-rc.0` uses `rc`, and a stable version uses `latest`.
+It publishes only public packages under `packages/`, skips versions already on npm,
+and uses pnpm to replace workspace dependency ranges before publishing. GitHub release
+tags use the same script.
+
+Prerelease publishing leaves an existing `latest` tag unchanged. npm can still add
+`latest` on a package's first publication; this script does not remove existing tags.
+
 ## Verification
 
 ```bash

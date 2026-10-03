@@ -19,7 +19,7 @@ proxy: the page imports the generated service and its DTOs.
 | `--resource <name>` | The localization resource; the backend's default otherwise |
 | `--extension-module <m>` | Where the backend files this entity's object extensions, as `Module` or `Module.Entity`; the resource and the entity name otherwise |
 | `--route` / `--menu` / `--icon` | Override what is inferred |
-| `--policy <name>` | The base permission; `.Create`, `.Update` and `.Delete` follow |
+| `--policy <name>` | The base permission; matching backend action policies such as `.Edit` are kept, missing or unrelated policies use `.Create`, `.Update` and `.Delete` |
 | `--force` | Rewrite the generated blocks of files already there |
 | `--url` / `--source` / `--config-source` / `--token` / `--insecure` | As in `proxy` |
 | `--dry-run` | Say what would change and write nothing |

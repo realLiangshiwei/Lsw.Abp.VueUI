@@ -19,8 +19,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      # Versions come from `changeset version` on a release PR; this only publishes what
-      # is not on npm yet, every package at the same version (fixed mode).
-      - run: pnpm exec changeset publish
+      # Changesets manages versions; the release script selects alpha/beta/rc or latest.
+      - run: pnpm release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

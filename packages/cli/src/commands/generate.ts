@@ -346,7 +346,8 @@ export const generateCommand = defineCommand({
     menu: { type: 'string', description: 'Localization key of the menu entry' },
     policy: {
       type: 'string',
-      description: 'The base permission; .Create, .Update and .Delete are derived from it',
+      description:
+        'The base permission; matching backend action policies are kept, others are derived',
     },
     icon: { type: 'string', description: 'Icon class of the menu entry, e.g. bi bi-book' },
     url: { type: 'string', description: 'The backend; taken from the proxy when absent' },

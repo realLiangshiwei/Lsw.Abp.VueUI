@@ -360,6 +360,18 @@ function policyOf(action: ActionDefinition | undefined): string | undefined {
   );
 }
 
+function pagePolicy(
+  action: ActionDefinition | undefined,
+  base: string | undefined,
+  suffix?: string,
+): string | undefined {
+  const declared = policyOf(action);
+  if (!base) return declared;
+  if (declared === base || declared?.startsWith(`${base}.`)) return declared;
+
+  return suffix ? `${base}.${suffix}` : base;
+}
+
 export interface EntityPageOptions {
   definition: ApiDefinition;
   /** The proxy's own registry, so the page imports the names the proxy exported. */
@@ -378,7 +390,7 @@ export interface EntityPageOptions {
   route?: string | undefined;
   menu?: string | undefined;
   icon?: string | undefined;
-  /** Overrides what the actions say, for a backend that authorizes elsewhere. */
+  /** The base permission used when the backend declares no matching action policy. */
   policy?: string | undefined;
   report: GenerationReport;
 }
@@ -418,19 +430,12 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
     parameter => (parameter.jsonName ?? parameter.name).toLowerCase() === 'filter',
   );
 
-  const policies: EntityPolicies = options.policy
-    ? {
-        list: options.policy,
-        create: `${options.policy}.Create`,
-        update: `${options.policy}.Update`,
-        delete: `${options.policy}.Delete`,
-      }
-    : {
-        list: policyOf(actions.getList),
-        create: policyOf(actions.create),
-        update: policyOf(actions.update),
-        delete: policyOf(actions.delete),
-      };
+  const policies: EntityPolicies = {
+    list: pagePolicy(actions.getList, options.policy),
+    create: pagePolicy(actions.create, options.policy, 'Create'),
+    update: pagePolicy(actions.update, options.policy, 'Update'),
+    delete: pagePolicy(actions.delete, options.policy, 'Delete'),
+  };
 
   return {
     module,

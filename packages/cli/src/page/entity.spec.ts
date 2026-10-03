@@ -125,6 +125,28 @@ describe('readEntityPage', () => {
     });
   });
 
+  it('keeps an edit permission declared under the requested base policy', () => {
+    const declared = structuredClone(definition);
+    for (const module of Object.values(declared.modules)) {
+      for (const controller of Object.values(module.controllers)) {
+        for (const action of Object.values(controller.actions)) {
+          for (const authorization of action.authorizeDatas ?? []) {
+            if (authorization.policy === 'BookStore.Books.Update') {
+              authorization.policy = 'BookStore.Books.Edit';
+            }
+          }
+        }
+      }
+    }
+
+    expect(
+      read('Book', { definition: declared, policy: 'BookStore.Books' }).page.policies.update,
+    ).toBe('BookStore.Books.Edit');
+    expect(read('Book', { definition: declared, policy: 'Other.Books' }).page.policies.update).toBe(
+      'Other.Books.Update',
+    );
+  });
+
   it('names the keys after the resource, and the route and menu after the plural', () => {
     const { page } = read('Tenant', { resource: 'BookStore' });
 

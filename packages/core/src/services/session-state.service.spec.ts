@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createInjector } from '../di/injector.js';
+import { CookieService } from './platform/cookie.service.js';
 import { StorageService } from './platform/storage.service.js';
 import { SessionStateService } from './session-state.service.js';
 
@@ -35,14 +36,35 @@ function session(stored?: string) {
   const storage = fakeStorage();
   if (stored !== undefined) storage.values.set('abpSession', stored);
 
-  const service = createInjector([{ provide: StorageService, useValue: storage.service }]).get(
-    SessionStateService,
-  );
+  const cookies = { get: vi.fn(), set: vi.fn(), remove: vi.fn() } satisfies CookieService;
+  const service = createInjector([
+    { provide: StorageService, useValue: storage.service },
+    { provide: CookieService, useValue: cookies },
+  ]).get(SessionStateService);
 
-  return { storage, service };
+  return { storage, service, cookies };
 }
 
 describe('session state', () => {
+  it('synchronizes the persisted language cookie only after initialization', () => {
+    const { service, cookies } = session(JSON.stringify({ language: 'en' }));
+    expect(cookies.set).not.toHaveBeenCalled();
+
+    service.init();
+
+    expect(cookies.set).toHaveBeenCalledWith('.AspNetCore.Culture', 'c=en|uic=en');
+  });
+
+  it('updates the backend culture cookie when the language changes in this or another tab', () => {
+    const { service, storage, cookies } = session();
+    service.init();
+    service.setLanguage('en');
+    expect(cookies.set).toHaveBeenLastCalledWith('.AspNetCore.Culture', 'c=en|uic=en');
+
+    storage.writeFromAnotherTab('abpSession', JSON.stringify({ language: 'ar' }));
+
+    expect(cookies.set).toHaveBeenLastCalledWith('.AspNetCore.Culture', 'c=ar|uic=ar');
+  });
   it('reads back what the last visit stored, after init', () => {
     const { service } = session(JSON.stringify({ language: 'fi' }));
 

@@ -133,7 +133,7 @@ Running it twice changes nothing the second time, markers and route included.
 | | |
 | --- | --- |
 | `--module <name>` | Which `api-definition` module to look in; all of them otherwise |
-| `--policy <name>` | The base permission. `.Create`, `.Update` and `.Delete` follow from it |
+| `--policy <name>` | The base permission. Matching backend action policies such as `.Edit` are kept; missing or unrelated policies use `.Create`, `.Update` and `.Delete` |
 | `--route` / `--menu` / `--icon` | Override what is inferred |
 | `--resource <name>` | The localization resource; the backend's default resource otherwise |
 | `--extension-module <m>` | Where the backend files the object extensions, as `Module` or `Module.Entity` |
