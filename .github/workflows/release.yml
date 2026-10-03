@@ -18,8 +18,7 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      # Changesets manages versions; the release script selects alpha/beta/rc or latest.
+      # Verification must pass before the script selects and publishes the release tag.
       - run: pnpm release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

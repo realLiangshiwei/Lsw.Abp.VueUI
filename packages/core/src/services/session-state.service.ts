@@ -4,6 +4,7 @@ import { defineService, type ServiceOf } from '../di/token.js';
 import type { CurrentTenantDto } from '../proxy/models.js';
 import { InternalStore } from '../utils/internal-store.js';
 import { CookieService } from './platform/cookie.service.js';
+import { DocumentService } from './platform/document.service.js';
 import { StorageService } from './platform/storage.service.js';
 
 /** The key ABP's Angular UI uses, so a solution can switch UIs without logging out. */
@@ -34,12 +35,15 @@ function parse(raw: string | null): SessionState {
 export const SessionStateService = defineService('SessionStateService', () => {
   const storage = inject(StorageService);
   const cookies = inject(CookieService);
+  const browserDocument = inject(DocumentService);
   const store = new InternalStore<SessionState>({});
   let started = false;
 
   const persist = () => storage.setItem(SESSION_KEY, JSON.stringify(store.state.value));
-  const syncLanguageCookie = (language: string | null): void => {
-    if (language) cookies.set('.AspNetCore.Culture', `c=${language}|uic=${language}`);
+  const syncLanguage = (language: string | null): void => {
+    if (!language) return;
+    cookies.set('.AspNetCore.Culture', `c=${language}|uic=${language}`);
+    browserDocument.setLang?.(language);
   };
 
   return {
@@ -52,8 +56,8 @@ export const SessionStateService = defineService('SessionStateService', () => {
       started = true;
 
       store.set(parse(storage.getItem(SESSION_KEY)));
-      syncLanguageCookie(store.state.value.language ?? null);
-      store.onUpdate(state => state.language ?? null, syncLanguageCookie);
+      syncLanguage(store.state.value.language ?? null);
+      store.onUpdate(state => state.language ?? null, syncLanguage);
       store.onUpdate(state => state, persist);
       // Another tab writing the session is the same event as this tab writing it, so the
       // language and tenant of every open tab stay in step.

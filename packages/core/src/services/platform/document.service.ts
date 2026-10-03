@@ -5,6 +5,7 @@ export interface DocumentService {
   readonly nativeDocument: Document | undefined;
   setTitle(title: string): void;
   setDir(dir: 'ltr' | 'rtl'): void;
+  setLang?: ((language: string) => void) | undefined;
   getBaseUrl(): string;
 }
 
@@ -20,6 +21,9 @@ export const DocumentService: InjectionToken<DocumentService> = defineService(
       },
       setDir: dir => {
         nativeDocument?.documentElement.setAttribute('dir', dir);
+      },
+      setLang: language => {
+        nativeDocument?.documentElement.setAttribute('lang', language);
       },
       getBaseUrl: () => nativeDocument?.querySelector('base')?.getAttribute('href') ?? '/',
     };

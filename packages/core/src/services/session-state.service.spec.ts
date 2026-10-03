@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createInjector } from '../di/injector.js';
 import { CookieService } from './platform/cookie.service.js';
+import { DocumentService } from './platform/document.service.js';
 import { StorageService } from './platform/storage.service.js';
 import { SessionStateService } from './session-state.service.js';
 
@@ -37,15 +38,59 @@ function session(stored?: string) {
   if (stored !== undefined) storage.values.set('abpSession', stored);
 
   const cookies = { get: vi.fn(), set: vi.fn(), remove: vi.fn() } satisfies CookieService;
+  const browserDocument = {
+    nativeDocument: undefined,
+    setTitle: vi.fn(),
+    setDir: vi.fn(),
+    setLang: vi.fn(),
+    getBaseUrl: () => '/',
+  };
   const service = createInjector([
     { provide: StorageService, useValue: storage.service },
     { provide: CookieService, useValue: cookies },
+    { provide: DocumentService, useValue: browserDocument },
   ]).get(SessionStateService);
 
-  return { storage, service, cookies };
+  return { storage, service, cookies, browserDocument };
 }
 
 describe('session state', () => {
+  it('restores the document language during initialization without factory side effects', () => {
+    const { service, browserDocument } = session(JSON.stringify({ language: 'ar' }));
+    expect(browserDocument.setLang).not.toHaveBeenCalled();
+
+    service.init();
+
+    expect(browserDocument.setLang).toHaveBeenCalledExactlyOnceWith('ar');
+  });
+
+  it('updates the document language when the choice changes in this or another tab', () => {
+    const { service, storage, browserDocument } = session();
+    service.init();
+    service.setLanguage('zh-Hans');
+    expect(browserDocument.setLang).toHaveBeenLastCalledWith('zh-Hans');
+
+    storage.writeFromAnotherTab('abpSession', JSON.stringify({ language: 'ar' }));
+
+    expect(browserDocument.setLang).toHaveBeenLastCalledWith('ar');
+  });
+
+  it('accepts a document replacement without the optional language capability', () => {
+    const browserDocument = {
+      nativeDocument: undefined,
+      setTitle: vi.fn(),
+      setDir: vi.fn(),
+      getBaseUrl: () => '/',
+    } satisfies DocumentService;
+    const service = createInjector([{ provide: DocumentService, useValue: browserDocument }]).get(
+      SessionStateService,
+    );
+    service.init();
+
+    expect(() => service.setLanguage('ar')).not.toThrow();
+    expect(service.getLanguage()).toBe('ar');
+  });
+
   it('synchronizes the persisted language cookie only after initialization', () => {
     const { service, cookies } = session(JSON.stringify({ language: 'en' }));
     expect(cookies.set).not.toHaveBeenCalled();

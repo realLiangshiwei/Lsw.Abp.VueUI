@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { verifyRelease } from './verify-release.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -37,7 +38,7 @@ function main() {
   const options = process.argv.slice(2);
   if (options.length === 1 && options[0] === '--help') {
     console.log('Usage: pnpm release [--dry-run]');
-    console.log('Selects the npm tag from the package version and skips published versions.');
+    console.log('Verifies the release, selects its npm tag, and skips published versions.');
     return;
   }
   if (options.some(option => option !== '--dry-run')) {
@@ -70,6 +71,7 @@ function main() {
     }
   }
 
+  verifyRelease(repoRoot);
   console.log(`Release ${version}: ${packages.length} public packages, npm tag ${tag}.`);
   const result = spawnSync(
     'pnpm',

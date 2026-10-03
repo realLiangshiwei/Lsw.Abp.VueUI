@@ -9,7 +9,7 @@ Vue Router; applications can replace the theme and extend module pages.
 
 ## Alpha
 
-The current alpha candidate is `0.0.1-alpha.1` across all fourteen public packages.
+The current published alpha is `0.0.1-alpha.2` across all fourteen public packages.
 Use the `alpha` tag when trying the CLI:
 
 ```bash
@@ -62,11 +62,10 @@ Pages, so deployment remains disabled until the repository becomes eligible.
 ## Publishing
 
 Keep using `pnpm exec changeset version` to update versions and changelogs. All public
-packages must have the same version. Build before publishing:
+packages must have the same version. Verify the candidate before publishing:
 
 ```bash
-pnpm build
-pnpm release --dry-run
+pnpm verify:release
 pnpm release
 ```
 
@@ -74,7 +73,10 @@ The release script selects the npm tag from the version: `0.0.1-alpha.2` uses `a
 `0.0.1-beta.0` uses `beta`, `0.0.1-rc.0` uses `rc`, and a stable version uses `latest`.
 It publishes only public packages under `packages/`, skips versions already on npm,
 and uses pnpm to replace workspace dependency ranges before publishing. GitHub release
-tags use the same script.
+tags use the same script. Every release invocation, including `--dry-run`, first runs
+lint, type checking, the full coverage suite, builds, size budgets, declaration and
+entry point checks, and clean external installation, source release and library checks.
+A failure stops publication. `pnpm verify:release` runs these checks without publishing.
 
 Prerelease publishing leaves an existing `latest` tag unchanged. npm can still add
 `latest` on a package's first publication; this script does not remove existing tags.

@@ -35,6 +35,12 @@ describe('DocumentService', () => {
     expect(document.documentElement.getAttribute('dir')).toBe('rtl');
   });
 
+  it('sets the document language', () => {
+    injector().get(DocumentService).setLang?.('ar');
+
+    expect(document.documentElement.getAttribute('lang')).toBe('ar');
+  });
+
   it('the base URL is the root with no base tag', () => {
     expect(injector().get(DocumentService).getBaseUrl()).toBe('/');
   });

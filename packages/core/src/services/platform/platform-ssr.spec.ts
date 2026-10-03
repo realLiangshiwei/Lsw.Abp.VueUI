@@ -23,6 +23,13 @@ describe('with no browser', () => {
     expect(() => services.get(DocumentService).setDir('rtl')).not.toThrow();
   });
 
+  it('setting the document language is a no-op without a browser', () => {
+    const service = injector().get(DocumentService);
+
+    expect(service.setLang).toBeTypeOf('function');
+    expect(() => service.setLang?.('ar')).not.toThrow();
+  });
+
   it('storage falls back to memory and reads and writes as usual', () => {
     const storage = injector().get(StorageService);
 

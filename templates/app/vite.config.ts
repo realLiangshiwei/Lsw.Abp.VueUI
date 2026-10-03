@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: source.alias,
     },
-    optimizeDeps: { exclude: source.exclude },
+    optimizeDeps: { exclude: source.exclude, include: source.include },
     plugins: [
       vue(),
       // Reads the `paths` of tsconfig.json, which is where a package released with
