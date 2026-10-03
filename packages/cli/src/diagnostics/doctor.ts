@@ -8,6 +8,7 @@ import { generateProxy } from '../generator/generate.js';
 import { readSourceCodeRecord } from '../source-code/record.js';
 import { abpVersionIn } from '../solution/abp-version.js';
 import { findSolutionUpwards, readSolution, type Solution } from '../solution/locate.js';
+import { projectRootOf } from '../solution/layout.js';
 import { reachBackend, type ReachResult } from './backend.js';
 import { checkEnvironment } from './environment.js';
 import { extensionCoverage } from './object-extensions.js';
@@ -235,12 +236,14 @@ export function versionCheck(
 }
 
 async function abpVersionOf(solution: Solution): Promise<string | undefined> {
-  const text = await readFile(join(solution.root, `${solution.name}.abpsln`), 'utf8').catch(
-    () => undefined,
-  );
-  if (!text) return undefined;
-
-  return abpVersionIn(text);
+  for (const root of new Set([projectRootOf(solution.root), solution.root])) {
+    const text = await readFile(join(root, `${solution.name}.abpsln`), 'utf8').catch(
+      () => undefined,
+    );
+    const version = text ? abpVersionIn(text) : undefined;
+    if (version) return version;
+  }
+  return undefined;
 }
 
 /**

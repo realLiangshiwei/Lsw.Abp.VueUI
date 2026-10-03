@@ -70,51 +70,47 @@ describe('generate', () => {
     await writeFile(join(cwd, 'package.json'), JSON.stringify({ abpVue: { autoImports: true } }));
     await runGenerate(args(cwd));
     expect(await read(cwd, 'src/pages/TenantsPage.vue')).not.toContain("from '@lsw-abpvue/");
-    expect(await read(cwd, 'src/pages/tenants.extensions.ts')).not.toContain("from '@lsw-abpvue/");
+    await expect(read(cwd, 'src/pages/tenants.extensions.ts')).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
 
     await runGenerate(args(cwd, { force: true, 'auto-imports': false }));
     expect(await read(cwd, 'src/pages/TenantsPage.vue')).toContain("from '@lsw-abpvue/core'");
-    expect(await read(cwd, 'src/pages/tenants.extensions.ts')).toContain(
-      "from '@lsw-abpvue/components'",
-    );
+    expect(await read(cwd, 'src/pages/TenantsPage.vue')).toContain("from '@lsw-abpvue/components'");
   });
-  it('writes the page, its extensions and the route', async () => {
+  it('writes an application page and its route', async () => {
     const cwd = await project();
     const result = await runGenerate(args(cwd));
 
     expect(result.files.map(file => `${file.path} ${file.action}`)).toEqual([
       'src/pages/TenantsPage.vue created',
-      'src/pages/tenants.extensions.ts created',
       'src/routes.ts updated',
     ]);
 
     const page = await read(cwd, 'src/pages/TenantsPage.vue');
 
     expect(page).toContain("import { TenantService } from '../proxy/volo/abp/tenant-management'");
-    expect(page).toContain('useRecordEditor<TenantDto>');
-    expect(page).toContain('<AbpExtensibleTable');
+    expect(page).toContain('async function save()');
+    expect(page).toContain('<AbpDataTable');
     expect(await read(cwd, 'src/routes.ts')).toContain("path: '/tenants'");
   });
 
-  it('the page is the short one: the columns and the fields are next door', async () => {
+  it('keeps form controls and commands directly editable in the page', async () => {
     const cwd = await project();
     await runGenerate(args(cwd));
-
     const page = await read(cwd, 'src/pages/TenantsPage.vue');
-    const extensions = await read(cwd, 'src/pages/tenants.extensions.ts');
-
-    // The React template's BooksPage.tsx is 438 lines (design 09). The ratio is the
-    // point of the whole extension system, so it is a test rather than a claim.
-    expect(page.split('\n').length).toBeLessThan(438 / 6);
-    expect(extensions).toContain('EntityProp.createMany<TenantDto>');
-    expect(extensions).toContain('FormProp.createMany<TenantDto>');
+    expect(page.startsWith('<template>')).toBe(true);
+    expect(page).toContain('useAbpForm');
+    expect(page).toContain('form.controls.name');
+    expect(page).not.toContain('registerTenantsExtensions');
+    expect(page).not.toContain('useRecordEditor');
   });
 
   it('a dry run writes nothing', async () => {
     const cwd = await project();
     const result = await runGenerate(args(cwd, { 'dry-run': true }));
 
-    expect(result.files).toHaveLength(3);
+    expect(result.files).toHaveLength(2);
     await expect(read(cwd, 'src/pages/TenantsPage.vue')).rejects.toThrow();
   });
 
@@ -129,19 +125,15 @@ describe('generate', () => {
     expect(await read(cwd, 'src/pages/TenantsPage.vue')).toBe('<!-- mine now -->\n');
   });
 
-  it('--force rewrites the generated blocks and keeps what is outside them', async () => {
+  it('--force replaces the page and leaves legacy extension files alone', async () => {
     const cwd = await project();
     await runGenerate(args(cwd));
-
-    const path = 'src/pages/tenants.extensions.ts';
-    const edited = `${await read(cwd, path)}\nexport const MINE = 1;\n`;
-    await writeFile(join(cwd, path), edited, 'utf8');
-
+    await writeFile(join(cwd, 'src/pages/TenantsPage.vue'), '<!-- customized -->');
+    const legacy = 'export const MINE = 1;\n';
+    await writeFile(join(cwd, 'src/pages/tenants.extensions.ts'), legacy);
     await runGenerate(args(cwd, { force: true }));
-    const merged = await read(cwd, path);
-
-    expect(merged).toContain('export const MINE = 1;');
-    expect(merged).toContain('EntityProp.createMany<TenantDto>');
+    expect(await read(cwd, 'src/pages/TenantsPage.vue')).toContain('async function save()');
+    expect(await read(cwd, 'src/pages/tenants.extensions.ts')).toBe(legacy);
   });
 
   it('running it twice changes nothing the second time', async () => {
@@ -185,36 +177,24 @@ describe('generate', () => {
     await runGenerate(args(cwd));
 
     // `defaultResourceName` in the application configuration, not the entity's name.
-    expect(await read(cwd, 'src/pages/tenants.extensions.ts')).toContain(
-      "'BookStore.TenantsComponent'",
-    );
+    expect(await read(cwd, 'src/pages/TenantsPage.vue')).toContain("'BookStore.TenantsComponent'");
   });
 
-  it('generates the page ABP’s own BookStore tutorial entity gets', async () => {
+  it('generates direct controls for the BookStore tutorial entity', async () => {
     const cwd = await project('app');
     await runGenerate(args(cwd, { entity: 'Book' }));
-
     const page = await read(cwd, 'src/pages/BooksPage.vue');
-    const extensions = await read(cwd, 'src/pages/books.extensions.ts');
-
-    // The number the whole extension system is measured by: the React template's
-    // hand-written BooksPage.tsx is 438 lines (design 09).
-    expect(page.split('\n').length).toBeLessThan(438 / 6);
-
     expect(page).toContain("import { BookService } from '../proxy/book-store/books'");
-    expect(page).toContain("deletionMessage: 'BookStore::BookDeletionConfirmationMessage'");
-    expect(page).toContain('searchable');
-
-    // Four columns, the enum among them, localized the way ABP names enum members.
-    expect(extensions).toContain("name: 'publishDate'");
-    expect(extensions).toContain('`BookStore::Enum:BookType.${value}`');
-    expect(extensions).toContain('Validators.range(0, 1000)');
-
-    // The permissions the controller carries, and the object extensions the backend
-    // declares for the entity.
-    expect(extensions).toContain("permission: 'BookStore.Books.Create'");
-    expect(extensions).toContain("getObjectExtensionEntities(injector, 'BookStore')");
-    expect(extensions).toContain('{ [BOOKS]: entities.Book }');
+    expect(page).toContain('BookStore::BookDeletionConfirmationMessage');
+    expect(page).toContain('list.filter.value');
+    expect(page).toContain('form.controls.publishDate');
+    expect(page).toContain('BookStore::Enum:BookType.');
+    expect(page).toContain('Validators.range(0, 1000)');
+    expect(page).toContain('BookStore.Books.Create');
+    expect(page).not.toContain('getObjectExtensionEntities');
+    await expect(read(cwd, 'src/pages/books.extensions.ts')).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
   });
 
   it('finds an entity in another module when told which one', async () => {
@@ -232,15 +212,11 @@ describe('generate', () => {
     }
   });
 
-  it('takes back what it wrote when one of the files cannot be written', async () => {
+  it('refuses a page path occupied by a directory without changing routes', async () => {
     const cwd = await project();
 
-    // A directory where the extensions file has to go: writing it fails, and the page
-    // written before it has to go back.
-    await mkdir(join(cwd, 'src/pages/tenants.extensions.ts'), { recursive: true });
-
+    await mkdir(join(cwd, 'src/pages/TenantsPage.vue'), { recursive: true });
     await expect(runGenerate(args(cwd))).rejects.toThrow(/Could not write the page/);
-    await expect(read(cwd, 'src/pages/TenantsPage.vue')).rejects.toThrow();
     expect(await read(cwd, 'src/routes.ts')).toBe(ROUTES);
   });
 });

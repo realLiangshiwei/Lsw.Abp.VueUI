@@ -1,5 +1,5 @@
 import { rm, stat } from 'node:fs/promises';
-import { isAbsolute, join, resolve } from 'node:path';
+import { isAbsolute, join, relative, resolve } from 'node:path';
 import process from 'node:process';
 import * as prompts from '@clack/prompts';
 import { defineCommand } from 'citty';
@@ -7,9 +7,10 @@ import { failed, formatChecks, printChecks, type Check } from '../diagnostics/ch
 import { checkEnvironment } from '../diagnostics/environment.js';
 import { generateProxy, installDependencies, releaseAskedSources } from './frontend.js';
 import { CliError, isUserFacingError } from '../errors.js';
-import { abpNewArgs, splitArgs } from '../solution/abp-cli.js';
+import { abpNewArgs, newProjectDirectory, splitArgs } from '../solution/abp-cli.js';
 import { configureBackend, type BackendEdit } from '../solution/backend-config.js';
-import { findSolutionRoot, readSolution, type Solution } from '../solution/locate.js';
+import { readSolution, type Solution } from '../solution/locate.js';
+import { BACKEND_DIRECTORY, frontendDirectoryOf } from '../solution/layout.js';
 import { moduleBlocks, readTemplateManifest } from '../template/manifest.js';
 import { templateRoot } from '../template/paths.js';
 import { renderTemplate } from '../template/render.js';
@@ -24,11 +25,12 @@ export interface NewOptions {
 }
 
 export interface NewResult {
-  /** The solution root, or the application's own directory when there is no backend. */
+  /** The project root, containing `aspnet-core/` and `vue/` when there is a backend. */
   root: string;
   /** Where the frontend was written. */
   frontend: string;
   files: string[];
+  /** Backend paths relative to the project root. */
   edits: BackendEdit[];
   /** What was decided along the way and is worth saying out loud. */
   notes: string[];
@@ -80,11 +82,19 @@ async function generateBackend(
   name: string,
   passthrough: readonly string[],
   cwd: string,
+  root: string,
   rollback: Rollback,
 ): Promise<Solution> {
   const args = abpNewArgs(name, passthrough);
-  const created = join(cwd, name);
-  const existed = await exists(created);
+  const backend = join(root, BACKEND_DIRECTORY);
+  if (await exists(backend)) {
+    throw new CliError(
+      `${backend} already exists. Choose another output directory or use abpv switch-ui.`,
+    );
+  }
+
+  const created = (await exists(root)) ? backend : root;
+  rollback.add(`removed ${created}`, () => rm(created, { recursive: true, force: true }));
 
   prompts.log.step(`abp ${args.join(' ')}`);
   const { code } = await run('abp', args, { cwd, stream: true });
@@ -93,11 +103,7 @@ async function generateBackend(
     throw new CliError(`abp new exited with ${code}, so there is no solution to build on.`);
   }
 
-  if (!existed && (await exists(created))) {
-    rollback.add(`removed ${created}`, () => rm(created, { recursive: true, force: true }));
-  }
-
-  return readSolution(await findSolutionRoot(cwd, name));
+  return readSolution(backend);
 }
 
 /** The flags as they were typed, which is the only reading of them that is not lossy. */
@@ -131,12 +137,23 @@ export async function runNew(
   const split = splitArgs(rawArgs);
   const { name, passthrough } = split;
   const flags = new Flags(split.flags);
+  const root = resolve(cwd, newProjectDirectory(name, passthrough));
+  const backend = join(root, BACKEND_DIRECTORY);
+  const frontend = flags.on('no-backend')
+    ? root
+    : frontendDirectoryOf(root, backend, flags.value('dir'));
 
   const dryRun = flags.on('dry-run');
   const packageManager = flags.value('package-manager') ?? 'pnpm';
   const port = Number(flags.value('port') ?? DEFAULT_PORT);
   const appUrl = `http://localhost:${port}`;
   const notes: string[] = [];
+
+  if (!dryRun && (await exists(frontend))) {
+    throw new CliError(
+      `${frontend} already exists. Choose another output directory or use abpv switch-ui.`,
+    );
+  }
 
   const checks = await checkEnvironment({
     backend: !flags.on('no-backend'),
@@ -166,25 +183,27 @@ export async function runNew(
     if (flags.on('no-backend')) {
       notes.push('No backend was created, so nothing was configured on one either.');
     } else if (dryRun) {
-      notes.push(`Would run: abp ${abpNewArgs(name, passthrough).join(' ')}`);
+      notes.push(
+        `Would run: abp ${abpNewArgs(name, flags.on('sample-crud') ? withSampleCrud(passthrough) : passthrough).join(' ')}`,
+      );
     } else {
       solution = await generateBackend(
         name,
         flags.on('sample-crud') ? withSampleCrud(passthrough) : passthrough,
         cwd,
+        root,
         rollback,
       );
     }
-
-    // With no backend beside it the application is the project, and there is nothing for
-    // a subdirectory to keep it apart from.
-    const root = solution?.root ?? join(cwd, name);
-    const frontend = flags.on('no-backend') ? root : join(root, flags.value('dir') ?? 'vue');
 
     const appName = solution?.appName ?? (name.split('.').at(-1) as string);
     const apiUrl = flags.value('backend') ?? solution?.hostUrl ?? DEFAULT_BACKEND;
 
     const existed = await exists(frontend);
+    if (!existed && !dryRun) {
+      rollback.add(`removed ${frontend}`, () => rm(frontend, { recursive: true, force: true }));
+    }
+
     const { written } = await renderTemplate({
       source,
       target: frontend,
@@ -201,12 +220,11 @@ export async function runNew(
       },
     });
 
-    if (!existed && !dryRun) {
-      rollback.add(`removed ${frontend}`, () => rm(frontend, { recursive: true, force: true }));
-    }
-
     const edits = solution
-      ? await configureBackend({ solution, appUrl, dryRun })
+      ? (await configureBackend({ solution, appUrl, dryRun })).map(edit => ({
+          ...edit,
+          file: relative(root, join(solution.root, edit.file)),
+        }))
       : ([] as BackendEdit[]);
 
     if (edits.length > 0) {
@@ -230,14 +248,14 @@ export async function runNew(
       await generateProxy(frontendOptions);
     }
 
-    rollback.commit();
-
     return { root, frontend, files: written, edits, notes, checks };
   } catch (error) {
     const undone = await rollback.run();
     if (undone.length > 0) prompts.log.warn(['Taken back:', ...undone].join('\n  '));
 
     throw error;
+  } finally {
+    rollback.commit();
   }
 }
 

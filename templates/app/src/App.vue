@@ -1,3 +1,9 @@
+<template>
+  <AbpDynamicLayout :default-layout="LayoutType.application">
+    <RouterView />
+  </AbpDynamicLayout>
+</template>
+
 <script setup lang="ts">
 import { startupError } from './startup';
 
@@ -10,9 +16,3 @@ onMounted(() => {
   }
 });
 </script>
-
-<template>
-  <AbpDynamicLayout :default-layout="LayoutType.application">
-    <RouterView />
-  </AbpDynamicLayout>
-</template>

@@ -181,4 +181,63 @@ describe('abpv switch-ui', () => {
     await expect(switchUi()).rejects.toThrow(CliError);
     await expect(switchUi({ force: true })).resolves.toBeDefined();
   });
+
+  it.each(['keep', 'replace'])('places Vue beside aspnet-core in %s mode', async mode => {
+    const project = join(root, 'Separated');
+    const backend = join(project, 'aspnet-core');
+    await writeSolutionFixture(backend);
+    await mkdir(join(project, 'angular'));
+    await writeFile(join(project, 'angular/angular.json'), '{}');
+    const result = await switchUi({ solution: project, cwd: project, mode });
+    expect(result.solution.root).toBe(backend);
+    expect(result.frontend).toBe(join(project, 'vue'));
+    await expect(stat(join(backend, 'vue'))).rejects.toThrow();
+    const angular = mode === 'keep' ? 'angular' : 'angular.bak';
+    await expect(stat(join(project, angular, 'angular.json'))).resolves.toBeDefined();
+  });
+
+  it('previews backend paths relative to the project directory', async () => {
+    const project = join(root, 'Separated');
+    const backend = join(project, 'aspnet-core');
+    await writeSolutionFixture(backend);
+    const result = await switchUi({ solution: backend, cwd: project, 'dry-run': true });
+    expect(result.diff.join('\n')).toContain('+++ b/vue/src/main.ts');
+    expect(result.diff.join('\n')).toContain(
+      '+++ b/aspnet-core/src/Acme.BookStore.HttpApi.Host/appsettings.json',
+    );
+    await expect(stat(join(project, 'vue'))).rejects.toThrow();
+  });
+
+  it('refuses uncommitted work in a backend with its own Git repository', async () => {
+    const project = join(root, 'Separated');
+    const backend = join(project, 'aspnet-core');
+    await writeSolutionFixture(backend);
+    await run('git', ['init'], { cwd: backend });
+    await run('git', ['add', '.'], { cwd: backend });
+    await expect(switchUi({ solution: project, cwd: project })).rejects.toThrow(
+      'uncommitted changes',
+    );
+    await expect(stat(join(project, 'vue'))).rejects.toThrow();
+  });
+
+  it('discovers the backend from an existing frontend directory', async () => {
+    const project = join(root, 'Separated');
+    await writeSolutionFixture(join(project, 'aspnet-core'));
+    await mkdir(join(project, 'vue'));
+    await writeFile(join(project, 'vue/notes.md'), 'preserved');
+    const result = await switchUi({ solution: undefined, cwd: join(project, 'vue') });
+    expect(result.frontend).toBe(join(project, 'vue'));
+    expect(await readFile(join(project, 'vue.bak/notes.md'), 'utf8')).toBe('preserved');
+  });
+
+  it.each(['aspnet-core', 'aspnet-core/frontend', '.', '../outside'])(
+    'rejects a frontend directory that would overwrite or escape the project: %s',
+    async dir => {
+      const project = join(root, 'Separated');
+      const backend = join(project, 'aspnet-core');
+      await writeSolutionFixture(backend);
+      await expect(switchUi({ solution: project, cwd: project, dir })).rejects.toThrow(CliError);
+      await expect(stat(join(backend, 'Acme.BookStore.slnx'))).resolves.toBeDefined();
+    },
+  );
 });

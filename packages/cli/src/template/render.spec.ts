@@ -121,6 +121,11 @@ describe('renderTemplate', () => {
     await expect(read('CHANGELOG.md')).rejects.toThrow();
   });
 
+  it('names the application in its readme', async () => {
+    await render();
+    expect(await read('README.md')).toMatch(/^# Acme\.BookStore\n/);
+  });
+
   it('turns the workspace ranges into the version doing the rendering', async () => {
     await render();
     const manifest = JSON.parse(await read('package.json')) as {

@@ -51,14 +51,14 @@ function camelizeHyphen(name: string): string {
  * `GetListAsyncByInput` is `getList`: ABP builds a unique name by appending the
  * parameters, and everything from `Async` on is that suffix.
  */
-function methodNameOf(action: ActionDefinition): string {
+export function methodNameOf(action: ActionDefinition): string {
   const [name = action.uniqueName] = action.uniqueName.split('Async');
 
   return camelCase(name);
 }
 
 /** What tells two overloads apart once `Async` and everything after it is gone. */
-function qualifiedMethodNameOf(action: ActionDefinition): string {
+export function qualifiedMethodNameOf(action: ActionDefinition): string {
   return camelCase(action.uniqueName.replace('Async', ''));
 }
 

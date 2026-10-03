@@ -1,7 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { basename, dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { parse } from 'jsonc-parser';
 import { CliError } from '../errors.js';
+import { BACKEND_DIRECTORY } from './layout.js';
 
 /** What was found in a generated or existing ABP solution. */
 export interface Solution {
@@ -40,9 +41,14 @@ async function solutionFileIn(dir: string): Promise<string | undefined> {
   return found[0];
 }
 
+async function backendIn(dir: string): Promise<string | undefined> {
+  if (await solutionFileIn(dir)) return dir;
+  const backend = join(dir, BACKEND_DIRECTORY);
+  return (await solutionFileIn(backend)) ? backend : undefined;
+}
+
 /**
- * The solution at or below a directory. One level down is where `-csf` puts it, which is
- * how `abpv new` finds what it just asked the official CLI to create.
+ * The backend at a project root or one of its immediate child projects.
  *
  * @param from The directory to look in
  * @param preferred The name to pick when a directory holds more than one solution
@@ -51,18 +57,21 @@ export async function findSolutionRoot(
   from: string,
   preferred?: string | undefined,
 ): Promise<string> {
-  if (await solutionFileIn(from)) return from;
+  from = resolve(from);
+  const direct = await backendIn(from);
+  if (direct) return direct;
 
-  const candidates: string[] = [];
+  const candidates: { name: string; root: string }[] = [];
   for (const entry of await entries(from)) {
     const child = join(from, entry);
-    if (await solutionFileIn(child)) candidates.push(child);
+    const backend = await backendIn(child);
+    if (backend) candidates.push({ name: entry, root: backend });
   }
 
-  const chosen = candidates.find(path => basename(path) === preferred) ?? candidates[0];
+  const chosen = candidates.find(candidate => candidate.name === preferred) ?? candidates[0];
   if (!chosen) throw new CliError(`No ABP solution in ${from} or the directories below it.`);
 
-  return chosen;
+  return chosen.root;
 }
 
 /**
@@ -75,7 +84,8 @@ export async function findSolutionUpwards(from: string): Promise<string> {
   let dir = resolve(from);
 
   for (;;) {
-    if (await solutionFileIn(dir)) return dir;
+    const backend = await backendIn(dir);
+    if (backend) return backend;
 
     const parent = dirname(dir);
     if (parent === dir) {
@@ -127,9 +137,10 @@ async function clientIdOf(migratorDir: string | undefined, appName: string): Pro
  * Reads what the frontend needs to know about a solution: where its API is, where its
  * identity server is, and which OpenIddict client it should use.
  *
- * @param root The solution root
+ * @param root The project root or the backend directory containing its solution file
  */
 export async function readSolution(root: string): Promise<Solution> {
+  root = (await backendIn(resolve(root))) ?? resolve(root);
   const file = await solutionFileIn(root);
   if (!file) throw new CliError(`${root} holds no ABP solution.`);
 

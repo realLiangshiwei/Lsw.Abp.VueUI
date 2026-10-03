@@ -1,9 +1,11 @@
+import { join } from 'node:path';
 import { CliError } from '../errors.js';
+import { BACKEND_DIRECTORY } from './layout.js';
 
 /**
  * The flags `abpv new` reads itself, and whether each one takes a value. Everything else
- * on the command line belongs to the official CLI and is handed to it as it was typed --
- * which is the only way `abp new`'s options stay available as ABP adds to them.
+ * on the command line belongs to the official CLI. Output options are adjusted to keep
+ * the backend and frontend in separate directories.
  */
 export const NEW_FLAGS: Record<string, boolean> = {
   backend: true,
@@ -81,6 +83,38 @@ export function splitArgs(
 const has = (args: readonly string[], ...names: string[]): boolean =>
   args.some(arg => names.includes(arg) || names.some(name => arg.startsWith(`${name}=`)));
 
+function outputOptions(name: string, passthrough: readonly string[]) {
+  let directory = name;
+  const forwarded: string[] = [];
+
+  for (let index = 0; index < passthrough.length; index += 1) {
+    const token = passthrough[index] as string;
+    const equals = token.indexOf('=');
+    const flag = equals < 0 ? token : token.slice(0, equals);
+    const inline = equals < 0 ? undefined : token.slice(equals + 1);
+
+    if (flag === '-o' || flag === '--output-folder') {
+      const value = inline ?? passthrough[++index];
+      if (!value || value.startsWith('-')) {
+        throw new CliError(`${flag} needs the project output directory. Use -o Acme.BookStore.`);
+      }
+      directory = value;
+    } else if (flag === '-csf' || flag === '--create-solution-folder') {
+      if (inline === undefined && /^(true|false)$/i.test(passthrough[index + 1] ?? '')) {
+        index += 1;
+      }
+    } else {
+      forwarded.push(token);
+    }
+  }
+
+  return { directory, forwarded };
+}
+
+export function newProjectDirectory(name: string, passthrough: readonly string[]): string {
+  return outputOptions(name, passthrough).directory;
+}
+
 /**
  * The command line the official CLI is called with. `-u no-ui` is not negotiable: the UI
  * is what this command generates, and any other value would leave a second one behind.
@@ -96,6 +130,8 @@ export function abpNewArgs(name: string, passthrough: readonly string[]): string
     );
   }
 
+  const { directory, forwarded } = outputOptions(name, passthrough);
+
   return [
     'new',
     name,
@@ -105,11 +141,8 @@ export function abpNewArgs(name: string, passthrough: readonly string[]): string
     'no-ui',
     // Without it a machine with a commercial subscription produces the commercial variant.
     ...(has(passthrough, '-uost', '--use-open-source-template') ? [] : ['-uost']),
-    // The frontend is written beside the solution, so the solution gets a folder of its
-    // own rather than the working directory.
-    ...(has(passthrough, '-csf', '--create-solution-folder', '-o', '--output-folder')
-      ? []
-      : ['-csf']),
-    ...passthrough,
+    '-o',
+    join(directory, BACKEND_DIRECTORY),
+    ...forwarded,
   ];
 }

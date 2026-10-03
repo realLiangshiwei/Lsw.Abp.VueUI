@@ -1,144 +1,92 @@
 # A CRUD page
 
-Your own entities are not npm packages — they are your domain model. `abpv generate`
-writes their pages.
+`abpv generate` creates an ordinary Vue page for an entity exposed by your backend.
+The page owns its table columns, form controls and CRUD methods, so you can edit them
+in one place.
 
 ```bash
-pnpm abpv proxy add --module app       # the typed service the page is built on
+pnpm abpv proxy add --module app
 pnpm abpv generate Book
 ```
 
-Run these from the frontend directory. If a local backend serves an ASP.NET development
-certificate that Node does not trust, append `--insecure` to both commands. The CLI also
-prints this hint when certificate validation fails.
-
-Generate the proxy and page before starting `pnpm dev`. If the dev server is already
-running, stop it and restart after generation so Vite can scan the new dependencies
-before the first page navigation.
-
-Three things land:
-
-```
-src/pages/BooksPage.vue          the list, the dialog and the four requests
-src/pages/books.extensions.ts    the columns, the form fields and the buttons
-src/routes.ts                    one entry, wrapped in abpv:begin markers
-```
+Run these from the frontend directory with the backend running. If Node does not trust
+a local development certificate, append `--insecure` to both commands. Generate before
+starting `pnpm dev`, or restart the development server afterwards.
 
 ## What is generated
 
-```vue
-<script setup lang="ts">
-import {
-  AbpExtensibleTable, AbpPage, AbpPageToolbar, AbpRecordModal, useRecordEditor,
-} from '@lsw-abpvue/components';
-import { inject as injectAbp, useListService } from '@lsw-abpvue/core';
-import { BookService } from '../proxy/acme/book-store/books';
-import type { BookDto, CreateUpdateBookDto } from '../proxy/acme/book-store/books';
-import { BOOKS, BOOKS_PAGE, registerBooksExtensions } from './books.extensions';
-
-const bookService = injectAbp(BookService);
-
-const list = useListService({ persistKey: BOOKS });
-const { items } = list.hookToQuery(query => bookService.getList(query));
-
-registerBooksExtensions();
-
-const editor = useRecordEditor<BookDto>({
-  identifier: BOOKS,
-  reload: () => list.get(),
-  create: body => bookService.create(body as unknown as CreateUpdateBookDto),
-  update: (id, body) => bookService.update(id, body as unknown as CreateUpdateBookDto),
-  delete: id => bookService.delete(id),
-  idOf: record => record.id,
-  nameOf: record => String(record.name ?? ''),
-  deletionMessage: 'BookStore::BookDeletionConfirmationMessage',
-  providers: [/* what the row and toolbar buttons call */],
-});
-</script>
-
-<template>
-  <AbpPage title="BookStore::Menu:Books">
-    <template #toolbar><AbpPageToolbar :data="items" /></template>
-    <AbpExtensibleTable :data="items" :list="list" record-key="id" caption="BookStore::Menu:Books" />
-    <AbpRecordModal :editor="editor" label="BookStore::Menu:Books" create-title="BookStore::NewBook" />
-  </AbpPage>
-</template>
+```text
+src/pages/BooksPage.vue    the template, columns, form and CRUD methods
+src/routes.ts            one route and menu entry
 ```
 
-Sixty-six lines, against the 438 of the React template's hand-written `BooksPage.tsx`. The
-difference is not cleverness in the generator — paging, sorting, validation, the
-permission checks on every button, the deletion question, the toasts and the server-side
-validation errors all belong to `AbpExtensibleTable`, `AbpExtensibleForm` and
-`useRecordEditor`. What is generated is a description of the entity.
+The page puts `<template>` before `<script setup lang="ts">`. It uses `AbpDataTable`
+and `AbpPagination` for the list, explicit theme controls for each form field, and
+`AbpModal` for the dialog. Common APIs use the application's automatic imports when
+`abpVue.autoImports` is enabled; business services and DTOs keep explicit imports.
+
+The page includes these application methods:
+
+| Method       | Behavior                                                |
+| ------------ | ------------------------------------------------------- |
+| `createBook` | Clear the selection, reset the form and open the dialog |
+| `editBook`   | Fetch the record, fill the form and open the dialog     |
+| `save`       | Validate, create or update, then close and reload       |
+| `deleteBook` | Ask for confirmation, delete and reload                 |
+
+`useListService` handles query state and `useAbpForm` handles control values and validation.
+There is no page token, extension registration function or adjacent `.extensions.ts` file.
+Reusable module UIs continue to use the [extension system](../concepts/extensions.md).
 
 ## What it reads
 
-Everything comes from `api-definition`, by HTTP shape rather than by method name — a
-service that renamed `GetListAsync` is still the one that lists:
+| Backend description                            | Page                         |
+| ---------------------------------------------- | ---------------------------- |
+| GET returning `PagedResultDto<T>`              | List and record type         |
+| GET with an id                                 | Re-read before editing       |
+| POST body                                      | Form fields and create DTO   |
+| PUT with an id                                 | Update request               |
+| DTO properties, including inherited properties | Columns and controls         |
+| Data annotations                               | Client validators            |
+| Authorization policies                         | Route and action permissions |
+| List filter parameter                          | Search box                   |
 
-| The backend | The page |
-| --- | --- |
-| GET with no route parameter returning `PagedResultDto<T>` | The list; `T` is the record type |
-| GET with `{id}` | Re-read the whole record before editing it |
-| The body of POST | The form fields |
-| The body of PUT with `{id}` | The update DTO |
-| The record's properties, inherited ones included | The columns |
-| `[Required]`, `[StringLength]`, `[Range]`, `[RegularExpression]` | The validators |
-| The controller's `[Authorize]` | The permission on each button |
-| A `filter` on the list endpoint | A search box |
+Dates use date controls, enums use localized selects, and boolean fields use checkboxes.
+Unsupported nested objects and collections are reported for you to implement directly.
+Write-only fields start with an empty value when editing. Existing record data, including
+extra properties and concurrency stamps, is retained in update requests.
 
-A `DateTime` becomes a date control even though ABP reports its simple type as `string`,
-and an enum becomes a select whose members are localized under ABP's own
-`Enum:{Type}.{value}` convention. `id`, `extraProperties`, `concurrencyStamp` and the six
-audit fields are left out: the first two are the framework's, the stamp is carried back
-for you, and nobody wants to fill in `creationTime` on a create form.
+## Customizing the page
 
-## Changing what it shows
+Edit the generated Vue file directly:
 
-The extensions file is the one to edit. A column removed there is a column gone:
+- Change `columns` or add a `#cell-{id}` slot to customize a cell.
+- Add or reorder form controls in the template and their definitions in `useAbpForm`.
+- Change the request body in `save` for your business rules.
+- Add your own buttons and methods.
 
-```ts
-// abpv:begin props
-export const BOOK_ENTITY_PROPS = EntityProp.createMany<BookDto>([
-  { type: PropType.String, name: 'name', displayName: 'BookStore::Name', sortable: true },
-  { type: PropType.Date, name: 'publishDate', displayName: 'BookStore::PublishDate', sortable: true },
-]);
-// abpv:end props
-```
+Validation messages appear beside their controls. Server validation errors are sent to
+the form, and unmatched messages appear in the dialog. A failed save leaves the dialog
+open. The modal receives `form.dirty` and the busy state; its Cancel action uses the
+footer's `close()` so it can confirm before discarding changes.
 
-Three things follow from the page being a contributor to the extension system rather than
-a page that bypasses it:
-
-1. You change a column by editing your own source.
-2. The backend adding an `ObjectExtensions` property puts a column and a field on the page
-   **with no regeneration** — it arrives in `application-configuration` at runtime.
-3. Another package can add a button to your page through the same contributor API every
-   ABP module page accepts.
+Backend object extensions do not automatically add controls to an application page.
+Add their controls and bindings explicitly. Module pages retain automatic object extension
+mapping through their contributors.
 
 ## Regenerating
+
+Existing pages are kept unless you pass `--force`:
 
 ```bash
 pnpm abpv generate Book --force
 ```
 
-Without `--force` a file that is already there is left alone. With it, only what is
-inside the `abpv:begin` markers is rewritten — a helper you added below them, or an extra
-column outside them, survives. The page file itself is rewritten whole, because its
-structure is not the part you were meant to edit.
+**`--force` replaces the entire Vue page.** Save your custom changes before using it.
+The route is not added twice. Legacy `.extensions.ts` files are left on disk and are no
+longer imported by newly generated pages; review them before removing them yourself.
 
-Running it twice changes nothing the second time, markers and route included.
+## Options
 
-## The options
-
-| | |
-| --- | --- |
-| `--module <name>` | Which `api-definition` module to look in; all of them otherwise |
-| `--policy <name>` | The base permission. Matching backend action policies such as `.Edit` are kept; missing or unrelated policies use `.Create`, `.Update` and `.Delete` |
-| `--route` / `--menu` / `--icon` | Override what is inferred |
-| `--resource <name>` | The localization resource; the backend's default resource otherwise |
-| `--extension-module <m>` | Where the backend files the object extensions, as `Module` or `Module.Entity` |
-| `--target` / `--proxy` / `--routes` | Where the files are |
-| `--no-router` | Do not touch the routes file |
-| `--dry-run` | Say what would change and write nothing |
-
-Entity names work in either number: `abpv generate Books` finds the `Book` controller.
+See the [generate reference](../cli/generate.md) for module selection, target directories,
+localization resources, policies, route names and automatic import options.

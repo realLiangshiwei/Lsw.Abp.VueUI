@@ -1,7 +1,3 @@
-<script setup lang="ts">
-const { user, isAuthenticated } = useCurrentUser();
-</script>
-
 <template>
   <div class="card">
     <div class="card-body">
@@ -12,3 +8,7 @@ const { user, isAuthenticated } = useCurrentUser();
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+const { user, isAuthenticated } = useCurrentUser();
+</script>

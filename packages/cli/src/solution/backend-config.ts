@@ -6,7 +6,7 @@ import type { Solution } from './locate.js';
 
 /** One value the CLI changed in a solution's configuration. */
 export interface BackendEdit {
-  /** Relative to the solution root, so the report reads like the repository. */
+  /** Relative to the backend root; command results report paths from the project root. */
   file: string;
   /** As appsettings names it, e.g. `App:CorsOrigins`. */
   key: string;

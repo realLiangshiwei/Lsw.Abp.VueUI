@@ -89,7 +89,7 @@ async function usesAutoImports(cwd: string): Promise<boolean> {
 
 /**
  * Runs `abpvue generate`: asks the backend what the entity looks like, works out the
- * page from it, and writes the two files and the route.
+ * page from it, and writes the page and the route.
  *
  * @param args The options, as the flags spell them
  */
@@ -170,7 +170,7 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
   const paths = pagePathsOf(page, args.target);
   const existing: Record<string, string> = {};
 
-  for (const path of [paths.page, paths.extensions, ...(routesPath ? [routesPath] : [])]) {
+  for (const path of [paths.page, ...(routesPath ? [routesPath] : [])]) {
     const found = await readIfPresent(join(cwd, path));
     if (found !== undefined) existing[path] = found;
   }
@@ -203,9 +203,7 @@ export async function runGenerate(args: GenerateArgs): Promise<GenerateRunResult
 }
 
 /**
- * Writes what changed, and takes it all back if one of them fails. A page whose
- * extensions file was written and whose own file was not is worse than neither: the
- * next run would leave the extensions alone as "already there".
+ * Writes the page and route, restoring both if a write fails.
  */
 async function write(cwd: string, files: readonly GeneratedFile[]): Promise<void> {
   const rollback = new Rollback();
@@ -276,7 +274,7 @@ function print(result: GenerateRunResult): void {
       [
         'Left alone, because they are already there:',
         ...kept.map(file => `  - ${file.path}`),
-        'Pass --force to write the generated blocks again.',
+        'Pass --force to replace the generated page. Save your custom changes first.',
       ].join('\n'),
     );
   }
@@ -340,7 +338,7 @@ export const generateCommand = defineCommand({
     },
     'extension-module': {
       type: 'string',
-      description: 'The module the backend registers this entity’s object extensions under',
+      description: 'Legacy compatibility option; application pages do not register extensions',
     },
     route: { type: 'string', description: 'The path the page is served at' },
     menu: { type: 'string', description: 'Localization key of the menu entry' },
@@ -364,7 +362,7 @@ export const generateCommand = defineCommand({
     },
     force: {
       type: 'boolean',
-      description: 'Write the generated blocks of files that are already there',
+      description: 'Replace an existing page with the generated page',
       default: false,
     },
     'dry-run': {

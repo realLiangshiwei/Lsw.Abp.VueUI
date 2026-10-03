@@ -9,6 +9,7 @@ import { CliError, isUserFacingError } from '../errors.js';
 import { generateProxy, installDependencies, releaseAskedSources } from './frontend.js';
 import { configureBackend, type BackendEdit } from '../solution/backend-config.js';
 import { findSolutionUpwards, readSolution, type Solution } from '../solution/locate.js';
+import { frontendDirectoryOf, projectRootOf } from '../solution/layout.js';
 import { readTemplateManifest, moduleBlocks } from '../template/manifest.js';
 import { templateRoot } from '../template/paths.js';
 import { renderTemplate } from '../template/render.js';
@@ -47,6 +48,7 @@ export interface SwitchUiResult {
   frontend: string;
   files: string[];
   renamed: Renamed[];
+  /** Backend paths relative to the project root containing the backend. */
   edits: BackendEdit[];
   notes: string[];
 }
@@ -67,25 +69,32 @@ async function exists(path: string): Promise<boolean> {
  * Refuses to touch a checkout with uncommitted work in it, because the way back from this
  * command is the version control the solution is already under (design 08 §4, S1).
  */
-async function assertCommitted(root: string, args: SwitchUiArgs, notes: string[]): Promise<void> {
+async function assertCommitted(
+  roots: readonly string[],
+  args: SwitchUiArgs,
+  notes: string[],
+): Promise<void> {
   if (args.force === true) return;
 
-  const { code, output } = await run('git', ['status', '--porcelain'], { cwd: root }).catch(() => ({
-    code: null,
-    output: '',
-  }));
-
-  if (code !== 0) {
-    notes.push('Not a git checkout, so there is nothing to compare what changed against.');
-    return;
-  }
-
-  if (output.trim() !== '') {
-    throw new CliError(
-      `${root} has uncommitted changes, and this command edits files you already have. ` +
-        'Commit them first, or pass --force.',
+  let found = false;
+  for (const root of new Set(roots)) {
+    const { code, output } = await run('git', ['status', '--porcelain'], { cwd: root }).catch(
+      () => ({
+        code: null,
+        output: '',
+      }),
     );
+    if (code !== 0) continue;
+    found = true;
+    if (output.trim() !== '') {
+      throw new CliError(
+        `${root} has uncommitted changes, and this command edits files you already have. ` +
+          'Commit them first, or pass --force.',
+      );
+    }
   }
+  if (!found)
+    notes.push('Not a git checkout, so there is nothing to compare what changed against.');
 }
 
 /** Moves a directory aside under a name that is free, and says how to move it back. */
@@ -139,8 +148,9 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
 
   const given =
     args.solution && (isAbsolute(args.solution) ? args.solution : resolve(cwd, args.solution));
-  const root = given ?? (await findSolutionUpwards(cwd));
-  const solution = await readSolution(root);
+  const solution = await readSolution(given ?? (await findSolutionUpwards(cwd)));
+  const root = projectRootOf(solution.root);
+  const frontend = frontendDirectoryOf(root, solution.root, args.dir);
 
   const checks = await checkEnvironment({
     backend: false,
@@ -153,7 +163,7 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
     );
   }
 
-  if (!dryRun) await assertCommitted(root, args, notes);
+  if (!dryRun) await assertCommitted([root, solution.root], args, notes);
 
   const source = args.template
     ? isAbsolute(args.template)
@@ -162,7 +172,6 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
     : templateRoot();
   const blocks = await chosenBlocks(source, args);
 
-  const frontend = join(root, args.dir ?? 'vue');
   const rollback = new Rollback();
   rollback.watchInterrupts(undone => prompts.log.warn(['Interrupted.', ...undone].join('\n  ')));
 
@@ -180,6 +189,12 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
     // A second run, or a directory that was already called `vue`. Never deleted (S6).
     if (await exists(frontend)) {
       renamed.push(await moveAside(frontend, rollback, dryRun));
+    }
+
+    if (!dryRun) {
+      rollback.add(`removed ${relative(root, frontend)}`, () =>
+        rm(frontend, { recursive: true, force: true }),
+      );
     }
 
     const { written, contents, binary } = await renderTemplate({
@@ -216,12 +231,6 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
         ]
       : [];
 
-    if (!dryRun) {
-      rollback.add(`removed ${relative(root, frontend)}`, () =>
-        rm(frontend, { recursive: true, force: true }),
-      );
-    }
-
     const edits =
       args['skip-backend-config'] === true
         ? []
@@ -232,7 +241,8 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
             backup: true,
             rollback,
             preview: (file, before, after) => {
-              if (dryRun) diff.push(unifiedDiff(file, before, after));
+              if (dryRun)
+                diff.push(unifiedDiff(relative(root, join(solution.root, file)), before, after));
             },
           });
 
@@ -260,20 +270,28 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
       await generateProxy(frontendOptions);
     }
 
-    rollback.commit();
-
-    return { solution, frontend, files: written, renamed, edits, notes, diff };
+    return {
+      solution,
+      frontend,
+      files: written,
+      renamed,
+      edits: edits.map(edit => ({ ...edit, file: relative(root, join(solution.root, edit.file)) })),
+      notes,
+      diff,
+    };
   } catch (error) {
     const undone = await rollback.run();
     if (undone.length > 0) prompts.log.warn(['Taken back:', ...undone].join('\n  '));
 
     throw error;
+  } finally {
+    rollback.commit();
   }
 }
 
 function print(result: SwitchUiResult, args: SwitchUiArgs): void {
   const dryRun = args['dry-run'] === true;
-  const root = result.solution.root;
+  const root = projectRootOf(result.solution.root);
   const lines: string[] = [];
 
   for (const { from, to } of result.renamed) {

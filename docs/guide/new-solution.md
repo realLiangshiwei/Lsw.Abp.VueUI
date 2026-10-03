@@ -9,13 +9,13 @@ npx @lsw-abpvue/cli@alpha new Acme.BookStore -d mongodb --sample-crud
 
 ## Before you start
 
-| | |
-| --- | --- |
-| Node | 20 or newer |
-| pnpm | Any recent version; npm and yarn work too |
-| .NET SDK | Whatever the ABP version you are creating needs |
-| The ABP CLI | `dotnet tool install -g Volo.Abp.Studio.Cli` |
-| Docker | For the MongoDB example below; an existing MongoDB server also works |
+|             |                                                                      |
+| ----------- | -------------------------------------------------------------------- |
+| Node        | 20 or newer                                                          |
+| pnpm        | Any recent version; npm and yarn work too                            |
+| .NET SDK    | Whatever the ABP version you are creating needs                      |
+| The ABP CLI | `dotnet tool install -g Volo.Abp.Studio.Cli`                         |
+| Docker      | For the MongoDB example below; an existing MongoDB server also works |
 
 `new` checks the toolchain before it writes anything. Run `pnpm abpv doctor --offline`
 from the generated `vue/` directory after installation to check the project too. In an
@@ -26,12 +26,13 @@ Skip the last two if you already have a backend: `abpv new Acme.BookStore --no-b
 
 ## What the command does
 
-1. Runs `abp new Acme.BookStore -t app -u no-ui -uost -csf`, plus whatever else you
-   typed. Every `abp new` option is passed through untouched, so `-d mongodb`,
-   `--separate-auth-server` and the rest work as they do with the official CLI.
+1. Runs `abp new Acme.BookStore -t app -u no-ui -uost -o Acme.BookStore/aspnet-core`.
+   `-o` / `--output-folder` selects the whole project directory, and `-csf` is consumed
+   to avoid nesting another solution folder. Other ABP options, such as `-d mongodb`
+   and `--separate-auth-server`, are passed through as typed.
 2. Reads the solution off disk — not the exit code, which `abp new` returns as zero even
    when one of its post-actions failed.
-3. Writes the frontend into `vue/`, next to the backend's `src/`.
+3. Writes the frontend into `vue/`, next to `aspnet-core/`, following ABP's Angular layout.
 4. Edits three values in the backend's configuration, without which nothing can sign in:
    the OpenIddict client's `RootUrl`, which is what the seeder builds its redirect URIs
    from, and the CORS origins of the hosts that answer the frontend. A solution generated
@@ -39,9 +40,12 @@ Skip the last two if you already have a backend: `abpv new Acme.BookStore --no-b
 
 ```
 Acme.BookStore/
-├── src/                          the backend, by the official CLI
-│   ├── Acme.BookStore.HttpApi.Host/
-│   └── Acme.BookStore.DbMigrator/
+├── aspnet-core/                  the backend, by the official CLI
+│   ├── Acme.BookStore.slnx
+│   ├── src/
+│   │   ├── Acme.BookStore.HttpApi.Host/
+│   │   └── Acme.BookStore.DbMigrator/
+│   └── test/
 └── vue/                          the frontend
     ├── src/
     │   ├── routes.ts             your routes, and the modules'
@@ -56,15 +60,14 @@ Acme.BookStore/
 After generation, install the backend's client-side libraries from its host project:
 
 ```bash
-cd Acme.BookStore/src/Acme.BookStore.HttpApi.Host
+cd Acme.BookStore/aspnet-core/src/Acme.BookStore.HttpApi.Host
 abp install-libs
 cd ../..
 ```
 
 The backend still needs these libraries with `no-ui`. If this step was skipped or an
 ABP post-action failed, requests can return 500 with "The Libs Folder is Missing".
-Running this command from the solution root also scans `vue/` and invokes Yarn there;
-the host directory keeps it scoped to backend libraries.
+Running it from the host directory keeps it scoped to that project's backend libraries.
 
 Then start the database, seed the application and run both hosts, in this order:
 
@@ -103,16 +106,20 @@ and is `1q2w3E*` unless you changed it. The **Books** menu opens the sample CRUD
 
 ## The options worth knowing
 
-| | |
-| --- | --- |
-| `--port 5173` | The frontend's port. Everything that has to agree with it — the OpenIddict redirect URIs, the CORS origins, Vite — is written for you |
-| `--modules identity,account` | Wire up only these module UIs. The dependencies stay whole: what is not routed is not bundled, which is tree-shaking's job, not the manifest's |
-| `--sample-crud` | ABP's Books sample, backend and page, which is a working example of the extension system |
-| `--with-source-code identity` | Put a module's UI source in the project from the start |
-| `--no-backend --backend <url>` | Only the frontend, pointed at a backend you already have |
-| `--dry-run` | Say what it would write and write nothing |
+|                                |                                                                                                                                                |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--port 5173`                  | The frontend's port. Everything that has to agree with it — the OpenIddict redirect URIs, the CORS origins, Vite — is written for you          |
+| `-o / --output-folder <path>`  | The whole project output directory; backend and frontend are written inside it                                                                 |
+| `--dir <path>`                 | The frontend's directory relative to the project root; `vue` by default                                                                        |
+| `--modules identity,account`   | Wire up only these module UIs. The dependencies stay whole: what is not routed is not bundled, which is tree-shaking's job, not the manifest's |
+| `--sample-crud`                | ABP's Books sample, backend and a page with direct CRUD methods                                                                                |
+| `--with-source-code identity`  | Put a module's UI source in the project from the start                                                                                         |
+| `--no-backend --backend <url>` | Only the frontend, pointed at a backend you already have                                                                                       |
+| `--dry-run`                    | Say what it would write and write nothing                                                                                                      |
 
-Everything the CLI does not recognise goes to `abp new` as it was typed.
+Other ABP options go to `abp new` as typed. The frontend directory must stay inside the
+project and separate from `aspnet-core/`. Existing backend or frontend directories are
+not overwritten. If creation fails, only directories created by this run are removed.
 
 ## If sign-in does not work
 

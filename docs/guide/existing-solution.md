@@ -11,28 +11,43 @@ npx @lsw-abpvue/cli@alpha switch-ui --dry-run        # says what it would do to 
 
 ## It is deliberately timid
 
+The standard project layout remains the same as ABP's Angular solution:
+
+```text
+Acme.BookStore/
+├── aspnet-core/
+├── angular/          # kept with --mode keep; otherwise renamed to angular.bak/
+└── vue/
+```
+
+Run the command from the project root, `aspnet-core/`, the existing frontend or their
+subdirectories. `--solution` accepts either the project root or backend directory.
+`--dir` is relative to the project root and must stay separate from the backend.
+Existing flat solutions are recognised without relocating their backend. `doctor` can
+also find the sibling backend when run from `vue/`.
+
 It edits files you already have, so:
 
-| | |
-| --- | --- |
-| It stops on an uncommitted working tree | Unless you pass `--force`. Your diff is the undo button |
-| It copies every file before editing it | The copy is what a rollback puts back |
-| It edits JSON through an AST | Comments, key order and formatting survive |
-| It never touches a `.cs` file | The backend's code is not its business |
-| It renames rather than deletes | `angular/` becomes `angular.bak/` |
-| It puts everything back if it cannot finish | Half-applied is the one outcome worth ruling out |
-| `--dry-run` prints every edit | Including the ones to your backend's configuration |
+|                                             |                                                         |
+| ------------------------------------------- | ------------------------------------------------------- |
+| It stops on an uncommitted working tree     | Unless you pass `--force`. Your diff is the undo button |
+| It copies every file before editing it      | The copy is what a rollback puts back                   |
+| It edits JSON through an AST                | Comments, key order and formatting survive              |
+| It never touches a `.cs` file               | The backend's code is not its business                  |
+| It renames rather than deletes              | `angular/` becomes `angular.bak/`                       |
+| It puts everything back if it cannot finish | Half-applied is the one outcome worth ruling out        |
+| `--dry-run` prints every edit               | Including the ones to your backend's configuration      |
 
 ## What it changes on the backend
 
 The same three values `abpv new` writes, and for the same reason: without them nothing
 can sign in.
 
-| | |
-| --- | --- |
-| The OpenIddict client's `RootUrl` | What the data seeder builds the redirect URIs from |
-| `CorsOrigins` | The frontend's origin, on every host that answers it |
-| `RedirectAllowedUrls` | Where the identity server is allowed to send the visitor back |
+|                                   |                                                               |
+| --------------------------------- | ------------------------------------------------------------- |
+| The OpenIddict client's `RootUrl` | What the data seeder builds the redirect URIs from            |
+| `CorsOrigins`                     | The frontend's origin, on every host that answers it          |
+| `RedirectAllowedUrls`             | Where the identity server is allowed to send the visitor back |
 
 A value that is already right is left alone — including the empty entry the official
 template leaves after a trailing comma, which is semantically nothing and not worth a

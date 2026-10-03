@@ -163,6 +163,31 @@ describe('abpv doctor', () => {
     expect(detail(checks, 'versions')).toContain('no ABP version found');
   });
 
+  it.each([false, true])(
+    'reads a sibling backend with an explicit project path: %s',
+    async explicit => {
+      const directory = join(root, 'Separated');
+      const backend = join(directory, 'aspnet-core');
+      const frontend = join(directory, 'vue');
+      await writeSolutionFixture(backend);
+      await mkdir(frontend);
+      await writeFile(join(frontend, 'package.json'), '{}');
+      await writeFile(
+        join(directory, 'Acme.BookStore.abpsln'),
+        '{ "versions": { "AbpFramework": "10.6.0" } }',
+      );
+      const { checks } = await runDoctor({
+        project: frontend,
+        solution: explicit ? directory : undefined,
+        offline: true,
+        environment: false,
+      });
+      expect(status(checks, 'versions')).toBe('ok');
+      expect(detail(checks, 'versions')).toContain('ABP 10.6.0');
+      expect(status(checks, 'solution')).toBeUndefined();
+    },
+  );
+
   it('reports a backend that does not answer', async () => {
     await configure({ apis: { default: { url: 'http://127.0.0.1:1' } } });
 

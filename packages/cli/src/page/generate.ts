@@ -1,6 +1,4 @@
 import { GenerationReport } from '../generator/report.js';
-import { mergeBlocks } from './blocks.js';
-import { emitExtensions } from './emit-extensions.js';
 import { emitPage } from './emit-page.js';
 import type { EntityPage } from './entity.js';
 import { insertRoute } from './routes.js';
@@ -28,26 +26,22 @@ export interface GeneratePageResult {
 
 export interface GeneratePageOptions {
   page: EntityPage;
-  /** Where the two page files go, relative to the project root. */
+  /** Where the page goes, relative to the project root. */
   target: string;
   /** The file that declares the project's routes; absent when `--no-router`. */
   routesPath?: string | undefined;
   /** What is on disk already, keyed by the same paths this returns. */
   existing: Record<string, string>;
-  /** Rewrites the generated blocks of files that are already there. */
+  /** Replaces a page that is already there. */
   force?: boolean | undefined;
   autoImports?: boolean | undefined;
   report?: GenerationReport | undefined;
 }
 
-/** Where the two files of a page go, which a caller has to know to read them first. */
-export function pagePathsOf(
-  page: EntityPage,
-  target: string,
-): { page: string; extensions: string } {
+/** Where the page goes, which a caller reads before generating it. */
+export function pagePathsOf(page: EntityPage, target: string): { page: string } {
   return {
     page: `${target}/${page.plural}Page.vue`,
-    extensions: `${target}/${page.fileBase}.extensions.ts`,
   };
 }
 
@@ -57,8 +51,7 @@ export function pagePathsOf(
  * and what it writes otherwise.
  *
  * A page that is already there is left alone unless `force` says otherwise, and even
- * then only the generated blocks of the extensions file are rewritten -- the rest of it
- * is whatever the person who owns the page has made of it.
+ * then the page is replaced. Its controls and commands belong to the application.
  *
  * @param options The entity, where its files go and what is on disk
  */
@@ -68,8 +61,7 @@ export function generatePage(options: GeneratePageOptions): GeneratePageResult {
   const paths = pagePathsOf(page, options.target);
 
   const files: GeneratedFile[] = [
-    resolve(paths.page, emitPage(page, options.autoImports), options, { merge: false }),
-    resolve(paths.extensions, emitExtensions(page, options.autoImports), options, { merge: true }),
+    resolve(paths.page, emitPage(page, options.autoImports), options),
   ];
 
   if (options.routesPath) {
@@ -95,29 +87,11 @@ export function generatePage(options: GeneratePageOptions): GeneratePageResult {
 }
 
 /** What to do with one generated file, given what is on disk. */
-function resolve(
-  path: string,
-  content: string,
-  options: GeneratePageOptions,
-  kind: { merge: boolean },
-): GeneratedFile {
+function resolve(path: string, content: string, options: GeneratePageOptions): GeneratedFile {
   const existing = options.existing[path];
 
   if (existing === undefined) return { path, content, action: 'created' };
   if (!options.force) return { path, content: existing, action: 'kept' };
 
-  if (!kind.merge) {
-    return existing === content
-      ? { path, content, action: 'unchanged' }
-      : { path, content, action: 'updated' };
-  }
-
-  const merged = mergeBlocks(existing, content);
-
-  return {
-    path,
-    content: merged.source,
-    action: merged.changed ? 'updated' : 'unchanged',
-    ...(merged.missing.length > 0 ? { missingBlocks: merged.missing } : {}),
-  };
+  return { path, content, action: existing === content ? 'unchanged' : 'updated' };
 }

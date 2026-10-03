@@ -7,6 +7,7 @@ import type {
 } from '../api-definition/models.js';
 import { parseClrType, shortName, typePoolKey } from '../generator/clr-type.js';
 import { validatorsForProperty } from '../generator/emit-validators.js';
+import { methodNameOf, qualifiedMethodNameOf } from '../generator/emit-services.js';
 import { camelCase, kebabCase, namespaceToDirectory, pascalCase } from '../generator/names.js';
 import type { GenerationReport } from '../generator/report.js';
 import type { TypeRegistry } from '../generator/type-registry.js';
@@ -64,6 +65,8 @@ export interface GeneratedProp {
   displayName: string;
   /** The rules the backend's own data annotations stand for. */
   validators: string[];
+  /** False for write-only inputs that are absent from the record DTO. */
+  recordProperty?: boolean | undefined;
   /** The enum's CLR name, for the member texts; only on an enum prop. */
   enumType?: string | undefined;
   /** The values the enum declares, in the order the backend lists them. */
@@ -79,7 +82,7 @@ export interface EntityPolicies {
   delete?: string | undefined;
 }
 
-/** Everything the two generated files and the route need to say. */
+/** Everything the generated page and route need to say. */
 export interface EntityPage {
   /** The api-definition module the controller came from, which is what the proxy is
    * generated per. */
@@ -88,17 +91,15 @@ export interface EntityPage {
   entity: string;
   /** `Books` */
   plural: string;
-  /** `books`, which names both files. */
+  /** `books`, used in routes and form ids. */
   fileBase: string;
-  /** The extension system's component key, `BookStore.BooksComponent`. */
+  /** Stable page identity, `BookStore.BooksComponent`, for list state persistence. */
   componentKey: string;
   /** The localization resource, `BookStore`. */
   resource: string;
   /**
-   * How the backend files this entity's object extensions: the module
-   * `objectExtensions.modules` is keyed by, and the entity under it. ABP's own modules
-   * use `Identity` and `User`; an application picks its own module name, usually the
-   * project's, and names the entity after the class.
+   * Legacy object extension metadata retained for callers of the generator API.
+   * Application pages do not register module extensions.
    */
   extensionModule: string;
   extensionEntity: string;
@@ -107,7 +108,11 @@ export interface EntityPage {
   menuKey: string;
   icon: string | undefined;
   /** The proxy's service: its name and the directory the proxy put it in. */
-  service: { name: string; directory: string };
+  service: {
+    name: string;
+    directory: string;
+    methods?: Partial<Record<keyof EntityActions, string>> | undefined;
+  };
   /** The generated types, as the proxy exports them. */
   types: { record: string; create: string; update: string };
   columns: GeneratedProp[];
@@ -403,6 +408,15 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
   const { definition, report } = options;
   const { module, controller } = findController(definition, options.entity, options.module);
   const actions = readActions(controller, options.entity);
+  const methods: Partial<Record<keyof EntityActions, string>> = {};
+  for (const [kind, action] of Object.entries(actions)) {
+    if (!action) continue;
+    const name = methodNameOf(action);
+    const overloaded =
+      Object.values(controller.actions).filter(candidate => methodNameOf(candidate) === name)
+        .length > 1;
+    methods[kind as keyof EntityActions] = overloaded ? qualifiedMethodNameOf(action) : name;
+  }
 
   const recordType = recordTypeOf(actions.getList);
   if (!recordType) throw new NotACrudControllerError(options.entity, 'record type it lists');
@@ -416,13 +430,19 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
   const createType = bodyTypeOf(actions.create) ?? recordType;
   const updateType = bodyTypeOf(actions.update) ?? createType;
   const columns = propsOf(registry, types, recordType, resource, report);
-  const fields = propsOf(registry, types, createType, resource, report);
+  const recordProperties = new Set(
+    propertiesOf(types, recordType).map(property => property.jsonName ?? camelCase(property.name)),
+  );
+  const fields = propsOf(registry, types, createType, resource, report).map(field => ({
+    ...field,
+    recordProperty: recordProperties.has(field.name),
+  }));
 
   if (columns.length === 0) {
     report.add(
       'skipped',
       `${shortName(recordType)} has no property a column can show, so the table has only its ` +
-        'row buttons. Add the columns by hand in the extensions file.',
+        'row buttons. Add the columns directly in the page.',
     );
   }
   // ABP reports a bound query parameter under the CLR property's own name, `Filter`.
@@ -454,6 +474,7 @@ export function readEntityPage(options: EntityPageOptions): EntityPage {
         options.serviceNames.get(controller.type) ??
         `${controller.controllerName ?? entity}Service`,
       directory: namespaceToDirectory(registry.get(recordType)?.namespace ?? ''),
+      methods,
     },
     types: {
       record: identifierOf(registry, recordType),

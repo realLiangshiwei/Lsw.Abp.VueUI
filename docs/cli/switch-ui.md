@@ -7,18 +7,28 @@ abpv switch-ui --port 5173
 abpv switch-ui --dry-run
 ```
 
-| | |
-| --- | --- |
-| `--mode <replace\|keep>` | Whether the old UI is renamed out of the way |
-| `--port <n>` | The frontend's port, written everywhere it has to agree |
-| `--modules <list>` | Which module UIs to wire up |
-| `--force` | Proceed on an uncommitted working tree |
-| `--dry-run` | Every edit it would make, including to the backend's configuration |
+|                          |                                                                      |
+| ------------------------ | -------------------------------------------------------------------- |
+| `--mode <replace\|keep>` | Whether the old UI is renamed out of the way                         |
+| `--solution <path>`      | Project root or `aspnet-core/`; discovered upwards when absent       |
+| `--dir <path>`           | Frontend subdirectory relative to the project root; `vue` by default |
+| `--port <n>`             | The frontend's port, written everywhere it has to agree              |
+| `--modules <list>`       | Which module UIs to wire up                                          |
+| `--force`                | Proceed on an uncommitted working tree                               |
+| `--dry-run`              | Every edit it would make, including to the backend's configuration   |
 
 The dry run prints a full unified diff of generated text files and backend configuration
 edits, including comments and surrounding context. Renames and binary files are listed
 separately. Existing backups are preserved by choosing the next available `.1.bak`,
 `.2.bak` and so on. Previewing writes no files and runs no dependency installation.
+
+For the standard `aspnet-core/` + `angular/` layout, `vue/` is added beside both
+directories. Run from the project root, backend, existing frontend or their subdirectories,
+or pass either the project root or backend directory with `--solution`. Paths in the
+preview are relative to the project root. Existing flat solutions are also recognised
+and keep their backend in its current location.
+
+`--dir` must stay inside the project and cannot overwrite the backend directory.
 
 ## Seven rules it follows
 

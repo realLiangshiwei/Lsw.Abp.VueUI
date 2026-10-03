@@ -59,7 +59,7 @@ describe('splitArgs', () => {
 });
 
 describe('abpNewArgs', () => {
-  it('is the official command line with the three fixed choices added', () => {
+  it('writes the backend under aspnet-core in the project directory', () => {
     expect(abpNewArgs('Acme.BookStore', ['-d', 'mongodb'])).toEqual([
       'new',
       'Acme.BookStore',
@@ -68,7 +68,8 @@ describe('abpNewArgs', () => {
       '-u',
       'no-ui',
       '-uost',
-      '-csf',
+      '-o',
+      'Acme.BookStore/aspnet-core',
       '-d',
       'mongodb',
     ]);
@@ -81,16 +82,39 @@ describe('abpNewArgs', () => {
     );
   });
 
-  it('adds neither flag twice', () => {
+  it('keeps the open source choice and does not nest another solution folder', () => {
     const args = abpNewArgs('X', ['-uost', '-csf']);
 
     expect(args.filter(arg => arg === '-uost')).toHaveLength(1);
-    expect(args.filter(arg => arg === '-csf')).toHaveLength(1);
+    expect(args).not.toContain('-csf');
   });
 
-  it('leaves the output folder to the caller who named one', () => {
-    expect(abpNewArgs('X', ['-o', '../solutions'])).not.toContain('-csf');
+  it.each([
+    ['-o', '../solutions'],
+    ['--output-folder', '../solutions'],
+    ['--output-folder=../solutions'],
+    ['-o=../solutions'],
+  ])('places the backend inside an explicit project output directory: %j', (...flags) => {
+    const args = abpNewArgs('X', [...flags, '-d', 'mongodb']);
+    expect(args).toContain('../solutions/aspnet-core');
+    expect(args.filter(arg => arg === '-o')).toHaveLength(1);
+    expect(args).toContain('mongodb');
+    expect(args).not.toContain('-csf');
   });
+
+  it('consumes the value of the legacy create-solution-folder option', () => {
+    const args = abpNewArgs('X', ['--create-solution-folder', 'false', '-d', 'mongodb']);
+    expect(args).not.toContain('--create-solution-folder');
+    expect(args).not.toContain('false');
+    expect(args).toContain('X/aspnet-core');
+  });
+
+  it.each([['-o'], ['--output-folder', '-d', 'mongodb'], ['--output-folder=']])(
+    'rejects an output flag without a path: %j',
+    (...flags) => {
+      expect(() => abpNewArgs('X', flags)).toThrow('needs the project output directory');
+    },
+  );
 
   it('refuses to pass a UI through, since the UI is what it generates', () => {
     expect(() => abpNewArgs('X', ['-u', 'angular'])).toThrow(CliError);

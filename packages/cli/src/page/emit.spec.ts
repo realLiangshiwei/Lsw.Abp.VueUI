@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { emitExtensions } from './emit-extensions.js';
 import { emitPage } from './emit-page.js';
 import type { EntityPage } from './entity.js';
 
@@ -66,135 +65,120 @@ const book: EntityPage = {
 };
 
 describe('emitPage', () => {
+  it('puts the template first and keeps the page independent of module extensions', () => {
+    const source = emitPage(book);
+    expect(source.startsWith('<template>')).toBe(true);
+    for (const name of [
+      'useRecordEditor',
+      'registerBooksExtensions',
+      'BOOKS_PAGE',
+      'AbpExtensibleTable',
+      'AbpRecordModal',
+      '.extensions',
+    ]) {
+      expect(source).not.toContain(name);
+    }
+    expect(source).toContain('<AbpDataTable');
+    expect(source).toContain('<AbpModal');
+    expect(source).toContain('async function save()');
+  });
+
   it('keeps business imports when common APIs are automatically imported', () => {
     const source = emitPage(book, true);
     expect(source).not.toContain("from '@lsw-abpvue/");
     expect(source).toContain("import { BookService } from '../proxy/book-store/books';");
     expect(source).toContain('import type { BookDto, CreateUpdateBookDto }');
-    expect(source).toContain('useRecordEditor<BookDto>');
-    expect(source).toContain('<AbpExtensibleTable');
-
-    const extensions = emitExtensions(book, true);
-    expect(extensions).not.toContain("from '@lsw-abpvue/");
-    expect(extensions).toContain("import type { BookDto } from '../proxy/book-store/books';");
-    expect(extensions).toContain('PropData<BookDto>');
-    expect(extensions).toContain('Validators.required()');
+    expect(source).toContain('useAbpForm');
   });
+
   it('hooks the list to the generated service', () => {
-    const source = emitPage(book);
-
-    expect(source).toContain("import { BookService } from '../proxy/book-store/books';");
-    expect(source).toContain('const bookService = injectAbp(BookService);');
-    expect(source).toContain('list.hookToQuery(query => bookService.getList(query))');
+    expect(emitPage(book)).toContain('list.hookToQuery(query => bookService.getList(query))');
   });
 
-  it('imports every DTO it names, once', () => {
-    expect(emitPage(book)).toContain(
-      "import type { BookDto, CreateUpdateBookDto } from '../proxy/book-store/books';",
-    );
+  it('only offers search when the list endpoint takes a filter', () => {
+    expect(emitPage(book)).toContain('list.filter.value');
+    expect(emitPage({ ...book, filter: false })).not.toContain('list.filter.value');
   });
 
-  it('puts a search box on a list endpoint that takes a filter, and not otherwise', () => {
-    expect(emitPage(book)).toContain('searchable');
-    expect(emitPage({ ...book, filter: false })).not.toContain('searchable');
-  });
-
-  it('re-reads the record before editing it when there is an endpoint for one', () => {
+  it('re-reads the record before editing when an endpoint exists', () => {
     expect(emitPage(book)).toContain("await bookService.get(record.id ?? '')");
-    expect(emitPage({ ...book, reload: false })).toContain(
-      'edit: (record: BookDto) => editor.show(record)',
-    );
+    expect(emitPage({ ...book, reload: false })).toContain('selected.value = record;');
   });
 
-  it('carries the concurrency stamp back when the record has one', () => {
-    expect(emitPage(book)).not.toContain('stampOf');
-    expect(emitPage({ ...book, concurrencyStamp: true })).toContain(
-      'stampOf: record => record.concurrencyStamp',
-    );
+  it('defines form controls, validators and localized enum options in the page', () => {
+    const source = emitPage(book);
+    expect(source).toContain('Validators.required(), Validators.maxLength(128)');
+    expect(source).toContain('form.controls.name');
+    expect(source).toContain('bookTypeOptions');
+    expect(source).toContain('BookStore::Enum:BookType.');
+    expect(source).not.toContain('PropData');
   });
 
-  it('names the deletion question after the entity, the way ABP does', () => {
-    expect(emitPage(book)).toContain(
-      "deletionMessage: 'BookStore::BookDeletionConfirmationMessage'",
-    );
-  });
-});
-
-describe('emitExtensions', () => {
-  it('writes one column per property, sortable except the enums', () => {
-    const source = emitExtensions(book);
-
-    expect(source).toContain("name: 'name',");
-    expect(source).toContain('sortable: true,');
-    expect(source).toContain("displayName: 'BookStore::PublishDate',");
-  });
-
-  it('localizes an enum through ABP’s own key convention', () => {
-    const source = emitExtensions(book);
-
-    expect(source).toContain('data.getInjected(LocalizationService)');
-    expect(source).toContain('`BookStore::Enum:BookType.${value}`');
-    expect(source).toContain(
-      '[0, 1, 2].map(value => ({ value, label: bookTypeText(data, value) }))',
-    );
-    expect(source).toContain('valueResolver: data => bookTypeText(data, data.record.type),');
-    expect(source).toContain('options: bookTypeOptions,');
-  });
-
-  it('an enum used twice is declared once', () => {
-    expect([...emitExtensions(book).matchAll(/const bookTypeText/g)]).toHaveLength(1);
-  });
-
-  it('turns the data annotations into validators', () => {
-    expect(emitExtensions(book)).toContain(
-      'validators: () => [Validators.required(), Validators.maxLength(128)],',
-    );
-  });
-
-  it('permissions the buttons with what the backend authorizes them with', () => {
-    const source = emitExtensions(book);
-
-    expect(source).toContain("permission: 'BookStore.Books.Update',");
-    expect(source).toContain("permission: 'BookStore.Books.Delete',");
-    expect(source).toContain("permission: 'BookStore.Books.Create',");
-  });
-
-  it('leaves the permission off a button the backend does not authorize', () => {
-    expect(emitExtensions({ ...book, policies: {} })).not.toContain('permission:');
-  });
-
-  it('wraps what it owns in markers, and nothing else', () => {
-    const source = emitExtensions(book);
-
-    for (const name of ['imports', 'enums', 'props', 'actions', 'register']) {
-      expect(source).toContain(`// abpv:begin ${name}`);
-      expect(source).toContain(`// abpv:end ${name}`);
+  it('keeps permissions on buttons and guards the corresponding methods', () => {
+    const source = emitPage(book);
+    for (const policy of Object.values(book.policies).filter(
+      policy => policy !== book.policies.list,
+    )) {
+      expect(source).toContain(`policy="${policy}"`);
+      expect(source).toContain(`permission.isGranted('${policy}')`);
     }
-
-    // The component key and the token are outside them: a page that has been renamed
-    // should not be renamed back by a regeneration.
-    const key = source.indexOf('export const BOOKS =');
-    expect(key).toBeGreaterThan(source.indexOf('// abpv:end imports'));
-    expect(key).toBeLessThan(source.indexOf('// abpv:begin enums'));
+    expect(emitPage({ ...book, policies: {} })).not.toContain('permission.isGranted');
   });
 
-  it('wires the backend’s object extensions into the same page', () => {
-    const source = emitExtensions(book);
-
-    // A property the backend adds to `ObjectExtensions` has to become a column without
-    // anyone regenerating anything, which means the mapping has to be called here.
-    expect(source).toContain("getObjectExtensionEntities(injector, 'BookStore')");
-    expect(source).toContain('mapEntitiesToContributors<BookDto>');
-    expect(source).toContain('{ [BOOKS]: entities.Book }');
-    expect(source).toContain('fromBackend.prop');
-    expect(source).toContain('fromBackend.createForm');
-    expect(source).toContain('fromBackend.editForm');
+  it('preserves concurrency stamps explicitly when the record carries one', () => {
+    expect(emitPage({ ...book, concurrencyStamp: true })).toContain(
+      'concurrencyStamp: selected.value?.concurrencyStamp',
+    );
   });
 
-  it('has no enum block when the entity has no enum', () => {
-    const plain = emitExtensions({ ...book, columns: [book.columns[0] as never], fields: [] });
+  it('uses the method names resolved by proxy generation', () => {
+    const source = emitPage({
+      ...book,
+      service: {
+        ...book.service,
+        methods: {
+          getList: 'findBooks',
+          get: 'findBook',
+          create: 'addBook',
+          update: 'changeBook',
+          delete: 'removeBook',
+        },
+      },
+    });
+    for (const name of ['findBooks', 'findBook', 'addBook', 'changeBook', 'removeBook']) {
+      expect(source).toContain(`bookService.${name}(`);
+    }
+  });
 
-    expect(plain).not.toContain('abpv:begin enums');
-    expect(plain).not.toContain('LocalizationService');
+  it('does not read write-only fields from the record', () => {
+    const source = emitPage({
+      ...book,
+      fields: [
+        {
+          name: 'secret',
+          type: 'PropType.String',
+          displayName: 'BookStore::Secret',
+          validators: [],
+          recordProperty: false,
+        },
+      ],
+    });
+    expect(source).not.toContain('record?.secret');
+    expect(source).toContain("secret: ''");
+  });
+
+  it('can generate a page with no supported form fields', () => {
+    const source = emitPage({ ...book, fields: [] });
+    expect(source).not.toContain('function errorsOf');
+    expect(source).not.toContain('bookTypeOptions');
+  });
+
+  it('names the deletion confirmation and binds unsaved changes to the form', () => {
+    const source = emitPage(book);
+    expect(source).toContain('BookStore::BookDeletionConfirmationMessage');
+    expect(source).toContain(':dirty="form.dirty"');
+    expect(source).toContain(':busy="isBusy"');
+    expect(source).toContain('@click="close"');
+    expect(source).toContain('useServerValidation(form)');
   });
 });

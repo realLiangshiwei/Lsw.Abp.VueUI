@@ -1,3 +1,15 @@
+<template>
+  <AbpPage title="Sample::Menu:Sample">
+    <template #toolbar>
+      <AbpPageToolbar :data="items" />
+    </template>
+
+    <AbpExtensibleTable :data="items" :list="list" record-key="id" caption="Sample::Menu:Sample" />
+
+    <AbpRecordModal :editor="editor" label="Sample::Menu:Sample" create-title="AbpUi::NewRecord" />
+  </AbpPage>
+</template>
+
 <script setup lang="ts">
 import {
   AbpExtensibleTable,
@@ -61,15 +73,3 @@ const editor = useRecordEditor<SampleDto>({
   ],
 });
 </script>
-
-<template>
-  <AbpPage title="Sample::Menu:Sample">
-    <template #toolbar>
-      <AbpPageToolbar :data="items" />
-    </template>
-
-    <AbpExtensibleTable :data="items" :list="list" record-key="id" caption="Sample::Menu:Sample" />
-
-    <AbpRecordModal :editor="editor" label="Sample::Menu:Sample" create-title="AbpUi::NewRecord" />
-  </AbpPage>
-</template>

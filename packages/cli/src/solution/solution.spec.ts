@@ -1,10 +1,10 @@
-import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CliError } from '../errors.js';
 import { configureBackend } from './backend-config.js';
-import { findSolutionRoot, readSolution } from './locate.js';
+import { findSolutionRoot, findSolutionUpwards, readSolution } from './locate.js';
 import { writeSolutionFixture } from './solution-fixture.js';
 
 describe('a generated solution', () => {
@@ -157,5 +157,46 @@ describe('a generated solution', () => {
     const files = await readdir(join(root, 'src', 'Acme.BookStore.HttpApi.Host'));
 
     expect(files.filter(name => name.endsWith('.bak'))).toHaveLength(1);
+  });
+});
+
+describe('a solution with separate backend and frontend directories', () => {
+  let directory: string;
+  let root: string;
+  let backend: string;
+
+  beforeEach(async () => {
+    directory = await mkdtemp(join(tmpdir(), 'abpvue-separated-solution-'));
+    root = join(directory, 'Acme.BookStore');
+    backend = join(root, 'aspnet-core');
+    await writeSolutionFixture(backend);
+    await mkdir(join(root, 'vue/src/pages'), { recursive: true });
+  });
+
+  afterEach(async () => {
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  it('finds the backend from the project directory and its parent', async () => {
+    expect(await findSolutionRoot(root)).toBe(backend);
+    expect(await findSolutionRoot(directory, 'Acme.BookStore')).toBe(backend);
+  });
+
+  it('accepts either the project directory or the backend directory explicitly', async () => {
+    expect((await readSolution(root)).root).toBe(backend);
+    expect((await readSolution(backend)).root).toBe(backend);
+  });
+
+  it.each(['', 'aspnet-core', 'aspnet-core/src', 'vue', 'vue/src/pages'])(
+    'finds the sibling backend when invoked from %s',
+    async path => {
+      expect(await findSolutionUpwards(join(root, path))).toBe(backend);
+    },
+  );
+
+  it('selects the named project when several separated solutions exist', async () => {
+    const other = join(directory, 'Another.Project', 'aspnet-core');
+    await writeSolutionFixture(other);
+    expect(await findSolutionRoot(directory, 'Acme.BookStore')).toBe(backend);
   });
 });

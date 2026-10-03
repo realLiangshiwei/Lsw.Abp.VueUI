@@ -6,23 +6,24 @@ abpv generate Book --policy Acme.BookStore.Books --icon "bi bi-book"
 abpv generate Book --force
 ```
 
-Writes `src/pages/BooksPage.vue`, `src/pages/books.extensions.ts` and one route. Needs a
-proxy: the page imports the generated service and its DTOs.
+Writes `src/pages/BooksPage.vue` and one route. The page directly owns its columns, form
+controls and CRUD methods. It needs a proxy because it imports the generated service and DTOs.
 
-| | |
-| --- | --- |
-| `--module <name>` | Which `api-definition` module to look in; all of them otherwise |
-| `--target <dir>` | Where the page goes; default `src/pages` |
-| `--proxy <dir>` | Where the proxy is; default `src/proxy` |
-| `--routes <file>` | The file that declares the routes; default `src/routes.ts` |
-| `--no-router` | Do not touch the routes file |
-| `--resource <name>` | The localization resource; the backend's default otherwise |
-| `--extension-module <m>` | Where the backend files this entity's object extensions, as `Module` or `Module.Entity`; the resource and the entity name otherwise |
-| `--route` / `--menu` / `--icon` | Override what is inferred |
-| `--policy <name>` | The base permission; matching backend action policies such as `.Edit` are kept, missing or unrelated policies use `.Create`, `.Update` and `.Delete` |
-| `--force` | Rewrite the generated blocks of files already there |
-| `--url` / `--source` / `--config-source` / `--token` / `--insecure` | As in `proxy` |
-| `--dry-run` | Say what would change and write nothing |
+|                                                                     |                                                                                                                                                      |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--module <name>`                                                   | Which `api-definition` module to look in; all of them otherwise                                                                                      |
+| `--target <dir>`                                                    | Where the page goes; default `src/pages`                                                                                                             |
+| `--proxy <dir>`                                                     | Where the proxy is; default `src/proxy`                                                                                                              |
+| `--routes <file>`                                                   | The file that declares the routes; default `src/routes.ts`                                                                                           |
+| `--no-router`                                                       | Do not touch the routes file                                                                                                                         |
+| `--resource <name>`                                                 | The localization resource; the backend's default otherwise                                                                                           |
+| `--extension-module <m>`                                            | Legacy compatibility option; direct application pages do not register extensions                                                                     |
+| `--route` / `--menu` / `--icon`                                     | Override what is inferred                                                                                                                            |
+| `--policy <name>`                                                   | The base permission; matching backend action policies such as `.Edit` are kept, missing or unrelated policies use `.Create`, `.Update` and `.Delete` |
+| `--force`                                                           | Replace the entire existing Vue page; save custom changes first                                                                                      |
+| `--url` / `--source` / `--config-source` / `--token` / `--insecure` | As in `proxy`                                                                                                                                        |
+| `--no-auto-imports`                                                 | Write explicit common imports instead of using the application preset                                                                                |
+| `--dry-run`                                                         | Say what would change and write nothing                                                                                                              |
 
 Full walkthrough: [A CRUD page](../guide/crud-page).
 

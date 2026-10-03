@@ -1,101 +1,101 @@
 # Lsw.Abp.VueUI
 
-An unofficial Vue UI for the ABP Framework, released under the [MIT License](LICENSE).
-It uses the framework's existing endpoints and keeps Angular UI component keys,
-localization keys, DTO fields and permission names compatible.
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-Packages use the `@lsw-abpvue/*` scope. The implementation uses Vue 3, TypeScript and
-Vue Router; applications can replace the theme and extend module pages.
+[![npm alpha](https://img.shields.io/npm/v/%40lsw-abpvue%2Fcli/alpha?label=npm%20alpha&style=flat-square)](https://www.npmjs.com/package/@lsw-abpvue/cli) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
-## Alpha
+**Lsw.Abp.VueUI** provides a Vue 3 frontend for applications built with the [ABP Framework](https://abp.io/), including authentication, application modules, Bootstrap themes and a CLI.
 
-The current published alpha is `0.0.1-alpha.2` across all fourteen public packages.
-Use the `alpha` tag when trying the CLI:
+The project follows the capabilities and extension points of ABP's Angular UI using Vue's Composition API. It consumes existing ABP APIs without requiring an additional backend package.
 
-```bash
-npx @lsw-abpvue/cli@alpha new Acme.BookStore -d mongodb --sample-crud
-```
+This is an **unofficial community project**, not affiliated with Volosoft. Packages use the **`@lsw-abpvue/*`** scope and are currently available through the **`alpha`** tag.
 
-Follow [the new solution guide](docs/guide/new-solution.md) for backend setup, or
-[the existing solution guide](docs/guide/existing-solution.md) to add Vue to a backend.
+## Getting Started
 
-## Run the playground
+### Create a new solution
 
-Use Node 24 (the CI version), pnpm 11.22.0, the .NET 10 SDK, Docker and the official ABP
-CLI. The workspace pins TypeScript to 6.0.3.
-
-From the repository root:
+Install the CLIs and create a solution:
 
 ```bash
-pnpm install --frozen-lockfile
+dotnet tool install -g Volo.Abp.Studio.Cli
+npm install -g @lsw-abpvue/cli@alpha
+abpv new Acme.BookStore -d mongodb
 ```
 
-Start and seed the test backend by following [the backend setup](e2e/backend/README.md).
-That includes MongoDB, `abp install-libs`, and running the migrator from its own project
-directory. Trust the local HTTPS development certificate with
-`dotnet dev-certs https --trust` if it has not been trusted yet.
+`abpv` creates the backend through the official ABP CLI's `no-ui` template and adds a Vue frontend. The layout follows ABP's Angular solution, with `vue/` as the frontend directory:
 
-Then, in another terminal at the repository root:
+```text
+Acme.BookStore/
+├── aspnet-core/
+│   ├── src/     # ABP backend projects
+│   └── test/    # Backend tests
+└── vue/         # Vue frontend
+```
+
+### Use an existing ABP solution
+
+Add Vue to an existing solution while keeping its current UI:
 
 ```bash
-pnpm --filter playground dev
+abpv switch-ui --mode keep
 ```
 
-Open <http://localhost:4200/account/login> and sign in with `admin` / `1q2w3E*`.
-The Books page exercises a generated CRUD page and a backend-defined ISBN extension.
-The backend's Swagger UI is at <https://localhost:44384/swagger>.
+## Features
 
-## Documentation
+- **Authentication** — authorization code flow with PKCE, token renewal, login and logout.
+- **Authorization** — permission checks for routes, menus, components and actions.
+- **Multi-tenancy** — tenant selection and tenant-aware API requests.
+- **Localization** — backend resources, language switching and RTL layouts.
+- **Application services** — dependency injection, configuration, HTTP services and list management.
+- **Validation and feedback** — form validation, server errors, confirmations and notifications.
 
-```bash
-pnpm --filter @lsw-abpvue/docs dev
-```
+## Themes
 
-The [documentation index](docs/index.md) links to setup, configuration, extension points,
-the CLI and the [Angular migration guide](docs/migration/from-angular.md).
+The included **Basic Theme** uses **Bootstrap 5** styles and **Reka UI** controls, with responsive navigation, light and dark modes, RTL support and shared form controls. Module UIs use theme contracts so applications can provide their own theme.
 
-Documentation CI builds the site independently of deployment. GitHub Pages deployment
-is opt-in through the repository variable `DOCS_PAGES_ENABLED=true`, with Pages configured
-to use GitHub Actions. The current private repository's GitHub plan does not support
-Pages, so deployment remains disabled until the repository becomes eligible.
+## Application Modules
 
-## Publishing
+The following open source ABP module UIs are available as separate packages:
 
-Keep using `pnpm exec changeset version` to update versions and changelogs. All public
-packages must have the same version. Verify the candidate before publishing:
+| Module                | Package                             | Features                                                      |
+| --------------------- | ----------------------------------- | ------------------------------------------------------------- |
+| Account               | `@lsw-abpvue/account`               | Login, registration, password recovery and profile management |
+| Identity              | `@lsw-abpvue/identity`              | Users, roles and their permissions                            |
+| Permission Management | `@lsw-abpvue/permission-management` | Permission management dialog                                  |
+| Tenant Management     | `@lsw-abpvue/tenant-management`     | Tenants, connection strings and tenant features               |
+| Feature Management    | `@lsw-abpvue/feature-management`    | Feature management dialog                                     |
+| Setting Management    | `@lsw-abpvue/setting-management`    | Settings page                                                 |
 
-```bash
-pnpm verify:release
-pnpm release
-```
+## Templates and Tooling
 
-The release script selects the npm tag from the version: `0.0.1-alpha.2` uses `alpha`,
-`0.0.1-beta.0` uses `beta`, `0.0.1-rc.0` uses `rc`, and a stable version uses `latest`.
-It publishes only public packages under `packages/`, skips versions already on npm,
-and uses pnpm to replace workspace dependency ranges before publishing. GitHub release
-tags use the same script. Every release invocation, including `--dry-run`, first runs
-lint, type checking, the full coverage suite, builds, size budgets, declaration and
-entry point checks, and clean external installation, source release and library checks.
-A failure stops publication. `pnpm verify:release` runs these checks without publishing.
+### Application template
 
-Prerelease publishing leaves an existing `latest` tag unchanged. npm can still add
-`latest` on a package's first publication; this script does not remove existing tags.
+The application template includes Vue 3, TypeScript, Vue Router and Vite, with authentication, module routes and runtime configuration. Common Vue and ABP components and APIs support **automatic imports on demand**.
 
-## Verification
+### The `abpv` CLI
 
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test:coverage
-pnpm build
-pnpm size
-```
+Both `abpv` and `abpvue` invoke the same CLI.
 
-Framework contract tests cover captured ABP 10.5.0 and 10.6.0 responses even when the
-backend is unavailable. Tests needing authentication report why they are skipped.
-With the test backend running, the generated service and module tests use its real API.
+| Command       | Purpose                                                        |
+| ------------- | -------------------------------------------------------------- |
+| `new`         | Create an ABP backend and Vue frontend                         |
+| `switch-ui`   | Add Vue to an existing solution                                |
+| `proxy`       | Generate typed services, DTOs, validators and permission names |
+| `generate`    | Generate a CRUD page for a backend entity                      |
+| `add-package` | Add a module package, optionally with its source code          |
+| `create-lib`  | Create a reusable module UI package                            |
+| `doctor`      | Diagnose environment, backend and authentication configuration |
+| `update`      | Update the project's ABP Vue packages                          |
 
-Size budgets measure each package's own code with shared framework and UI dependencies
-excluded. The basic theme's budget is 12.5 kB after replacing its native date input with
-the calendar and segmented date/time fields; the pure object-extension mapping entry has
-a separate 1 kB budget.
+## Documentation and Samples
+
+- [Documentation](docs/index.md) — guides, concepts, modules and CLI reference.
+- [Playground](playground/) — a BookStore application demonstrating module UIs and extension points.
+
+## Contributing
+
+Bug reports, documentation improvements and pull requests are welcome. Please use [GitHub Issues](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/issues) to report problems or propose features.
+
+## License
+
+Lsw.Abp.VueUI is released under the [MIT License](LICENSE). ABP Framework and other dependencies retain their respective licenses.

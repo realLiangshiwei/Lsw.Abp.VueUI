@@ -62,6 +62,13 @@ describe('readEntityPage', () => {
     expect(page.service).toEqual({
       name: 'TenantService',
       directory: 'volo/abp/tenant-management',
+      methods: {
+        getList: 'getList',
+        get: 'get',
+        create: 'create',
+        update: 'update',
+        delete: 'delete',
+      },
     });
   });
 
@@ -114,6 +121,19 @@ describe('readEntityPage', () => {
     // compile, so saying which endpoints are missing is the more useful answer.
     expect(() => read('File')).toThrow(NotACrudControllerError);
     expect(() => read('File')).toThrow(/that creates.*that updates.*that deletes/);
+  });
+
+  it('resolves a renamed list method by its HTTP shape', () => {
+    const renamed = structuredClone(definition);
+    for (const module of Object.values(renamed.modules)) {
+      for (const controller of Object.values(module.controllers)) {
+        if (controller.controllerName !== 'Tenant') continue;
+        for (const action of Object.values(controller.actions)) {
+          if (action.uniqueName.startsWith('GetListAsync')) action.uniqueName = 'BrowseAsync';
+        }
+      }
+    }
+    expect(read('Tenant', { definition: renamed }).page.service.methods?.getList).toBe('browse');
   });
 
   it('derives the four permissions from --policy', () => {
