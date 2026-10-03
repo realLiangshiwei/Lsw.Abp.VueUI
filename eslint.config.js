@@ -137,6 +137,14 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.turbo/**',
       'e2e/backend/**',
+      'e2e/**/artifacts/**',
+      'e2e/**/results/**',
+      'e2e/**/reports/**',
+      'e2e/**/screenshots/**',
+      'e2e/**/videos/**',
+      'playwright-report/**',
+      'test-results/**',
+      'blob-report/**',
       // Generated proxies: `abpvue proxy add` writes what the backend describes, enums
       // included, and the rules here are about code someone writes.
       'packages/*/proxy/**',

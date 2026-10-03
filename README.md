@@ -9,7 +9,7 @@ Vue Router; applications can replace the theme and extend module pages.
 
 ## Alpha
 
-The first alpha candidate is `0.0.1-alpha.0` across all fourteen public packages.
+The current alpha candidate is `0.0.1-alpha.1` across all fourteen public packages.
 Use the `alpha` tag when trying the CLI:
 
 ```bash

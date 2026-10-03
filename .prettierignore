@@ -4,6 +4,14 @@ coverage/
 pnpm-lock.yaml
 e2e/backend/
 e2e/fixtures/
+e2e/**/artifacts/
+e2e/**/results/
+e2e/**/reports/
+e2e/**/screenshots/
+e2e/**/videos/
+playwright-report/
+test-results/
+blob-report/
 *.md
 templates/app/auto-imports.d.ts
 templates/app/components.d.ts

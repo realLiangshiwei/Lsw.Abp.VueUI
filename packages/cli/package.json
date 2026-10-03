@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/cli",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1-alpha.1",
   "description": "The command line tool of the ABP Vue UI. Generates typed proxies from a running ABP backend.",
   "license": "MIT",
   "type": "module",
