@@ -1,6 +1,6 @@
 # ABP x Vue: Introducing Lsw.Abp.VueUI
 
-![ABP x Vue](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/codex/community-vue-introduction/articles/20261004Intrudoce/cover.jpg)
+![ABP x Vue](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/main/articles/20261004Intrudoce/cover.jpg)
 
 **Lsw.Abp.VueUI** is a complete, community-developed Vue 3 frontend for ABP Framework. It follows ABP's modular architecture, bringing framework services, module UIs, extension points, and themes together for building applications with Vue.
 
@@ -10,7 +10,7 @@ Authentication, permissions, multi-tenancy, localization, and module development
 
 Built-in modules cover accounts, users, roles, permissions, tenants, features, and settings. They provide the administration pages you expect in an ABP application, so you can focus on your own business features.
 
-![Lsw.Abp.VueUI features](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/codex/community-vue-introduction/articles/20261004Intrudoce/features.png)
+![Lsw.Abp.VueUI features](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/main/articles/20261004Intrudoce/features.png)
 
 Module pages are extensible. You can add table columns, form fields, row actions, and toolbar buttons through your application's configuration. For example, adding a custom action to the user list does not require editing the module package.
 
@@ -18,7 +18,7 @@ The UI is designed to support multiple themes. Basic Theme includes light, dark,
 
 Here is the BookStore playground switching between light and dark modes, then changing language:
 
-![Theme and language switching](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/codex/community-vue-introduction/articles/20261004Intrudoce/theme-language.gif)
+![Theme and language switching](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/main/articles/20261004Intrudoce/theme-language.gif)
 
 ## Getting started
 
@@ -31,7 +31,7 @@ abpv new Acme.BookStore -d mongodb --sample-crud
 
 The solution contains the ABP backend in `aspnet-core/` and the Vue frontend in `vue/`.
 
-![ABP and Vue project in VS Code](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/codex/community-vue-introduction/articles/20261004Intrudoce/vscode-project.png)
+![ABP and Vue project in VS Code](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/main/articles/20261004Intrudoce/vscode-project.png)
 
 ## Building a CRUD page
 
@@ -46,7 +46,7 @@ The generated page includes a table, create and edit forms, CRUD methods, and ro
 
 This recording shows creating a book and editing its price in the BookStore playground:
 
-![BookStore create and edit demonstration](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/codex/community-vue-introduction/articles/20261004Intrudoce/books-crud.gif)
+![BookStore create and edit demonstration](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/main/articles/20261004Intrudoce/books-crud.gif)
 
 ## Documentation
 
