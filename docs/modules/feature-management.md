@@ -1,30 +1,25 @@
 # Feature management
 
-The dialog that turns features on and off, for any provider.
+Edits features for a backend provider, including tenant features opened from tenant management.
+
+## Install and use
+
+```bash
+pnpm add @lsw-abpvue/feature-management@alpha
+```
 
 ```vue
 <AbpFeatureManagement v-model:visible="open" provider-name="T" :provider-key="tenant.id" />
 ```
 
-Opened from the tenants page for a tenant (`T`), or for an edition or the host by the same
-component with a different provider name.
+Import the component from the package. Supply a local visibility value and provider key. A tenant uses provider `T`; other provider names require backend support. There is no independent feature route. `provideFeatureManagementConfig()` from `/config` contributes feature management to settings; register it after setting-management config when using that integration.
 
-## What a feature can be
+## Values and permissions
 
-| Value type | Control |
-| --- | --- |
-| Boolean | A toggle |
-| Selection | A select, with the options the backend declared |
-| Free text | An input, with the backend's own validator attached |
+Boolean features use toggles, selection features use backend-declared options, and free-text features use inputs with supported validation. Numeric constraints use backend bounds. The caller must have the management policy required by the selected provider; tenant actions use `AbpTenantManagement.Tenants.ManageFeatures`.
 
-A numeric feature carries the server's minimum and maximum, and the input enforces them
-rather than waiting for a 400. The Angular UI drops them.
+## Cascade and save
 
-## Cascading
+Turning a parent off disables its descendants; turning it back on restores the prior child values. Only changed values are sent. Saving failures preserve edits, and unsaved cancellation follows the modal contract.
 
-Turning a parent off turns its children off and disables them, and turning it back on
-restores what they were. The rules — `flattenFeatures`, `setFeatureValue`,
-`changedFeatures`, `isFeatureDisabled`, `selectionItemsOf` — are pure functions exported
-from the package, so the cascade is unit tested rather than asserted through a dialog.
-
-Only what changed is sent.
+Effective features read through core's `FeatureService` are separate from these editable provider values. Reload session configuration after a custom save that changes current effective values. [Public exports](/api/feature-management) lists feature rules, components and proxies. The component key is `FeatureManagement.FeatureManagementComponent`.

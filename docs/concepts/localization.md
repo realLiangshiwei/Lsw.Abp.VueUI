@@ -28,8 +28,7 @@ localization.languages.value;                   // what the backend offers
 ## Keys
 
 `Resource::Key` is ABP's own shape, and the resources are the backend's:
-`AbpIdentity::Users`, `AbpUi::Save`, `AbpValidation::ThisFieldIsRequired.`. Your own
-application's resource is whatever `application.name` in the configuration says.
+`AbpIdentity::Users`, `AbpUi::Save`, `AbpValidation::ThisFieldIsRequired.`. The default resource is the backend configuration's `localization.defaultResourceName`.
 
 A key with no text is returned as it is, with a warning in development. That is deliberate:
 the alternative is an empty screen where a missing translation should be visible.

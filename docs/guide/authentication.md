@@ -1,100 +1,37 @@
 # Authentication
 
-ABP's identity server is OpenIddict, and the frontend talks to it the way the Angular UI
-does: the authorization code flow with PKCE by default, the resource owner password flow
-when the application would rather host its own login form.
+Register `provideAbpOAuth()` to implement the `AuthService` token declared by core. The configured `oAuthConfig.responseType` chooses the flow.
 
-## Which flow
+## Authorization code with PKCE
 
-`oAuthConfig.responseType` in the [configuration](./configuration) decides:
+With `responseType: 'code'`, Login redirects to the authorization server. It authenticates the user, then returns a code to the registered frontend callback. The frontend exchanges the code and reloads application configuration. Use this flow for production browser applications.
 
-| | |
-| --- | --- |
-| `code` | The visitor is sent to the identity server and comes back with a code. Silent renewal through a hidden iframe. This is the default |
-| Anything else | The account module's login form, over the password flow. The password passes through your application |
+Login, registration and forgot-password entry points hand over to that server. A reset-password link can still reach the local account route. Logout follows the authorization server's end-session flow and returns to `postLogoutRedirectUri`; clearing only local tokens would leave the server session active.
 
-Both end in the same place: an access token in storage, a `currentUser` in the
-application configuration, and `grantedPolicies` deciding what renders.
+## Local password flow
 
-## Signing in
+For the non-code configuration, the account login page collects credentials and calls the token endpoint. The backend must allow this grant and local login. `TwoFactorRequiredError` can trigger the account page's second-factor step when the backend supplies it. Available delivery providers depend on backend capabilities.
+
+Local logout clears the token and current user's list preferences, reloads anonymous configuration and navigates home.
+
+## Use the service
 
 ```ts
+import { AuthService, inject } from '@lsw-abpvue/core';
+
 const auth = inject(AuthService);
-
-await auth.navigateToLogin();          // code flow: leaves for the identity server
-await auth.login({ username, password, rememberMe: true });   // password flow
-await auth.logout();
+const login = () => auth.navigateToLogin('/books');
+const logout = () => auth.logout();
 ```
 
-`login` rejects with a typed error rather than a bare `HttpErrorResponse`:
+Call these methods from your event handlers. `isAuthenticated` is a computed ref; `isInternalAuth` identifies local authentication. `login(params)` is for a local credential form.
 
-| | |
-| --- | --- |
-| `AuthError` | Wrong credentials, a locked-out user, a disabled account |
-| `TwoFactorRequiredError` | Carries the `userId` and the `twoFactorToken` the second step needs |
+## My account
 
-ABP's token endpoint answers two-factor challenges with fields outside the OAuth error
-shape, which is why they are read out and typed here rather than left in a raw body.
+The user menu calls `NAVIGATE_TO_MANAGE_PROFILE`. OAuth's default opens `{issuer}/Account/Manage` with a return URL. Registering `provideAccountConfig()` after OAuth overrides that token to open the local `/account/manage` route. The generated template includes that override when the account module is selected. Choose and register the profile behavior your application needs; it is independent from the code-flow logout redirect.
 
-## Two factor
+## Tokens and tenant changes
 
-```ts
-try {
-  await auth.login({ username, password });
-} catch (error) {
-  if (error instanceof TwoFactorRequiredError) {
-    // error.userId and error.twoFactorToken are what the second step needs
-    await auth.login({ username, password, twoFactorProvider: 'Authenticator', twoFactorCode });
-  }
-}
-```
+`TokenStorage` defaults to browser storage and can be replaced through `withTokenStorage`. A 401 can trigger one shared token refresh and retry. Failed renewal ends the session. Switching tenant invalidates a token issued for the previous tenant and reloads configuration.
 
-The account module's login page handles the challenge, provider selection, code entry
-and retry. It offers Authenticator by default. An application with email or SMS delivery
-supplies its backend adapter:
-
-```ts
-import { provideAccount, type TwoFactorService } from '@lsw-abpvue/account';
-import { twoFactorApi } from './two-factor-api';
-
-const twoFactorService: TwoFactorService = {
-  getProviders: challenge => twoFactorApi.getProviders(challenge),
-  sendCode: (challenge, provider) => twoFactorApi.sendCode(challenge, provider),
-};
-
-provideAccount({ twoFactorService });
-```
-
-Each provider has `name`, optional `displayName`, and `requiresCodeDelivery`. A provider
-requiring delivery shows send and resend actions. Changing the provider clears the code.
-Both adapter methods receive the original `userId` and `twoFactorToken` challenge; the
-second login sends `TwoFactorProvider` and `TwoFactorCode` under ABP's parameter names.
-The open-source account module has no email/SMS two-factor delivery endpoint, so the
-adapter calls the host's own API. Authorization-code login continues to use the identity
-server's account pages.
-
-## Tokens
-
-Stored through `TokenStorage`, which is a token you can replace:
-`provideAbpOAuth(withTokenStorage(MemoryTokenStorage))` keeps a session from outliving
-the tab, and `ServerTokenStorage` is the seam a server-side renderer needs.
-`BrowserTokenStorage` is the default.
-
-A 401 refreshes once and retries; a second failure ends the session and sends the visitor
-to the login page. Requests that were in flight while the refresh happened are queued
-rather than each triggering their own refresh.
-
-Logout and a failed token renewal clear the current user's saved list preferences.
-Other users' preferences remain intact. Local logout reloads anonymous application
-configuration before navigating home, so permission-dependent menus update immediately.
-
-## Multi-tenancy
-
-The tenant comes from one of three places, in this order: what the user picked (stored),
-the `__tenant` in the URL, or the host name. `TenantService` resolves a name to an id
-through `/api/abp/multi-tenancy/tenants/by-name/{name}`, and every request afterwards
-carries the `__tenant` header.
-
-Switching tenants clears a token issued for a different one. A token minted for tenant A
-sent to tenant B only produces a string of 401s, and reasoning about which of them meant
-what is not something to leave to the person using the application.
+Match issuer, client id, scope, callback and logout addresses with the seeded OpenIddict client. See [configuration](./configuration) and [multi-tenancy](/core/multi-tenancy).

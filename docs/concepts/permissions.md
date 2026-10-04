@@ -5,7 +5,7 @@
 ```ts
 const permission = inject(PermissionService);
 
-permission.isGranted('Identity.Users.Create');        // boolean
+permission.isGranted('AbpIdentity.Users.Create');        // boolean
 permission.isGranted('A || B');                      // policy expressions too
 permission.isGrantedRef(() => policy);               // ComputedRef<boolean>
 ```
@@ -13,7 +13,7 @@ permission.isGrantedRef(() => policy);               // ComputedRef<boolean>
 ## In a template
 
 ```vue
-<AbpPermission policy="Identity.Users.Create">
+<AbpPermission policy="AbpIdentity.Users.Create">
   <AbpButton @click="add">{{ $t('AbpIdentity::NewUser') }}</AbpButton>
 </AbpPermission>
 ```
@@ -28,7 +28,7 @@ on, and rendering a button that does nothing is worse than not rendering it.
 ABP's `||` and `&&` are supported, and so are parentheses:
 
 ```
-Identity.Users.Create || Identity.Users.Update
+AbpIdentity.Users.Create || AbpIdentity.Users.Update
 (A || B) && C
 ```
 

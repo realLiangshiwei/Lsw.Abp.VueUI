@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev",
-    "build": "vitepress build",
-    "preview": "vitepress preview"
+    "dev": "node ../scripts/generate-docs-reference.mjs && vitepress dev",
+    "build": "node ../scripts/generate-docs-reference.mjs && vitepress build",
+    "preview": "vitepress preview",
+    "typecheck": "vue-tsc -p tsconfig.examples.json"
   },
   "devDependencies": {
-    "vitepress": "^1.6.4"
+    "vitepress": "^1.6.4",
+    "vue-router": "^4.5.1"
   }
 }

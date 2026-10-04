@@ -46,7 +46,7 @@ HTML where it expected JSON falls through to the next level silently, which look
 | --- | --- |
 | `apis.default.url` | The backend. Every generated service sends here unless its module names another API |
 | `apis.<name>.url` | A module that lives on its own host. The name is ABP's `remoteServiceName` |
-| `application.name` | The localization resource of your own texts, and the browser title |
+| `application.name` | Application name and browser title |
 | `application.baseUrl` | Where the frontend is served, which is what the redirect URIs are built from |
 | `oAuthConfig.issuer` | The identity server. The same host as the API in a single-host template |
 | `oAuthConfig.responseType` | `code` hands the visitor to the identity server's login page. Anything else uses the account module's own form, over the password flow |
@@ -54,8 +54,7 @@ HTML where it expected JSON falls through to the next level silently, which look
 | `oAuthConfig.metadataUrl` | Optional discovery URL; the development template points it at the same-origin proxy |
 | `oAuthConfig.metadataSeed` | Optional token, revocation, user-info and JWKS endpoint overrides |
 
-The field names are `angular-oauth2-oidc`'s, which is what the Angular UI uses — so an
-`environment.ts` from an Angular application can be moved over as it is.
+Environment field names follow Angular conventions. Review the supported options and addresses when migrating. The default localization resource comes from backend application configuration.
 
 ## Which login the visitor sees
 
@@ -93,12 +92,4 @@ production builds use the runtime configuration's real service URLs.
 
 ## Changing the port
 
-The frontend's port has to agree with three things on the backend: the OpenIddict
-client's redirect URIs, its post-logout redirect URI and the CORS origins. Rather than
-editing four places:
-
-```bash
-abpv switch-ui --port 5173
-```
-
-It writes all of them, and `abpv doctor` tells you when they have drifted apart again.
+During initial integration, use `switch-ui --port <n>`. For an already generated Vue app, synchronize its Vite and runtime configuration with backend CORS and seeded callback URLs, then run DbMigrator and doctor.

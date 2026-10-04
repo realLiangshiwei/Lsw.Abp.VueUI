@@ -1,31 +1,28 @@
 # The abpv CLI
 
+Install the alpha CLI globally, or run it without a global installation:
+
 ```bash
-npx @lsw-abpvue/cli <command>
+npm install -g @lsw-abpvue/cli@alpha
+npx @lsw-abpvue/cli@alpha --help
 ```
 
-Both `abpv` and `abpvue` run it. Node 20 or newer; the .NET SDK and the official ABP CLI
-are needed only by `new` and `switch-ui`.
+`abpv` and `abpvue` invoke the same command. The CLI requires Node 20 or newer. Creating a backend requires the target .NET SDK and official ABP CLI. Existing-solution operations also inspect backend configuration; online generation needs a running backend or saved metadata.
 
-| Command | |
+| Command | Purpose |
 | --- | --- |
-| [`new`](./new) | A whole solution: the backend by the official `abp`, the frontend by this |
-| [`switch-ui`](./switch-ui) | Add or swap in a Vue UI in a solution that already exists |
-| [`proxy`](./proxy) | Typed services, DTOs, validators and permission names from a running backend |
-| [`generate`](./generate) | A CRUD page for one of your entities |
-| [`add-package`](./add-package) | Install a module UI, optionally with its source |
-| [`create-lib`](./create-lib) | Scaffold the UI package of a third-party module |
-| [`doctor`](./doctor) | Diagnose the ten usual "it cannot talk to the backend" mismatches |
-| [`update`](./update) | Move the project's packages to a newer version |
+| [new](./new) | Create an ABP backend and Vue frontend |
+| [switch-ui](./switch-ui) | Add Vue to an existing solution |
+| [proxy](./proxy) | Generate typed services, DTOs, validators and policy names |
+| [generate](./generate) | Generate an ordinary application CRUD page |
+| [add-package](./add-package) | Install a package or release its source locally |
+| [eject](./eject) | Alias for releasing package source |
+| [create-lib](./create-lib) | Scaffold a reusable module UI package |
+| [doctor](./doctor) | Diagnose environment and backend configuration |
+| [update](./update) | Update ABP Vue package versions |
 
-Every command that writes takes `--dry-run`, and says what it would do.
+## Project commands
 
-## Running it from a project
+The generated frontend includes the CLI as a dependency. Run `pnpm abpv <command>` from `vue/` to use that project's version. Mutating commands support `--dry-run`; `doctor` only reads and reports. Use `<command> --help` for the installed version's options.
 
-```bash
-cd vue
-npx abpv doctor
-```
-
-The CLI is a dependency of a project `abpv new` created, so `npx abpv` inside it runs the
-version that project was built with rather than whatever npm has today.
+See [configuration and generated files](./configuration) for metadata, previews, backups and overwrite behavior.

@@ -89,7 +89,7 @@ Both `abpv` and `abpvue` invoke the same CLI.
 
 ## Documentation and Samples
 
-- [Documentation](docs/index.md) — guides, concepts, modules and CLI reference.
+- [Documentation](https://realliangshiwei.github.io/Lsw.Abp.VueUI/) — English and Chinese guides, CLI and API references.
 - [Playground](playground/) — a BookStore application demonstrating module UIs and extension points.
 
 ## Contributing

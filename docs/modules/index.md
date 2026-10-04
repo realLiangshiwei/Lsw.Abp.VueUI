@@ -1,62 +1,24 @@
 # Module UIs
 
-The six open source ABP modules, each as its own package with three entry points.
+Six open-source ABP module UIs are available. Install the matching backend module before exposing its frontend routes or dialogs. Your application also needs core, authentication and a registered theme.
 
-| Package | What it gives you |
-| --- | --- |
-| [`account`](./account) | Login, register, forgot and reset password, the profile page |
-| [`account-core`](./account) | The pieces both the account pages and a theme need: the tenant box, the profile tabs |
-| [`identity`](./identity) | Users and roles, with their permissions |
-| [`permission-management`](./permission-management) | The permission dialog, for any provider |
-| [`tenant-management`](./tenant-management) | Tenants, their features and their connection strings |
-| [`feature-management`](./feature-management) | The feature dialog, for any provider |
-| [`setting-management`](./setting-management) | The settings page and its tab tree |
+| UI | Package | Integration |
+| --- | --- | --- |
+| [Account](./account) | `@lsw-abpvue/account` | Pages and profile tabs |
+| [Identity](./identity) | `@lsw-abpvue/identity` | Users and roles routes |
+| [Permission management](./permission-management) | `@lsw-abpvue/permission-management` | Provider dialog |
+| [Tenant management](./tenant-management) | `@lsw-abpvue/tenant-management` | Tenant routes |
+| [Feature management](./feature-management) | `@lsw-abpvue/feature-management` | Provider dialog and settings contribution |
+| [Setting management](./setting-management) | `@lsw-abpvue/setting-management` | Settings routes and tabs |
 
-## Wiring one up
+`account-core` contains shared tenant and profile services used by account and themes. Built-in services and DTOs live in public `/proxy` entry points; lightweight startup registrations live in `/config` where provided.
 
-Two lines, in two places. The menu at startup:
+## Integration pattern
 
-```ts
-// main.ts
-provideIdentityConfig();
-```
+Register configuration providers at application startup, and load module routes lazily. The CLI template wires selected modules. Installing a package alone does not create its routes or menu entries.
 
-The pages, lazily:
+## Customization
 
-```ts
-// routes.ts
-lazyRoutes('/identity', () =>
-  import('@lsw-abpvue/identity').then(module => module.createIdentityRoutes()),
-);
-```
+Module tables and forms support contributors. Component keys match Angular so replacements and extension configurations can reuse the same identifiers; Vue callbacks still require Promise/Ref and component adaptations.
 
-`abpv new` writes both for the modules you asked for.
-
-## Customising one
-
-Every page is a contributor to the [extension system](../concepts/extensions), so a
-column, a field or a button is added from the host:
-
-```ts
-createIdentityRoutes({
-  entityPropContributors: {
-    [IdentityComponents.Users]: [props => props.addTail(EntityProp.create({ ... }))],
-  },
-});
-```
-
-And any page can be replaced wholesale by its component key, without forking the module:
-
-```ts
-inject(ReplaceableComponentsService).add({
-  key: IdentityComponents.Users,
-  component: MyUsersPage,
-});
-```
-
-## What is not here
-
-Three things the Angular UI has that these do not, all because the open source backend has
-no endpoint behind them: locking a user out and setting their password from the users
-page, per-user two-factor settings, and the resource permission screen. They are not
-"to do" — there is nothing to call.
+Frontend screens cover the endpoints available in the open-source backend. Commercial identity operations and resource permission screens are not included. Check each module's API and permissions instead of assuming every Angular commercial screen is available.

@@ -1,6 +1,12 @@
 # Permission management
 
-The dialog that grants permissions, for any provider ABP knows.
+A dialog for permissions provided by the backend. Identity opens it for users and roles; another page can open it for a supported provider.
+
+## Install and use
+
+```bash
+pnpm add @lsw-abpvue/permission-management@alpha
+```
 
 ```vue
 <AbpPermissionManagement
@@ -11,31 +17,14 @@ The dialog that grants permissions, for any provider ABP knows.
 />
 ```
 
-| Provider | What it means |
-| --- | --- |
-| `R` | A role |
-| `U` | A user |
-| `C` | An OpenIddict client |
+Import `AbpPermissionManagement` from the package unless your resolver covers it. Supply the local boolean `open` and role record. There is no independent page route or startup menu provider for this dialog.
 
-The identity module opens it from a row action on both its pages; anything else that has
-permissions can open it the same way.
+## Providers and authorization
 
-## What the dialog knows
+ABP provider names include `R` for roles, `U` for users and `C` for clients. The provider key is the backend's identifier for that provider: role name for `R`, user id for `U`. Confirm that the corresponding backend grant provider is installed and the caller has the provider-specific management permission.
 
-- The groups and their permissions, as the backend defines them.
-- Which are granted here, and which are granted somewhere else — a permission a user has
-  through a role is shown as granted and disabled, with the provider named.
-- The parent/child relationship: granting a child grants its parent, revoking a parent
-  revokes its children.
+## Editing behavior
 
-The grant rules are pure functions (`toggle`, `changesBetween`, `isGrantedElsewhere`,
-`flatten`), exported and unit tested, rather than logic living inside a component. The
-Angular UI keeps them in the component; having them out here is what makes the cascade
-testable.
+The dialog shows groups, hierarchical permissions and grants from other providers. A user grant inherited through a role is displayed as granted and disabled. Granting a child also grants its parent; revoking a parent revokes its descendants. Search narrows the display without discarding the current edit state.
 
-## Only what changed is sent
-
-`changesBetween` compares the state the dialog opened with against the state it is
-closing with, and sends the difference. ABP's endpoint accepts a full list, but sending
-one means a permission somebody else granted while the dialog was open is silently
-reverted.
+Only changes from the initial state are sent. Saving failures keep edits, and Cancel uses the modal's unsaved-change confirmation. Public grant utilities and service DTOs are listed in the [API reference](/api/permission-management). The replaceable key is `PermissionManagement.PermissionManagementComponent`.

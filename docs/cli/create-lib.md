@@ -39,10 +39,3 @@ abpv proxy add --module blogging --target proxy/src
 
 Rename what needs renaming: the component key is public API — a host replaces your page by
 it — so pick it once.
-
-## It is checked, not hoped for
-
-CI packs the ABP Vue packages, runs `create-lib`, installs the result outside the
-workspace, type checks it and builds it, and fails if a `.vue` specifier survived into a
-published declaration. A scaffold nobody builds is a scaffold that is broken half the
-time.

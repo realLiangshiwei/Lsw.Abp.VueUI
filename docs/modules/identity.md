@@ -1,46 +1,38 @@
 # Identity
 
-Users and roles.
+Users and roles with CRUD, search, role assignment and permission dialogs.
+
+## Install and register
+
+```bash
+pnpm add @lsw-abpvue/identity@alpha
+```
 
 ```ts
-provideIdentityConfig();   // main.ts, the menu
+import { provideIdentityConfig } from '@lsw-abpvue/identity/config';
+import { lazyRoutes } from '@lsw-abpvue/core/router';
 
-lazyRoutes('/identity', () =>
-  import('@lsw-abpvue/identity').then(m => m.createIdentityRoutes(options)),
+const moduleConfig = provideIdentityConfig();
+const moduleRoute = lazyRoutes('/identity', () =>
+  import('@lsw-abpvue/identity').then(module => module.createIdentityRoutes()),
 );
 ```
 
-| Page | Route | Component key |
+Add `moduleConfig` to startup providers and `moduleRoute` to your routes. Keep the matching ABP backend module installed.
+
+## Routes and keys
+
+| Page | Route | Key |
 | --- | --- | --- |
 | Users | `/identity/users` | `Identity.UsersComponent` |
 | Roles | `/identity/roles` | `Identity.RolesComponent` |
 
-Both are extensible tables with a create/edit dialog, a search box and the permission
-dialog behind a row action. The users dialog has a second tab for role assignment.
+## Permissions and configuration
 
-## Contributors
+Page policies are `AbpIdentity.Users` and `AbpIdentity.Roles`. Create, Update, Delete and ManagePermissions use the corresponding suffix. Import `IdentityPolicyNames` from `/config` to avoid spelling errors.
 
-```ts
-createIdentityRoutes({
-  entityPropContributors: { [IdentityComponents.Users]: [...] },
-  createFormPropContributors: { [IdentityComponents.Users]: [...] },
-  editFormPropContributors: { [IdentityComponents.Users]: [...] },
-  entityActionContributors: { [IdentityComponents.Users]: [...] },
-  toolbarActionContributors: { [IdentityComponents.Users]: [...] },
-});
-```
+## Behavior and customization
 
-Component keys and contributor shapes are `@abp/ng.identity`'s, verbatim.
+The five contributor maps customize columns, create/edit fields, row actions and toolbar actions. Object extensions for `Identity.User` and `Identity.Role` map supported metadata automatically. See the [users extension tutorial](/tutorials/extend-users). Lockout administration, password setting for another user and per-user two-factor administration need backend APIs absent from the open-source module.
 
-## Object extensions
-
-A property declared in `ObjectExtensions` for `Identity.User` becomes a column and a form
-field with no code here — it arrives in `application-configuration`, and the validators
-its attributes stand for come with it.
-
-## What is not here
-
-| | Why |
-| --- | --- |
-| Lock a user out, set their password | `IdentityUserAppService` in the open source module has no endpoint for either |
-| Per-user two-factor settings | Same; the commercial identity module adds them |
+Services and DTOs are in `@lsw-abpvue/identity/proxy`; [public exports](/api/identity) list configuration, types and extension options.

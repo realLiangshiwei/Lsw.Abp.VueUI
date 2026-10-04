@@ -44,3 +44,7 @@ and keep their backend in its current location.
 
 Run the DbMigrator again. The OpenIddict client is seeded, so new redirect URIs only reach
 the database that way.
+
+## Additional generation options
+
+`--template <dir>`, `--package-manager <name>` (default pnpm), `--with-source-code <list>`, `--skip-install` and `--skip-proxy` control frontend generation. `--skip-backend-config` leaves backend settings for you to synchronize. The default port is 4200.

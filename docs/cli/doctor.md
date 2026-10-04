@@ -10,7 +10,7 @@ abpv doctor --offline
 | --- | --- |
 | `--token <token>` | Also compares the permission names |
 | `--offline` | Only what can be told without the backend |
-| `--project <dir>` / `--solution <dir>` | Where to look |
+| `--solution <dir>` | Where to look |
 
 Ten checks; each failure prints the command that fixes it. The list and what each one
 means: [When it does not work](../guide/troubleshooting).

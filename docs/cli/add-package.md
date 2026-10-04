@@ -3,7 +3,7 @@
 ```bash
 abpv add-package @lsw-abpvue/identity
 abpv add-package @lsw-abpvue/identity --with-source-code
-abpv add-package --with-source-code all,@lsw-abpvue/theme-basic
+abpv add-package all,@lsw-abpvue/theme-basic --with-source-code
 abpv add-package --list-source-ready
 ```
 
@@ -29,3 +29,5 @@ and `abpv doctor` both read it and say those packages no longer follow releases.
 ## abpv eject
 
 The same thing under the name people look for. It is an alias.
+
+Installing a package does not register its menu and routes; follow its [module guide](/modules/).

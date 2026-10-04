@@ -1,48 +1,42 @@
 # Account
 
-The pages a visitor sees before they are signed in, and the profile page after.
+Provides local login, registration, password recovery and profile pages. Shared tenant and profile services live in `account-core`.
+
+## Install and register
+
+```bash
+pnpm add @lsw-abpvue/account@alpha
+```
 
 ```ts
-provideAccountConfig();
-provideManageProfileTabs();
+import { provideAccountConfig } from '@lsw-abpvue/account/config';
+import { provideManageProfileTabs } from '@lsw-abpvue/account';
+import { lazyRoutes } from '@lsw-abpvue/core/router';
 
-lazyRoutes('/account', () =>
-  import('@lsw-abpvue/account').then(m => m.createAccountRoutes()),
+const accountProviders = [provideAccountConfig(), provideManageProfileTabs()];
+const accountRoutes = lazyRoutes('/account', () =>
+  import('@lsw-abpvue/account').then(module => module.createAccountRoutes()),
 );
 ```
 
-| Page | Route | Component key |
+Add the providers after OAuth and the route to your application routes.
+
+## Routes and keys
+
+| Page | Route | Key |
 | --- | --- | --- |
 | Login | `/account/login` | `Account.LoginComponent` |
 | Register | `/account/register` | `Account.RegisterComponent` |
 | Forgot password | `/account/forgot-password` | `Account.ForgotPasswordComponent` |
 | Reset password | `/account/reset-password` | `Account.ResetPasswordComponent` |
-| Manage profile | `/account/manage-profile` | `Account.ManageProfileComponent` |
+| Profile | `/account/manage` | `Account.ManageProfileComponent` |
 
-The login page is only reached in the password flow. With `responseType: 'code'` the
-visitor goes to the identity server instead, and these pages are dead weight the bundler
-removes.
+The profile requires authentication. Local login and registration visibility follow the backend account settings. Code flow delegates login, registration and forgot password to the authorization server; reset-password links remain supported locally.
 
-## Two factor
+## Profile and extension behavior
 
-The login page handles ABP's second step itself: a first attempt that comes back with
-`TwoFactorRequiredError` shows the code field, and the second carries `twoFactorProvider`
-and `twoFactorCode`. The Angular UI needs the commercial account module for this.
+`provideAccountConfig()` overrides My account navigation to the local profile route. Without that override, OAuth opens the server profile page. [Authentication](/guide/authentication) explains the choice.
 
-## The profile page's tabs
+Personal details and change password are profile tabs registered by `provideManageProfileTabs()`. Add custom tabs using Vue components, and use account form contributors for reusable customization. [Profile tabs](/customization/profile-settings) provides an example.
 
-```ts
-provideManageProfileTabs([
-  { name: 'BookStore::ApiKeys', order: 3, component: () => import('./ApiKeysTab.vue') },
-]);
-```
-
-The tab tree is a contributor point, so a package can add a tab to the profile page. The
-two the module ships — personal details and change password — are entries in the same
-tree and can be reordered or hidden.
-
-## `account-core`
-
-The half both the account pages and a theme need: the tenant box on the login page, the
-profile state, and the tab tree. A theme depends on `account-core`, never on `account` —
-the login form is a page, and the tenant switcher is a piece of chrome.
+Second-factor login behavior depends on backend responses and delivery capabilities. Two-factor administration is not supplied by the open-source profile API. [Public exports](/api/account) and [shared services](/api/account-core) list the available APIs.

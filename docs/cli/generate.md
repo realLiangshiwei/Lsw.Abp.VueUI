@@ -33,9 +33,10 @@ By HTTP shape, not by method name. The GET with no route parameter returning
 `PagedResultDto<T>` is the list; `T` is the record; the body of the POST is the form. A
 service that renamed `GetListAsync` still works.
 
-`PropType` comes from `type` rather than `typeSimple`, because ABP reports a `DateTime`
-as a simple `string` and a table built from that shows dates as text.
+Field controls use the full backend type rather than only its simplified JSON type, so dates can use date controls.
 
 Service and DTO names come from replaying the proxy generation in memory with the options
 `generate-proxy.json` recorded — two modules with a `BookDto` each mean one was renamed,
 and the page has to import the name that was written.
+
+`--module` also accepts `-m`. `--auto-imports` enables the preset-based generation explicitly; its default follows `package.json`.

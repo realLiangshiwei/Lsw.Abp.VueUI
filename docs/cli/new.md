@@ -47,16 +47,10 @@ Three values, without which nothing can sign in:
 
 A solution generated with `-u no-ui` has none of them.
 
-## Why it reads the disk rather than the exit code
+## Backend generation
 
-`abp new` returns zero even when one of its post-actions failed — on Apple silicon its
-bundled pwsh is x64 and the "Initialize Solution" step fails every time, while the CLI
-still prints "Your solution has been created." So this command looks at the solution that
-is actually on disk.
+The command inspects the solution actually written to disk before adding the frontend. Follow [Quick Start](/guide/new-solution) for backend library installation, database seeding and startup.
 
-## Reproducibility
+## Additional generation options
 
-`abpv new X -d mongodb` and `abp new X -t app -u no-ui -uost -o X/aspnet-core -d mongodb`
-produce the same backend in `X/aspnet-core`, apart from the two `appsettings.json` files this one deliberately edits —
-once five values `abp new` randomises on every run (project ids, a creation timestamp, a
-certificate passphrase, an encryption passphrase and the ports) are normalised away.
+`--package-manager <pnpm|npm|yarn>` selects the installer (default pnpm). `--skip-install` skips installation; `--skip-proxy` skips proxy generation. The default frontend port is 4200. `--backend` can override the detected backend address.

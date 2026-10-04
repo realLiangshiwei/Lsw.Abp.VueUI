@@ -1,40 +1,37 @@
 # Tenant management
 
-Tenants, the features they are given and the connection strings they use.
+Tenant CRUD, feature management and tenant connection strings.
+
+## Install and register
+
+```bash
+pnpm add @lsw-abpvue/tenant-management@alpha
+```
 
 ```ts
-provideTenantManagementConfig();
+import { provideTenantManagementConfig } from '@lsw-abpvue/tenant-management/config';
+import { lazyRoutes } from '@lsw-abpvue/core/router';
 
-lazyRoutes('/tenant-management', () =>
-  import('@lsw-abpvue/tenant-management').then(m => m.createTenantManagementRoutes()),
+const moduleConfig = provideTenantManagementConfig();
+const moduleRoute = lazyRoutes('/tenant-management', () =>
+  import('@lsw-abpvue/tenant-management').then(module => module.createTenantManagementRoutes()),
 );
 ```
 
-| Page | Route | Component key |
+Add `moduleConfig` to startup providers and `moduleRoute` to your routes. Keep the matching ABP backend module installed.
+
+## Routes and keys
+
+| Page | Route | Key |
 | --- | --- | --- |
 | Tenants | `/tenant-management/tenants` | `TenantManagement.TenantsComponent` |
 
-An extensible table with create, edit and delete, plus two row actions: the feature dialog
-and the connection string.
+## Permissions and configuration
 
-## The connection string
+Page access requires `AbpTenantManagement.Tenants`; actions use Create, Update, Delete, ManageFeatures and ManageConnectionStrings policies under that prefix. Management is a host capability; it is separate from selecting a tenant for login.
 
-```
-Use shared database          the tenant has none of its own
-Use a separate database      one connection string, saved with the tenant
-```
+## Behavior and customization
 
-The Angular UI has no screen for this at all — the endpoints are there and nothing calls
-them. Here it is a small dialog behind a row action, gated on
-`AbpTenantManagement.Tenants.ManageConnectionStrings`.
+Feature management opens the shared dialog with provider `T` and the tenant id. Connection strings can use the shared database or a tenant-specific database. The tenant page supports the five contributor maps and `TenantManagement.Tenant` object extensions. [Page extensions](/concepts/extensions) describes the options; [feature management](./feature-management) describes the dialog.
 
-## Features
-
-The same dialog the feature management module provides, opened with `provider-name="T"`
-and the tenant's id. A feature that is disabled for a tenant cascades: its children go
-with it, and the email settings tab disappears from that tenant's settings page.
-
-## Object extensions
-
-`ObjectExtensions` for `TenantManagement.Tenant` add columns and fields here, as
-everywhere else.
+Services and DTOs are in `@lsw-abpvue/tenant-management/proxy`; [public exports](/api/tenant-management) list configuration, types and extension options.

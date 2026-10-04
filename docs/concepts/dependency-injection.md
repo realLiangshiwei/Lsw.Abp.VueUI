@@ -13,7 +13,7 @@ export const BookService = defineService('BookService', () => {
 
   return {
     getList: (input: PagedAndSortedResultRequestDto) =>
-      rest.request<never, PagedResultDto<BookDto>>({ method: 'GET', url: '/api/app/book' }),
+      rest.request<never, PagedResultDto<BookDto>>({ method: 'GET', url: '/api/app/book', params: { ...input } }),
   };
 });
 

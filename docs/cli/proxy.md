@@ -1,9 +1,9 @@
 # abpv proxy
 
 ```bash
-abpv proxy add --module identity     # one module, several, or "all"
+abpv proxy add --module app     # one module, several, or "all"
 abpv proxy refresh                   # generate again what is recorded
-abpv proxy remove --module identity  # take one out, generate the rest again
+abpv proxy remove --module app  # take one out, generate the rest again
 ```
 
 | | |
@@ -32,9 +32,6 @@ DTOs as interfaces, one service per controller, a validator map per namespace, t
 permission names as constants, and a barrel per directory. See
 [Talking to the backend](../guide/backend).
 
-## Compared with Angular
+## Built-in modules
 
-`@abp/ng.schematics`'s `generate-proxy` is the same idea and the same algorithm. What
-differs: validator maps and permission-name constants are generated (Angular generates
-neither), two controllers wanting one name are disambiguated rather than colliding, and
-`--dry-run` exists.
+Import built-in services from package `/proxy` entry points. Generate application proxies for your business API, or generate a specific module only when deliberately maintaining its proxy yourself. Methods return promises; cancellation uses an AbortSignal.

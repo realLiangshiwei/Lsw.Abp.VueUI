@@ -1,103 +1,32 @@
 # Themes
 
-Two layers: `theme-shared` is the contract and has **no UI dependency at all**, and a
-theme package implements it.
+`theme-shared` defines UI contracts and feedback services without depending on a UI library. `theme-basic` implements those contracts with Bootstrap styles and Vue controls.
 
-## The contract
-
-Twelve components, by key:
-
-```
-AbpModal      AbpToastHost   AbpConfirmHost   AbpButton
-AbpFormField  AbpInput       AbpSelect        AbpToggle
-AbpDatePicker AbpTypeahead   AbpPagination    AbpSpinner
-```
-
-Everything above the theme — the module UIs, the extensible table and form, your own
-pages — imports these from `@lsw-abpvue/theme-shared` and gets whatever the application
-registered.
+## Register and import
 
 ```ts
+import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
 import { AbpButton, AbpModal } from '@lsw-abpvue/theme-shared';
+
+const theme = provideAbpThemeBasic();
 ```
 
-## Why the contract layer has no UI dependency
+Add `theme` to startup providers. Module pages import controls from theme-shared; they never depend directly on a theme implementation. Import Bootstrap, icons and Basic Theme styles in the order shown in [startup](/development/startup).
 
-`theme-basic` is built on reka-ui, which is Vue components. A theme built on Web
-Components would be a different kind of thing entirely. If either of them were a
-dependency of the contract layer, every application using the other would carry it for
-nothing — so the contract layer has neither, and each theme brings its own.
+## Contracts
 
-The proof that the line is in the right place: two unrelated implementations —
-`theme-basic` (reka-ui with Bootstrap 5) and a plain reference theme built from native
-elements only — pass the same 70 behavioural assertions with `theme-shared` unchanged.
+Twelve controls cover button, input, select, toggle, form field, date picker, typeahead, modal, pagination, spinner, toast host and confirmation host. Their props, events and slots are listed in [components](/components/).
 
-## Registering a theme
+Replace a single control with `provideThemeComponents`. Replace the application shell or its logo and navigation with `ReplaceableComponentsService` and theme component keys. Layout parts do not expose an arbitrary set of named slots; see [layout customization](/customization/layout).
 
-```ts
-provideAbpThemeBasic();
-```
+## Modal behavior
 
-Or a component at a time, which is how you replace one of the twelve without forking a
-theme:
+`AbpModal` guards user close paths. Native input events or an explicit `dirty` flag can trigger unsaved-change confirmation. `busy` blocks user closing. Cancel uses the footer slot's `close()`; successful save sets visibility to false directly. [Modal reference](/components/modal) documents lifecycle events and accessibility.
 
-```ts
-provideThemeComponents({ AbpDatePicker: MyDatePicker });
-```
+## Theme testing
 
-## Layouts and slots
+A custom implementation can use `runThemeContractTests` from `@lsw-abpvue/theme-shared/testing` to check keyboard interaction, focus, disabled state and accessible behavior. Passing a suite does not replace visual review of your own theme.
 
-A theme provides three layouts — `application`, `account` and `empty` — and a set of
-slots inside them: the brand, the navbar items, the user menu, the language switcher, the
-breadcrumb. A host fills a slot rather than replacing the layout.
+Basic Theme supports light, dark and system modes, and follows localization direction for RTL. The generated application is a client SPA; platform-safe core services do not constitute a full server-rendered theme template.
 
-Replaceable components go further: any page can be swapped by its component key, which is
-how a module's page is replaced wholesale without forking the module.
-
-```ts
-replaceable.add({ key: IdentityComponents.Users, component: MyUsersPage });
-```
-
-## Testing a theme
-
-```ts
-import { runThemeContractTests } from '@lsw-abpvue/theme-shared/testing';
-
-runThemeContractTests(myTheme);
-```
-
-Seventy assertions about behaviour rather than markup: Esc closes a modal, focus returns
-to what opened it, arrow keys move through a select, `aria-expanded` flips both ways,
-a disabled control is not interactive. Plus axe-core over every contract component.
-
-A theme that passes them is a theme every module UI works on.
-
-## Dark mode and RTL
-
-Both are the theme's, and `theme-basic` has them. Dark mode follows the OS by default and
-can be set explicitly; RTL follows the culture's direction from the localization
-configuration, so switching to Arabic switches the layout.
-
-## Closing a modal
-
-`AbpModal` asks before discarding changes made in its body. Pass `dirty` when a custom
-control updates a form without emitting a native input event. `busy` blocks user closes;
-`suppressUnsavedChangesWarning` permits closing without confirmation.
-
-Use the footer's `close()` for Cancel. Set `visible` to false after a successful save.
-
-```vue
-<AbpModal v-model:visible="open" :dirty="form.dirty" :busy="saving">
-  <template #header><h2>Edit record</h2></template>
-  <MyForm :form="form" />
-  <template #footer="{ close }">
-    <AbpButton variant="secondary" outline @click="close">Cancel</AbpButton>
-    <AbpButton :loading="saving" @click="save">Save</AbpButton>
-  </template>
-</AbpModal>
-```
-
-Refusing the confirmation keeps the form open with its values. A dirty, visible modal
-also requests the browser's native warning when leaving the document. Theme authors
-can use `useModal(props, close)` for this shared behavior and provide its `requestClose`
-to their footer slot.
+[Write a theme](/customization/create-theme).

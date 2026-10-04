@@ -1,0 +1,368 @@
+{
+  "labels": {
+    "en": {
+      "source": "Source",
+      "example": "Usage",
+      "behavior": "Behavior",
+      "name": "Name",
+      "type": "Type",
+      "required": "Required",
+      "default": "Default",
+      "yes": "Yes",
+      "no": "No",
+      "payload": "Payload",
+      "context": "Context",
+      "noProps": "No component-specific props.",
+      "noEvents": "No component-specific events. Native attributes/events follow the component's root element.",
+      "noSlots": "No named slots.",
+      "attributes": "Examples are template fragments: supply the named values and handlers in your page. Import controls from `@lsw-abpvue/theme-shared` and data/page components from `@lsw-abpvue/components`, or use the application template's auto-import preset. Types and models are extracted from the public contract; default expressions are from the current implementation. A dash means no explicit default is declared. Optional boolean props are normally false when omitted.",
+      "related": "Package API",
+      "apiIntro": "Public exports grouped by import entry. Value exports exist at runtime; type exports are used with `import type`. Source links lead to their declarations.",
+      "version": "This reference follows **main**. The published npm channel is **alpha**; consult [versions and compatibility](/release/compatibility) before relying on a change that has not been published.",
+      "imports": "Import",
+      "export": "Export",
+      "kind": "Kind",
+      "typeOnly": "Type",
+      "value": "Value"
+    },
+    "zh": {
+      "source": "源码",
+      "example": "用法",
+      "behavior": "行为说明",
+      "name": "名称",
+      "type": "类型",
+      "required": "必填",
+      "default": "默认值",
+      "yes": "是",
+      "no": "否",
+      "payload": "参数",
+      "context": "上下文",
+      "noProps": "没有组件专有参数。",
+      "noEvents": "没有组件专有事件。原生属性和事件由组件根元素处理。",
+      "noSlots": "没有命名插槽。",
+      "attributes": "示例为模板片段，需要在页面中提供对应变量和方法。主题控件从 `@lsw-abpvue/theme-shared` 导入，数据与页面组件从 `@lsw-abpvue/components` 导入，也可使用应用模板的自动导入配置。类型和绑定来自公开契约，默认表达式来自当前实现。短横线表示未显式声明默认值；可选 boolean 属性省略时通常为 false。",
+      "related": "包 API",
+      "apiIntro": "按导入入口列出公开导出。值导出存在于运行时；类型导出使用 `import type`。源码链接指向对应声明。",
+      "version": "本参考跟随 **main**。npm 已发布通道是 **alpha**；使用尚未发布的变更前请查看[版本与兼容性](/zh/release/compatibility)。",
+      "imports": "导入",
+      "export": "导出",
+      "kind": "类别",
+      "typeOnly": "类型",
+      "value": "值"
+    }
+  },
+  "components": [
+    {
+      "name": "AbpButton",
+      "slug": "button",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpButton.vue",
+      "contract": "packages/theme-shared/src/contracts/button.ts",
+      "description": {
+        "en": "A themed button with loading, disabled and icon states.",
+        "zh": "带加载、禁用和图标状态的主题按钮."
+      },
+      "example": "<AbpButton variant=\"primary\" :loading=\"saving\" @click=\"save\">Save</AbpButton>",
+      "notes": {
+        "en": "Loading prevents clicks. Add aria-label when the button has only an icon.",
+        "zh": "加载状态会阻止点击。仅显示图标时应提供 aria-label。"
+      }
+    },
+    {
+      "name": "AbpInput",
+      "slug": "input",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpInput.vue",
+      "contract": "packages/theme-shared/src/contracts/input.ts",
+      "description": {
+        "en": "A themed input, textarea or password field.",
+        "zh": "主题输入框、多行文本和密码输入框。"
+      },
+      "example": "<AbpInput v-model=\"name\" autocomplete=\"name\" :invalid=\"invalid\" />",
+      "notes": {
+        "en": "Use type=\"number\" for numeric values. Text inputs emit strings; clearing a numeric input can emit null. Connect labels through AbpFormField.",
+        "zh": "数字值使用 type=\"number\"。文本输入输出字符串，清空数字输入可输出 null。使用 AbpFormField 关联标签。"
+      }
+    },
+    {
+      "name": "AbpSelect",
+      "slug": "select",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpSelect.vue",
+      "contract": "packages/theme-shared/src/contracts/select.ts",
+      "description": {
+        "en": "Single or multiple selection from typed options.",
+        "zh": "基于选项的单选或多选控件。"
+      },
+      "example": "<AbpSelect v-model=\"category\" :options=\"categories\" clearable />",
+      "notes": {
+        "en": "Each option has value and label; multiple selection uses an array. Labels are display text, so localize them before passing them.",
+        "zh": "选项包含 value 和 label；多选值是数组。label 是显示文本，需要传入前完成本地化。"
+      }
+    },
+    {
+      "name": "AbpToggle",
+      "slug": "toggle",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpToggle.vue",
+      "contract": "packages/theme-shared/src/contracts/toggle.ts",
+      "description": {
+        "en": "A checkbox or switch.",
+        "zh": "复选框或开关。"
+      },
+      "example": "<AbpToggle v-model=\"enabled\" variant=\"switch\" aria-label=\"Enabled\" />",
+      "notes": {
+        "en": "Checkbox and switch variants bind a boolean. Radio controls bind the selected option value. `indeterminate` applies to the checkbox variant. The example uses a boolean switch.",
+        "zh": "checkbox 和 switch 绑定布尔值，radio 绑定所选选项的值。`indeterminate` 用于 checkbox。示例使用布尔开关。"
+      }
+    },
+    {
+      "name": "AbpFormField",
+      "slug": "form-field",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpFormField.vue",
+      "contract": "packages/theme-shared/src/contracts/form-field.ts",
+      "description": {
+        "en": "A label, validation messages and help text around a control.",
+        "zh": "为控件提供标签、校验消息和帮助文本。"
+      },
+      "example": "<AbpFormField label=\"Name\" for=\"name\" :errors=\"messages\">\n  <AbpInput id=\"name\" v-model=\"name\" />\n</AbpFormField>",
+      "notes": {
+        "en": "Use the same for and id. Pass already formatted validation messages in errors; do not pass validation rule objects.",
+        "zh": "for 与控件 id 保持一致。errors 接收已格式化的消息，不直接传入校验规则对象。"
+      }
+    },
+    {
+      "name": "AbpDatePicker",
+      "slug": "date-picker",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpDatePicker.vue",
+      "contract": "packages/theme-shared/src/contracts/date-picker.ts",
+      "description": {
+        "en": "Date, time or datetime input with ISO string values.",
+        "zh": "以 ISO 字符串绑定日期、时间或日期时间。"
+      },
+      "example": "<AbpDatePicker v-model=\"publishDate\" type=\"date\" clearable />",
+      "notes": {
+        "en": "Values remain strings for ABP DTOs. Basic Theme uses culture-aware date segments and a calendar. Respect min/max and choose date, time or datetime to match your DTO; displaying a date is separate from timezone conversion.",
+        "zh": "绑定值保持字符串，便于传入 ABP DTO。Basic Theme 提供符合文化格式的分段输入和日历。按 DTO 选择 date、time 或 datetime，并设置 min/max；显示格式与时区转换是不同操作。"
+      }
+    },
+    {
+      "name": "AbpTypeahead",
+      "slug": "typeahead",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpTypeahead.vue",
+      "contract": "packages/theme-shared/src/contracts/typeahead.ts",
+      "description": {
+        "en": "An asynchronous lookup with separate value and display text.",
+        "zh": "异步查找控件，分别保存值和显示文本。"
+      },
+      "example": "<AbpTypeahead v-model=\"authorId\" v-model:display-value=\"authorName\" :search=\"searchAuthors\" />",
+      "notes": {
+        "en": "search returns value/label items and receives an AbortSignal. Respect it in your request. displayValue fills an existing record without another lookup. Basic Theme currently uses its existing typeahead implementation; the reka-ui migration is planned.",
+        "zh": "search 返回 value/label 选项，并接收 AbortSignal；请求应使用该信号。displayValue 可显示已有记录而无需额外查询。Basic Theme 当前沿用已有自动完成实现，reka-ui 迁移尚未完成。"
+      }
+    },
+    {
+      "name": "AbpModal",
+      "slug": "modal",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpModal.vue",
+      "contract": "packages/theme-shared/src/contracts/modal.ts",
+      "description": {
+        "en": "A modal dialog with guarded close paths.",
+        "zh": "带关闭保护的模态框。"
+      },
+      "example": "<AbpModal v-model:visible=\"visible\" :busy=\"saving\" :dirty=\"form.dirty\">\n  <template #header><h2>Edit record</h2></template>\n  <form @submit.prevent=\"save\">...</form>\n  <template #footer=\"{ close }\">\n    <AbpButton variant=\"secondary\" @click=\"close\">Cancel</AbpButton>\n    <AbpButton :loading=\"saving\" @click=\"save\">Save</AbpButton>\n  </template>\n</AbpModal>",
+      "notes": {
+        "en": "Cancel, the close button, Esc and the backdrop request a guarded close. Native input changes or dirty trigger a discard confirmation. busy prevents user closes. After a successful save set visible=false directly. Use footer.close() for cancellation. init/appear/disappear describe visibility lifecycle, not completed animations. Focus returns to the trigger.",
+        "zh": "取消、关闭按钮、Esc 和遮罩会请求受保护的关闭。原生输入变更或 dirty 会触发丢弃确认，busy 会阻止用户关闭。保存成功后直接设置 visible=false；取消使用 footer.close()。init/appear/disappear 描述可见状态生命周期，不表示动画结束。关闭后焦点返回触发元素。"
+      }
+    },
+    {
+      "name": "AbpPagination",
+      "slug": "pagination",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpPagination.vue",
+      "contract": "packages/theme-shared/src/contracts/pagination.ts",
+      "description": {
+        "en": "Zero-based pagination and a page-size selector.",
+        "zh": "从零开始的分页与每页条数选择器。"
+      },
+      "example": "<AbpPagination v-model:page=\"page\" v-model:page-size=\"pageSize\" :total=\"total\" />",
+      "notes": {
+        "en": "Bind ListService.page directly: it is zero-based. total is the total record count, not the number of pages. Render the record-range summary in your page; AbpExtensibleTable includes that summary.",
+        "zh": "ListService.page 从零开始，可直接绑定。total 是记录总数，不是页数。普通页面自行显示记录范围；AbpExtensibleTable 已包含该摘要。"
+      }
+    },
+    {
+      "name": "AbpSpinner",
+      "slug": "spinner",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpSpinner.vue",
+      "contract": "packages/theme-shared/src/contracts/spinner.ts",
+      "description": {
+        "en": "An accessible loading indicator.",
+        "zh": "具有可访问名称的加载指示器。"
+      },
+      "example": "<AbpSpinner label=\"Loading records\" size=\"sm\" />",
+      "notes": {
+        "en": "Use a useful label. A spinner does not disable other controls; bind their busy or disabled state separately.",
+        "zh": "提供有意义的 label。加载指示器不会禁用其他控件，需要分别绑定 busy 或 disabled。"
+      }
+    },
+    {
+      "name": "AbpToastHost",
+      "slug": "toast-host",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpToastHost.vue",
+      "contract": "packages/theme-shared/src/contracts/toast-host.ts",
+      "description": {
+        "en": "Renders notifications from ToasterService.",
+        "zh": "显示 ToasterService 的通知。"
+      },
+      "example": "<AbpToastHost />",
+      "notes": {
+        "en": "Basic Theme installs its notification host in the application shell. Add a host when building your own shell; send messages through useToaster rather than manipulating the host.",
+        "zh": "Basic Theme 已在应用外壳中安装通知宿主。自定义外壳时添加宿主，通过 useToaster 发送消息。"
+      }
+    },
+    {
+      "name": "AbpConfirmHost",
+      "slug": "confirm-host",
+      "package": "theme-shared",
+      "source": "packages/theme-basic/src/components/AbpConfirmHost.vue",
+      "contract": "packages/theme-shared/src/contracts/confirm-host.ts",
+      "description": {
+        "en": "Renders pending ConfirmationService requests.",
+        "zh": "显示 ConfirmationService 的确认请求。"
+      },
+      "example": "<AbpConfirmHost />",
+      "notes": {
+        "en": "Basic Theme provides a host. useConfirmation().warn() resolves to ConfirmationStatus; compare the result with ConfirmationStatus.confirm before a destructive operation.",
+        "zh": "Basic Theme 已提供宿主。useConfirmation().warn() 返回 ConfirmationStatus，执行删除等操作前应与 ConfirmationStatus.confirm 比较。"
+      }
+    },
+    {
+      "name": "AbpPage",
+      "slug": "page",
+      "package": "components",
+      "source": "packages/components/src/components/AbpPage.vue",
+      "description": {
+        "en": "A page heading, toolbar and content container.",
+        "zh": "页面标题、工具栏与正文容器。"
+      },
+      "example": "<AbpPage title=\"BookStore::Menu:Books\">\n  <template #toolbar><AbpButton @click=\"create\">New book</AbpButton></template>\n  <p>Page content</p>\n</AbpPage>",
+      "notes": {
+        "en": "title is a localization key. The layout owns the breadcrumb. Use the title slot for a custom heading.",
+        "zh": "title 接收本地化 key。面包屑由布局提供；自定义标题使用 title 插槽。"
+      }
+    },
+    {
+      "name": "AbpPageToolbar",
+      "slug": "page-toolbar",
+      "package": "components",
+      "source": "packages/components/src/components/AbpPageToolbar.vue",
+      "description": {
+        "en": "Renders contributed toolbar actions in reusable module pages.",
+        "zh": "显示可复用模块页面贡献的工具栏操作。"
+      },
+      "example": "<AbpPageToolbar :data=\"items\" />",
+      "notes": {
+        "en": "Requires an extension identifier and assembled toolbar contributors. Application pages can place ordinary buttons in AbpPage's toolbar slot instead.",
+        "zh": "需要扩展标识和已装配的工具栏贡献者。应用业务页面可直接在 AbpPage 的 toolbar 插槽放置普通按钮。"
+      }
+    },
+    {
+      "name": "AbpDataTable",
+      "slug": "data-table",
+      "package": "components",
+      "source": "packages/components/src/components/AbpDataTable.vue",
+      "description": {
+        "en": "A table driven by explicit columns and records.",
+        "zh": "由显式列定义与记录驱动的表格。"
+      },
+      "example": "<AbpDataTable :data=\"books\" :columns=\"columns\" record-key=\"id\">\n  <template #cell-name=\"{ row }\"><strong>{{ row.name }}</strong></template>\n</AbpDataTable>",
+      "notes": {
+        "en": "Sorting updates the `sortKey` and `sortOrder` named models; update your list query to load the sorted data. Selection and expanded rows use named v-model bindings. Table cells render text by default.",
+        "zh": "排序更新 `sortKey` 和 `sortOrder` 命名模型，需要更新列表查询以加载排序数据。选择和展开行使用命名 v-model 绑定。默认单元格按文本渲染。"
+      }
+    },
+    {
+      "name": "AbpGridActions",
+      "slug": "grid-actions",
+      "package": "components",
+      "source": "packages/components/src/components/AbpGridActions.vue",
+      "description": {
+        "en": "Row actions displayed as one button or a dropdown.",
+        "zh": "将行操作显示为单个按钮或下拉菜单。"
+      },
+      "example": "<AbpGridActions :record=\"book\" :actions=\"actions\" :disabled=\"saving\" />",
+      "notes": {
+        "en": "One action becomes a button; multiple actions become a dropdown; no actions render nothing. Plain RowAction.action receives the record. Filter actions by policy before passing them. Omit actions only inside an extensible module context.",
+        "zh": "一个操作显示按钮，多个操作显示下拉菜单，没有操作时不显示。普通 RowAction.action 接收记录。传入前按权限过滤操作；仅在模块扩展上下文中省略 actions。"
+      }
+    },
+    {
+      "name": "AbpTabList",
+      "slug": "tab-list",
+      "package": "components",
+      "source": "packages/components/src/components/AbpTabList.vue",
+      "description": {
+        "en": "Accessible tabs with horizontal or vertical orientation.",
+        "zh": "支持水平或垂直排列的可访问标签页。"
+      },
+      "example": "<AbpTabList v-model=\"selected\" :items=\"tabs\" orientation=\"horizontal\" aria-label=\"Settings\" />",
+      "notes": {
+        "en": "Items use name, optional text and iconClass. text/name are localized. The caller renders the selected panel. Arrow keys and Home/End move selection.",
+        "zh": "标签项包含 name，以及可选 text 和 iconClass。text/name 会本地化。调用者负责显示选中的面板，方向键和 Home/End 可切换选择。"
+      }
+    },
+    {
+      "name": "AbpExtensibleTable",
+      "slug": "extensible-table",
+      "package": "components",
+      "source": "packages/components/src/components/AbpExtensibleTable.vue",
+      "description": {
+        "en": "A module table assembled from column and action contributors.",
+        "zh": "通过列和操作贡献者装配的模块表格。"
+      },
+      "example": "<AbpExtensibleTable :data=\"items\" :list=\"list\" record-key=\"id\" searchable />",
+      "notes": {
+        "en": "Requires the module's EXTENSIONS_IDENTIFIER and resolved contributors. Handles paging, sorting, record range and optional search. Column visibility shares the list's preference key. Use AbpDataTable for an application page with explicit columns.",
+        "zh": "需要模块的 EXTENSIONS_IDENTIFIER 和已解析的贡献者。处理分页、排序、记录范围与可选搜索。列显隐与列表共用偏好 key。显式定义列的应用页面使用 AbpDataTable。"
+      }
+    },
+    {
+      "name": "AbpExtensibleForm",
+      "slug": "extensible-form",
+      "package": "components",
+      "source": "packages/components/src/components/AbpExtensibleForm.vue",
+      "description": {
+        "en": "Fields assembled from form contributors.",
+        "zh": "通过表单贡献者装配字段。"
+      },
+      "example": "<AbpExtensibleForm :form=\"form\" :record=\"record\">\n  <template #field-name=\"{ control }\"><AbpInput v-model=\"control.value\" /></template>\n</AbpExtensibleForm>",
+      "notes": {
+        "en": "form is the result of useExtensibleForm. field-{name} replaces one control. Grouped properties render together, and unmatched server errors remain visible.",
+        "zh": "form 来自 useExtensibleForm。field-{name} 替换一个控件。同组属性一起显示，无法匹配字段的服务端错误仍会展示。"
+      }
+    },
+    {
+      "name": "AbpRecordModal",
+      "slug": "record-modal",
+      "package": "components",
+      "source": "packages/components/src/components/AbpRecordModal.vue",
+      "description": {
+        "en": "A dialog view of an extensible module record editor.",
+        "zh": "模块记录编辑器的对话框视图。"
+      },
+      "example": "<AbpRecordModal :editor=\"editor\" label=\"AbpIdentity::Roles\" create-title=\"AbpIdentity::NewRole\" />",
+      "notes": {
+        "en": "editor comes from useRecordEditor in a reusable module. The default body renders the extensible form; header/body/footer can be replaced. Application CRUD pages use AbpModal with their own form and save method.",
+        "zh": "editor 来自可复用模块中的 useRecordEditor。默认正文显示扩展表单，可替换标题、正文和底部。应用 CRUD 页面使用 AbpModal、自己的表单和保存方法。"
+      }
+    }
+  ]
+}

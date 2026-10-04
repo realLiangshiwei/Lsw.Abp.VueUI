@@ -25,9 +25,7 @@ then fails in a way that is very hard to see.
 @lsw-abpvue/identity/proxy    the generated services
 ```
 
-Three entry points because the three are needed at different times. `config` imports no
-component, so an application that never opens the identity pages still gets their menu
-for a few hundred bytes.
+Three entry points because the three are needed at different times. Identity config registers navigation without loading its pages. Other config entries can include lazy tab components, so inspect the package entry when deciding what to load.
 
 `abpv create-lib` writes a package with the same three, for a module of your own.
 

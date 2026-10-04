@@ -1,7 +1,7 @@
 # abpv update
 
 ```bash
-abpv update                 # to whatever the registry publishes as latest
+abpv update --tag alpha     # the current prerelease channel
 abpv update --to 0.2.0
 abpv update --tag next
 abpv update --dry-run
@@ -38,3 +38,5 @@ runs three migrations. There have been none so far, which is what an empty list 
 ## Afterwards
 
 It edits the manifest and nothing else. Install again.
+
+`--to` chooses an exact version, `--tag` chooses a registry tag (default `latest`), and `--dry-run` previews changes. During the alpha-only stage use `--tag alpha` because the current `latest` points to the older initial alpha.

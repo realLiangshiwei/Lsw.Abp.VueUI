@@ -1,81 +1,37 @@
 # Setting management
 
-The settings page and its tab tree.
+A settings page whose tab tree can be extended by modules and the host.
+
+## Install and register
+
+```bash
+pnpm add @lsw-abpvue/setting-management@alpha
+```
 
 ```ts
-provideSettingManagementConfig();
+import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/config';
+import { lazyRoutes } from '@lsw-abpvue/core/router';
 
-lazyRoutes('/setting-management', () =>
-  import('@lsw-abpvue/setting-management').then(m => m.createSettingManagementRoutes()),
+const moduleConfig = provideSettingManagementConfig();
+const moduleRoute = lazyRoutes('/setting-management', () =>
+  import('@lsw-abpvue/setting-management').then(module => module.createSettingManagementRoutes()),
 );
 ```
 
-| Page | Route | Component key |
+Add `moduleConfig` to startup providers and `moduleRoute` to your routes. Keep the matching ABP backend module installed.
+
+## Routes and keys
+
+| Page | Route | Key |
 | --- | --- | --- |
 | Settings | `/setting-management` | `SettingManagement.SettingsComponent` |
 
-## The tabs
+## Permissions and configuration
 
-The page renders the tab tree contributed by packages. Email, account and time zone tabs
-ship with it. Their visibility follows the backend's permissions, features and capabilities.
+Email access uses `SettingManagement.Emailing`; sending a test uses `SettingManagement.Emailing.Test`. Timezone access uses `SettingManagement.TimeZone` and backend timezone capability. Tab visibility follows permissions, features and API availability.
 
-```ts
-import { inject, provideAppInitializer } from '@lsw-abpvue/core';
-import { SettingTabsService } from '@lsw-abpvue/setting-management/config';
-import { defineAsyncComponent } from 'vue';
+## Behavior and customization
 
-provideAppInitializer(() => {
-  inject(SettingTabsService).add([
-    {
-      name: 'BookStore::Printing',
-      order: 5,
-      component: defineAsyncComponent(() => import('./PrintingTab.vue')),
-    },
-  ]);
-});
-```
+Email, account and timezone tabs are provided. The default account tab displays local-login and self-registration settings as read-only because the open-source account module has no update endpoint for them. A host can replace `AccountSettingsService` from `/config` with a writable adapter; its required policy must match that API. Register settings config before feature config. Custom tabs use `SettingTabsService`; see [profile and settings tabs](/customization/profile-settings).
 
-`name` is both the tab id and its localization key, matching the Angular convention.
-Use that same name when reordering, replacing or hiding a tab.
-
-## Account settings
-
-The default tab reads `Abp.Account.IsSelfRegistrationEnabled` and
-`Abp.Account.EnableLocalLogin` from application configuration. It is visible to signed-in
-users and shows disabled switches: the open-source account module exposes these values
-but has no account-settings update endpoint.
-
-A host with a writable account settings API can replace the service:
-
-```ts
-import { AccountSettingsService } from '@lsw-abpvue/setting-management/config';
-import { accountSettingsApi } from './account-settings-api';
-
-const accountSettingsProvider = {
-  provide: AccountSettingsService,
-  useValue: {
-    requiredPolicy: 'AbpAccount.SettingManagement',
-    get: () => accountSettingsApi.get(),
-    update: settings => accountSettingsApi.update(settings),
-  } satisfies AccountSettingsService,
-};
-```
-
-Add this provider to the application's providers alongside `provideSettingManagementConfig()`.
-Without an explicit `requiredPolicy`, a writable adapter requires
-`AbpAccount.SettingManagement`. The save button appears only when `update` exists, and a
-successful save refreshes application configuration.
-
-## Email settings
-
-The form the backend's `EmailSettingsAppService` describes, plus its "send a test email"
-endpoint. The test button is gated on the permission that endpoint actually checks, which
-is not the same one as the page.
-
-The tab is not rendered at all for a tenant whose email feature is off — the backend
-would refuse every save, and a form that cannot be saved is worse than no form.
-
-## Time zone
-
-Behind ABP's `Abp.Timing.TimeZone` setting, and only shown when the backend has timezone
-support switched on.
+Services and DTOs are in `@lsw-abpvue/setting-management/proxy`; [public exports](/api/setting-management) list configuration, types and extension options.

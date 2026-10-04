@@ -4,7 +4,7 @@ A module's UI is an npm package until you want it in your repository.
 
 ```bash
 abpv add-package @lsw-abpvue/identity --with-source-code
-abpv add-package --with-source-code all,@lsw-abpvue/theme-basic
+abpv add-package all,@lsw-abpvue/theme-basic --with-source-code
 abpv add-package --list-source-ready
 ```
 
@@ -40,6 +40,6 @@ Release the one module you are actually customising, not all of them.
 ## Going back
 
 Delete the directory under `packages/`, take its entry out of `tsconfig.json`'s `paths`
-and out of `.abpvue/source-code.json`, and install again. The npm package was never
+and any corresponding build aliases, and out of `.abpvue/source-code.json`, and install again. The npm package was never
 removed from `dependencies` — the path only shadowed it — so there is nothing to put
 back.
