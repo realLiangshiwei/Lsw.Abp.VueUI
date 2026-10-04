@@ -8,7 +8,7 @@ Use Node 20 or newer, a package manager, the .NET SDK required by the target ABP
 
 ```bash
 dotnet tool install -g Volo.Abp.Studio.Cli
-npm install -g @lsw-abpvue/cli@alpha
+npm install -g @lsw-abpvue/cli
 ```
 
 This example uses MongoDB. Run a local server or create one with Docker before seeding.

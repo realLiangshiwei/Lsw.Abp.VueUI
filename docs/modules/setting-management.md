@@ -5,7 +5,7 @@ A settings page whose tab tree can be extended by modules and the host.
 ## Install and register
 
 ```bash
-pnpm add @lsw-abpvue/setting-management@alpha
+pnpm add @lsw-abpvue/setting-management
 ```
 
 ```ts

@@ -8,7 +8,7 @@ CLI 将 ABP 后端写入 `aspnet-core/`，Vue 前端写入 `vue/`。
 
 ```bash
 dotnet tool install -g Volo.Abp.Studio.Cli
-npm install -g @lsw-abpvue/cli@alpha
+npm install -g @lsw-abpvue/cli
 ```
 
 本例使用 MongoDB，初始化数据库前需要启动本地服务或 Docker 容器。

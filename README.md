@@ -2,13 +2,13 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-[![npm alpha](https://img.shields.io/npm/v/%40lsw-abpvue%2Fcli/alpha?label=npm%20alpha&style=flat-square)](https://www.npmjs.com/package/@lsw-abpvue/cli) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![npm](https://img.shields.io/npm/v/%40lsw-abpvue%2Fcli?style=flat-square)](https://www.npmjs.com/package/@lsw-abpvue/cli) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 **Lsw.Abp.VueUI** provides a Vue 3 frontend for applications built with the [ABP Framework](https://abp.io/), including authentication, application modules, Bootstrap themes and a CLI.
 
 The project follows the capabilities and extension points of ABP's Angular UI using Vue's Composition API. It consumes existing ABP APIs without requiring an additional backend package.
 
-This is an **unofficial community project**, not affiliated with Volosoft. Prerelease packages are available through the **`alpha`** tag.
+This is an **unofficial community project**, not affiliated with Volosoft.
 
 ## Getting Started
 
@@ -18,7 +18,7 @@ Install the CLIs and create a solution:
 
 ```bash
 dotnet tool install -g Volo.Abp.Studio.Cli
-npm install -g @lsw-abpvue/cli@alpha
+npm install -g @lsw-abpvue/cli
 abpv new Acme.BookStore -d mongodb
 ```
 

@@ -5,7 +5,7 @@
 ## 安装与注册
 
 ```bash
-pnpm add @lsw-abpvue/account@alpha
+pnpm add @lsw-abpvue/account
 ```
 
 ```ts

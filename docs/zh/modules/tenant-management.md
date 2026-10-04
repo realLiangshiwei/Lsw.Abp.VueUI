@@ -5,7 +5,7 @@
 ## 安装与注册
 
 ```bash
-pnpm add @lsw-abpvue/tenant-management@alpha
+pnpm add @lsw-abpvue/tenant-management
 ```
 
 ```ts

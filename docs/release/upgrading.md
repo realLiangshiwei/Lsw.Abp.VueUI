@@ -3,16 +3,16 @@
 Keep the CLI and all `@lsw-abpvue/*` runtime packages on one release version. Read the target release notes and preview the manifest changes first.
 
 ```bash
-pnpm abpv update --tag alpha --dry-run
-pnpm abpv update --tag alpha
+pnpm abpv update --dry-run
+pnpm abpv update
 pnpm install
 ```
 
-Use `--to <version>` for an exact target. The command's default tag is `latest`, which currently points to the older initial alpha; pass `--tag alpha` explicitly now.
+Use `--to <version>` for an exact target. The command's default tag is `latest`, which selects the stable release. Select a prerelease channel explicitly with `--tag alpha`, `--tag beta` or `--tag rc` when needed.
 
 ## What changes
 
-The CLI updates plain semver ranges while keeping their modifier. Tags, `file:` dependencies and Git URLs are left as chosen. Registered migrations execute in version order; current releases have no migration steps.
+The CLI updates plain semver ranges while keeping their modifier. Tags, `file:` dependencies and Git URLs are left as chosen. Any registered migrations execute in version order.
 
 Released local source is listed with newer changelog notes, but its files and recorded source version are not overwritten. Review and merge those fixes yourself. [Source ownership](/guide/source-code) explains this boundary.
 

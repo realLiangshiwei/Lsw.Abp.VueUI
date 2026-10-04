@@ -5,7 +5,7 @@ A dialog for permissions provided by the backend. Identity opens it for users an
 ## Install and use
 
 ```bash
-pnpm add @lsw-abpvue/permission-management@alpha
+pnpm add @lsw-abpvue/permission-management
 ```
 
 ```vue

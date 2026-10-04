@@ -5,7 +5,7 @@ Provides local login, registration, password recovery and profile pages. Shared 
 ## Install and register
 
 ```bash
-pnpm add @lsw-abpvue/account@alpha
+pnpm add @lsw-abpvue/account
 ```
 
 ```ts

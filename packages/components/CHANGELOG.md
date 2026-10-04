@@ -1,5 +1,23 @@
 # @lsw-abpvue/components
 
+## 0.1.0
+
+### Minor Changes
+
+- First stable release of the ABP Vue UI.
+- a540a6a: Add automatic imports for common Vue and ABP APIs in application templates and generated pages, with initial TypeScript declarations. Generate application proxies by default and omit internal template changelogs from new projects.
+
+  Fix repeated form option requests, released source package resolution, language persistence, localized page titles, form layout attributes, and modal title accessibility.
+
+- a63ede6: Use dropdowns for multiple application row actions and buttons for a single action. Show localized pagination summaries and align page links with the page size selector.
+- Updated dependencies [a540a6a]
+- Updated dependencies [8e63363]
+- Updated dependencies [ffe8cd5]
+- Updated dependencies [4547b17]
+  - @lsw-abpvue/core@0.1.0
+  - @lsw-abpvue/theme-shared@0.1.0
+  - @lsw-abpvue/utils@0.1.0
+
 ## 0.0.1-alpha.5
 
 ### Patch Changes

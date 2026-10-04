@@ -1,5 +1,17 @@
 # @lsw-abpvue/account-core
 
+## 0.1.0
+
+### Minor Changes
+
+- First stable release of the ABP Vue UI.
+- Updated dependencies [a540a6a]
+- Updated dependencies [8e63363]
+- Updated dependencies [ffe8cd5]
+- Updated dependencies [4547b17]
+  - @lsw-abpvue/core@0.1.0
+  - @lsw-abpvue/utils@0.1.0
+
 ## 0.0.1-alpha.5
 
 ### Patch Changes

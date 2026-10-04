@@ -5,7 +5,7 @@
 ## 安装与使用
 
 ```bash
-pnpm add @lsw-abpvue/permission-management@alpha
+pnpm add @lsw-abpvue/permission-management
 ```
 
 ```vue

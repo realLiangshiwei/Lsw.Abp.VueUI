@@ -5,7 +5,7 @@
 ## 1. 创建解决方案
 
 ~~~bash
-npx @lsw-abpvue/cli@alpha new Acme.BookStore -d mongodb --sample-crud
+npx @lsw-abpvue/cli new Acme.BookStore -d mongodb --sample-crud
 ~~~
 
 按照[快速开始](/zh/guide/new-solution)初始化并启动后端，在 `vue/` 启动前端，使用拥有 Books 示例权限的账户登录。可选示例包含 Authors 与 Books 端点；默认解决方案没有这些实体。

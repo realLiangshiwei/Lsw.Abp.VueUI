@@ -5,7 +5,7 @@ The command line tool of [Lsw.Abp.VueUI](https://github.com/realLiangshiwei/Lsw.
 generates typed proxies from a running backend.
 
 ```bash
-npx @lsw-abpvue/cli@alpha new Acme.BookStore
+npx @lsw-abpvue/cli new Acme.BookStore
 ```
 
 Both `abpvue` and `abpv` run it.
@@ -231,12 +231,14 @@ application that never opens your module pays a few hundred bytes for it.
 
 ```bash
 abpv update                 # to whatever the registry publishes as latest
-abpv update --to 0.2.0
 abpv update --dry-run
 ```
 
+Use `--to <version>` to select an exact published version.
+
 Every `@lsw-abpvue/*` range in `package.json` moves to one version, with the modifier the
-project chose kept: `^0.1.0` becomes `^0.2.0`, `0.1.0` becomes `0.2.0`. A range that is
+project chose kept. For example, when moving from `0.1.0` to `0.2.0`, `^0.1.0` becomes
+`^0.2.0` and `0.1.0` becomes `0.2.0`. A range that is
 not a plain version -- a `file:` path, a tag, a git URL -- is a decision the project made
 on purpose and is left alone, and it says which ones and why.
 
@@ -244,8 +246,7 @@ A package whose source has been released into the project is not upgraded either
 upgrade cannot reach source that lives in `packages/`. Those are listed, with the version
 they were released at, so the changes can be brought over by hand.
 
-Breaking changes come with a migration that runs here. There have been none, which is
-what an empty list means rather than a missing feature.
+Registered migrations run in version order. If none apply to the upgrade, the list is empty.
 
 Install again afterwards; this command edits the manifest and nothing else.
 

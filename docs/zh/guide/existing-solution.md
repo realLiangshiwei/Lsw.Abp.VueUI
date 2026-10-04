@@ -3,10 +3,10 @@
 abpv switch-ui 为已有或尚无 UI 的 ABP 解决方案增加 Vue。
 
 ```bash
-npx @lsw-abpvue/cli@alpha switch-ui                  # renames angular/ to angular.bak/ and adds vue/
-npx @lsw-abpvue/cli@alpha switch-ui --mode keep      # leaves the old UI where it is
-npx @lsw-abpvue/cli@alpha switch-ui --port 5173
-npx @lsw-abpvue/cli@alpha switch-ui --dry-run        # says what it would do to your files
+npx @lsw-abpvue/cli switch-ui                  # renames angular/ to angular.bak/ and adds vue/
+npx @lsw-abpvue/cli switch-ui --mode keep      # leaves the old UI where it is
+npx @lsw-abpvue/cli switch-ui --port 5173
+npx @lsw-abpvue/cli switch-ui --dry-run        # says what it would do to your files
 ```
 
 ## 项目结构与修改保护

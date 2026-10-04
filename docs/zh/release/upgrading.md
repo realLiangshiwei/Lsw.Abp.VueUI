@@ -3,16 +3,16 @@
 CLI 与全部 `@lsw-abpvue/*` 运行时包保持同一发布版本。先阅读目标版本记录，再预览清单变化。
 
 ```bash
-pnpm abpv update --tag alpha --dry-run
-pnpm abpv update --tag alpha
+pnpm abpv update --dry-run
+pnpm abpv update
 pnpm install
 ```
 
-精确版本使用 `--to <version>`。命令默认标签为 `latest`，目前指向较旧的初始 alpha，应显式传入 `--tag alpha`。
+精确版本使用 `--to <version>`。命令默认标签为 `latest`，选择稳定版。需要预发布版本时，显式使用 `--tag alpha`、`--tag beta` 或 `--tag rc`。
 
 ## 修改范围
 
-CLI 更新普通 semver 范围，并保留原来的修饰符。标签、`file:` 依赖和 Git URL 保持用户选择。已注册迁移按版本顺序执行，当前版本还没有迁移步骤。
+CLI 更新普通 semver 范围，并保留原来的修饰符。标签、`file:` 依赖和 Git URL 保持用户选择。如果存在已注册的迁移，按版本顺序执行。
 
 已释放本地源码会显示更新的变更说明，但不会覆盖文件或更新其源码版本标记，需要自行审阅并合入修复。[源码维护](/zh/guide/source-code)说明了这条边界。
 

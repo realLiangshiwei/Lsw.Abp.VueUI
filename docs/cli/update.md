@@ -1,14 +1,14 @@
 # abpv update
 
 ```bash
-abpv update --tag alpha     # the current prerelease channel
-abpv update --to 0.2.0
-abpv update --tag next
+abpv update                # the latest stable release
+abpv update --tag alpha     # opt into the alpha channel
 abpv update --dry-run
 ```
 
 Every `@lsw-abpvue/*` range in `package.json` moves to one version, keeping the modifier
-the project chose: `^0.1.0` becomes `^0.2.0`, `0.1.0` becomes `0.2.0`.
+the project chose. For example, when moving from `0.1.0` to `0.2.0`, `^0.1.0` becomes
+`^0.2.0` and `0.1.0` becomes `0.2.0`.
 
 ## What it leaves alone
 
@@ -33,10 +33,10 @@ or claim its release marker has moved to the target version.
 
 A release with a breaking change carries a migration, and everything between the version
 the project is on and the version it is going to runs in order — skipping three releases
-runs three migrations. There have been none so far, which is what an empty list means.
+runs the migrations registered for those versions. If none apply, the migration list is empty.
 
 ## Afterwards
 
 It edits the manifest and nothing else. Install again.
 
-`--to` chooses an exact version, `--tag` chooses a registry tag (default `latest`), and `--dry-run` previews changes. During prerelease development, select `--tag alpha` explicitly rather than relying on the default registry tag.
+`--to <version>` chooses an exact published version, `--tag` chooses a registry tag (default `latest`), and `--dry-run` previews changes. The default selects the stable release; select a prerelease channel explicitly when needed.

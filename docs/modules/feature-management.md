@@ -5,7 +5,7 @@ Edits features for a backend provider, including tenant features opened from ten
 ## Install and use
 
 ```bash
-pnpm add @lsw-abpvue/feature-management@alpha
+pnpm add @lsw-abpvue/feature-management
 ```
 
 ```vue

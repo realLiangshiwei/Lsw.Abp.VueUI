@@ -5,7 +5,7 @@ Tenant CRUD, feature management and tenant connection strings.
 ## Install and register
 
 ```bash
-pnpm add @lsw-abpvue/tenant-management@alpha
+pnpm add @lsw-abpvue/tenant-management
 ```
 
 ```ts

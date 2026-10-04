@@ -5,7 +5,7 @@ This walkthrough creates the optional BookStore sample, then changes price displ
 ## 1. Create the solution
 
 ~~~bash
-npx @lsw-abpvue/cli@alpha new Acme.BookStore -d mongodb --sample-crud
+npx @lsw-abpvue/cli new Acme.BookStore -d mongodb --sample-crud
 ~~~
 
 Start and initialize the backend following [Quick Start](/guide/new-solution). Start the frontend from `vue/` and log in with an account granted the sample's Books permissions. The optional sample includes Authors and Books endpoints; a default solution does not include these entities.

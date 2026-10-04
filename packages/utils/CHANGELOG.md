@@ -1,5 +1,11 @@
 # @lsw-abpvue/utils
 
+## 0.1.0
+
+### Minor Changes
+
+- First stable release of the ABP Vue UI.
+
 ## 0.0.1-alpha.5
 
 ## 0.0.1-alpha.4

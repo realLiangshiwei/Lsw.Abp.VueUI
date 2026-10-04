@@ -7,7 +7,7 @@ Basic Theme is the Bootstrap implementation of the shared UI contracts. Generate
 For a manually configured application, install the theme and its styles:
 
 ```bash
-pnpm add @lsw-abpvue/theme-basic@alpha bootstrap bootstrap-icons
+pnpm add @lsw-abpvue/theme-basic bootstrap bootstrap-icons
 ```
 
 In `src/main.ts`, keep the Core and router providers and add the theme provider:

@@ -1,5 +1,22 @@
 # @lsw-abpvue/identity
 
+## 0.1.0
+
+### Minor Changes
+
+- Persist list preferences under the built-in component identifier.
+- First stable release of the ABP Vue UI.
+- Updated dependencies [a540a6a]
+- Updated dependencies [a63ede6]
+- Updated dependencies [8e63363]
+- Updated dependencies [ffe8cd5]
+- Updated dependencies [4547b17]
+  - @lsw-abpvue/components@0.1.0
+  - @lsw-abpvue/core@0.1.0
+  - @lsw-abpvue/permission-management@0.1.0
+  - @lsw-abpvue/theme-shared@0.1.0
+  - @lsw-abpvue/utils@0.1.0
+
 ## 0.0.1-alpha.5
 
 ### Patch Changes

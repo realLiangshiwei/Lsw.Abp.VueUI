@@ -1,10 +1,10 @@
 # The abpv CLI
 
-Install the alpha CLI globally, or run it without a global installation:
+Install the CLI globally, or run it without a global installation:
 
 ```bash
-npm install -g @lsw-abpvue/cli@alpha
-npx @lsw-abpvue/cli@alpha --help
+npm install -g @lsw-abpvue/cli
+npx @lsw-abpvue/cli --help
 ```
 
 `abpv` and `abpvue` invoke the same command. The CLI requires Node 20 or newer. Creating a backend requires the target .NET SDK and official ABP CLI. Existing-solution operations also inspect backend configuration; online generation needs a running backend or saved metadata.

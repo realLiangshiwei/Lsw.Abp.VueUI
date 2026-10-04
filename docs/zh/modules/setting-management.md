@@ -5,7 +5,7 @@
 ## 安装与注册
 
 ```bash
-pnpm add @lsw-abpvue/setting-management@alpha
+pnpm add @lsw-abpvue/setting-management
 ```
 
 ```ts

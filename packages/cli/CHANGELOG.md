@@ -1,5 +1,30 @@
 # @lsw-abpvue/cli
 
+## 0.1.0
+
+### Minor Changes
+
+- 86747fc: Generate solutions with sibling aspnet-core and vue directories, matching ABP's Angular layout. Support this layout when adding Vue to an existing solution and diagnosing it, including custom output paths, previews and failure cleanup.
+- a540a6a: Add automatic imports for common Vue and ABP APIs in application templates and generated pages, with initial TypeScript declarations. Generate application proxies by default and omit internal template changelogs from new projects.
+
+  Fix repeated form option requests, released source package resolution, language persistence, localized page titles, form layout attributes, and modal title accessibility.
+
+- 8e63363: Prebundle installed application entry points before automatic imports discover them, while preserving one dependency injection instance for released package sources.
+- 86747fc: Generate application CRUD pages with explicit table columns, form controls and CRUD methods instead of module extension registration and record editors. Put templates before scripts, simplify the optional Books example, and preserve existing legacy extension files during regeneration.
+- a63ede6: Use dropdowns for multiple application row actions and buttons for a single action. Show localized pagination summaries and align page links with the page size selector.
+- 5052859: Resolve generated service and page imports relative to custom page, proxy and route output directories.
+- ffe8cd5: Synchronize the selected language with the backend culture cookie, including restored
+  sessions and changes from another tab. Preserve backend action policies under the
+  requested base permission when generating CRUD pages, including `.Edit` permissions.
+- e556960: Preserve existing template and application routes when generating their pages, and reject conflicting route changes.
+- 8e63363: Require complete verification before publishing, including tests, coverage, builds, and clean external consumer checks.
+- Release the first stable version of the ABP Vue UI with framework services, OAuth, Bootstrap themes, extensible components, application modules and CLI tools. Include normalized Windows preview paths, list preference keys based on built-in component identifiers, and expanded English and Chinese documentation.
+- Updated dependencies [a540a6a]
+- Updated dependencies [8e63363]
+- Updated dependencies [ffe8cd5]
+- Updated dependencies [4547b17]
+  - @lsw-abpvue/core@0.1.0
+
 ## 0.0.1-alpha.5
 
 ### Patch Changes

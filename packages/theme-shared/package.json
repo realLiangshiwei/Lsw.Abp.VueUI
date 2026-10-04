@@ -1,6 +1,6 @@
 {
   "name": "@lsw-abpvue/theme-shared",
-  "version": "0.0.1-alpha.5",
+  "version": "0.1.0",
   "description": "The theme contract of the ABP Vue UI: twelve component interfaces, the state services behind them, and no UI library of its own.",
   "license": "MIT",
   "type": "module",

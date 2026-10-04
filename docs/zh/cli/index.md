@@ -1,10 +1,10 @@
 # abpv CLI
 
-全局安装 alpha CLI，或直接运行：
+全局安装 CLI，或直接运行：
 
 ```bash
-npm install -g @lsw-abpvue/cli@alpha
-npx @lsw-abpvue/cli@alpha --help
+npm install -g @lsw-abpvue/cli
+npx @lsw-abpvue/cli --help
 ```
 
 `abpv` 与 `abpvue` 调用同一个命令。CLI 要求 Node 20 或以上，创建后端还需要目标 .NET SDK 和 ABP 官方 CLI。已有方案操作会读取后端配置，在线生成需要运行中的后端，也可使用保存的元数据。

@@ -5,7 +5,7 @@ Users and roles with CRUD, search, role assignment and permission dialogs.
 ## Install and register
 
 ```bash
-pnpm add @lsw-abpvue/identity@alpha
+pnpm add @lsw-abpvue/identity
 ```
 
 ```ts

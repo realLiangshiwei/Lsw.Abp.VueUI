@@ -7,7 +7,7 @@ Basic Theme 使用 Bootstrap 实现共享 UI 契约，生成应用默认注册�
 手动配置应用时安装主题与样式：
 
 ```bash
-pnpm add @lsw-abpvue/theme-basic@alpha bootstrap bootstrap-icons
+pnpm add @lsw-abpvue/theme-basic bootstrap bootstrap-icons
 ```
 
 在 `src/main.ts` 保留 Core、路由提供者，增加主题：

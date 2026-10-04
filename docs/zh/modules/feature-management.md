@@ -5,7 +5,7 @@
 ## 安装与使用
 
 ```bash
-pnpm add @lsw-abpvue/feature-management@alpha
+pnpm add @lsw-abpvue/feature-management
 ```
 
 ```vue

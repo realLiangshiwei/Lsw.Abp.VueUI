@@ -2,13 +2,13 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-[![npm alpha](https://img.shields.io/npm/v/%40lsw-abpvue%2Fcli/alpha?label=npm%20alpha&style=flat-square)](https://www.npmjs.com/package/@lsw-abpvue/cli) [![许可证：MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+[![npm](https://img.shields.io/npm/v/%40lsw-abpvue%2Fcli?style=flat-square)](https://www.npmjs.com/package/@lsw-abpvue/cli) [![许可证：MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 **Lsw.Abp.VueUI** 为基于 [ABP Framework](https://abp.io/) 的应用提供 Vue 3 前端，包含认证、业务模块、Bootstrap 主题和 CLI。
 
 项目的功能与扩展点对标 ABP 官方 Angular UI，实现采用 Vue Composition API。直接使用 ABP 已有的 API，无需安装额外的后端包。
 
-这是一个**非官方社区项目**，与 Volosoft 无关联。目前通过 **`alpha`** 标签提供预发布版本。
+这是一个**非官方社区项目**，与 Volosoft 无关联。
 
 ## 快速开始
 
@@ -18,7 +18,7 @@
 
 ```bash
 dotnet tool install -g Volo.Abp.Studio.Cli
-npm install -g @lsw-abpvue/cli@alpha
+npm install -g @lsw-abpvue/cli
 abpv new Acme.BookStore -d mongodb
 ```
 
