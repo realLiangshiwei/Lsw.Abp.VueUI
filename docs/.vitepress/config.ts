@@ -1,5 +1,6 @@
 import { defineConfig, type DefaultTheme } from 'vitepress';
 import reference from './reference.json';
+import { searchOptions } from './search';
 
 const repository = 'https://github.com/realLiangshiwei/Lsw.Abp.VueUI';
 type Locale = 'en' | 'zh';
@@ -222,6 +223,7 @@ export default defineConfig({
     search: {
       provider: 'local',
       options: {
+        miniSearch: { options: searchOptions },
         locales: {
           zh: {
             translations: {

@@ -32,7 +32,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lsw-abpvue/docs typecheck
-      - run: pnpm exec vitest run --project tooling scripts/docs-api.spec.ts
+      - run: pnpm exec vitest run --project tooling scripts/docs-api.spec.ts scripts/docs-search.spec.ts
       - run: pnpm --filter @lsw-abpvue/docs build
       - uses: actions/upload-pages-artifact@v4
         with:
