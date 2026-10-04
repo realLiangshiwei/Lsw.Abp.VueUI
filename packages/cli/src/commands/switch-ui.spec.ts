@@ -1,12 +1,13 @@
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CliError } from '../errors.js';
 import { writeSolutionFixture } from '../solution/solution-fixture.js';
 import { run } from '../system/run.js';
+import { templateRoot } from '../template/paths.js';
 import { runSwitchUi, type SwitchUiArgs } from './switch-ui.js';
 
 const MODULE_FILE = join('src', 'Acme.BookStore.HttpApi.Host', 'BookStoreHttpApiHostModule.cs');
@@ -206,6 +207,30 @@ describe('abpv switch-ui', () => {
       '+++ b/aspnet-core/src/Acme.BookStore.HttpApi.Host/appsettings.json',
     );
     await expect(stat(join(project, 'vue'))).rejects.toThrow();
+  });
+
+  it('previews nested frontend renames with portable paths', async () => {
+    await mkdir(join(root, 'frontend', 'app'), { recursive: true });
+    await writeFile(join(root, 'frontend', 'app', 'notes.md'), 'mine');
+    const result = await switchUi({ dir: 'frontend/app', 'dry-run': true });
+    expect(result.diff.join('\n')).toContain(
+      'diff --git a/frontend/app b/frontend/app.bak\nrename from frontend/app\nrename to frontend/app.bak',
+    );
+    expect(await readFile(join(root, 'frontend', 'app', 'notes.md'), 'utf8')).toBe('mine');
+  });
+
+  it('previews binary files with portable paths', async () => {
+    const source = join(root, 'custom-template');
+    await cp(templateRoot(), source, {
+      recursive: true,
+      filter: file => !file.includes('node_modules'),
+    });
+    await writeFile(join(source, 'public', 'logo.png'), new Uint8Array([0, 1, 2]));
+    const result = await switchUi({ dir: 'frontend/app', template: source, 'dry-run': true });
+    expect(result.diff.join('\n')).toContain(
+      'Binary files /dev/null and b/frontend/app/public/logo.png differ',
+    );
+    await expect(stat(join(root, 'frontend'))).rejects.toThrow();
   });
 
   it('refuses uncommitted work in a backend with its own Git repository', async () => {

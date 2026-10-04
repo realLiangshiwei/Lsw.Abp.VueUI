@@ -24,7 +24,7 @@ import { USERS_PAGE } from '../tokens/extensions.token.js';
 
 const users = injectAbp(IdentityUserService);
 
-const list = useListService({ persistKey: 'Identity.Users' });
+const list = useListService({ persistKey: IdentityComponents.Users });
 const { items } = list.hookToQuery(query => users.getList(query));
 
 const tab = ref('details');

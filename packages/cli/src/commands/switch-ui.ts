@@ -16,7 +16,7 @@ import { renderTemplate } from '../template/render.js';
 import { Rollback } from '../system/rollback.js';
 import { run } from '../system/run.js';
 import { cliVersion } from '../system/version.js';
-import { unifiedDiff } from '../system/diff.js';
+import { diffPath, unifiedDiff } from '../system/diff.js';
 
 /** The options of `abpv switch-ui`. */
 export interface SwitchUiArgs {
@@ -215,18 +215,21 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
 
     const diff = dryRun
       ? [
-          ...renamed.map(({ from, to }) =>
-            [
-              `diff --git a/${relative(root, from)} b/${relative(root, to)}`,
-              `rename from ${relative(root, from)}`,
-              `rename to ${relative(root, to)}`,
-            ].join('\n'),
-          ),
+          ...renamed.map(({ from, to }) => {
+            const fromPath = diffPath(relative(root, from));
+            const toPath = diffPath(relative(root, to));
+            return [
+              `diff --git a/${fromPath} b/${toPath}`,
+              `rename from ${fromPath}`,
+              `rename to ${toPath}`,
+            ].join('\n');
+          }),
           ...Object.entries(contents).map(([file, body]) =>
             unifiedDiff(relative(root, join(frontend, file)), '', body),
           ),
           ...binary.map(
-            file => `Binary files /dev/null and b/${relative(root, join(frontend, file))} differ`,
+            file =>
+              `Binary files /dev/null and b/${diffPath(relative(root, join(frontend, file)))} differ`,
           ),
         ]
       : [];

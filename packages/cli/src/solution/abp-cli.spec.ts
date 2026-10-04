@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CliError } from '../errors.js';
 import { abpNewArgs, splitArgs } from './abp-cli.js';
@@ -69,7 +70,7 @@ describe('abpNewArgs', () => {
       'no-ui',
       '-uost',
       '-o',
-      'Acme.BookStore/aspnet-core',
+      join('Acme.BookStore', 'aspnet-core'),
       '-d',
       'mongodb',
     ]);
@@ -96,7 +97,7 @@ describe('abpNewArgs', () => {
     ['-o=../solutions'],
   ])('places the backend inside an explicit project output directory: %j', (...flags) => {
     const args = abpNewArgs('X', [...flags, '-d', 'mongodb']);
-    expect(args).toContain('../solutions/aspnet-core');
+    expect(args).toContain(join('../solutions', 'aspnet-core'));
     expect(args.filter(arg => arg === '-o')).toHaveLength(1);
     expect(args).toContain('mongodb');
     expect(args).not.toContain('-csf');
@@ -106,7 +107,7 @@ describe('abpNewArgs', () => {
     const args = abpNewArgs('X', ['--create-solution-folder', 'false', '-d', 'mongodb']);
     expect(args).not.toContain('--create-solution-folder');
     expect(args).not.toContain('false');
-    expect(args).toContain('X/aspnet-core');
+    expect(args).toContain(join('X', 'aspnet-core'));
   });
 
   it.each([['-o'], ['--output-folder', '-d', 'mongodb'], ['--output-folder=']])(

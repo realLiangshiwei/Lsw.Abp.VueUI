@@ -20,7 +20,7 @@ import { ROLES_PAGE } from '../tokens/extensions.token.js';
 
 const roles = injectAbp(IdentityRoleService);
 
-const list = useListService({ persistKey: 'Identity.Roles' });
+const list = useListService({ persistKey: IdentityComponents.Roles });
 const { items } = list.hookToQuery(query => roles.getList(query));
 
 const permissionsFor = shallowRef<IdentityRoleDto>();

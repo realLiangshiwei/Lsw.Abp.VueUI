@@ -1,6 +1,6 @@
 import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as environment from '../diagnostics/environment.js';
 import { CliError } from '../errors.js';
@@ -136,7 +136,7 @@ describe('abpv new with a backend', () => {
     expect(result.frontend).toBe(join(root, 'vue'));
     await expect(stat(join(root, 'aspnet-core/Acme.BookStore.slnx'))).resolves.toBeDefined();
     await expect(stat(join(root, 'src'))).rejects.toThrow();
-    expect(result.edits.every(edit => edit.file.startsWith('aspnet-core/'))).toBe(true);
+    expect(result.edits.every(edit => edit.file.startsWith(`aspnet-core${sep}`))).toBe(true);
     expect(await readFile(join(root, 'vue/public/dynamic-env.json'), 'utf8')).toContain(
       'BookStore_App',
     );
@@ -160,7 +160,7 @@ describe('abpv new with a backend', () => {
     const result = await create('-o', 'custom', '--dry-run');
     expect(result.root).toBe(join(cwd, 'custom'));
     expect(result.frontend).toBe(join(cwd, 'custom/vue'));
-    expect(result.notes.join('\n')).toContain('custom/aspnet-core');
+    expect(result.notes.join('\n')).toContain(join('custom', 'aspnet-core'));
     expect(program.run).not.toHaveBeenCalled();
     await expect(stat(result.root)).rejects.toThrow();
   });

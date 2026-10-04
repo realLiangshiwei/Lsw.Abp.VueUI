@@ -62,7 +62,7 @@ export function clearListPreferences(storage: StorageService, userId?: string | 
 
 /**
  * The stored preferences of one list. Call it in an injection context.
- * @param persistKey Names the list; by convention the component key, e.g. `Identity.Users`
+ * @param persistKey Names the list; by convention the component key, e.g. `Identity.UsersComponent`
  */
 export function useListPreferences(persistKey: string): ListPreferenceStore {
   const storage = inject(StorageService);

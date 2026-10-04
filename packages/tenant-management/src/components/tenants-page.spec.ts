@@ -2,6 +2,7 @@ import {
   ABP_INJECTOR_KEY,
   ConfigStateService,
   createInjector,
+  StorageService,
   type ApplicationConfigurationDto,
   type Injector,
   type PagedResultDto,
@@ -13,6 +14,7 @@ import { ConfirmationService, ConfirmationStatus } from '@lsw-abpvue/theme-share
 import { expectAccessiblePage, plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { TenantManagementComponents } from '../enums/components.js';
 import { tenantManagementExtensionsResolver } from '../resolvers/extensions.resolver.js';
 import AbpTenantConnectionString from './AbpTenantConnectionString.vue';
 import TenantsPage from './TenantsPage.vue';
@@ -124,6 +126,30 @@ const rowAction = (text: string, index = 0): HTMLButtonElement | undefined =>
   buttonsSaying(text)[index];
 
 describe('TenantsPage', () => {
+  it('restores and saves preferences under the component key', async () => {
+    const key = `abpvue.list.${TenantManagementComponents.Tenants}.anonymous`;
+    const values = new Map([[key, JSON.stringify({ maxResultCount: 25 })]]);
+    const storage: StorageService = {
+      getItem: name => values.get(name) ?? null,
+      setItem: (name, value) => void values.set(name, value),
+      removeItem: name => void values.delete(name),
+      keys: () => [...values.keys()],
+      onChange: () => () => {},
+    };
+    const page = await renderPage(
+      injectorWith([
+        tenantService(),
+        featuresService,
+        { provide: StorageService, useValue: storage },
+      ]),
+    );
+    const selector = page.get<HTMLSelectElement>('select[aria-label="Page size"]');
+    expect(selector.element.value).toBe('25');
+    await selector.setValue('50');
+    expect(JSON.parse(values.get(key) ?? '{}')).toMatchObject({ maxResultCount: 50 });
+    expect([...values.keys()]).toEqual([key]);
+  });
+
   it('lists what the backend answered', async () => {
     const page = await renderPage(injectorWith([tenantService(), featuresService]));
 

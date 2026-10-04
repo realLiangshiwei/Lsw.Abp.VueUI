@@ -2,6 +2,7 @@ import {
   ABP_INJECTOR_KEY,
   ConfigStateService,
   createInjector,
+  StorageService,
   type ApplicationConfigurationDto,
   type Injector,
   type ListResultDto,
@@ -20,6 +21,7 @@ import { expectAccessiblePage, plainTheme } from '@lsw-abpvue/theme-shared/testi
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Component } from 'vue';
+import { IdentityComponents } from '../enums/components.js';
 import { identityExtensionsResolver } from '../resolvers/extensions.resolver.js';
 import RolesPage from './RolesPage.vue';
 import UsersPage from './UsersPage.vue';
@@ -185,6 +187,35 @@ function buttonsSaying(text: string): HTMLButtonElement[] {
     button.textContent?.includes(text),
   );
 }
+
+describe('list preferences', () => {
+  it.each([
+    { page: UsersPage, key: IdentityComponents.Users, service: userService() },
+    { page: RolesPage, key: IdentityComponents.Roles, service: roleService() },
+  ])(
+    'restores and saves preferences under the component key: $key',
+    async ({ page, key, service }) => {
+      const storedKey = `abpvue.list.${key}.user-1`;
+      const values = new Map([[storedKey, JSON.stringify({ maxResultCount: 25 })]]);
+      const storage: StorageService = {
+        getItem: name => values.get(name) ?? null,
+        setItem: (name, value) => void values.set(name, value),
+        removeItem: name => void values.delete(name),
+        keys: () => [...values.keys()],
+        onChange: () => () => {},
+      };
+      const wrapper = await render(
+        page,
+        injectorWith([service, permissionsService, { provide: StorageService, useValue: storage }]),
+      );
+      const selector = wrapper.get<HTMLSelectElement>('select[aria-label="Page size"]');
+      expect(selector.element.value).toBe('25');
+      await selector.setValue('50');
+      expect(JSON.parse(values.get(storedKey) ?? '{}')).toMatchObject({ maxResultCount: 50 });
+      expect([...values.keys()]).toEqual([storedKey]);
+    },
+  );
+});
 
 describe('UsersPage', () => {
   it('lists what the backend answered with, in the columns the module declares', async () => {

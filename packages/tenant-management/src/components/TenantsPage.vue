@@ -21,7 +21,7 @@ import { TENANTS_PAGE } from '../tokens/extensions.token.js';
 
 const tenants = injectAbp(TenantService);
 
-const list = useListService({ persistKey: 'TenantManagement.Tenants' });
+const list = useListService({ persistKey: TenantManagementComponents.Tenants });
 const { items } = list.hookToQuery(query => tenants.getList(query));
 
 const featuresFor = shallowRef<TenantDto>();

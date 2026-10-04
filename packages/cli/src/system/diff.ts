@@ -1,6 +1,11 @@
+export function diffPath(file: string): string {
+  return file.replaceAll('\\', '/');
+}
+
 /** Shows every changed line in a file, with context, without writing either version. */
 export function unifiedDiff(file: string, before: string, after: string): string {
   if (before === after) return '';
+  const path = diffPath(file);
   const linesOf = (text: string) =>
     text === ''
       ? []
@@ -53,9 +58,9 @@ export function unifiedDiff(file: string, before: string, after: string): string
     ...display(oldLines.slice(oldEnd, oldEnd + contextEnd), ' '),
   ];
   return [
-    `diff --git a/${file} b/${file}`,
-    `--- ${before === '' ? '/dev/null' : `a/${file}`}`,
-    `+++ b/${file}`,
+    `diff --git a/${path} b/${path}`,
+    `--- ${before === '' ? '/dev/null' : `a/${path}`}`,
+    `+++ b/${path}`,
     `@@ -${oldCount === 0 ? 0 : contextStart + 1},${oldCount} +${newCount === 0 ? 0 : contextStart + 1},${newCount} @@`,
     ...body,
   ].join('\n');
