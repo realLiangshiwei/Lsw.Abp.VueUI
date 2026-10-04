@@ -1,87 +1,14 @@
 import { defineConfig, type DefaultTheme } from 'vitepress';
-import reference from './reference.json';
+import { createFrameworkSidebar } from './sidebar';
 import { searchOptions } from './search';
+import { fileURLToPath } from 'node:url';
+import { workspaceAliases } from '../../scripts/workspace-aliases';
+import { workspaceTypeScript } from './workspace';
 
 const repository = 'https://github.com/realLiangshiwei/Lsw.Abp.VueUI';
 type Locale = 'en' | 'zh';
 type Entry = [path: string, english: string, chinese: string];
 
-const framework: [string, string, Entry[]][] = [
-  ['Overview', '概览', [['guide/what-is-this', 'Overview', '项目概览']]],
-  [
-    'Quick Start',
-    '快速开始',
-    [
-      ['guide/new-solution', 'Create a solution', '创建新解决方案'],
-      ['guide/existing-solution', 'Use an existing solution', '接入已有解决方案'],
-    ],
-  ],
-  [
-    'Development',
-    '开发',
-    [
-      ['development/structure', 'Project structure', '项目结构'],
-      ['development/startup', 'Application startup', '应用启动'],
-      ['guide/configuration', 'Configuration', '环境配置'],
-      ['development/auto-imports', 'Automatic imports', '自动按需导入'],
-      ['guide/backend', 'API proxies', 'API 代理'],
-      ['guide/crud-page', 'Application pages', '业务页面'],
-      ['development/testing', 'Testing', '测试'],
-      ['development/deployment', 'Deployment', '部署'],
-    ],
-  ],
-  [
-    'Core Functionality',
-    '核心功能',
-    [
-      ['concepts/dependency-injection', 'Dependency injection', '依赖注入'],
-      ['concepts/state', 'Application state', '应用状态'],
-      ['guide/authentication', 'Authentication', '认证'],
-      ['core/current-user', 'Current user', '当前用户'],
-      ['concepts/localization', 'Localization', '本地化'],
-      ['concepts/permissions', 'Permissions', '权限'],
-      ['core/settings-features', 'Settings and features', '设置与功能'],
-      ['core/multi-tenancy', 'Multi-tenancy', '多租户'],
-      ['concepts/routes-and-menu', 'Routing and navigation', '路由与导航'],
-      ['core/http', 'HTTP and errors', 'HTTP 与错误处理'],
-    ],
-  ],
-  [
-    'Utilities',
-    '工具',
-    [
-      ['utilities/forms', 'Forms and validation', '表单与验证'],
-      ['utilities/lists', 'Lists and preferences', '列表与偏好'],
-      ['utilities/requests', 'Request lifecycle', '请求生命周期'],
-      ['utilities/notifications', 'Notifications and confirmation', '通知与确认'],
-      ['utilities/platform', 'Browser and server boundaries', '浏览器与服务端边界'],
-    ],
-  ],
-  [
-    'Customization',
-    '定制',
-    [
-      ['concepts/themes', 'Themes', '主题'],
-      ['customization/create-theme', 'Write a theme', '编写主题'],
-      ['customization/layout', 'Layouts and navigation', '布局与导航'],
-      ['customization/replacement', 'Replace components', '替换组件'],
-      ['concepts/extensions', 'Page extensions', '页面扩展'],
-      ['customization/object-extensions', 'Object extensions', '对象扩展'],
-      ['customization/profile-settings', 'Profile and settings tabs', '个人资料与设置页签'],
-      ['guide/source-code', 'Work with package source', '使用包源码'],
-    ],
-  ],
-  [
-    'Components',
-    '组件',
-    [
-      ['components/', 'Overview', '概览'],
-      ...reference.components.map(
-        item => [`components/${item.slug}`, item.name, item.name] as Entry,
-      ),
-    ],
-  ],
-];
 const modules: Entry[] = [
   ['modules/', 'Overview', '概览'],
   ['modules/account', 'Account', '账户'],
@@ -110,32 +37,10 @@ const tutorials: Entry[] = [
   ['tutorials/', 'Overview', '概览'],
   ['tutorials/crud', 'Build a business page', '开发业务页面'],
   ['tutorials/extend-users', 'Extend the users page', '扩展用户页面'],
+  ['tutorials/backend-examples', 'Run the backend examples', '运行后端示例'],
   ['tutorials/module', 'Create a reusable module', '创建可复用模块'],
 ];
-const api: Entry[] = [
-  ['api/', 'How to use the reference', '参考索引说明'],
-  ['api/services', 'Service and composable guide', '服务与组合式函数速查'],
-  ...[
-    'utils',
-    'core',
-    'oauth',
-    'theme-shared',
-    'components',
-    'theme-basic',
-    'account-core',
-    'account',
-    'identity',
-    'permission-management',
-    'tenant-management',
-    'feature-management',
-    'setting-management',
-    'cli',
-  ].map(name => [`api/${name}`, `@lsw-abpvue/${name}`, `@lsw-abpvue/${name}`] as Entry),
-  ['concepts/packages', 'Package dependencies', '包依赖关系'],
-];
 const maintenance: Entry[] = [
-  ['migration/from-angular', 'Migrate from Angular', '从 Angular 迁移'],
-  ['migration/api-map', 'Angular API mapping', 'Angular API 对照'],
   ['guide/troubleshooting', 'Troubleshooting', '问题排查'],
   ['release/upgrading', 'Upgrading', '升级'],
   ['release/compatibility', 'Versions and compatibility', '版本与兼容性'],
@@ -151,10 +56,7 @@ function theme(locale: Locale): DefaultTheme.Config {
     collapsed: false,
     items: entries(items),
   });
-  const frameworkSidebar = framework.map(([en, zh, items]) => ({
-    ...group(en, zh, items),
-    collapsed: !['Overview', 'Quick Start'].includes(en),
-  }));
+  const frameworkSidebar = createFrameworkSidebar(locale);
   const sidebar: DefaultTheme.Sidebar = {};
   for (const path of [
     'guide',
@@ -169,16 +71,13 @@ function theme(locale: Locale): DefaultTheme.Config {
   sidebar[prefix + 'modules/'] = [group('Modules', '模块', modules)];
   sidebar[prefix + 'cli/'] = [group('CLI', 'CLI', cli)];
   sidebar[prefix + 'tutorials/'] = [group('Tutorials', '教程', tutorials)];
-  sidebar[prefix + 'api/'] = [group('API Reference', 'API 参考', api)];
   sidebar[prefix + 'release/'] = [group('Maintenance', '维护', maintenance)];
-  sidebar[prefix + 'migration/'] = [group('Maintenance', '维护', maintenance)];
   return {
     nav: [
       { text: chinese ? 'Vue UI' : 'Vue UI', link: prefix + 'guide/what-is-this' },
       { text: chinese ? 'CLI' : 'CLI', link: prefix + 'cli/' },
       { text: chinese ? '模块' : 'Modules', link: prefix + 'modules/' },
       { text: chinese ? '教程' : 'Tutorials', link: prefix + 'tutorials/' },
-      { text: chinese ? 'API 参考' : 'API', link: prefix + 'api/' },
       { text: chinese ? '维护' : 'Maintenance', items: entries(maintenance) },
     ],
     sidebar,
@@ -207,6 +106,11 @@ export default defineConfig({
   description: 'Vue 3 UI for ABP Framework',
   base: '/Lsw.Abp.VueUI/',
   cleanUrls: true,
+  vite: {
+    plugins: [workspaceTypeScript],
+    resolve: { alias: workspaceAliases(fileURLToPath(new URL('../../packages', import.meta.url))) },
+  },
+  srcExclude: ['CHANGELOG.md'],
   lastUpdated: true,
   ignoreDeadLinks: [/^https?:\/\/localhost/],
   locales: {

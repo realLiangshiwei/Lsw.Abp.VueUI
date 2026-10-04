@@ -1,31 +1,49 @@
 # 问题排查
 
 ```bash
-pnpm abpv doctor
-pnpm abpv doctor --token "$ACCESS_TOKEN"
-pnpm abpv doctor --offline
+abpv doctor
+abpv doctor --token "$ACCESS_TOKEN"   # also compares the permission names
+abpv doctor --offline                 # only what can be told without the backend
 ```
 
-## 诊断范围
+前后端连接问题通常源于可机械检查的配置不匹配。各失败项提供修复命令。
 
-doctor 检查工具链、后端可达性、证书、CORS、OpenIddict 客户端、回调地址、版本、代理是否过期、对象扩展覆盖和本地源码状态。没有 token 时会说明跳过权限名检查，offline 只执行不需要后端的部分。
-
-## 常见症状
-
-| 症状 | 检查与处理 |
+| 检查 | 失败含义 |
 | --- | --- |
-| 空白页或网络错误 | 启动后端，检查地址和证书；保留模板启动错误页 |
-| 500，The Libs Folder is Missing | 在 HttpApi.Host 项目目录执行 abp install-libs 后重启 |
-| 登录失败或回调循环 | 核对 issuer、clientId、scope 和回调，修改后重跑 DbMigrator |
-| 修改 dynamic-env.json 没生效 | 检查是否返回 JSON、缓存是否刷新、是否被 HTML 回退替代 |
-| 未登录仍显示空管理分组 | 检查配置是否匿名、子菜单权限及应用是否加载旧包 |
-| My account 或退出无响应 | 检查服务与 NAVIGATE_TO_MANAGE_PROFILE 注册，刷新旧标签页 |
-| 代理与后端不一致 | 运行 proxy refresh 并审阅差异 |
-| 扩展字段不显示 | 检查后端元数据、模块实体名称、UI 显隐、权限和功能条件 |
-| update 找不到 latest | 当前 alpha 阶段使用 --tag alpha |
+| 环境 | Node、包管理器、.NET SDK、ABP CLI |
+| 后端可达 | GET {api}/api/abp/application-configuration |
+| 证书 | 开发证书未受信任，使用 dotnet dev-certs https --trust |
+| CORS | 响应宿主的 CorsOrigins 缺少前端源 |
+| OpenIddict 客户端 | 身份服务器发现文档与 clientId |
+| 重定向 URI | redirectUri 不在客户端 RedirectAllowedUrls |
+| 版本 | 方案 ABP 版本与本发布已测试版本 |
+| 代理新鲜度 | 在内存中重生成并逐文件比较 |
+| 对象扩展覆盖 | 后端声明 N 项，规则识别 M 项 |
+| 已释放源码 | 哪些包不再跟随发布 |
 
-对象扩展诊断会列出后端声明但未识别的属性，提供这些具体名称有助于定位映射问题。
+## 对象扩展诊断
 
-## 提交问题
+十五项规则把后端属性映射成列与表单。缺失规则会像应用配置错误：属性已配置但不显示。doctor 比较数量并列出具体差异，输出例如：
 
-附上 doctor 输出、CLI 与包版本、ABP 版本、页面地址和复现步骤。去除 token、密码、连接串等敏感数据。后端不提供的商业模块端点不能靠前端开关启用。
+```
+⚠ object extensions   backend 9, recognised 8
+                      not recognised: IdentityUser.HireDate (DateTime?, hidden on the table)
+                      → this is a gap in our mapping rules; please open an issue
+```
+
+指出的属性属于项目映射缺口。
+
+## 首次运行常见问题
+
+| 现象 | 检查 |
+| --- | --- |
+| 空白页与网络错误 | 后端未启动或证书不受信任 |
+| 500：The Libs Folder is Missing | 在 HttpApi.Host 项目目录执行 abp install-libs，重启宿主 |
+| 登录循环 | 重定向 URI 与已种子客户端不符；switch-ui --port &lt;yours&gt;，再运行 DbMigrator |
+| 换租户后每次请求 401 | 切换时旧租户令牌会被丢弃；持续出现时检查租户客户端种子 |
+| 登录后菜单为空 | 用户缺少权限或应用配置被缓存，强制刷新 |
+| 后端配置列未显示 | 查看 doctor 对象扩展诊断 |
+
+## 求助
+
+创建 issue 时附上 doctor 输出，包含工具链、后端位置与失败项，方便定位。

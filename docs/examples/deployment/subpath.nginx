@@ -1,0 +1,27 @@
+server {
+    listen 8080;
+    server_name app.example.com;
+    root /srv/www;
+    include /etc/nginx/mime.types;
+
+    location = /portal { return 308 /portal/; }
+    location = /portal/dynamic-env.json {
+        add_header Cache-Control "no-store" always;
+        try_files $uri =404;
+    }
+    location = /portal/index.html {
+        add_header Cache-Control "no-cache" always;
+        try_files $uri =404;
+    }
+    location ^~ /portal/assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+    location ~* ^/portal/.*\.(?:css|js|mjs|map|json|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|html)$ {
+        try_files $uri =404;
+    }
+    location /portal/ {
+        try_files $uri $uri/ /portal/index.html;
+    }
+    location / { return 404; }
+}

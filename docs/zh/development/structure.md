@@ -1,6 +1,6 @@
 # 项目结构
 
-标准解决方案沿用 ABP Angular 的目录结构，前端目录改为 `vue/`：
+标准解决方案分开存放后端与 Vue 前端：
 
 ```text
 Acme.BookStore/

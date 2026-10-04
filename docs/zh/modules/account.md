@@ -39,4 +39,4 @@ const accountRoutes = lazyRoutes('/account', () =>
 
 `provideManageProfileTabs()` 注册个人信息和修改密码页签，可使用 Vue 组件增加自定义页签，账户表单贡献者用于可复用定制。示例见[资料页签](/zh/customization/profile-settings)。
 
-二次验证登录取决于后端响应及发送能力，开源资料 API 不提供二次验证管理。可用接口见[公共导出](/zh/api/account)与[共享服务](/zh/api/account-core)。
+二次验证登录取决于后端响应及发送能力，开源资料 API 不提供二次验证管理。

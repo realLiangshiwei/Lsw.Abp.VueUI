@@ -2,7 +2,7 @@
 
 Lsw.Abp.VueUI 为 ABP Framework 应用提供 Vue 3 前端，是采用 MIT 许可证的非官方社区项目，npm 命名空间为 `@lsw-abpvue/*`。
 
-公共模块名称、DTO 字段、本地化 key、权限和可替换组件 key 遵循 ABP Angular 约定，实现使用 Vue Composition API、Promise、Ref 和作用域插槽。
+应用使用 Vue Composition API、Promise、Ref 和作用域插槽。共享服务读取 ABP 配置，模块 UI 使用对应后端的 DTO、本地化资源与权限策略。
 
 ## 提供的能力
 
@@ -19,6 +19,6 @@ Lsw.Abp.VueUI 为 ABP Framework 应用提供 Vue 3 前端，是采用 MIT 许可
 
 ## 阅读顺序
 
-先阅读[快速开始](./new-solution)或[已有方案接入](./existing-solution)。开发部分介绍业务开发，核心功能与工具介绍共享服务，定制部分介绍主题及模块调整，组件与 API 用于查阅。
+先阅读[快速开始](./new-solution)或[已有方案接入](./existing-solution)。开发部分介绍业务开发，核心功能与工具介绍共享服务，定制部分介绍主题及模块调整，组件部分介绍控件及其用法。
 
-站点随 `main` 更新，已发布 alpha 包可能稍晚，见[版本与兼容性](/zh/release/compatibility)。Angular 用户可先阅读[迁移说明](/zh/migration/from-angular)。
+站点随 `main` 更新，已发布 alpha 包可能稍晚，见[版本与兼容性](/zh/release/compatibility)。

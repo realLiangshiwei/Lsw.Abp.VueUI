@@ -39,4 +39,4 @@ runs three migrations. There have been none so far, which is what an empty list 
 
 It edits the manifest and nothing else. Install again.
 
-`--to` chooses an exact version, `--tag` chooses a registry tag (default `latest`), and `--dry-run` previews changes. During the alpha-only stage use `--tag alpha` because the current `latest` points to the older initial alpha.
+`--to` chooses an exact version, `--tag` chooses a registry tag (default `latest`), and `--dry-run` previews changes. During prerelease development, select `--tag alpha` explicitly rather than relying on the default registry tag.

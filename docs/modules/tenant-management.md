@@ -34,4 +34,4 @@ Page access requires `AbpTenantManagement.Tenants`; actions use Create, Update, 
 
 Feature management opens the shared dialog with provider `T` and the tenant id. Connection strings can use the shared database or a tenant-specific database. The tenant page supports the five contributor maps and `TenantManagement.Tenant` object extensions. [Page extensions](/concepts/extensions) describes the options; [feature management](./feature-management) describes the dialog.
 
-Services and DTOs are in `@lsw-abpvue/tenant-management/proxy`; [public exports](/api/tenant-management) list configuration, types and extension options.
+Services and DTOs are in `@lsw-abpvue/tenant-management/proxy`. Startup configuration is imported from the package's `/config` entry; pass page contributors to its route factory.

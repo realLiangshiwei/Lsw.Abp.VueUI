@@ -1,20 +1,40 @@
+<script setup>
+import Example from "../../examples/TabListExample.vue";
+</script>
+
 # AbpTabList
 
-支持水平或垂直排列的可访问标签页。
+`AbpTabList` 显示页签导航，页面持有选中名称和面板内容。
+
+## 切换面板
+
+<ClientOnly><DocsDemo :example="Example" note="演示仅使用本地数据，不连接业务服务器。" /></ClientOnly>
+
+<<< ../../examples/TabListExample.vue
+
+每个页签有稳定 name，text 是本地化 key 或带后备文字的 key。模型保存名称，不保存数组下标。
+
+## 方向与键盘
+
+默认纵向适合设置导航与内容并排，横向适合内容上方的紧凑导航。纵向使用上下键，横向使用左右键并考虑文字方向，Home 和 End 选择首尾。
+
+初始值必须对应可见名称。如果权限变化移除了已选页签，页面应选择另一个可见名称。没有选中项时，所有页签可能都不在正常 Tab 焦点顺序内。
+
+## 渲染内容
+
+组件不自动挂载面板，页面应像示例一样显示有可访问名称的内容区域。自定义 label 插槽提供 item，增加徽标、图标时仍需保留有意义的文字。
+
+希望每次访问都重新加载时，可以通过 v-if 只挂载当前面板。需要切换后保留未保存编辑时，应自行设计状态或缓存策略。个人资料与设置贡献组件参见[资料与设置页签](/zh/customization/profile-settings)。
+
+<!-- component-contract:start -->
+
+## 属性、事件与插槽
 
 [源码](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/packages/components/src/components/AbpTabList.vue)
 
-## 用法
+类型来自公开契约，默认表达式来自当前实现。短横线表示没有显式默认值；省略的可选布尔属性通常为 false。
 
-```vue
-<AbpTabList v-model="selected" :items="tabs" orientation="horizontal" aria-label="Settings" />
-```
-
-## 行为说明
-
-标签项包含 name，以及可选 text 和 iconClass。text/name 会本地化。调用者负责显示选中的面板，方向键和 Home/End 可切换选择。
-
-## Props
+### Props
 
 | 名称          | 类型                                      | 必填 | 默认值       |
 | ------------- | ----------------------------------------- | ---- | ------------ |
@@ -23,18 +43,16 @@
 | `ariaLabel`   | `string \| undefined`                     | 否   | `undefined`  |
 | `modelValue`  | `string`                                  | 否   | `''`         |
 
-## Events
+### Events
 
 | 名称                | 参数              |
 | ------------------- | ----------------- |
 | `update:modelValue` | `[value: string]` |
 
-## Slots
+### Slots
 
 | 名称    | 上下文                              |
 | ------- | ----------------------------------- |
 | `label` | `(context: { item: T }) => unknown` |
 
-示例为模板片段，需要在页面中提供对应变量和方法。主题控件从 `@lsw-abpvue/theme-shared` 导入，数据与页面组件从 `@lsw-abpvue/components` 导入，也可使用应用模板的自动导入配置。类型和绑定来自公开契约，默认表达式来自当前实现。短横线表示未显式声明默认值；可选 boolean 属性省略时通常为 false。
-
-[包 API](/zh/api/components)
+<!-- component-contract:end -->

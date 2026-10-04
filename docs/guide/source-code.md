@@ -10,7 +10,7 @@ abpv add-package --list-source-ready
 
 The sources land in `packages/`, `tsconfig.json` gets a path that shadows the npm
 package, and **not a single import in your application changes** — the package name stays
-what it was, which is how the ABP CLI has released Angular sources all along.
+what it was.
 
 ```
 your-app/

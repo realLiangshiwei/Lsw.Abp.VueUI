@@ -1,77 +1,59 @@
 # Permissions
 
-`grantedPolicies` arrives in the application configuration, and everything else reads it.
+Permission checks read `auth.grantedPolicies` from application configuration. They control the interface; backend authorization still decides whether a request succeeds.
 
-```ts
-const permission = inject(PermissionService);
+## Snapshot and reactive checks
 
-permission.isGranted('AbpIdentity.Users.Create');        // boolean
-permission.isGranted('A || B');                      // policy expressions too
-permission.isGrantedRef(() => policy);               // ComputedRef<boolean>
-```
+~~~ts
+import { usePermission } from '@lsw-abpvue/core';
+import { IdentityPolicyNames } from '@lsw-abpvue/identity/config';
 
-## In a template
+const permission = usePermission();
+const canCreateNow = permission.isGranted(IdentityPolicyNames.UsersCreate);
+const canCreate = permission.isGrantedRef(IdentityPolicyNames.UsersCreate);
+~~~
 
-```vue
-<AbpPermission policy="AbpIdentity.Users.Create">
-  <AbpButton @click="add">{{ $t('AbpIdentity::NewUser') }}</AbpButton>
-</AbpPermission>
-```
+`isGranted` returns a boolean for that call. `isGrantedRef` returns a computed ref that changes when policies or its reactive input change. Use the reactive form for buttons and other UI that must follow a session refresh.
 
-A component rather than a directive: Vue's directives cannot remove the element they are
-on, and rendering a button that does nothing is worse than not rendering it.
+## Render a permitted action
 
-`usePermission()` is the same check in `setup()`.
+<<< ../examples/PermissionButton.vue
 
-## Policy expressions
+`AbpPermission` renders its content only when the policy is granted. Import it explicitly in a reusable component; the generated application preset also supports automatic imports. The click handler and its busy state remain the page's responsibility.
 
-ABP's `||` and `&&` are supported, and so are parentheses:
+[Test this component](/development/testing#test-a-reactive-permission) by starting without the policy and then granting it.
 
-```
+## Expressions
+
+Use actual, case-sensitive backend names:
+
+~~~text
 AbpIdentity.Users.Create || AbpIdentity.Users.Update
-(A || B) && C
-```
+(AbpIdentity.Users.Create || AbpIdentity.Users.Update) && AbpIdentity.Users
+~~~
 
-The Angular UI returns false for a parenthesised expression — its own source carries a
-`TODO` about it. This is a recursive descent parser, and what it accepts is a superset of
-what Angular does, so no configuration written for Angular breaks here.
+`&&` binds more tightly than `||`; parentheses group a condition. An absent or empty policy means no additional restriction. An unknown policy or invalid expression is denied. Invalid expressions produce a development diagnostic.
 
-## On routes
+## Routes and menus
 
-```ts
-{
-  path: 'users',
+Add `meta.requiredPolicy` to a protected route:
+
+~~~ts
+const route = {
+  path: '/identity/users',
+  component: () => import('../pages/UsersPage.vue'),
   meta: { requiredPolicy: IdentityPolicyNames.Users },
-}
-```
+};
+~~~
 
-The guard sends an unauthorized visitor away, and `RoutesService` leaves the entry out of
-the menu — the same name doing both jobs.
+The registered router guards enforce the requirement and navigation filters use the corresponding policy. A group with no visible children is hidden. Register routing through `provideAbpRouter` so guards are installed; declaring route metadata alone does not initialize the framework.
 
-## Names that cannot be misspelled
+For an application list with plain `RowAction` callbacks, filter actions by policy before passing them to `AbpGridActions`. Reusable module contributors can specify their action's permission. See [row actions](/customization/entity-actions).
 
-The proxy generator writes the permission names as constants, and merging its union into
-core turns a typo into a compile error:
+## Names and changes
 
-```ts
-declare module '@lsw-abpvue/core' {
-  interface AbpKnownPolicyName extends Record<AbpIdentityPolicyName, true> {}
-}
-```
+Built-in modules expose policy constants from their configuration entries. Your generated proxies expose the names described by your backend. Optional `AbpKnownPolicyName` augmentation can narrow policy strings; without it, ordinary strings remain accepted.
 
-Merging nothing keeps `isGranted` taking any string, so this is opt-in per application.
+A role or user grant changes on the server. Refresh the effective current session through `ConfigStateService.refreshAppState()` when needed; merely hiding a button does not revoke a grant. If a request returns 403 after the interface showed an action, check current tenant, user, policy and session configuration.
 
-## Granting them
-
-The permission management UI is a package of its own:
-
-```vue
-<AbpPermissionManagement
-  v-model:visible="open"
-  provider-name="R"
-  :provider-key="role.name"
-  :entity-display-name="role.name"
-/>
-```
-
-Provider names are ABP's: `R` for a role, `U` for a user, `C` for a client.
+The [permission management dialog](/modules/permission-management) manages provider grants. `R`, `U` and `C` identify role, user and client providers where supported by the backend.

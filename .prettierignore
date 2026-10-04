@@ -1,6 +1,7 @@
 dist/
 coverage/
 .turbo/
+docs/.vitepress/cache/
 pnpm-lock.yaml
 e2e/backend/
 e2e/fixtures/

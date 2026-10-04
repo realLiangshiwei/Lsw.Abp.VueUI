@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'vue/compiler-sfc';
@@ -9,8 +9,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const docs = join(root, 'docs');
 const metadata = JSON.parse(readFileSync(join(docs, '.vitepress/reference.json'), 'utf8'));
 const tick = String.fromCharCode(96);
-const inline = value => tick + value + tick;
-const block = (language, value) => tick.repeat(3) + language + '\n' + value + '\n' + tick.repeat(3);
+const inline = value => tick + value.trim().replace(/^\|\s*/, '') + tick;
 const clean = value => value.replaceAll('|', '\\|').replace(/\s+/g, ' ').trim();
 const sourceLink = file =>
   'https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/' +
@@ -102,6 +101,8 @@ function componentApi(item) {
       if (initial) result.defaults[property] = initial.initializer.getText(source);
     }
   });
+  if (contract && !result.slots.length)
+    result.slots = contractMembers(contract, item.name + 'Slots');
   if (item.slots) result.slots.push(...item.slots);
   return result;
 }
@@ -112,22 +113,23 @@ function table(rows, columns) {
     ...rows.map(row => '| ' + row.map(clean).join(' | ') + ' |'),
   ].join('\n');
 }
-const counts = { api: 0, components: 0 };
+let componentCount = 0;
+const start = '<!-- component-contract:start -->';
+const end = '<!-- component-contract:end -->';
 for (const locale of ['en', 'zh']) {
   const words = metadata.labels[locale];
   const prefix = locale === 'zh' ? 'zh/' : '';
   for (const item of metadata.components) {
     const api = componentApi(item);
     const content = [
-      '# ' + item.name,
-      item.description[locale],
+      '## ' + (locale === 'zh' ? '属性、事件与插槽' : 'Props, events and slots'),
       '[' + words.source + '](' + sourceLink(join(root, item.source)) + ')',
-      '## ' + words.example,
-      block(item.language ?? 'vue', item.example),
+      locale === 'zh'
+        ? '类型来自公开契约，默认表达式来自当前实现。短横线表示没有显式默认值；省略的可选布尔属性通常为 false。'
+        : 'Types come from the public contract and defaults from the current implementation. A dash means no explicit default; optional boolean props are normally false when omitted.',
     ];
-    if (item.notes?.[locale]) content.push('## ' + words.behavior, item.notes[locale]);
     content.push(
-      '## Props',
+      '### Props',
       api.props.length
         ? table(
             api.props.map(prop => [
@@ -141,7 +143,7 @@ for (const locale of ['en', 'zh']) {
         : words.noProps,
     );
     content.push(
-      '## Events',
+      '### Events',
       api.emits.length
         ? table(
             api.emits.map(event => [inline(event.name), inline(event.type)]),
@@ -150,7 +152,7 @@ for (const locale of ['en', 'zh']) {
         : words.noEvents,
     );
     content.push(
-      '## Slots',
+      '### Slots',
       api.slots.length
         ? table(
             api.slots.map(slot => [inline(slot.name), inline(slot.type)]),
@@ -158,84 +160,16 @@ for (const locale of ['en', 'zh']) {
           )
         : words.noSlots,
     );
-    content.push(
-      words.attributes,
-      '[' + words.related + '](/' + prefix + 'api/' + item.package + ')',
+    const path = prefix + 'components/' + item.slug + '.md';
+    const body = read(join(docs, path));
+    const from = body.indexOf(start);
+    const to = body.indexOf(end);
+    if (from < 0 || to <= from) throw new Error('Missing component contract markers in ' + path);
+    await write(
+      path,
+      body.slice(0, from) + start + '\n\n' + content.join('\n\n') + '\n\n' + body.slice(to),
     );
-    await write(prefix + 'components/' + item.slug + '.md', content.join('\n\n'));
-    counts.components++;
-  }
-  for (const directory of readdirSync(join(root, 'packages'))) {
-    const folder = join(root, 'packages', directory);
-    const manifestPath = join(folder, 'package.json');
-    if (!existsSync(manifestPath)) continue;
-    const manifest = JSON.parse(read(manifestPath));
-    if (!manifest.exports) continue;
-    const entries = [];
-    let firstValue;
-    for (const entry of Object.keys(manifest.exports)) {
-      if (entry === './package.json' || entry.endsWith('.css')) continue;
-      const segment = entry === '.' ? '' : entry.slice(2);
-      const candidates = segment
-        ? [join(folder, segment, 'src/index.ts'), join(folder, 'src', segment, 'index.ts')]
-        : [join(folder, 'src/index.ts')];
-      const file = candidates.find(existsSync);
-      if (!file) throw new Error('No public source entry for ' + manifest.name + '/' + segment);
-      const source = tree(file);
-      const symbols = [];
-      for (const node of source.statements) {
-        if (
-          !ts.isExportDeclaration(node) ||
-          !node.exportClause ||
-          !ts.isNamedExports(node.exportClause)
-        )
-          continue;
-        for (const symbol of node.exportClause.elements) {
-          const original = symbol.propertyName?.text ?? symbol.name.text;
-          const target =
-            node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)
-              ? resolve(dirname(file), node.moduleSpecifier.text.replace(/\.js$/, '.ts'))
-              : file;
-          const actual = existsSync(target)
-            ? target
-            : node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)
-              ? resolve(dirname(file), node.moduleSpecifier.text)
-              : file;
-          symbols.push([
-            inline(symbol.name.text),
-            node.isTypeOnly || symbol.isTypeOnly ? words.typeOnly : words.value,
-            '[' + words.source + '](' + sourceLink(actual) + ')',
-          ]);
-          if (original === 'default' && !existsSync(actual))
-            throw new Error('Missing component source: ' + actual);
-        }
-      }
-      if (!segment)
-        firstValue = symbols.find(symbol => symbol[1] === words.value)?.[0].slice(1, -1);
-      const importPath = manifest.name + (segment ? '/' + segment : '');
-      entries.push(
-        '## ' + inline(importPath),
-        table(symbols, [words.export, words.kind, words.source]),
-      );
-    }
-    const content = [
-      '# ' + manifest.name,
-      words.apiIntro,
-      words.version,
-      '## ' + words.imports,
-      block('ts', 'import { ' + firstValue + " } from '" + manifest.name + "';"),
-      ...entries,
-    ];
-    if (manifest.exports['./style.css'])
-      content.push('## CSS', block('ts', "import '" + manifest.name + "/style.css';"));
-    await write(prefix + 'api/' + directory + '.md', content.join('\n\n'));
-    counts.api++;
+    componentCount++;
   }
 }
-console.log(
-  'Documentation references: ' +
-    counts.components +
-    ' component pages, ' +
-    counts.api +
-    ' package pages.',
-);
+console.log('Documentation references: ' + componentCount + ' component pages.');

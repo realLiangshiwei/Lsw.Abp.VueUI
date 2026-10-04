@@ -1,6 +1,4 @@
-# The documentation site builds on every push; Pages deployment is enabled separately.
-# The build itself also runs in CI on a pull request, because a dead link or an example
-# that no longer compiles is a broken promise either way.
+# Pull requests check the documentation; main publishes the repository's Pages site.
 name: docs
 
 on:
@@ -11,16 +9,15 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: docs-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
@@ -32,22 +29,24 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @lsw-abpvue/docs typecheck
-      - run: pnpm exec vitest run --project tooling scripts/docs-api.spec.ts scripts/docs-search.spec.ts
+      - run: pnpm exec vitest run --project tooling scripts/docs-content.spec.ts scripts/docs-search.spec.ts scripts/docs-examples.spec.ts
       - run: pnpm --filter @lsw-abpvue/docs build
       - uses: actions/upload-pages-artifact@v4
         with:
           path: docs/.vitepress/dist
 
   deploy:
-    if: github.ref == 'refs/heads/main' && vars.DOCS_PAGES_ENABLED == 'true'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - id: deployment
         uses: actions/deploy-pages@v4

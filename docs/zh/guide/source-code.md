@@ -1,6 +1,6 @@
 # 使用包源码
 
-需要深度定制模块时，可以将 npm 包源码释放到自己的项目。
+模块 UI 默认来自 npm，必要时可以把源码释放到应用仓库。
 
 ```bash
 abpv add-package @lsw-abpvue/identity --with-source-code
@@ -8,14 +8,26 @@ abpv add-package all,@lsw-abpvue/theme-basic --with-source-code
 abpv add-package --list-source-ready
 ```
 
-## 输出
+源码进入 packages/，tsconfig.json 的路径覆盖 npm 包；应用导入名称保持不变。
 
-源码放入 `packages/`，TypeScript 与构建解析覆盖 npm 包，应用继续使用相同包名导入。`.abpvue/source-code.json` 记录释放版本。源码需要的依赖合入应用后，重新安装依赖。
+```
+your-app/
+├── packages/identity/          the source, yours now
+├── src/                        untouched: still imports @lsw-abpvue/identity
+├── tsconfig.json               paths: { "@lsw-abpvue/identity": ["./packages/identity/src"] }
+└── .abpvue/source-code.json    what was released, and at which version
+```
 
-## 维护责任
+## 释放后重新安装
 
-本地源码不再自动跟随包更新。doctor 会提示，update 会汇总新版变更但不覆盖本地文件，需要自己审阅并合入。尽量只释放确实需要深度定制的包。
+释放包的依赖会加入应用。包自身依赖原本位于 node_modules 的包目录，源码移出后不再处于该位置。pnpm 下 packages/theme-basic 看不到原包安装的 reka-ui，因此需重新安装应用依赖。npm、yarn 的平铺布局可能可用，但也应保持严格布局兼容。
+
+## 维护成本
+
+释放的包不再自动跟随发布。abpv update 会列出包与释放版本，方便手动合入修复；abpv doctor 每次也会报告。
+
+源码可读可改，同时升级由你维护。只释放实际需要定制的模块。
 
 ## 恢复 npm 包
 
-移除本地源码目录、tsconfig 中对应路径、构建别名和 `.abpvue/source-code.json` 条目，再安装依赖。npm 依赖本身保留，之前由源码路径覆盖。检查 Vite 与 TypeScript 都恢复到同一个 npm 实例，避免 DI Token 不一致。
+删除 packages/ 下对应目录，移除 tsconfig.json paths、构建别名和 .abpvue/source-code.json 对应记录，再安装。npm 依赖一直存在，只是被路径覆盖，无需重新添加。

@@ -1,20 +1,44 @@
+<script setup>
+import Example from "../examples/InputExample.vue";
+</script>
+
 # AbpInput
 
-A themed input, textarea or password field.
+`AbpInput` edits a text or numeric value. Pair it with `AbpFormField` for a label, hint and validation messages.
+
+## Bind different input types
+
+<ClientOnly><DocsDemo :example="Example" note="This example uses local data and does not contact a business server." /></ClientOnly>
+
+<<< ../examples/InputExample.vue
+
+The example includes a bounded text input, number, revealable password and textarea. Edit or clear Copies and inspect the displayed model.
+
+## Model values
+
+Text inputs emit strings. A number input emits a number, or `null` when emptied. Declare a compatible model rather than assuming every input produces a string. `type="textarea"` uses `rows`; `type="password"` with `revealable` adds the visibility control.
+
+`min`, `max`, `step` and `maxlength` configure the native input. They do not replace business validators or backend validation. For a submit workflow, use [forms and validation](/utilities/forms).
+
+## Labels, hints and errors
+
+Bind all three values supplied by the field slot: `id`, `describedBy` and `invalid`. The id connects the label; `aria-describedby` connects hints and errors. When the control stands alone, supply `aria-label` or an external label linked to its id. Set `autocomplete` and `name` when relevant to browser autofill.
+
+## Disabled or readonly
+
+Disable a field when users should not interact during a request. Use readonly when the value should remain selectable and visible without editing. Neither state authorizes a request. The application decides whether the field is included in its DTO.
+
+Listen to `blur` to mark a form control touched if errors should appear after leaving the field. `focus` and `blur` carry the native focus event. `invalid` changes accessibility and appearance; it does not calculate an error or render its text.
+
+<!-- component-contract:start -->
+
+## Props, events and slots
 
 [Source](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/packages/theme-basic/src/components/AbpInput.vue)
 
-## Usage
+Types come from the public contract and defaults from the current implementation. A dash means no explicit default; optional boolean props are normally false when omitted.
 
-```vue
-<AbpInput v-model="name" autocomplete="name" :invalid="invalid" />
-```
-
-## Behavior
-
-Use type="number" for numeric values. Text inputs emit strings; clearing a numeric input can emit null. Connect labels through AbpFormField.
-
-## Props
+### Props
 
 | Name              | Type                                    | Required | Default  |
 | ----------------- | --------------------------------------- | -------- | -------- |
@@ -36,7 +60,7 @@ Use type="number" for numeric values. Text inputs emit strings; clearing a numer
 | `ariaDescribedby` | `string \| undefined`                   | No       | —        |
 | `ariaLabel`       | `string \| undefined`                   | No       | —        |
 
-## Events
+### Events
 
 | Name                | Payload                             |
 | ------------------- | ----------------------------------- |
@@ -44,10 +68,8 @@ Use type="number" for numeric values. Text inputs emit strings; clearing a numer
 | `blur`              | `[event: FocusEvent]`               |
 | `focus`             | `[event: FocusEvent]`               |
 
-## Slots
+### Slots
 
 No named slots.
 
-Examples are template fragments: supply the named values and handlers in your page. Import controls from `@lsw-abpvue/theme-shared` and data/page components from `@lsw-abpvue/components`, or use the application template's auto-import preset. Types and models are extracted from the public contract; default expressions are from the current implementation. A dash means no explicit default is declared. Optional boolean props are normally false when omitted.
-
-[Package API](/api/theme-shared)
+<!-- component-contract:end -->

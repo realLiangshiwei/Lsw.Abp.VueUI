@@ -34,4 +34,4 @@ Email access uses `SettingManagement.Emailing`; sending a test uses `SettingMana
 
 Email, account and timezone tabs are provided. The default account tab displays local-login and self-registration settings as read-only because the open-source account module has no update endpoint for them. A host can replace `AccountSettingsService` from `/config` with a writable adapter; its required policy must match that API. Register settings config before feature config. Custom tabs use `SettingTabsService`; see [profile and settings tabs](/customization/profile-settings).
 
-Services and DTOs are in `@lsw-abpvue/setting-management/proxy`; [public exports](/api/setting-management) list configuration, types and extension options.
+Services and DTOs are in `@lsw-abpvue/setting-management/proxy`. Startup configuration is imported from the package's `/config` entry; pass page contributors to its route factory.

@@ -1,32 +1,66 @@
 # Settings and features
 
-The read services use application configuration and return reactive values. They do not save changes to the backend.
+Settings describe effective application/user/tenant preferences. Features describe enabled capabilities or quotas. These reading services consume application configuration; they do not persist changes.
 
-```ts
+## Read reactive values
+
+~~~ts
+import { computed } from 'vue';
 import { useFeature, useSetting } from '@lsw-abpvue/core';
 
-const setting = useSetting();
-const feature = useFeature();
-const culture = setting.get('Abp.Localization.DefaultLanguage');
-const enabled = feature.isEnabled('BookStore.Printing');
-const quota = feature.get('BookStore.PrintingQuota');
-```
+const settings = useSetting();
+const features = useFeature();
+const culture = settings.get('Abp.Localization.DefaultLanguage');
+const printingEnabled = features.isEnabled('BookStore.Printing');
+const quota = features.get('BookStore.PrintingQuota');
+const remainingQuota = computed(() => {
+  if (quota.value === undefined) return undefined;
+  const parsed = Number(quota.value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+});
+~~~
 
-## Values and conditions
+The BookStore feature names are examples that require backend definitions. Returned values are ComputedRefs: use `.value` in script and direct bindings in templates.
 
-| API | Result |
-| --- | --- |
-| `setting.get(name)` | Computed string or undefined |
-| `setting.getBoolean(name)` | Computed boolean |
-| `setting.getAll(keyword?)` | Computed settings record, optionally filtered |
-| `feature.get(name)` | Computed string or undefined |
-| `feature.isEnabled(name)` | Computed boolean feature condition |
-| `feature.isGlobalEnabled(name)` | Computed global feature condition |
+## Methods and conversion
 
-Feature values can represent booleans, quotas or selections. Read a numeric quota as a string first and convert according to your business contract. A missing value and zero are different states.
+| API | Return | Conversion |
+| --- | --- | --- |
+| `settings.get(name)` | `ComputedRef<string \| undefined>` | Effective raw string |
+| `settings.getBoolean(name)` | `ComputedRef<boolean>` | Case-insensitive string `true`; otherwise false |
+| `settings.getAll(keyword?)` | `ComputedRef<Record<string, string>>` | Case-sensitive key substring filter |
+| `features.get(name)` | `ComputedRef<string \| undefined>` | Effective raw string |
+| `features.isEnabled(name)` | `ComputedRef<boolean>` | Case-insensitive string `true`; otherwise false |
+| `features.isGlobalEnabled(name)` | `ComputedRef<boolean>` | Membership in the global enabled set |
 
-## Saving values
+Do not call `Boolean(quota.value)` to interpret a backend boolean string: `"false"` is a truthy JavaScript string. A quota of `"0"` is different from a missing definition. Model special values such as unlimited according to your backend feature contract rather than guessing a numeric conversion.
 
-Use [Setting management](/modules/setting-management) and [Feature management](/modules/feature-management), or your own typed backend services, to write values. Refresh application configuration after a custom save that changes the current session's effective settings or features.
+## Combine with permissions
 
-Permissions and features are separate conditions: an enabled feature does not grant access to an operation.
+~~~ts
+import { computed } from 'vue';
+import { useFeature, usePermission } from '@lsw-abpvue/core';
+
+const features = useFeature();
+const permissions = usePermission();
+const enabled = features.isEnabled('BookStore.Printing');
+const showPrint = computed(() =>
+  enabled.value && permissions.isGranted('BookStore.Books.Print'),
+);
+~~~
+
+Bind `v-if="showPrint"` to the control. A granted permission does not enable a tenant feature, and an enabled feature does not grant permission. [Global features](/core/global-features) adds the solution-level condition when relevant.
+
+## Save and refresh
+
+Use the [setting-management](/modules/setting-management) or [feature-management](/modules/feature-management) module for their supported backend operations. For business-specific settings, call your own generated service.
+
+After a custom save that changes this session's effective values, call `ConfigStateService.refreshAppState()` and await it. Reading an existing ComputedRef then yields updated values. The reading service does not provide `set` or silently change backend scope.
+
+Setting a tenant's feature as a host administrator is different from modifying the active user's effective feature values. Refresh the session whose displayed configuration actually changed.
+
+## Diagnose
+
+Inspect `setting.values` and `features.values` in the application's configuration response for the same session. Confirm backend definitions, provider/scope and name spelling. A missing value stays undefined; a missing boolean check is false.
+
+Use your backend's actual setting and feature names. They are case-sensitive keys, independent of translated display labels.

@@ -1,5 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": { "noEmit": true, "declaration": false, "declarationMap": false },
-  "include": ["examples/**/*.ts", "examples/**/*.vue"]
+  "include": [
+    "examples/**/*.ts",
+    "examples/**/*.vue",
+    ".vitepress/theme/**/*.ts",
+    ".vitepress/theme/**/*.vue"
+  ]
 }

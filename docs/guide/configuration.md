@@ -54,7 +54,7 @@ HTML where it expected JSON falls through to the next level silently, which look
 | `oAuthConfig.metadataUrl` | Optional discovery URL; the development template points it at the same-origin proxy |
 | `oAuthConfig.metadataSeed` | Optional token, revocation, user-info and JWKS endpoint overrides |
 
-Environment field names follow Angular conventions. Review the supported options and addresses when migrating. The default localization resource comes from backend application configuration.
+The default localization resource comes from backend application configuration. Configure the addresses for each deployed environment.
 
 ## Which login the visitor sees
 

@@ -27,4 +27,4 @@ ABP 提供者包括角色 `R`、用户 `U`、客户端 `C`。Key 使用后端对
 
 展示分组、权限层级和其他来源的授权。用户通过角色继承的权限显示为已授权且禁用。授予子权限同时授予父权限，撤销父权限同时撤销后代。搜索只缩小展示范围，不丢弃当前编辑状态。
 
-保存只发送相对初始状态的变化。失败保留修改，取消走模态框的未保存确认。授权工具函数和服务 DTO 见 [API 参考](/zh/api/permission-management)。可替换 key 为 `PermissionManagement.PermissionManagementComponent`。
+保存只发送相对初始状态的变化。失败保留修改，取消走模态框的未保存确认。可替换 key 为 `PermissionManagement.PermissionManagementComponent`。

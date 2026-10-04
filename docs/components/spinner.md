@@ -1,20 +1,34 @@
+<script setup>
+import Example from "../examples/SpinnerExample.vue";
+</script>
+
 # AbpSpinner
 
-An accessible loading indicator.
+`AbpSpinner` shows an ongoing operation with a screen-reader label. It does not block input or own a request.
+
+## Show only while working
+
+<ClientOnly><DocsDemo :example="Example" note="This example uses local data and does not contact a business server." /></ClientOnly>
+
+<<< ../examples/SpinnerExample.vue
+
+Put the spinner near the affected content, bind the content's `aria-busy` and give the spinner a specific label. Avoid an unlabeled icon that only communicates motion visually.
+
+## Buttons and page loading
+
+Use `AbpButton`'s `loading` prop for a save button; adding a separate spinner inside that button is usually unnecessary. For initial data loading, show a spinner and retain a distinct empty/error state. Hide it in `finally` or derive its visibility from the request status.
+
+`size` changes the visual size. It does not add a full-screen mask, focus trap or reduced-motion setting. Disable affected commands separately when an operation cannot be repeated. See [request lifecycle](/utilities/requests).
+
+<!-- component-contract:start -->
+
+## Props, events and slots
 
 [Source](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/packages/theme-basic/src/components/AbpSpinner.vue)
 
-## Usage
+Types come from the public contract and defaults from the current implementation. A dash means no explicit default; optional boolean props are normally false when omitted.
 
-```vue
-<AbpSpinner label="Loading records" size="sm" />
-```
-
-## Behavior
-
-Use a useful label. A spinner does not disable other controls; bind their busy or disabled state separately.
-
-## Props
+### Props
 
 | Name      | Type                   | Required | Default |
 | --------- | ---------------------- | -------- | ------- |
@@ -22,14 +36,12 @@ Use a useful label. A spinner does not disable other controls; bind their busy o
 | `label`   | `string \| undefined`  | No       | —       |
 | `overlay` | `boolean \| undefined` | No       | —       |
 
-## Events
+### Events
 
-No component-specific events. Native attributes/events follow the component's root element.
+No component-specific events are declared.
 
-## Slots
+### Slots
 
 No named slots.
 
-Examples are template fragments: supply the named values and handlers in your page. Import controls from `@lsw-abpvue/theme-shared` and data/page components from `@lsw-abpvue/components`, or use the application template's auto-import preset. Types and models are extracted from the public contract; default expressions are from the current implementation. A dash means no explicit default is declared. Optional boolean props are normally false when omitted.
-
-[Package API](/api/theme-shared)
+<!-- component-contract:end -->

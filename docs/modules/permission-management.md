@@ -27,4 +27,4 @@ ABP provider names include `R` for roles, `U` for users and `C` for clients. The
 
 The dialog shows groups, hierarchical permissions and grants from other providers. A user grant inherited through a role is displayed as granted and disabled. Granting a child also grants its parent; revoking a parent revokes its descendants. Search narrows the display without discarding the current edit state.
 
-Only changes from the initial state are sent. Saving failures keep edits, and Cancel uses the modal's unsaved-change confirmation. Public grant utilities and service DTOs are listed in the [API reference](/api/permission-management). The replaceable key is `PermissionManagement.PermissionManagementComponent`.
+Only changes from the initial state are sent. Saving failures keep edits, and Cancel uses the modal's unsaved-change confirmation. The replaceable key is `PermissionManagement.PermissionManagementComponent`.

@@ -35,3 +35,39 @@ The user menu calls `NAVIGATE_TO_MANAGE_PROFILE`. OAuth's default opens `{issuer
 `TokenStorage` defaults to browser storage and can be replaced through `withTokenStorage`. A 401 can trigger one shared token refresh and retry. Failed renewal ends the session. Switching tenant invalidates a token issued for the previous tenant and reloads configuration.
 
 Match issuer, client id, scope, callback and logout addresses with the seeded OpenIddict client. See [configuration](./configuration) and [multi-tenancy](/core/multi-tenancy).
+
+## Configure the complete code-flow round trip
+
+Set issuer to the browser-accessible authorization server, clientId to its seeded public SPA client, responseType to code, and scope to the API scopes plus offline_access when refresh is supported. redirectUri and postLogoutRedirectUri must match the client registrations exactly, including scheme, host, port and path. Do not put a client secret in a browser application.
+
+Register OAuth before modules that deliberately override navigation tokens. Start with [runtime configuration](/guide/configuration), then re-run DbMigrator after editing seeded client addresses. A development request proxy can forward discovery/token calls; it does not make a private authorization server reachable to a redirected browser.
+
+## Login, profile and logout are separate choices
+
+| Command | What to verify |
+| --- | --- |
+| navigateToLogin('/books') | Server login, callback handling and return to an allowed application path |
+| My account | Local account provider or authorization server /Account/Manage destination |
+| logout() | End-session redirect and configured post-logout return |
+| Refresh | Renewal supported by client/grant/scope and expired session behavior |
+
+Changing the profile destination does not turn code-flow logout into local token clearing. Signing out only one application does not necessarily end sessions in other applications; verify the authorization server's own session policy.
+
+## Authenticated state and API authorization
+
+isAuthenticated is a computed ref used for reactive UI; granted policies come from refreshed backend configuration. Authentication and a policy grant are different checks. An authenticated user can still receive 403 on an endpoint. Menus should hide denied commands, route guards should prevent entering denied pages and the backend must enforce the policy.
+
+Do not decode a token once at module import and cache an assumed permission set. Login/logout/tenant changes update configuration and trigger reactive checks. Use service state rather than maintaining a second disconnected current-user flag.
+
+## Diagnose by the failing step
+
+| Symptom | Check |
+| --- | --- |
+| Redirect URI rejected | Exact seeded client callback; database reseeding |
+| Login server cannot open | Real issuer reachability and certificate, not just API proxy |
+| Callback loops to login | state/callback handling, client scope and runtime addresses |
+| My account goes to an unexpected host | NAVIGATE_TO_MANAGE_PROFILE provider order and account route registration |
+| API fails after login | apiName URL, token audience/scope, tenant and CORS |
+| Logout returns to the wrong page | postLogoutRedirectUri registration and server end-session response |
+
+Check the browser's actual redirect URL and failed network request rather than changing multiple environment values at once. A local password flow requires backend support; it is not a fallback for a misconfigured code flow.

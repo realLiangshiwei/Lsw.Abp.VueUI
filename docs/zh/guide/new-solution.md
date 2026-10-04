@@ -1,6 +1,6 @@
 # 创建新解决方案
 
-CLI 将 ABP 后端写入 `aspnet-core/`，Vue 前端写入 `vue/`，结构与标准 Angular 方案一致。
+CLI 将 ABP 后端写入 `aspnet-core/`，Vue 前端写入 `vue/`。
 
 ## 环境准备
 

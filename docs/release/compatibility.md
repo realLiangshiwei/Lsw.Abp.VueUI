@@ -23,4 +23,13 @@ The CLI requires Node 20 or newer. The application uses Vue 3 and Vue Router 4. 
 
 The current source includes normalized Windows preview paths and list preference keys based on built-in component identifiers. These changes were made after alpha.5. They will reach npm in a subsequent release.
 
-Reka-based typeahead migration, additional motion behavior and other backlog items are not described as available features. [Release notes](./releases) link the actual published history.
+[Release notes](./releases) link the actual published history.
+
+## Capability scope
+
+| Capability | Current scope |
+| --- | --- |
+| Built-in open-source modules | Account, Identity, Permission, Tenant, Feature and Setting; backend modules/policies must exist |
+| SSR | Platform abstractions support server-safe access; no complete generated SSR template |
+| PWA | No preconfigured service-worker/offline template |
+| Motion | Further motion remains in Backlog; visibility events do not signify animation completion |

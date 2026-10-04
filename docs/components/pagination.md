@@ -1,20 +1,42 @@
+<script setup>
+import Example from "../examples/PaginationExample.vue";
+</script>
+
 # AbpPagination
 
-Zero-based pagination and a page-size selector.
+`AbpPagination` controls page number and page size. It receives the total number of records, not the number of pages.
+
+## Page and record range
+
+<ClientOnly><DocsDemo :example="Example" note="This example uses local data and does not contact a business server." /></ClientOnly>
+
+<<< ../examples/PaginationExample.vue
+
+Try another page and page size. The UI starts at page 1; the bound `page` starts at 0. The output shows the request values that correspond to the visible page.
+
+## Bind to a list
+
+Use `v-model:page="list.page.value"`, `v-model:page-size="list.maxResultCount.value"` and the query's total count. `useListService` handles refetching when these values change. For a manually managed list, reset page to zero on a size/filter change and issue the request yourself.
+
+Enable `show-size-selector` explicitly to show the page-size dropdown. `pageSizes` sets its choices. Use positive sizes appropriate for the backend's maximum limit. The pagination does not slice data or send requests.
+
+## Summary and empty results
+
+The standalone pager does not render “Showing 1 to 10 of 47 entries”. Calculate it in the caller as in the example, or localize `AbpUi::PagerInfo{0}{1}{2}`. Use zero for both range bounds when the total is zero. A server page can contain fewer items than requested; use the actual items length for its final bound.
+
+`AbpExtensibleTable` already renders the range and pager together. Avoid adding a second pager under it. If deleting the last item leaves the current page outside the total, move back to a valid page and reload.
+
+See [lists](/utilities/lists) and [data table](/components/data-table).
+
+<!-- component-contract:start -->
+
+## Props, events and slots
 
 [Source](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/packages/theme-basic/src/components/AbpPagination.vue)
 
-## Usage
+Types come from the public contract and defaults from the current implementation. A dash means no explicit default; optional boolean props are normally false when omitted.
 
-```vue
-<AbpPagination v-model:page="page" v-model:page-size="pageSize" :total="total" />
-```
-
-## Behavior
-
-Bind ListService.page directly: it is zero-based. total is the total record count, not the number of pages. Render the record-range summary in your page; AbpExtensibleTable includes that summary.
-
-## Props
+### Props
 
 | Name               | Type                             | Required | Default                   |
 | ------------------ | -------------------------------- | -------- | ------------------------- |
@@ -27,17 +49,15 @@ Bind ListService.page directly: it is zero-based. total is the total record coun
 | `disabled`         | `boolean \| undefined`           | No       | —                         |
 | `ariaLabel`        | `string \| undefined`            | No       | —                         |
 
-## Events
+### Events
 
 | Name              | Payload           |
 | ----------------- | ----------------- |
 | `update:page`     | `[value: number]` |
 | `update:pageSize` | `[value: number]` |
 
-## Slots
+### Slots
 
 No named slots.
 
-Examples are template fragments: supply the named values and handlers in your page. Import controls from `@lsw-abpvue/theme-shared` and data/page components from `@lsw-abpvue/components`, or use the application template's auto-import preset. Types and models are extracted from the public contract; default expressions are from the current implementation. A dash means no explicit default is declared. Optional boolean props are normally false when omitted.
-
-[Package API](/api/theme-shared)
+<!-- component-contract:end -->

@@ -1,9 +1,11 @@
-# 路由与导航
+# 路由与菜单
 
-业务页面可以在路由元数据中声明菜单，模块在启动时注册自己的导航项，再延迟加载页面。
+模块启动时注册导航项，布局渲染形成的树，并根据当前用户可见权限过滤。业务路由可以通过元数据声明自己的菜单项。
+
+## 页面声明菜单项
 
 ```ts
-const booksRoute = {
+{
   path: '/books',
   component: () => import('./pages/BooksPage.vue'),
   meta: {
@@ -11,29 +13,71 @@ const booksRoute = {
     requiredPolicy: 'BookStore.Books',
     routes: { name: 'BookStore::Menu:Books', order: 2, iconClass: 'bi bi-book' },
   },
-};
+}
 ```
 
-将该记录加入传给 provideAbpRouter 的路由数组。requiredPolicy 同时控制守卫与菜单可见性，名称必须对应后端策略。
+meta.routes 是菜单项。requiredPolicy 同时用于路由守卫与菜单过滤：拒绝未授权访问，并隐藏入口。
 
-## 注册与修改
+## 模块注册菜单
 
-配置入口在启动时通过 RoutesService.add 注册菜单。flat、tree、visible 是 ComputedRef，分别提供平铺列表、完整树和当前用户可见树。
-
-使用 patch(name, changes) 修改顺序或属性，remove(names) 移除项目，removeByParam(criteria) 按属性删除。稳定的 name 是导航身份，不要为了修改标签而随意改名。
-
-## 延迟路由与解析器
+模块页面首次进入时加载，菜单启动时就需要，所以模块 /config 入口只包含注册代码：
 
 ```ts
-import { lazyRoutes } from '@lsw-abpvue/core/router';
+provideAppInitializer(() => {
+  inject(RoutesService).add([
+    {
+      name: TenantManagementRouteNames.TenantManagement,
+      parentName: ThemeSharedRouteNames.Administration,
+      requiredPolicy: TenantManagementPolicyNames.TenantManagement,
+      iconClass: 'bi bi-people',
+      layout: LayoutType.application,
+      order: 2,
+    },
+  ]);
+});
+```
 
-const identityRoute = lazyRoutes('/identity', () =>
-  import('@lsw-abpvue/identity').then(module => module.createIdentityRoutes()),
+不导入页面组件，即使应用从不打开租户管理，也能以很小的启动开销获得菜单。
+
+## 修改模块注册项
+
+```ts
+const routes = inject(RoutesService);
+
+routes.patch('AbpTenantManagement::Menu:TenantManagement', { order: 10 });
+routes.remove(['AbpIdentity::Menu:Identity']);
+routes.removeByParam({ parentName: 'AbpUiNavigation::Menu:Administration' });
+```
+
+flat、tree、visible 分别是完整扁平项、完整树、当前用户可见树。
+
+## 模块路由懒加载
+
+```ts
+lazyRoutes('/identity', () =>
+  import('@lsw-abpvue/identity').then(module => module.createIdentityRoutes(contributors)),
 );
 ```
 
-首次进入前缀时添加模块路由。AbpRouterOutlet 根据 meta.providers 创建路由注入器，withResolvers 在页面显示前运行解析器，内置模块借此组装扩展。
+lazyRoutes 在首次进入前缀时向路由器添加模块记录，同时安装宿主传入的扩展贡献者。
+
+## 解析器
+
+```ts
+{
+  path: '/identity',
+  component: AbpRouterOutlet,
+  beforeEnter: [withResolvers([identityExtensionsResolver])],
+  meta: { providers: provideIdentity(options), requiresAuthentication: true },
+}
+```
+
+AbpRouterOutlet 根据 meta.providers 建立路由级注入器，withResolvers 在页面渲染前完成必要工作，包括模块扩展点组装。
 
 ## 布局
 
-meta.layout 选择 application、account 或 empty，由主题提供实现，AbpDynamicLayout 选择渲染。模块使用配置入口注册菜单，避免为菜单提前加载全部页面。
+meta.layout 选择 application、account、empty。主题提供三种布局，AbpDynamicLayout 负责切换，路由无需自行嵌套布局组件。
+
+## 浏览器标题
+
+默认标题策略在导航成功后读取 meta.title，语言变化后重新计算。后缀与自定义格式见[标题策略](/zh/core/title-strategy)。菜单名、页面标题和文档标题是不同内容。

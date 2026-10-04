@@ -1,22 +1,40 @@
+<script setup>
+import Example from "../../examples/ValidationExample.vue";
+</script>
+
 # AbpFormField
 
-为控件提供标签、校验消息和帮助文本。
+`AbpFormField` 将标签、提示和错误列表连接到控件，不持有值，也不运行验证器。
+
+## 连接可访问的验证字段
+
+<ClientOnly><DocsDemo :example="Example" note="演示仅使用本地数据，不连接业务服务器。" /></ClientOnly>
+
+<<< ../../examples/ValidationExample.vue
+
+提交空 email，修正后再 Reset。useAbpForm 管理值和验证，字段只显示生成的消息。显式 blur 回调将控制标为 touched。
+
+## 插槽连接
+
+默认插槽提供 id、describedBy 和 invalid，分别绑定控件的 id、aria-describedby 和 invalid。省略这些连接，标签可能外观正确，却无法与控件建立可访问关联。
+
+for 可以指定固定 id，否则组件生成 id。重复字段时必须保持唯一。required 显示必填提示，实际规则仍应写在表单中。disabled 表示字段状态，子控件也需要显式禁用。
+
+## 显示时机与定制
+
+errors 接收已本地化字符串，非空列表会使字段 invalid。示例使用访问字段或提交后显示错误的常见策略。label、hint、errors 插槽可定制显示，errors 插槽提供消息列表。
+
+后端错误参见[服务端验证](/zh/utilities/forms)。无法对应字段的错误应在表单级显示，避免请求被拒绝后没有任何反馈。
+
+<!-- component-contract:start -->
+
+## 属性、事件与插槽
 
 [源码](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/packages/theme-basic/src/components/AbpFormField.vue)
 
-## 用法
+类型来自公开契约，默认表达式来自当前实现。短横线表示没有显式默认值；省略的可选布尔属性通常为 false。
 
-```vue
-<AbpFormField label="Name" for="name" :errors="messages">
-  <AbpInput id="name" v-model="name" />
-</AbpFormField>
-```
-
-## 行为说明
-
-for 与控件 id 保持一致。errors 接收已格式化的消息，不直接传入校验规则对象。
-
-## Props
+### Props
 
 | 名称       | 类型                             | 必填 | 默认值     |
 | ---------- | -------------------------------- | ---- | ---------- |
@@ -27,11 +45,11 @@ for 与控件 id 保持一致。errors 接收已格式化的消息，不直接�
 | `errors`   | `readonly string[] \| undefined` | 否   | `() => []` |
 | `disabled` | `boolean \| undefined`           | 否   | —          |
 
-## Events
+### Events
 
-没有组件专有事件。原生属性和事件由组件根元素处理。
+没有声明组件专有事件。
 
-## Slots
+### Slots
 
 | 名称      | 上下文                                                |
 | --------- | ----------------------------------------------------- |
@@ -40,6 +58,4 @@ for 与控件 id 保持一致。errors 接收已格式化的消息，不直接�
 | `hint`    | `() => unknown`                                       |
 | `errors`  | `(context: { errors: readonly string[] }) => unknown` |
 
-示例为模板片段，需要在页面中提供对应变量和方法。主题控件从 `@lsw-abpvue/theme-shared` 导入，数据与页面组件从 `@lsw-abpvue/components` 导入，也可使用应用模板的自动导入配置。类型和绑定来自公开契约，默认表达式来自当前实现。短横线表示未显式声明默认值；可选 boolean 属性省略时通常为 false。
-
-[包 API](/zh/api/theme-shared)
+<!-- component-contract:end -->

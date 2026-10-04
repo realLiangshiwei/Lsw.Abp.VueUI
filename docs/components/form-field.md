@@ -1,22 +1,40 @@
+<script setup>
+import Example from "../examples/ValidationExample.vue";
+</script>
+
 # AbpFormField
 
-A label, validation messages and help text around a control.
+`AbpFormField` connects a label, hint and error list to one control. It does not own the value or run validators.
+
+## Wire an accessible validated field
+
+<ClientOnly><DocsDemo :example="Example" note="This example uses local data and does not contact a business server." /></ClientOnly>
+
+<<< ../examples/ValidationExample.vue
+
+Submit an empty email, correct it, then Reset. The example's `useAbpForm` owns values and validation; the field only renders the resulting messages. An explicit blur handler marks the control touched.
+
+## Slot wiring
+
+The default slot provides `id`, `describedBy` and `invalid`. Bind them to the control's id, aria-describedby and invalid props. Omitting that wiring leaves a visually correct label that is not programmatically connected to its control.
+
+`for` supplies a fixed id; otherwise the field creates one. Keep ids unique when repeating a field. `required` displays the required indication, but the actual validation rule belongs in the form. `disabled` describes field state; explicitly disable the child control too.
+
+## Error timing and customization
+
+Pass already localized strings to `errors`. A nonempty list marks the field invalid. A common policy is to show errors after touch or submission, as demonstrated. The `label`, `hint` and `errors` slots customize rendering; the errors slot receives the messages.
+
+For backend errors, use [server validation](/utilities/forms). Show unmatched errors at form level so a rejected request always has visible feedback.
+
+<!-- component-contract:start -->
+
+## Props, events and slots
 
 [Source](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/packages/theme-basic/src/components/AbpFormField.vue)
 
-## Usage
+Types come from the public contract and defaults from the current implementation. A dash means no explicit default; optional boolean props are normally false when omitted.
 
-```vue
-<AbpFormField label="Name" for="name" :errors="messages">
-  <AbpInput id="name" v-model="name" />
-</AbpFormField>
-```
-
-## Behavior
-
-Use the same for and id. Pass already formatted validation messages in errors; do not pass validation rule objects.
-
-## Props
+### Props
 
 | Name       | Type                             | Required | Default    |
 | ---------- | -------------------------------- | -------- | ---------- |
@@ -27,11 +45,11 @@ Use the same for and id. Pass already formatted validation messages in errors; d
 | `errors`   | `readonly string[] \| undefined` | No       | `() => []` |
 | `disabled` | `boolean \| undefined`           | No       | —          |
 
-## Events
+### Events
 
-No component-specific events. Native attributes/events follow the component's root element.
+No component-specific events are declared.
 
-## Slots
+### Slots
 
 | Name      | Context                                               |
 | --------- | ----------------------------------------------------- |
@@ -40,6 +58,4 @@ No component-specific events. Native attributes/events follow the component's ro
 | `hint`    | `() => unknown`                                       |
 | `errors`  | `(context: { errors: readonly string[] }) => unknown` |
 
-Examples are template fragments: supply the named values and handlers in your page. Import controls from `@lsw-abpvue/theme-shared` and data/page components from `@lsw-abpvue/components`, or use the application template's auto-import preset. Types and models are extracted from the public contract; default expressions are from the current implementation. A dash means no explicit default is declared. Optional boolean props are normally false when omitted.
-
-[Package API](/api/theme-shared)
+<!-- component-contract:end -->

@@ -2,7 +2,7 @@
 
 Lsw.Abp.VueUI provides a Vue 3 frontend for ABP Framework applications. It is an unofficial community project under the MIT license, with npm packages in the `@lsw-abpvue/*` scope.
 
-The public module names, DTO fields, localization keys, permissions and replaceable component keys follow ABP Angular conventions. The implementation uses Vue Composition API, promises, refs and scoped slots.
+Applications use Vue Composition API, promises, refs and scoped slots. Shared services consume ABP configuration; module UIs use the corresponding backend DTOs, localization resources and policies.
 
 ## What is included
 
@@ -19,6 +19,6 @@ Use the ABP endpoints already provided by your solution. No additional backend p
 
 ## Reading this documentation
 
-Start with [Quick Start](./new-solution) or [existing solution integration](./existing-solution). Development covers application work; Core Functionality and Utilities explain shared services; Customization covers theme and module changes; Components and API are references.
+Start with [Quick Start](./new-solution) or [existing solution integration](./existing-solution). Development covers application work; Core Functionality and Utilities explain shared services; Customization covers theme and module changes; Components explains the controls and their usage.
 
-The site follows `main`, while published alpha packages may lag behind it. See [versions and compatibility](/release/compatibility). Use [Angular migration](/migration/from-angular) for behavior and API differences.
+The site follows `main`, while published alpha packages may lag behind it. See [versions and compatibility](/release/compatibility).

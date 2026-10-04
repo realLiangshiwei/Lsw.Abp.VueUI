@@ -1,6 +1,6 @@
 # Project structure
 
-The standard solution follows ABP's Angular layout, with `vue/` as the frontend directory:
+The standard solution separates the backend and Vue frontend:
 
 ```text
 Acme.BookStore/

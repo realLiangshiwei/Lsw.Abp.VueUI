@@ -35,4 +35,4 @@ const moduleRoute = lazyRoutes('/identity', () =>
 
 五类贡献者定制列、新增与编辑字段、行操作和工具栏操作。`Identity.User`、`Identity.Role` 对象扩展自动映射受支持元数据。见[用户扩展教程](/zh/tutorials/extend-users)。锁定管理、给其他用户设置密码、逐用户二次验证管理依赖开源模块未提供的后端 API。
 
-服务和 DTO 从 `@lsw-abpvue/identity/proxy` 导入，[公共导出](/zh/api/identity)列出配置、类型与扩展选项。
+服务和 DTO 从 `@lsw-abpvue/identity/proxy` 导入。启动配置从包的 `/config` 入口导入，页面贡献者传给对应路由工厂。

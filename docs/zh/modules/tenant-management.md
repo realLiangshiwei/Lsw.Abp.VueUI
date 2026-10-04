@@ -34,4 +34,4 @@ const moduleRoute = lazyRoutes('/tenant-management', () =>
 
 功能管理使用提供者 `T` 和租户 ID 打开共享对话框。连接字符串支持共享数据库或租户独立数据库。页面支持五类贡献者与 `TenantManagement.Tenant` 对象扩展，选项见[页面扩展](/zh/concepts/extensions)，对话框见[功能管理](./feature-management)。
 
-服务和 DTO 从 `@lsw-abpvue/tenant-management/proxy` 导入，[公共导出](/zh/api/tenant-management)列出配置、类型与扩展选项。
+服务和 DTO 从 `@lsw-abpvue/tenant-management/proxy` 导入。启动配置从包的 `/config` 入口导入，页面贡献者传给对应路由工厂。

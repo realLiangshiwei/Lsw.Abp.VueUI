@@ -1,65 +1,58 @@
 # Application state
 
-`/api/abp/application-configuration` is the whole of it: the current user, the granted
-permissions, the settings, the features, the localization texts, the object extensions and
-the tenant. It is fetched once at startup, and again whenever something invalidates it —
-signing in, signing out, switching tenant, changing language.
+Application configuration contains the current user, granted policies, settings, features, localization, object extensions and current tenant. The app reads it during startup and refreshes it when the session changes.
 
-## Reading it
+## Read reactive state
 
-```ts
-const config = inject(ConfigStateService);
+~~~ts
+import { useConfigState } from '@lsw-abpvue/core';
 
-const user = config.getOne('currentUser');            // ComputedRef<CurrentUserDto>
-const clock = config.getDeep('timing.timeZone.iana'); // ComputedRef<string | undefined>
-const all = config.snapshot();                        // the object, right now
-```
+const config = useConfigState();
+const user = config.getOne('currentUser');
+const clock = config.getDeep<string | undefined>('timing.timeZone.iana');
+const snapshot = config.snapshot();
+~~~
 
-`getOne` and `getDeep` return `ComputedRef`, so a template re-renders on its own when the
-configuration is replaced. `.value` is the snapshot; there is no second stream-shaped API
-next to it the way Angular has `getOne` and `getOne$`.
+`getOne` returns a typed computed ref for a top-level field. `getDeep` reads a dotted path; its generic is a caller assertion, so include undefined for paths that may be absent. Templates unwrap refs; scripts read `.value`.
 
-The services on top of it are what you usually want:
+`snapshot()` returns the object at that moment. Saving that object in a variable does not make it follow later configuration replacements. Use a selector for a value displayed on screen.
 
-| | |
+## Choose a focused service
+
+| Need | Service / composable |
 | --- | --- |
-| `CurrentUserService` | Who is signed in, and whether anyone is |
-| `PermissionService` | `isGranted('Identity.Users.Create')` |
-| `SettingService` | `get('Abp.Localization.DefaultLanguage')` |
-| `FeatureService` | `isEnabled('BookStore.Printing')` |
-| `SessionStateService` | Language and tenant, which are the visitor's choices rather than the server's |
-| `LocalizationService` | The texts, and switching between them |
+| Current user and authenticated state | `CurrentUserService` / `useCurrentUser` |
+| Granted policies | `PermissionService` / `usePermission` |
+| Setting values | `SettingService` / `useSetting` |
+| Tenant and global features | `FeatureService` / `useFeature` |
+| Translation texts and culture | `LocalizationService` / `useLocalization` |
+| Visitor's language and tenant selection | `SessionStateService` / `useSessionState` |
 
-## Its initial value
+Application configuration is the server's effective result. Session state holds visitor choices and synchronizes supported changes across browser tabs. Neither is a store for arbitrary business records; keep page drafts and query results in their own Vue scope.
 
-Structurally complete and empty, rather than `{}`. Angular starts with an empty object and
-every reader guards its way down the tree; here the guarding is paid for once, at the
-edge, so the code that reads state does not have to be written defensively.
+## Refresh after a change
 
-## Refreshing
+~~~ts
+const saveAndRefresh = async (): Promise<void> => {
+  await saveCurrentUser();
+  await config.refreshAppState();
+};
+~~~
 
-```ts
-await config.refreshAppState();
-```
+Here `saveCurrentUser` is the page's actual save operation. Refresh when it changes effective current-user, permission, setting or tenant values. Do not refresh the entire configuration after every business CRUD request.
 
-Anything that changes what the server would say — a role granted, a setting saved —
-should refresh, and the module UIs already do it where they change something. Two
-refreshes in a row resolve to the newest one, and the whole object is replaced, which is
-why everything reading it is a `ComputedRef`.
+Refresh loads configuration and the selected culture's texts. Overlapping refreshes keep the latest result and abort older work. A failed request rejects and preserves existing state; handle it with the normal request feedback. A successful mutation followed by a failed refresh does not undo the server change.
 
-## Its own store
+Use `refreshLocalization(cultureName)` for a culture's texts; the localization service coordinates language selection. [Localization](/concepts/localization) explains that flow.
 
-`InternalStore` is what holds it: a `shallowRef` with typed selectors. Shallow on purpose
-— the configuration is a large object, and deep reactivity over it would cost far more
-than it returns, given that it is replaced wholesale rather than mutated.
+## Initial state and updates
 
-There is no Pinia and no Vuex. A store around a server-owned object that is only ever
-replaced would be ceremony with no payoff; a bridge package for applications that already
-use Pinia is on the list for after 1.0.
+Initial structure is complete but values are empty. Before startup finishes, a current user can still be anonymous, policies can be denied and feature values can be absent. Show loading through application startup or the page, not by treating an empty user as authenticated.
 
-## List preferences
+Configuration is held in a shallow store and replaced through service methods. Do not mutate `snapshot().auth.grantedPolicies` or other nested fields in place: readers depend on the published update. `setState` is useful for deliberately supplied configuration and isolated tests; normal applications load it from the backend.
 
-`useListPreferences(key)` stores page size, sort and hidden columns per user. Page number
-and filters are never persisted. Corrupt or incompatible stored values are ignored
-silently. Logout and failed token renewal remove preferences for the current user only;
-`clearListPreferences(storage, userId)` provides the same cleanup for custom authentication.
+For a callback outside a template, `config.onUpdate(callback)` returns an unsubscribe function. Tie cleanup to the component or service lifecycle so stale pages stop receiving changes.
+
+## Page preferences
+
+`useListPreferences(key)` persists page size, sorting and hidden columns per user. It does not persist page number or filters. Invalid stored values fall back to defaults; logout and failed renewal clear the current user's preferences. See [lists and preferences](/utilities/lists) for the storage key and query lifecycle.

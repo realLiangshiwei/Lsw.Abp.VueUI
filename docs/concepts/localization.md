@@ -1,62 +1,51 @@
 # Localization
 
-The texts come from the backend, in the resources ABP already ships. Nothing has to be
-duplicated in the frontend.
+The backend supplies resources, available cultures and current culture through application configuration/localization. The UI can also ship application-specific text. Use resource keys in UI logic and translate at rendering time.
 
-## In a template
+## Translate a complete page
 
-```vue
-<h1>{{ $t('AbpIdentity::Users') }}</h1>
-<p>{{ $t('AbpIdentity::UserDeletionConfirmationMessage', user.userName) }}</p>
-```
+Create `src/pages/Catalogue.vue`:
 
-`$t` is a global property and reactive by itself: switching language re-renders whatever
-used it. There is no pipe, and no layout is torn down and rebuilt to change language.
+<<< ../examples/LocalizationExample.vue
 
-## Outside one
+This example needs backend cultures `en` and `zh-Hans`. Choose the actual names in `localization.languages`; `zh`, `zh-CN` and `zh-Hans` are not interchangeable configuration entries. Switching culture makes a localization request, so this example runs in your application rather than the offline component preview.
 
-```ts
-const localization = inject(LocalizationService);
+## Add frontend texts
 
-localization.t('AbpUi::Save');                  // the text now
-localization.tr('AbpUi::Save');                 // ComputedRef<string>, for outside templates
-await localization.setLanguage('tr');
-localization.currentLang.value;                 // 'tr'
-localization.languages.value;                   // what the backend offers
-```
+Create `src/localization.ts`:
 
-## Keys
+<<< ../examples/localization-texts.ts
 
-`Resource::Key` is ABP's own shape, and the resources are the backend's:
-`AbpIdentity::Users`, `AbpUi::Save`, `AbpValidation::ThisFieldIsRequired.`. The default resource is the backend configuration's `localization.defaultResourceName`.
+Import `catalogueTexts` and pass it to `provideAbpCore(withOptions({ environment }), catalogueTexts)` in startup. With the backend configured for the same cultures, the heading and parameterized count update without remounting the page. Frontend entries win over backend entries with the same resource/key.
 
-A key with no text is returned as it is, with a warning in development. That is deliberate:
-the alternative is an empty screen where a missing translation should be visible.
+Keep domain terminology shared by backend and clients in the backend resource. Frontend-only page labels can live in shipped text. Register overrides intentionally rather than duplicating every backend resource.
 
-## A default, for a key that may not exist
+## Key lookup and fallback
 
-```ts
-$t({ key: 'BookStore::Reprint', defaultValue: 'Reprint' });
-```
+Use `BookStore::Catalogue` for an explicit resource and `::Catalogue` for the configured default resource. The configuration's `localization.defaultResourceName` controls that default. A missing translation returns its key and warns in development, making a missing resource visible.
 
-Useful for a package that has to work against a backend whose resource has not been
-extended yet.
+For an optional package label, use `{ key: 'BookStore::Reprint', defaultValue: 'Reprint' }` where the receiving contract accepts `LocalizationParam`. Not all label props do: action labels and `AbpPage.title` are string keys, while input/option labels are already translated text.
 
-## Texts the frontend ships
+`{0}`, `{1}` placeholders accept positional parameters. Do not concatenate translated sentence fragments, and do not inject translations as raw HTML.
 
-```ts
-provideAbpCore(
-  withOptions({ environment }),
-  withLocalizations([
-    { culture: 'en', resources: [{ resourceName: 'BookStore', texts: { Reprint: 'Reprint' } }] },
-  ]),
-);
-```
+## Reactive versus current text
 
-They win over the backend's for the same key, which is what makes overriding one text
-possible without touching the server.
+| Call | Result and use |
+| --- | --- |
+| `$t(key, ...params)` | Reactive template text |
+| `localization.t(key, ...params)` | A string at the time of the call |
+| `localization.tr(key, ...params)` | Computed text outside a template |
+| `currentLang` / `languages` | Computed current culture / available cultures |
+| `setLanguage(culture)` | Persists selection and loads that culture's texts |
 
-## Right to left
+For table headers and option arrays, use computed around t. A header computed once at module import will not follow a language change. Capture the service during setup; do not call inject after an await.
 
-The culture's direction comes from the localization configuration, so switching to Arabic
-switches the layout. The theme does the rest.
+## Runtime JSON and locale hooks
+
+`withOptions({ environment, uiLocalization: { enabled: true, basePath: '/assets/localization' } })` enables files such as `/assets/localization/en.json`. Their shape is `{ "BookStore": { "Catalogue": "Catalogue" } }`: resources at the top level, texts beneath. A missing culture file is ignored and backend texts remain available. Serve these files as JSON, without an SPA HTML fallback.
+
+Use `withRegisterLocale` when another library needs an asynchronous locale-registration hook. Native Intl formatting needs a locale name, not an imported registration module. Format dates and numbers separately from translating their surrounding sentence.
+
+## Direction and diagnosis
+
+Basic Theme derives direction from the current culture configuration. Check labels, dropdown alignment and keyboard movement in a right-to-left culture. If a key remains visible, check resource name, culture name, backend texts, shipped overrides and the request response. If a label stays in the previous language, move its translation into a reactive computed. See [dates](/utilities/dates) and [configuration](/guide/configuration).

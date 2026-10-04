@@ -1,6 +1,6 @@
 # Create a solution
 
-The CLI creates the ABP backend in `aspnet-core/` and the Vue frontend in `vue/`, matching the standard Angular solution layout.
+The CLI creates the ABP backend in `aspnet-core/` and the Vue frontend in `vue/`.
 
 ## Prerequisites
 

@@ -34,4 +34,4 @@ const moduleRoute = lazyRoutes('/setting-management', () =>
 
 提供邮件、账户和时区页签。默认账户页签只读显示本地登录与自注册设置，开源账户模块没有更新它们的端点。宿主可用可写适配器替换 `/config` 的 `AccountSettingsService`，要求的策略应匹配自定义 API。先注册设置配置，再注册功能配置。自定义页签使用 `SettingTabsService`，见[资料与设置页签](/zh/customization/profile-settings)。
 
-服务和 DTO 从 `@lsw-abpvue/setting-management/proxy` 导入，[公共导出](/zh/api/setting-management)列出配置、类型与扩展选项。
+服务和 DTO 从 `@lsw-abpvue/setting-management/proxy` 导入。启动配置从包的 `/config` 入口导入，页面贡献者传给对应路由工厂。

@@ -1,20 +1,40 @@
+<script setup>
+import Example from "../../examples/ToggleExample.vue";
+</script>
+
 # AbpToggle
 
-复选框或开关。
+`AbpToggle` 用于布尔选项或单选组。
+
+## 复选框、开关与单选
+
+<ClientOnly><DocsDemo :example="Example" note="演示仅使用本地数据，不连接业务服务器。" /></ClientOnly>
+
+<<< ../../examples/ToggleExample.vue
+
+复选框和开关绑定布尔值，单选组绑定某个选项值。标签和选项标签是已本地化文字；需要随语言变化时，由本地化服务配合 computed 生成。
+
+## 选择控件
+
+接受条款、选择记录适合复选框，启用设置适合开关，少量互斥选项适合保持可见的单选组。较长列表可使用[选择器](/zh/components/select)。
+
+indeterminate 表示复选框的混合显示状态，例如部分行被选中，不是第三种可保存的布尔值。实际选择由页面保存，根据选择结果计算混合状态。
+
+## 表单与可访问性
+
+提供 label 或 aria-label，尤其是表格里的控件。保存时绑定 disabled，有验证消息时绑定 invalid。控件发出 update:modelValue，不会自动保存设置。
+
+必须勾选同意时，仅使用 Validators.required() 不够，因为 false 也是已定义的值。增加要求 true 的自定义验证器，并在后端执行同一规则。参见[验证](/zh/utilities/forms)。
+
+<!-- component-contract:start -->
+
+## 属性、事件与插槽
 
 [源码](https://github.com/realLiangshiwei/Lsw.Abp.VueUI/blob/main/packages/theme-basic/src/components/AbpToggle.vue)
 
-## 用法
+类型来自公开契约，默认表达式来自当前实现。短横线表示没有显式默认值；省略的可选布尔属性通常为 false。
 
-```vue
-<AbpToggle v-model="enabled" variant="switch" aria-label="Enabled" />
-```
-
-## 行为说明
-
-checkbox 和 switch 绑定布尔值，radio 绑定所选选项的值。`indeterminate` 用于 checkbox。示例使用布尔开关。
-
-## Props
+### Props
 
 | 名称              | 类型                                             | 必填 | 默认值       |
 | ----------------- | ------------------------------------------------ | ---- | ------------ |
@@ -31,16 +51,14 @@ checkbox 和 switch 绑定布尔值，radio 绑定所选选项的值。`indeterm
 | `ariaDescribedby` | `string \| undefined`                            | 否   | —            |
 | `ariaLabel`       | `string \| undefined`                            | 否   | —            |
 
-## Events
+### Events
 
 | 名称                | 参数                                 |
 | ------------------- | ------------------------------------ |
 | `update:modelValue` | `[value: boolean \| AbpOptionValue]` |
 
-## Slots
+### Slots
 
 没有命名插槽。
 
-示例为模板片段，需要在页面中提供对应变量和方法。主题控件从 `@lsw-abpvue/theme-shared` 导入，数据与页面组件从 `@lsw-abpvue/components` 导入，也可使用应用模板的自动导入配置。类型和绑定来自公开契约，默认表达式来自当前实现。短横线表示未显式声明默认值；可选 boolean 属性省略时通常为 false。
-
-[包 API](/zh/api/theme-shared)
+<!-- component-contract:end -->

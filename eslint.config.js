@@ -136,6 +136,7 @@ export default tseslint.config(
       '**/dist/**',
       '**/coverage/**',
       '**/.turbo/**',
+      'docs/.vitepress/cache/**',
       'e2e/backend/**',
       'e2e/**/artifacts/**',
       'e2e/**/results/**',
@@ -151,6 +152,7 @@ export default tseslint.config(
       'packages/*/src/proxy/**',
       'playground/src/proxy/**',
       'e2e/proxy/**',
+      'docs/examples/generated/**',
     ],
   },
 

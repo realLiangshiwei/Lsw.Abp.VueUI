@@ -22,4 +22,4 @@ pnpm add @lsw-abpvue/feature-management@alpha
 
 关闭父功能会禁用后代，再打开时恢复原来的子值，只发送发生变化的值。保存失败保留修改，未保存取消遵循模态框契约。
 
-core 的 `FeatureService` 读取当前有效功能，与这里编辑的提供者值不同。自定义保存改变当前有效值后需要刷新会话配置。规则、组件和代理见[公共导出](/zh/api/feature-management)，组件 key 为 `FeatureManagement.FeatureManagementComponent`。
+core 的 `FeatureService` 读取当前有效功能，与这里编辑的提供者值不同。自定义保存改变当前有效值后需要刷新会话配置。组件 key 为 `FeatureManagement.FeatureManagementComponent`。

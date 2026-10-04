@@ -9,9 +9,9 @@ npx @lsw-abpvue/cli@alpha switch-ui --port 5173
 npx @lsw-abpvue/cli@alpha switch-ui --dry-run        # says what it would do to your files
 ```
 
-## It is deliberately timid
+## Project layout and safeguards
 
-The standard project layout remains the same as ABP's Angular solution:
+The standard project layout separates the backend and frontend:
 
 ```text
 Acme.BookStore/

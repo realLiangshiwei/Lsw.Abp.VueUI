@@ -39,4 +39,4 @@ The profile requires authentication. Local login and registration visibility fol
 
 Personal details and change password are profile tabs registered by `provideManageProfileTabs()`. Add custom tabs using Vue components, and use account form contributors for reusable customization. [Profile tabs](/customization/profile-settings) provides an example.
 
-Second-factor login behavior depends on backend responses and delivery capabilities. Two-factor administration is not supplied by the open-source profile API. [Public exports](/api/account) and [shared services](/api/account-core) list the available APIs.
+Second-factor login behavior depends on backend responses and delivery capabilities. Two-factor administration is not supplied by the open-source profile API.

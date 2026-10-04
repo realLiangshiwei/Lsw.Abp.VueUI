@@ -22,4 +22,4 @@ Boolean features use toggles, selection features use backend-declared options, a
 
 Turning a parent off disables its descendants; turning it back on restores the prior child values. Only changed values are sent. Saving failures preserve edits, and unsaved cancellation follows the modal contract.
 
-Effective features read through core's `FeatureService` are separate from these editable provider values. Reload session configuration after a custom save that changes current effective values. [Public exports](/api/feature-management) lists feature rules, components and proxies. The component key is `FeatureManagement.FeatureManagementComponent`.
+Effective features read through core's `FeatureService` are separate from these editable provider values. Reload session configuration after a custom save that changes current effective values. The component key is `FeatureManagement.FeatureManagementComponent`.

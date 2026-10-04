@@ -19,6 +19,6 @@ Register configuration providers at application startup, and load module routes 
 
 ## Customization
 
-Module tables and forms support contributors. Component keys match Angular so replacements and extension configurations can reuse the same identifiers; Vue callbacks still require Promise/Ref and component adaptations.
+Module tables and forms support contributors. Use a stable component key for each page, and register column, action, toolbar and form changes through the module's route options.
 
-Frontend screens cover the endpoints available in the open-source backend. Commercial identity operations and resource permission screens are not included. Check each module's API and permissions instead of assuming every Angular commercial screen is available.
+Each module guide describes its routes, backend prerequisites and management policies. Enable a module only when its endpoints and policies are available in the connected backend.

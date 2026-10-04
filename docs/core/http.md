@@ -1,34 +1,63 @@
-# HTTP and errors
+# HTTP requests
 
-`RestService` resolves the API address, applies framework interceptors and returns a promise. Generated proxies call it internally.
+`RestService` is the transport used by generated proxies. It selects the API base URL, applies framework interceptors, removes absent query parameters and returns a Promise.
 
-```ts
+## Request a response body
+
+Resolve the service synchronously in setup, then reuse it in event handlers. Install GET `/api/app/report` from [the backend examples](/tutorials/backend-examples) and sign in with `AbpIdentity.Users`.
+
+~~~ts
 import { inject, RestService } from '@lsw-abpvue/core';
 
 const rest = inject(RestService);
-const result = await rest.request<never, { total: number }>(
-  { method: 'GET', url: '/api/app/report', params: { year: 2026 } },
-  { apiName: 'default' },
+async function loadReport(year: number): Promise<{ total: number }> {
+  return rest.request<never, { total: number }>(
+    { method: 'GET', url: '/api/app/report', params: { year } },
+    { apiName: 'default' },
+  );
+}
+~~~
+
+The first generic is the request body; the second is what the Promise resolves to. For POST or PUT, supply the body type and `body`. Generated services already supply these types.
+
+## Request and transport options
+
+| Option | Default | Behavior |
+| --- | --- | --- |
+| `apiName` | `default` | Selects `environment.apis[name].url` |
+| `observe` | `body` | `response` returns status, headers and body |
+| `signal` | None | Cancels pending work |
+| `skipHandleError` | `false` | Prevents reporting to the global error chain; the Promise still rejects |
+| `skipAddingHeader` | `false` | Skips AJAX, tenant, language and timezone headers |
+| `skipAuthorization` | `false` | Skips Bearer token attachment and authentication refresh/retry |
+
+Setting `skipAddingHeader` does not skip OAuth by itself. When calling an unrelated external origin, explicitly choose both header and authentication options. An absolute HTTP URL bypasses the configured API base; a relative URL is joined to it.
+
+`params` drops `undefined` and empty strings. By default it also drops `null`; `withOptions({ environment, sendNullsAsQueryParam: true })` sends null as the string `"null"`. Arrays and objects must follow your endpoint's query contract.
+
+## Read status and headers
+
+~~~ts
+import { inject, RestService, type HttpResponse } from '@lsw-abpvue/core';
+
+const rest = inject(RestService);
+const response = await rest.request<never, HttpResponse<{ total: number }>>(
+  { method: 'GET', url: '/api/app/report', params: { year: new Date().getUTCFullYear() } },
+  { observe: 'response' },
 );
-```
+console.log(response.status, response.headers.get('ETag'), response.body.total);
+~~~
 
-This setup fragment assumes that your backend implements that endpoint. Capture `rest` before asynchronous callbacks; resolve services only inside an injection context.
+This is a setup fragment. `observe` changes the runtime result, so the result generic must be `HttpResponse<T>` rather than `T`.
 
-## Request options
+## Cancellation
 
-| Option | Behavior |
-| --- | --- |
-| `apiName` | Select a named API from the environment |
-| `signal` | Abort the request |
-| `observe: 'response'` | Return status and headers with the body |
-| `skipHandleError` | Let the caller handle failure without global reporting |
-| `skipAddingHeader` | Omit AJAX, tenant, language and timezone headers |
-| `skipAuthorization` | Omit the bearer token and authentication retry |
+Use the `AbortSignal` passed to a list query, or create an `AbortController` for component-owned work. [List queries](/utilities/lists) and [request lifecycle](/utilities/requests) describe cancellation and stale-result protection. A Promise alone does not stop an earlier request from overwriting newer data.
 
-For external services, choose headers and authentication explicitly. The default AJAX header makes ABP API failures return 401/403 instead of an HTML login redirect.
+## Failure behavior
 
-## Failure handling
+Failures reject with `AbpHttpError`. It exposes `status`, `method`, `url`, `headers`, the parsed ABP `error` envelope and `raw`. Transport failures, including cancellation, have status `0`. The envelope can contain `code`, `message`, `details` and `validationErrors`.
 
-`AbpHttpError` retains status, URL, ABP error details and validation errors. A transport failure has status zero. The theme registers handlers for authentication, tenant resolution, validation, ABP errors and other statuses.
+The theme can already have reported an error by the time your catch block runs. Catch it to keep your dialog open or restore loading state; show a second message only when you intentionally bypass the global handler.
 
-Use `useServerValidation(form)` when field-level backend errors should be displayed by a form. Use `skipHandleError` when a caller owns the entire error experience; avoid reporting the same error twice. [Forms](/utilities/forms) and [notifications](/utilities/notifications) describe those interfaces.
+For a field-level save failure, connect `useServerValidation(form)` before submitting. See [forms](/utilities/forms). For a custom global policy, continue with [HTTP error handling](/core/http-errors).

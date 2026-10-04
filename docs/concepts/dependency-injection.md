@@ -1,95 +1,77 @@
 # Dependency injection
 
-The extension system needs an injector that plain callbacks — not components — can reach,
-and Vue's `provide`/`inject` alone does not offer one. So there is a small kernel: typed
-tokens, hierarchical resolution, multi-providers, and an injector object a callback can
-hold on to.
+Use the ABP injector for shared services, configuration tokens and callbacks outside components. Service tokens belong to `@lsw-abpvue/core`; distinguish its `inject` from Vue's function with the same name.
 
-## Defining a service
+## Define a service
 
-```ts
-export const BookService = defineService('BookService', () => {
-  const rest = inject(RestService);
+Create `src/report-service.ts`. Install ReportAppService from [the backend examples](/tutorials/backend-examples) and sign in with `AbpIdentity.Users`. GET `/api/app/report?year=2026` returns `{ total: number }`:
 
-  return {
-    getList: (input: PagedAndSortedResultRequestDto) =>
-      rest.request<never, PagedResultDto<BookDto>>({ method: 'GET', url: '/api/app/book', params: { ...input } }),
-  };
-});
+<<< ../examples/report-service.ts
 
-export type BookService = ServiceOf<typeof BookService>;
-```
+`defineService` returns a typed token with a default factory. The factory runs on first resolution and its result is cached on the root injector. Multiple consumers share that result unless a child scope explicitly overrides the token. `ServiceOf` exposes the returned service type without duplicating it.
 
-Four lines of ceremony and no decorators: no `reflect-metadata`, no `emitDecoratorMetadata`,
-nothing that a bundler has to be told about. The factory runs once per injector, and its
-return value is the service.
+A factory should construct the service, not send requests or manipulate the page. Keep startup work in an initializer and page requests in the caller's operation.
 
-::: warning
-A factory must not have side effects — no requests, no DOM. Something that has to happen
-at startup goes in `provideAppInitializer`, which runs after the injector is built and
-can be awaited.
-:::
+## Resolve before asynchronous work
 
-## Using one
+In component setup or another service factory:
 
-```ts
-const books = inject(BookService);        // inside setup(), or another factory
-const books = injector.get(BookService);  // anywhere, given an injector
-```
+~~~ts
+import { inject } from '@lsw-abpvue/core';
+import { ReportService } from '../report-service';
 
-`inject()` outside an injection context throws with the resolution path in the message,
-rather than returning undefined for someone to trip over later.
+const reports = inject(ReportService);
+async function load(year: number): Promise<number> {
+  return (await reports.get(year)).total;
+}
+~~~
 
-## Replacing one
+Capture the dependency synchronously. Injection context is not retained after an await. A callback already holding an injector can call `injector.get(ReportService)`; extension callbacks receive `data.getInjected` for the same purpose.
 
-```ts
-createAbpApp(App, {
-  providers: [
-    provideAbpCore(withOptions({ environment })),
-    { provide: BookService, useClass: MyBookService },
-  ],
-});
-```
+## Provide configuration and replace services
 
-`useValue`, `useFactory`, `useClass` and `useExisting`, as in Angular. A token declared
-with `multi: true` collects every provider for it into an array — that is how HTTP
-interceptors, error handlers and localization contributors are registered.
+`defineToken` describes a value without requiring a built-in implementation:
 
-## Overriding one for a page
+~~~ts
+import { defineToken } from '@lsw-abpvue/core';
 
-```ts
-provideAbp([{ provide: BookService, useValue: fakeBooks }]);
-```
+export const REPORT_YEAR = defineToken<number>('REPORT_YEAR');
+const reportYearProvider = { provide: REPORT_YEAR, useValue: 2026 };
+~~~
 
-Called in a component's `setup()`, it establishes a child injector for that component's
-subtree. The component tree is the injector tree, which is what makes a page's extension
-identifier resolvable by the buttons inside it.
+Add the provider to the existing `createAbpApp` providers array. Without a provider or default factory, resolving the token throws. Reuse the exported token; creating a second token with the same description does not identify the same value.
 
-::: tip
-An `inject()` after `provideAbp` in the same `setup()` still sees the parent injector.
-The returned injector is what the page's own callbacks resolve through.
-:::
-
-## Tokens
-
-```ts
-export const HTTP_INTERCEPTORS = defineToken<HttpInterceptor[]>('HTTP_INTERCEPTORS', {
-  multi: true,
-});
-```
-
-A token is a symbol carrying a type, so two packages cannot collide and a wrong value
-does not compile. This is also why every package in this UI depends on its siblings
-through `peerDependencies`: two physical copies of `@lsw-abpvue/core` mean two symbols,
-and injection stops working in a way that is very hard to see.
-
-## Where it differs from Angular
-
-| Angular | Here |
+| Provider | Use |
 | --- | --- |
-| `@Injectable()` and decorators | `defineService(name, factory)` |
-| `providedIn: 'root'` | Provided where the application is created |
-| `InjectionToken` | `defineToken`, same idea |
-| `inject()` | `inject()`, same name and same rules |
-| A component-level `providers: []` | `provideAbp([...])` in `setup()` |
-| Errors surface at runtime | `MultiProviderMismatchError`, `DuplicateFeatureError` and `InjectorDestroyedError` are thrown where the mistake is |
+| `useValue` | An existing configuration value or service instance |
+| `useFactory` | Construct a value, resolving dependencies in the factory |
+| `useClass` | Construct a class implementation |
+| `useExisting` | Make another token resolve to the same service |
+
+An override must implement the token's complete public service shape. It changes which service resolves; it does not rewrite an instance that a consumer has already captured.
+
+## Create a component scope
+
+~~~ts
+import { provideAbp } from '@lsw-abpvue/core';
+import { ReportService } from '../report-service';
+
+const pageInjector = provideAbp([
+  { provide: ReportService, useValue: { get: async () => ({ total: 0 }) } },
+]);
+const pageReports = pageInjector.get(ReportService);
+~~~
+
+Call this in setup. The override applies to descendants of the component and is destroyed with that scope. In the same setup, plain `inject(ReportService)` still reads the parent; use the returned injector to read the page's override. This example supplies preview data rather than calling a backend.
+
+## Initialization and cleanup
+
+`provideAppInitializer` registers startup work; the app waits for its returned Promise. Resolve dependencies before awaiting inside the initializer. Subscribe explicitly, and use `onServiceDestroy` to release service-owned subscriptions, timers or connections. Avoid module-level mutable state for per-application data.
+
+A multi token collects providers into an array. Its token option and each provider's `multi` flag must agree; use the framework's registration helpers for interceptors and error handlers.
+
+## Package identity and diagnosis
+
+Tokens use Symbol identity. All UI packages should resolve to a single physical instance of the shared packages; libraries declare them as peers rather than bundle their own copies.
+
+For a missing provider, check the exported token, owning provider, initialization order and resolving scope. For destroyed-injector errors, cancel callbacks that outlive their page. [Startup](/development/startup), [testing](/development/testing) and [extension behavior](/customization/extension-behavior) show the surrounding lifecycle.

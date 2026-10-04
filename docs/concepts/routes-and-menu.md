@@ -64,7 +64,7 @@ lazyRoutes('/identity', () =>
 );
 ```
 
-`lazyRoutes` is `loadChildren` for `vue-router`: the module's route records are added on
+`lazyRoutes` adds the module's route records to the router on
 the first navigation into the prefix, and the extension contributors the host passes go in
 at the same time.
 
@@ -88,3 +88,7 @@ assembly of its extension points.
 `meta.layout` picks one of ABP's three: `application`, `account` and `empty`. The theme
 provides all three and `AbpDynamicLayout` switches between them, so a route says which
 one it wants rather than nesting itself under a component.
+
+## Browser title
+
+The default title strategy reads `meta.title` after successful navigation and recalculates it after a language change. See [title strategy](/core/title-strategy) for suffixes, custom formats. Menu names, headings and document titles are separate.

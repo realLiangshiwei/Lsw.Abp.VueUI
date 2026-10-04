@@ -20,4 +20,4 @@ Import the twelve theme controls from `@lsw-abpvue/theme-shared`. Import page an
 
 Each reference lists props, default values, events, slots and behavior. Tables are extracted from source. Theme-control defaults describe Basic Theme; another theme must preserve the public contract but can have different visual details.
 
-Examples are template fragments with application variables and handlers. Complete typed examples appear in [forms](/utilities/forms) and [lists](/utilities/lists). Properties documented as already localized need caller-translated text; properties accepting localization parameters can take `Resource::Key`.
+Each page includes a complete typed example. Simple controls have interactive previews using isolated local state; backend workflows state their endpoint and DTO prerequisites. The same files are included in both languages. See [forms](/utilities/forms) and [lists](/utilities/lists) for complete request workflows. Properties documented as already localized need caller-translated text; properties accepting localization parameters can take `Resource::Key`.
