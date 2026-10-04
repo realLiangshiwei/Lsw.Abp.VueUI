@@ -8,7 +8,7 @@
 
 The project follows the capabilities and extension points of ABP's Angular UI using Vue's Composition API. It consumes existing ABP APIs without requiring an additional backend package.
 
-This is an **unofficial community project**, not affiliated with Volosoft. Packages use the **`@lsw-abpvue/*`** scope and are currently available through the **`alpha`** tag.
+This is an **unofficial community project**, not affiliated with Volosoft. Prerelease packages are available through the **`alpha`** tag.
 
 ## Getting Started
 

@@ -8,7 +8,7 @@
 
 项目的功能与扩展点对标 ABP 官方 Angular UI，实现采用 Vue Composition API。直接使用 ABP 已有的 API，无需安装额外的后端包。
 
-这是一个**非官方社区项目**，与 Volosoft 无关联。npm 包统一使用 **`@lsw-abpvue/*`** 命名空间，目前通过 **`alpha`** 标签提供预发布版本。
+这是一个**非官方社区项目**，与 Volosoft 无关联。目前通过 **`alpha`** 标签提供预发布版本。
 
 ## 快速开始
 
