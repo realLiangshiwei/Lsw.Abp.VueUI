@@ -1,7 +1,5 @@
 # ABP x Vue: Introducing Lsw.Abp.VueUI
 
-![ABP x Vue](https://raw.githubusercontent.com/realLiangshiwei/Lsw.Abp.VueUI/main/articles/20261004Intrudoce/cover.jpg)
-
 **Lsw.Abp.VueUI** is a complete, community-developed Vue 3 frontend for ABP Framework. It follows ABP's modular architecture, bringing framework services, module UIs, extension points, and themes together for building applications with Vue.
 
 Authentication, permissions, multi-tenancy, localization, and module development provide a development experience consistent with ABP's Angular UI. The implementation uses Vue's Composition API, Vue Router, and single-file components, so you can build on familiar ABP conventions with the Vue tools you already use.
