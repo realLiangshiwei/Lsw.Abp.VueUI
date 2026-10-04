@@ -89,7 +89,7 @@ abpv switch-ui --mode keep
 
 ## 文档与示例
 
-- [文档站](https://realliangshiwei.github.io/Lsw.Abp.VueUI/zh/)：中英文使用指南、CLI 与组件指南。
+- [文档站](https://abpvue.liangshiwei.com/zh/)：中英文使用指南、CLI 与组件指南。
 - [Playground](playground/)：演示模块 UI 与扩展点的 BookStore 应用。
 
 ## 参与贡献

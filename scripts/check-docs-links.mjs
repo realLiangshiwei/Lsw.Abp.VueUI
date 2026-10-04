@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'docs/.vitepress/dist');
-const base = '/Lsw.Abp.VueUI/';
+const base = '/';
 const origin = 'https://docs.invalid';
 
 function* htmlFiles(directory) {

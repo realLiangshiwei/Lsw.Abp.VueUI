@@ -104,7 +104,7 @@ function theme(locale: Locale): DefaultTheme.Config {
 export default defineConfig({
   title: 'ABP Vue UI',
   description: 'Vue 3 UI for ABP Framework',
-  base: '/Lsw.Abp.VueUI/',
+  base: '/',
   cleanUrls: true,
   vite: {
     plugins: [workspaceTypeScript],
