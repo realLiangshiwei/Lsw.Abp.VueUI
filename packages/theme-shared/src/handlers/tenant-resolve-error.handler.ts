@@ -29,10 +29,7 @@ export const TenantResolveErrorHandler = defineService<AbpErrorHandler>(
         // The header carries the backend's own reason when it has one; the key is ABP's
         // own and takes the name of the tenant that could not be resolved.
         toaster.error(
-          error.headers?.get(HEADER) || {
-            key: 'AbpUiMultiTenancy::GivenTenantIsNotAvailable',
-            defaultValue: "Given tenant isn't available: {0}",
-          },
+          error.headers?.get(HEADER) || 'AbpUiMultiTenancy::GivenTenantIsNotAvailable',
           DEFAULT_ERROR_MESSAGES.default.title,
           { messageLocalizationParams: [tenant?.name ?? ''] },
         );

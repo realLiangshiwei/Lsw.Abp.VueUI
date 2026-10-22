@@ -1,53 +1,33 @@
-import type { LocalizationWithDefault } from '@lsw-abpvue/core';
+import type { LocalizationParam } from '@lsw-abpvue/core';
 
 export interface ErrorMessage {
-  title: LocalizationWithDefault;
-  details: LocalizationWithDefault;
+  title: LocalizationParam;
+  details: LocalizationParam;
 }
 
-/**
- * ABP's own texts for the statuses it has words for. Key and fallback together, because
- * a 500 while the application configuration is still loading has no localization to read
- * from and a blank page is the one thing worse than an English one.
- */
 export const DEFAULT_ERROR_MESSAGES: Record<
   'default' | '401' | '403' | '404' | '500',
   ErrorMessage
 > = {
   default: {
-    title: { key: 'AbpUi::DefaultErrorMessage', defaultValue: 'An error has occurred!' },
-    details: {
-      key: 'AbpUi::DefaultErrorMessageDetail',
-      defaultValue: 'Error detail not sent by server.',
-    },
+    title: 'AbpUi::DefaultErrorMessage',
+    details: 'AbpUi::DefaultErrorMessageDetail',
   },
   401: {
-    title: { key: 'AbpUi::DefaultErrorMessage401', defaultValue: 'You are not authenticated!' },
-    details: {
-      key: 'AbpUi::DefaultErrorMessage401Detail',
-      defaultValue: 'You should be authenticated (sign in) in order to perform this operation.',
-    },
+    title: 'AbpUi::DefaultErrorMessage401',
+    details: 'AbpUi::DefaultErrorMessage401Detail',
   },
   403: {
-    title: { key: 'AbpUi::DefaultErrorMessage403', defaultValue: 'You are not authorized!' },
-    details: {
-      key: 'AbpUi::DefaultErrorMessage403Detail',
-      defaultValue: 'You are not allowed to perform this operation.',
-    },
+    title: 'AbpUi::DefaultErrorMessage403',
+    details: 'AbpUi::DefaultErrorMessage403Detail',
   },
   404: {
-    title: { key: 'AbpUi::DefaultErrorMessage404', defaultValue: 'Resource not found!' },
-    details: {
-      key: 'AbpUi::DefaultErrorMessage404Detail',
-      defaultValue: 'The resource requested could not found on the server.',
-    },
+    title: 'AbpUi::DefaultErrorMessage404',
+    details: 'AbpUi::DefaultErrorMessage404Detail',
   },
   500: {
-    title: { key: 'AbpUi::500Message', defaultValue: 'Internal server error' },
-    details: {
-      key: 'AbpUi::DefaultErrorMessage',
-      defaultValue: 'Error detail not sent by server.',
-    },
+    title: 'AbpUi::InternalServerErrorMessage',
+    details: 'AbpUi::DefaultErrorMessage',
   },
 };
 

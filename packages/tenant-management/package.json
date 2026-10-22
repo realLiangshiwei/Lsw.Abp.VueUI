@@ -47,7 +47,7 @@
     "@lsw-abpvue/feature-management": "workspace:*",
     "@lsw-abpvue/theme-shared": "workspace:*",
     "@lsw-abpvue/utils": "workspace:*",
-    "vue": "^3.5.41",
+    "vue": "3.5.41",
     "vue-router": "^4.5.1"
   },
   "repository": {

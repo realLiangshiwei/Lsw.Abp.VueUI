@@ -19,7 +19,7 @@ import {
   AbpToggle,
   useToaster,
 } from '@lsw-abpvue/theme-shared';
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import type { GroupedPermission } from '../models/permission.js';
 import {
   changesBetween,
@@ -61,6 +61,9 @@ const selectedGroup = ref('');
 const filter = ref('');
 const busy = ref(false);
 const loading = ref(false);
+const failed = ref(false);
+let revision = 0;
+let request: AbortController | undefined;
 
 const groups = computed(() => matchingGroups(answer.value?.groups ?? [], filter.value));
 
@@ -105,31 +108,60 @@ function grantedCount(groupName: string): number {
   ).length;
 }
 
-async function load(): Promise<void> {
-  loading.value = true;
+function reset(): void {
+  request?.abort();
+  request = undefined;
+  revision += 1;
+  answer.value = undefined;
+  original.value = [];
+  working.value = [];
+  selectedGroup.value = '';
+  filter.value = '';
+  failed.value = false;
+  loading.value = false;
+  busy.value = false;
+}
 
+async function load(): Promise<void> {
+  reset();
+  if (!visible.value) return;
+  const current = revision;
+  const operation = new AbortController();
+  request = operation;
+  loading.value = true;
   try {
-    const result = await permissions.get(props.providerName, props.providerKey);
+    const result = await permissions.get(props.providerName, props.providerKey, {
+      signal: operation.signal,
+      skipHandleError: true,
+    });
+    if (current !== revision || operation.signal.aborted) return;
     answer.value = result;
     original.value = flatten(result.groups ?? []);
     working.value = original.value;
     selectedGroup.value = result.groups?.[0]?.name ?? '';
-    filter.value = '';
+  } catch {
+    if (current === revision && !operation.signal.aborted) failed.value = true;
   } finally {
-    loading.value = false;
+    if (current === revision) loading.value = false;
   }
 }
 
-// Opening is what fetches: the permissions of a user are asked for when someone asks to
-// see them, not when the page that can show them is rendered. Immediate, because a
-// dialog can be mounted already open.
 watch(
-  visible,
-  isOpen => {
-    if (isOpen) void load();
+  [
+    () => visible.value,
+    () => props.providerName,
+    () => props.providerKey,
+    () => configState.snapshot().currentUser.id,
+    () => configState.snapshot().currentUser.isAuthenticated,
+    () => configState.snapshot().currentTenant.id,
+    () => configState.snapshot().multiTenancy.userSharingStrategy,
+  ],
+  () => {
+    void load();
   },
-  { immediate: true },
+  { immediate: true, flush: 'sync' },
 );
+onBeforeUnmount(reset);
 
 // A filter that hides the tab in front of you leaves you looking at nothing.
 watch(groups, next => {
@@ -164,21 +196,38 @@ function changesCurrentUser(): boolean {
 }
 
 async function save(): Promise<void> {
+  if (busy.value || loading.value || failed.value || !answer.value || !visible.value) return;
   const changed = changesBetween(original.value, working.value);
   if (changed.length === 0) {
     visible.value = false;
     return;
   }
-
+  const current = revision;
+  const operation = new AbortController();
+  request = operation;
+  const refreshCurrentUser = changesCurrentUser();
   busy.value = true;
-
+  failed.value = false;
   try {
-    await permissions.update(props.providerName, props.providerKey, { permissions: changed });
-    visible.value = false;
-    if (changesCurrentUser()) await configState.refreshAppState();
+    await permissions.update(
+      props.providerName,
+      props.providerKey,
+      { permissions: changed },
+      {
+        signal: operation.signal,
+        skipHandleError: true,
+      },
+    );
+    if (current !== revision || operation.signal.aborted) return;
+    // Closing resets the operation, so finish its effects before changing visibility.
+    if (refreshCurrentUser) await configState.refreshAppState();
+    if (current !== revision || operation.signal.aborted) return;
     toaster.success('AbpUi::SavedSuccessfully');
+    visible.value = false;
+  } catch {
+    if (current === revision && !operation.signal.aborted) failed.value = true;
   } finally {
-    busy.value = false;
+    if (current === revision) busy.value = false;
   }
 }
 </script>
@@ -196,8 +245,16 @@ async function save(): Promise<void> {
     </template>
 
     <AbpSpinner v-if="loading" />
+    <div v-if="failed" role="alert">
+      <p>
+        {{ $t('AbpPermissionManagement::ErrorLoadingPermissions') }}
+      </p>
+      <AbpButton variant="secondary" :disabled="busy || loading" @click="load">{{
+        $t('AbpUi::Refresh')
+      }}</AbpButton>
+    </div>
 
-    <div v-else class="abp-permissions">
+    <div v-if="!loading && answer" class="abp-permissions">
       <div class="abp-permissions__header">
         <div class="abp-permissions__search">
           <span class="abp-permissions__search-icon" aria-hidden="true" />
@@ -296,7 +353,12 @@ async function save(): Promise<void> {
       <AbpButton variant="secondary" outline :disabled="busy" @click="close">
         {{ $t('AbpUi::Cancel') }}
       </AbpButton>
-      <AbpButton variant="primary" :loading="busy" @click="save">
+      <AbpButton
+        variant="primary"
+        :loading="busy"
+        :disabled="loading || !answer || failed"
+        @click="save"
+      >
         {{ $t('AbpUi::Save') }}
       </AbpButton>
     </template>

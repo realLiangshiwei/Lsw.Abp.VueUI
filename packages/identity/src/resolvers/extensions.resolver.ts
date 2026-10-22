@@ -114,7 +114,7 @@ function assemble<R>(
  * Running it again is harmless: a repeated navigation replaces the contributors rather
  * than adding a second copy of every column.
  */
-export function identityExtensionsResolver(): void {
+function resolveIdentityExtensions(includeUsers: boolean): void {
   const injector = getCurrentInjector();
   if (!injector) return;
 
@@ -133,29 +133,30 @@ export function identityExtensionsResolver(): void {
   const toolbarActions: IdentityToolbarActionContributors =
     injector.get(IDENTITY_TOOLBAR_ACTION_CONTRIBUTORS, {}, optional) ?? {};
 
-  assemble<IdentityUserDto>(
-    extensions,
-    IdentityComponents.Users,
-    {
-      entityProps: DEFAULT_USERS_ENTITY_PROPS,
-      createFormProps: DEFAULT_USERS_CREATE_FORM_PROPS,
-      editFormProps: DEFAULT_USERS_EDIT_FORM_PROPS,
-      entityActions: DEFAULT_USERS_ENTITY_ACTIONS,
-      toolbarActions: DEFAULT_USERS_TOOLBAR_ACTIONS,
-    },
-    mapEntitiesToContributors<IdentityUserDto>(
-      injector,
-      { [IdentityComponents.Users]: entities.User },
-      'AbpIdentity',
-    ),
-    {
-      entityProps: entityProps[IdentityComponents.Users] ?? [],
-      createFormProps: createFormProps[IdentityComponents.Users] ?? [],
-      editFormProps: editFormProps[IdentityComponents.Users] ?? [],
-      entityActions: entityActions[IdentityComponents.Users] ?? [],
-      toolbarActions: toolbarActions[IdentityComponents.Users] ?? [],
-    },
-  );
+  if (includeUsers)
+    assemble<IdentityUserDto>(
+      extensions,
+      IdentityComponents.Users,
+      {
+        entityProps: DEFAULT_USERS_ENTITY_PROPS,
+        createFormProps: DEFAULT_USERS_CREATE_FORM_PROPS,
+        editFormProps: DEFAULT_USERS_EDIT_FORM_PROPS,
+        entityActions: DEFAULT_USERS_ENTITY_ACTIONS,
+        toolbarActions: DEFAULT_USERS_TOOLBAR_ACTIONS,
+      },
+      mapEntitiesToContributors<IdentityUserDto>(
+        injector,
+        { [IdentityComponents.Users]: entities.User },
+        'AbpIdentity',
+      ),
+      {
+        entityProps: entityProps[IdentityComponents.Users] ?? [],
+        createFormProps: createFormProps[IdentityComponents.Users] ?? [],
+        editFormProps: editFormProps[IdentityComponents.Users] ?? [],
+        entityActions: entityActions[IdentityComponents.Users] ?? [],
+        toolbarActions: toolbarActions[IdentityComponents.Users] ?? [],
+      },
+    );
 
   assemble<IdentityRoleDto>(
     extensions,
@@ -180,4 +181,13 @@ export function identityExtensionsResolver(): void {
       toolbarActions: toolbarActions[IdentityComponents.Roles] ?? [],
     },
   );
+}
+
+export function identityExtensionsResolver(): void {
+  resolveIdentityExtensions(true);
+}
+
+/** Assembles the base roles page without changing the users extension bucket. */
+export function identityRolesExtensionsResolver(): void {
+  resolveIdentityExtensions(false);
 }

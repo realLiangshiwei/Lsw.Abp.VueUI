@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useLocalization, useRoutes, type AbpRoute, type TreeNode } from '@lsw-abpvue/core';
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
 import { useRoute } from 'vue-router';
-import { BREADCRUMB } from '../defaults/texts.js';
 
 /**
  * The trail from the menu tree rather than from the URL: ABP's routes carry the names
@@ -11,6 +10,7 @@ import { BREADCRUMB } from '../defaults/texts.js';
 const routes = useRoutes();
 const localization = useLocalization();
 const current = useRoute();
+const currentPageId = useId();
 
 const trail = computed(() => {
   const found = routes.search({ path: current.path });
@@ -23,10 +23,11 @@ const trail = computed(() => {
 </script>
 
 <template>
-  <nav v-if="trail.length > 0" :aria-label="localization.t(BREADCRUMB)">
+  <nav v-if="trail.length > 0" :aria-labelledby="currentPageId">
     <ol class="breadcrumb">
       <li
         v-for="(node, index) in trail"
+        :id="index === trail.length - 1 ? currentPageId : undefined"
         :key="node.name"
         class="breadcrumb-item"
         :class="index === trail.length - 1 ? 'active' : null"

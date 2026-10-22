@@ -10,7 +10,7 @@ import {
   useServerValidation,
   useToaster,
 } from '@lsw-abpvue/theme-shared';
-import { ref, shallowRef, type Ref, type ShallowRef } from 'vue';
+import { onScopeDispose, ref, shallowRef, watch, type Ref, type ShallowRef } from 'vue';
 import { EXTENSIONS_IDENTIFIER } from '../tokens/extensions.token.js';
 import { useExtensibleForm, type ExtensibleForm } from './use-extensible-form.js';
 
@@ -40,6 +40,8 @@ export interface RecordEditor<R> {
   readonly injector: Injector;
   /** Opens the dialog on a record, or on nothing to create one. */
   show(record?: R | undefined): void;
+  /** Retires pending operations when the page's identity or tenant context changes. */
+  invalidate?: (() => void) | undefined;
   /**
    * Validates, sends, closes, says so and reloads the list. A rejected request has
    * already been reported to the error handlers by the time it lands here, so it stops
@@ -79,6 +81,27 @@ export function useRecordEditor<R>(options: RecordEditorOptions<R>): RecordEdito
   const form = shallowRef<ExtensibleForm<R>>();
   const open = ref(false);
   const busy = ref(false);
+  let revision = 0;
+  let removing = false;
+  function invalidate(): void {
+    revision += 1;
+    removing = false;
+    busy.value = false;
+    open.value = false;
+  }
+  watch(
+    open,
+    visible => {
+      if (!visible) {
+        revision += 1;
+        busy.value = false;
+      }
+    },
+    { flush: 'sync' },
+  );
+  onScopeDispose(() => {
+    revision += 1;
+  });
 
   // The page says which component key it is before anything reads it. An `inject()` after
   // this line still sees the parent's injector (api-parity-map §2), so the returned one
@@ -92,17 +115,21 @@ export function useRecordEditor<R>(options: RecordEditorOptions<R>): RecordEdito
   useServerValidation({ setServerErrors: errors => form.value?.form.setServerErrors(errors) });
 
   function show(record?: R | undefined): void {
+    revision += 1;
+    removing = false;
+    busy.value = false;
     editing.value = record;
     form.value = runInInjectionContext(injector, () => useExtensibleForm<R>(record));
     open.value = true;
   }
 
   async function save(extra: Record<string, unknown> = {}): Promise<void> {
-    if (!form.value?.form.validate()) return;
+    if (busy.value || removing || !open.value || !form.value?.form.validate()) return;
 
     const body = { ...form.value.toRequestBody(), ...extra };
     const current = editing.value;
     const id = current === undefined ? undefined : options.idOf(current);
+    const own = ++revision;
     busy.value = true;
 
     try {
@@ -115,6 +142,7 @@ export function useRecordEditor<R>(options: RecordEditorOptions<R>): RecordEdito
         await options.create(body);
       }
 
+      if (own !== revision) return;
       open.value = false;
       toaster.success('AbpUi::SavedSuccessfully');
       options.reload();
@@ -122,24 +150,29 @@ export function useRecordEditor<R>(options: RecordEditorOptions<R>): RecordEdito
       // Reported already; swallowing it here is what keeps a refused save from also
       // arriving as an unhandled rejection.
     } finally {
-      busy.value = false;
+      if (own === revision) busy.value = false;
     }
   }
 
   async function remove(record: R): Promise<void> {
-    const answer = await confirmation.warn(options.deletionMessage, 'AbpUi::AreYouSure', {
-      messageLocalizationParams: [options.nameOf(record)],
-    });
-    if (answer !== ConfirmationStatus.confirm) return;
-
+    if (removing || busy.value) return;
+    const own = ++revision;
+    removing = true;
     try {
+      const answer = await confirmation.warn(options.deletionMessage, 'AbpUi::AreYouSure', {
+        messageLocalizationParams: [options.nameOf(record)],
+      });
+      if (answer !== ConfirmationStatus.confirm || own !== revision) return;
       await options.delete(options.idOf(record) ?? '');
+      if (own !== revision) return;
       toaster.success('AbpUi::DeletedSuccessfully');
       options.reload();
     } catch {
       // As above.
+    } finally {
+      if (own === revision) removing = false;
     }
   }
 
-  return { editing, form, open, busy, injector, show, save, remove };
+  return { editing, form, open, busy, injector, show, save, remove, invalidate };
 }

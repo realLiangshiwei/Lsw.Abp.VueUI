@@ -1,0 +1,27 @@
+{
+  "generated": [
+    "README.md",
+    "audit-logging/audit-log-settings.service.ts",
+    "audit-logging/audit-logs.service.ts",
+    "audit-logging/index.ts",
+    "audit-logging/models.ts",
+    "audit-logging/validators.ts",
+    "auditing/entity-change-type.enum.ts",
+    "auditing/index.ts",
+    "index.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "auditLogging": {
+      "rootPath": "auditLogging",
+      "remoteServiceName": "AbpAuditLogging"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": true,
+    "policyNames": false
+  }
+}

@@ -82,6 +82,14 @@ function time(value: string | null | undefined) {
   return parsed && 'hour' in parsed ? parsed : undefined;
 }
 const dateValue = computed(() => date(props.modelValue));
+const calendarLabel = computed(
+  () =>
+    props.ariaLabel ||
+    props.placeholder ||
+    new Intl.DateTimeFormat(locale.value, { dateStyle: 'long', timeZone: 'UTC' }).format(
+      dateValue.value?.toDate('UTC') ?? new Date(),
+    ),
+);
 const timeValue = computed(() => time(props.modelValue));
 const dateBounds = computed(() =>
   defined({ minValue: date(props.min), maxValue: date(props.max) }),
@@ -177,7 +185,7 @@ function clear(): void {
           <DatePickerTrigger
             class="abp-date-picker__trigger"
             :disabled="disabled || readonly"
-            :aria-label="ariaLabel || $t({ key: 'AbpUi::SelectDate', defaultValue: 'Select date' })"
+            :aria-label="calendarLabel"
           >
             <i class="bi bi-calendar3" aria-hidden="true" />
           </DatePickerTrigger>
@@ -194,7 +202,7 @@ function clear(): void {
             <div class="abp-date-picker__header">
               <DatePickerPrev
                 class="btn btn-sm btn-outline-secondary"
-                :aria-label="$t({ key: 'AbpUi::PreviousMonth', defaultValue: 'Previous month' })"
+                :aria-label="$t('AbpUi::PagerPrevious')"
               >
                 <i
                   class="bi"
@@ -205,7 +213,7 @@ function clear(): void {
               <DatePickerHeading class="fw-semibold" />
               <DatePickerNext
                 class="btn btn-sm btn-outline-secondary"
-                :aria-label="$t({ key: 'AbpUi::NextMonth', defaultValue: 'Next month' })"
+                :aria-label="$t('AbpUi::PagerNext')"
               >
                 <i
                   class="bi"

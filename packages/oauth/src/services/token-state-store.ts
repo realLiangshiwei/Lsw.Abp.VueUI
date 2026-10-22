@@ -10,24 +10,27 @@ export class TokenStateStore implements StateStore {
   constructor(
     private readonly storage: TokenStorage,
     private readonly prefix: string,
+    private readonly isActive: () => boolean = () => true,
   ) {}
 
   set(key: string, value: string): Promise<void> {
-    this.storage.setItem(this.prefix + key, value);
+    if (this.isActive()) this.storage.setItem(this.prefix + key, value);
     return Promise.resolve();
   }
 
   get(key: string): Promise<string | null> {
-    return Promise.resolve(this.storage.getItem(this.prefix + key));
+    return Promise.resolve(this.isActive() ? this.storage.getItem(this.prefix + key) : null);
   }
 
   remove(key: string): Promise<string | null> {
+    if (!this.isActive()) return Promise.resolve(null);
     const value = this.storage.getItem(this.prefix + key);
     this.storage.removeItem(this.prefix + key);
     return Promise.resolve(value);
   }
 
   getAllKeys(): Promise<string[]> {
+    if (!this.isActive()) return Promise.resolve([]);
     const keys = this.storage
       .keys()
       .filter(key => key.startsWith(this.prefix))

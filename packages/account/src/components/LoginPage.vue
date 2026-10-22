@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthWrapper } from '@lsw-abpvue/account-core';
 import {
+  AbpHttpError,
   AuthError,
   AuthService,
   getCurrentInjector,
@@ -22,7 +23,11 @@ import {
 import { computed, ref, shallowRef, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { AUTHENTICATOR_CODE, TWO_FACTOR_TEXTS } from '../defaults/texts.js';
-import { TwoFactorService, type TwoFactorProvider } from '../services/two-factor.service.js';
+import {
+  TwoFactorDeliveryUnavailableError,
+  TwoFactorService,
+  type TwoFactorProvider,
+} from '../services/two-factor.service.js';
 import { redirectUrlOf } from '../utils/redirect-url.js';
 
 const auth = injectAbp(AuthService);
@@ -48,6 +53,7 @@ const provider = ref('');
 const sending = ref(false);
 const codeSent = ref(false);
 const secondFactor = computed(() => challenge.value !== undefined);
+const registrationPrompt = computed(() => localization.findKey(['AbpAccount'], ['AreYouANewUser']));
 const selectedProvider = computed(() => providers.value.find(item => item.name === provider.value));
 const providerOptions = computed(() =>
   providers.value.map(item => ({
@@ -93,14 +99,37 @@ const passwordErrors = errorsOf('password');
  * code is what is worth translating; the description is the backend's own words and is
  * shown when there is nothing better.
  */
+function unavailableSecondFactor(): string {
+  const key = TWO_FACTOR_TEXTS.unavailable;
+  return localization.t(
+    localization.findKey(['AbpAccount'], ['Volo.Account:UnsupportedTwoFactorProvider']) === key
+      ? key
+      : 'AbpUi::DefaultErrorMessage',
+  );
+}
+
+function hasSecondFactorTexts(available: readonly TwoFactorProvider[]): boolean {
+  const keys: string[] = [TWO_FACTOR_TEXTS.code];
+  if (available.length > 1) keys.push(TWO_FACTOR_TEXTS.provider);
+  if (available.some(item => item.requiresCodeDelivery))
+    keys.push(TWO_FACTOR_TEXTS.resend, TWO_FACTOR_TEXTS.sent);
+  return keys.every(key => {
+    const [resource, name] = key.split('::');
+    return localization.findKey([resource ?? ''], [name ?? '']) === key;
+  });
+}
+
 function describe(error: unknown): string {
+  if (error instanceof TwoFactorDeliveryUnavailableError) return unavailableSecondFactor();
+
   if (error instanceof AuthError) {
     return error.error === 'invalid_grant' && !error.errorDescription
       ? localization.t('AbpAccount::InvalidUserNameOrPassword')
       : (error.errorDescription ?? localization.t('AbpAccount::InvalidUserNameOrPassword'));
   }
 
-  return error instanceof Error ? error.message : String(error);
+  if (error instanceof AbpHttpError && error.error?.message) return error.error.message;
+  return localization.t('AbpUi::DefaultErrorMessage');
 }
 
 async function submit(): Promise<void> {
@@ -131,8 +160,8 @@ async function submit(): Promise<void> {
     if (error instanceof TwoFactorRequiredError) {
       try {
         const available = await twoFactor.getProviders(error);
-        if (available.length === 0) {
-          toaster.error(localization.t(TWO_FACTOR_TEXTS.unavailable));
+        if (available.length === 0 || !hasSecondFactorTexts(available)) {
+          toaster.error(unavailableSecondFactor());
           return;
         }
         challenge.value = error;
@@ -153,7 +182,7 @@ async function submit(): Promise<void> {
   <h1 class="h4 mb-3">{{ $t('AbpAccount::Login') }}</h1>
 
   <p v-if="wrapper.isSelfRegistrationEnabled.value">
-    <strong>{{ $t('AbpAccount::AreYouANewUser') }}</strong>
+    <strong v-if="registrationPrompt">{{ localization.t(registrationPrompt) }}</strong>
     <RouterLink class="ms-1" to="/account/register">{{ $t('AbpAccount::Register') }}</RouterLink>
   </p>
 

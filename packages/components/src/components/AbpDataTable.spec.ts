@@ -135,6 +135,36 @@ describe('sorting', () => {
 });
 
 describe('selection', () => {
+  it('names selection from the existing table caption and each existing row value', () => {
+    const wrapper = render({ selectable: true, caption: 'Books' });
+    const nameOf = (input: Element): string =>
+      (input.getAttribute('aria-labelledby') ?? '')
+        .split(' ')
+        .map(id => wrapper.find(`[id="${id}"]`).text())
+        .join(' ');
+    expect(nameOf(wrapper.get('thead input').element)).toBe('Books');
+    expect(wrapper.findAll('tbody input').map(input => nameOf(input.element))).toEqual([
+      'Dune',
+      'Neuromancer',
+    ]);
+  });
+
+  it('uses the existing column heading when the table has no caption', () => {
+    const wrapper = render({ selectable: true });
+    const id = wrapper.get('thead input').attributes('aria-labelledby');
+    expect(wrapper.get(`[id="${id}"]`).text()).toBe('Name');
+  });
+
+  it('omits the bulk checkbox when there are no rows or no content that can name it', () => {
+    expect(render({ selectable: true, data: [] }).find('thead input').exists()).toBe(false);
+    const noColumns = render({ selectable: true, columns: [] });
+    expect(noColumns.find('thead input').exists()).toBe(false);
+    expect(noColumns.findAll('tbody input').map(input => input.attributes('aria-label'))).toEqual([
+      '1',
+      '2',
+    ]);
+  });
+
   it('there is no selection column unless the table is selectable', () => {
     expect(render().find('.abp-table-select').exists()).toBe(false);
   });
@@ -166,6 +196,19 @@ describe('selection', () => {
 });
 
 describe('row detail', () => {
+  it('names the expansion control from its record and identifies its expanded content', () => {
+    const wrapper = render(
+      { expandable: true, expanded: ['1'] },
+      { 'expanded-row': ({ row }: { row: Book }) => h('p', `about ${row.name}`) },
+    );
+    const toggle = wrapper.get('tbody button');
+    const labelId = toggle.attributes('aria-labelledby');
+    expect(wrapper.get(`[id="${labelId}"]`).text()).toBe('Dune');
+    const detailId = toggle.attributes('aria-controls');
+    expect(wrapper.get(`[id="${detailId}"]`).text()).toBe('about Dune');
+    expect(toggle.attributes('aria-expanded')).toBe('true');
+  });
+
   it('a row is expanded and collapsed, and says which it is', async () => {
     const wrapper = render(
       { expandable: true },

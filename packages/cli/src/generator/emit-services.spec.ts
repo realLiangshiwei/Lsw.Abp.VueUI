@@ -1,3 +1,7 @@
+import { execFile } from 'node:child_process';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type {
   ActionDefinition,
@@ -53,6 +57,106 @@ function emit(
 }
 
 describe('a service', () => {
+  it.each([
+    ['Volo.Abp.Data.ExtraPropertyDictionary', '{string:object}', 'ModelBinding'],
+    ['{System.String:System.Object}', '{string:object}', 'Query'],
+    ['Acme.PropertyBag', '{string:string}', 'ModelBinding'],
+  ])('keeps a named query dictionary for %s', (type, typeSimple, bindingSourceId) => {
+    const { content } = emit({
+      GetListAsyncByInput: action({
+        uniqueName: 'GetListAsyncByInput',
+        parametersOnMethod: [
+          {
+            name: 'input',
+            type: 'Acme.QueryInput',
+            typeSimple: 'Acme.QueryInput',
+            isOptional: false,
+          },
+        ],
+        parameters: [
+          {
+            nameOnMethod: 'input',
+            name: 'ExtraProperties',
+            descriptorName: 'input',
+            type,
+            typeSimple,
+            isOptional: false,
+            bindingSourceId,
+          },
+        ],
+      }),
+    });
+
+    expect(content).toContain('params: { extraProperties: input.extraProperties }');
+    expect(content).not.toContain('...input.extraProperties');
+  });
+
+  it.each([
+    ['System.Collections.Generic.Dictionary<System.String,System.Object>', '{string:object}'],
+    ['System.Collections.Generic.IDictionary<System.String,System.Object>', '{string:object}'],
+    ['Dictionary<string,string>', '{string:string}'],
+    ['Acme.PropertyBag', 'IDictionary<string,string>'],
+  ])(
+    'keeps the query entry convention for CLR dictionaries described by %s',
+    (type, typeSimple) => {
+      const { content } = emit({
+        GetListAsyncByFilters: action({
+          uniqueName: 'GetListAsyncByFilters',
+          parametersOnMethod: [{ name: 'filters', type, typeSimple, isOptional: false }],
+          parameters: [
+            {
+              nameOnMethod: 'filters',
+              name: 'filters',
+              type,
+              typeSimple,
+              isOptional: false,
+              bindingSourceId: 'Query',
+            },
+          ],
+        }),
+      });
+
+      expect(content).toContain('params: { ...filters }');
+      expect(content).not.toContain('params: { filters }');
+    },
+  );
+
+  it('keeps a required nullable query value distinct from an optional argument', () => {
+    const { content } = emit({
+      MoveAllUsersAsync: action({
+        uniqueName: 'MoveAllUsersAsync',
+        httpMethod: 'PUT',
+        url: 'api/roles/{id}/move-all-users',
+        parametersOnMethod: [
+          { name: 'id', type: 'System.Guid', typeSimple: 'string', isOptional: false },
+          { name: 'roleId', type: 'System.Guid?', typeSimple: 'string?', isOptional: false },
+        ],
+        parameters: [
+          {
+            nameOnMethod: 'id',
+            name: 'id',
+            type: 'System.Guid',
+            typeSimple: 'string',
+            isOptional: false,
+            bindingSourceId: 'Path',
+          },
+          {
+            nameOnMethod: 'roleId',
+            name: 'roleId',
+            type: 'System.Guid?',
+            typeSimple: 'string?',
+            isOptional: false,
+            bindingSourceId: 'Query',
+          },
+        ],
+      }),
+    });
+    expect(content).toContain(
+      'moveAllUsers: (id: string, roleId: string | null, config?: RestConfig)',
+    );
+    expect(content).toContain('params: { roleId }');
+  });
+
   it('is one file per controller, named after it', () => {
     const { path, content } = emit({ GetAsync: action({}) });
 
@@ -70,7 +174,7 @@ describe('a service', () => {
     expect(content).toContain('getList: (config?: RestConfig)');
   });
 
-  it('interpolates a path parameter into the url', () => {
+  it('encodes a path parameter as one URL segment', () => {
     const { content } = emit({
       GetAsyncById: action({
         uniqueName: 'GetAsyncById',
@@ -93,7 +197,7 @@ describe('a service', () => {
     });
 
     expect(content).toContain('get: (id: string, config?: RestConfig)');
-    expect(content).toContain('url: `/api/books/${id}`');
+    expect(content).toContain('url: `/api/books/${encodeURIComponent(String(id))}`');
   });
 
   it('reads a flattened query parameter off the input it came from', () => {
@@ -206,20 +310,49 @@ describe('a service', () => {
     expect(content).toContain('body: input');
   });
 
-  it('sends a bare string body as JSON, which is what the server reads it as', () => {
+  it.each(['string', 'string?'])(
+    'sends a %s body as JSON, which is what the server reads it as',
+    typeSimple => {
+      const { content } = emit({
+        SetAsyncByValue: action({
+          uniqueName: 'SetAsyncByValue',
+          httpMethod: 'POST',
+          parametersOnMethod: [
+            { name: 'value', type: 'System.String', typeSimple, isOptional: false },
+          ],
+          parameters: [
+            {
+              nameOnMethod: 'value',
+              name: 'value',
+              type: 'System.String',
+              typeSimple,
+              isOptional: false,
+              bindingSourceId: 'Body',
+              descriptorName: '',
+            },
+          ],
+        }),
+      });
+
+      expect(content).toContain('body: JSON.stringify(value)');
+      expect(content).toContain("headers: { 'Content-Type': 'application/json' }");
+    },
+  );
+
+  it('forwards mutable and readonly array bodies through a compatible request type', async () => {
     const { content } = emit({
-      SetAsyncByValue: action({
-        uniqueName: 'SetAsyncByValue',
-        httpMethod: 'POST',
+      ReplaceAsyncByInput: action({
+        uniqueName: 'ReplaceAsyncByInput',
+        httpMethod: 'PUT',
         parametersOnMethod: [
-          { name: 'value', type: 'System.String', typeSimple: 'string', isOptional: false },
+          { name: 'input', type: '[System.String]', typeSimple: '[string]', isOptional: false },
         ],
         parameters: [
           {
-            nameOnMethod: 'value',
-            name: 'value',
-            type: 'System.String',
-            typeSimple: 'string',
+            nameOnMethod: 'input',
+            name: 'input',
+            type: '[System.String]',
+            typeSimple: '[string]',
             isOptional: false,
             bindingSourceId: 'Body',
             descriptorName: '',
@@ -228,8 +361,52 @@ describe('a service', () => {
       }),
     });
 
-    expect(content).toContain('body: JSON.stringify(value)');
-    expect(content).toContain("headers: { 'Content-Type': 'application/json' }");
+    const directory = await mkdtemp(join(tmpdir(), 'abpvue-array-body-'));
+    try {
+      const source = join(directory, 'proxy.ts');
+      const httpTypes = resolve(import.meta.dirname, '../../../core/src/models/http.js');
+      await writeFile(
+        source,
+        `import type { HttpRequestConfig, RestConfig } from ${JSON.stringify(httpTypes)};
+declare function defineService<T>(name: string, factory: () => T): T;
+declare function inject<T>(token: T): T;
+type ServiceOf<T> = T;
+declare const RestService: {
+  request<TBody, TResult>(request: HttpRequestConfig<TBody>, config?: RestConfig): Promise<TResult>;
+};
+${content.replace(/^import .*;\n/gm, '')}
+const mutable: string[] = ['first'];
+const immutable = ['second'] as const;
+BookService.replace(mutable);
+BookService.replace(immutable);
+`,
+      );
+      const compiler = resolve(import.meta.dirname, '../../../../node_modules/typescript/bin/tsc');
+      const diagnostics = await new Promise<string>(resolveDiagnostics => {
+        execFile(
+          process.execPath,
+          [
+            compiler,
+            '--ignoreConfig',
+            '--noEmit',
+            '--strict',
+            '--skipLibCheck',
+            '--module',
+            'ESNext',
+            '--moduleResolution',
+            'bundler',
+            '--target',
+            'ES2022',
+            source,
+          ],
+          (error, stdout, stderr) =>
+            resolveDiagnostics(error ? `${stdout}${stderr}` || error.message : ''),
+        );
+      });
+      expect(diagnostics).toBe('');
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
   });
 
   it('takes FormData for an upload and posts it as the body', () => {

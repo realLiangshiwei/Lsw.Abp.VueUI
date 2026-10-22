@@ -11,11 +11,6 @@ docs/.vitepress/cache/
 .env.local
 .env.*.local
 
-# Local agent instructions and configuration
-AGENTS.md
-CLAUDE.md
-.claude/
-
 # Generated E2E records, screenshots and reports
 e2e/**/results/
 e2e/**/artifacts/

@@ -29,15 +29,23 @@ function identified(request: HttpRequestConfig, token: string | null): HttpReque
 export function authInterceptor(): HttpInterceptor {
   const oauth = inject(AbpOAuthService);
   const filters = inject(AuthErrorFilterService);
-  let renewal: Promise<void> | null = null;
+  let renewal: { revision: number; promise: Promise<void> } | null = null;
 
-  const renewOnce = (): Promise<void> =>
-    (renewal ??= oauth.refreshToken().finally(() => {
-      renewal = null;
-    }));
+  const renewOnce = (revision: number): Promise<void> => {
+    if (renewal?.revision === revision) return renewal.promise;
+    const entry = { revision, promise: oauth.refreshToken() };
+    renewal = entry;
+    void entry.promise
+      .finally(() => {
+        if (renewal === entry) renewal = null;
+      })
+      .catch(() => undefined);
+    return entry.promise;
+  };
 
   return async (request, next) => {
     if (request.context?.skipAuthorization) return next(request);
+    const own = oauth.sessionRevision;
 
     const send = () => next(identified(request, oauth.getAccessToken()));
 
@@ -47,9 +55,16 @@ export function authInterceptor(): HttpInterceptor {
       const unauthorized = error instanceof AbpHttpError && error.status === 401;
       // A filter claiming the failure says this endpoint answers 401 in the normal
       // course of things -- renewing the token would not change its mind.
-      if (!unauthorized || filters.run(error) || !oauth.getRefreshToken()) throw error;
+      if (
+        !unauthorized ||
+        own !== oauth.sessionRevision ||
+        filters.run(error) ||
+        !oauth.getRefreshToken()
+      )
+        throw error;
 
-      await renewOnce();
+      await renewOnce(own);
+      if (own !== oauth.sessionRevision) throw error;
       return send();
     }
   };

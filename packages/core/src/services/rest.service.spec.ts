@@ -177,6 +177,77 @@ describe('error reporting', () => {
 });
 
 describe('the loading flag', () => {
+  it('reports a current failure when config replaces an aborted request signal', async () => {
+    const original = new AbortController();
+    original.abort();
+    const current = new AbortController();
+    const send = vi.fn<FetchLike>(() =>
+      Promise.resolve(json({ error: { message: 'Current' } }, 500)),
+    );
+    const injector = context(send);
+    const seen = vi.fn();
+    injector.get(HttpErrorReporterService).onError(seen);
+
+    await expect(
+      injector
+        .get(RestService)
+        .request(
+          { method: 'PUT', url: '/api/books/owned', signal: original.signal },
+          { signal: current.signal },
+        ),
+    ).rejects.toBeInstanceOf(AbpHttpError);
+    expect(send.mock.calls[0]?.[1]?.signal).toBe(current.signal);
+    expect(seen).toHaveBeenCalledOnce();
+    expect(injector.get(HttpWaitService).loading.value).toBe(false);
+  });
+
+  it.each([
+    ['transport', 'config'],
+    ['validation', 'config'],
+    ['transport', 'request'],
+    ['validation', 'request'],
+  ] as const)(
+    'does not report an obsolete aborted %s failure with the signal on %s',
+    async (kind, location) => {
+      let finish: (response: Response) => void = () => {};
+      let fail: (reason: unknown) => void = () => {};
+      const injector = context(
+        () =>
+          new Promise<Response>((resolve, reject) => {
+            finish = resolve;
+            fail = reject;
+          }),
+      );
+      const seen = vi.fn();
+      injector.get(HttpErrorReporterService).onError(seen);
+      const controller = new AbortController();
+      const pending = injector.get(RestService).request(
+        {
+          method: 'PUT',
+          url: '/api/books/owned',
+          ...(location === 'request' ? { signal: controller.signal } : {}),
+        },
+        location === 'config' ? { signal: controller.signal } : {},
+      );
+      controller.abort();
+      if (kind === 'transport') fail(new DOMException('The operation was aborted.', 'AbortError'));
+      else
+        finish(
+          json(
+            {
+              error: {
+                message: 'Old validation',
+                validationErrors: [{ message: 'Old name', members: ['name'] }],
+              },
+            },
+            400,
+          ),
+        );
+      await expect(pending).rejects.toBeInstanceOf(AbpHttpError);
+      expect(seen).not.toHaveBeenCalled();
+      expect(injector.get(HttpWaitService).loading.value).toBe(false);
+    },
+  );
   it('true while a request is in flight and false once it is back', async () => {
     const injector = context(() => Promise.resolve(json({})));
     const wait = injector.get(HttpWaitService);

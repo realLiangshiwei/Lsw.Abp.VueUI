@@ -8,6 +8,20 @@ function store(prefix = 'oidc.') {
 }
 
 describe('the state store handed to oidc-client-ts', () => {
+  it('prevents a retired manager from reading or overwriting the replacement session', async () => {
+    const { storage } = store();
+    let active = true;
+    const retired = new TokenStateStore(storage, 'oidc.user.', () => active);
+    await retired.set('client', 'original');
+    active = false;
+    storage.setItem('oidc.user.client', 'replacement');
+    await retired.set('client', 'late-original');
+    await expect(retired.remove('client')).resolves.toBeNull();
+    await expect(retired.get('client')).resolves.toBeNull();
+    await expect(retired.getAllKeys()).resolves.toEqual([]);
+    expect(storage.getItem('oidc.user.client')).toBe('replacement');
+  });
+
   it('reads, writes and removes through the storage the host chose', async () => {
     const { storage, store: state } = store();
 

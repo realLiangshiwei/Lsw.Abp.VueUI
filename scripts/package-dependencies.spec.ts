@@ -76,6 +76,33 @@ const ALLOWED = {
     'vue',
     'vue-router',
   ],
+  'account-pro': [
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/account-core',
+    '@lsw-abpvue/theme-shared',
+    'vue',
+    'vue-router',
+  ],
+  'audit-logging': [
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/theme-shared',
+    'vue',
+    'vue-router',
+  ],
+  'identity-pro': [
+    '@lsw-abpvue/account-pro',
+    '@lsw-abpvue/audit-logging',
+    '@lsw-abpvue/setting-management',
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/identity',
+    '@lsw-abpvue/permission-management',
+    '@lsw-abpvue/theme-shared',
+    'vue',
+    'vue-router',
+  ],
   'permission-management': [
     // The tab list every module's grouped dialog renders (design 03 §1).
     '@lsw-abpvue/components',

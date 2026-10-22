@@ -1,10 +1,12 @@
 import { AccountService, type ProfileDto } from '@lsw-abpvue/account-core/proxy';
 import {
   ABP_INJECTOR_KEY,
+  AbpHttpError,
   AuthService,
   AuthError,
   ConfigStateService,
   createInjector,
+  LocalizationService,
   TwoFactorRequiredError,
   type ApplicationConfigurationDto,
   type Injector,
@@ -17,8 +19,8 @@ import { mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Component } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
+import { ossLocalizationResources } from '../../../../e2e/fixtures/localization.js';
 import { ACCOUNT_APP_NAME } from '../tokens/config-options.token.js';
-import { TwoFactorService } from '../services/two-factor.service.js';
 import ForgotPasswordPage from './ForgotPasswordPage.vue';
 import LoginPage from './LoginPage.vue';
 import RegisterPage from './RegisterPage.vue';
@@ -70,6 +72,10 @@ function injectorWith(providers: ProviderInput[], settings: Record<string, strin
   configState.setState({
     ...configState.snapshot(),
     setting: { values: settings },
+    localization: {
+      ...configState.snapshot().localization,
+      resources: ossLocalizationResources(),
+    },
   } as ApplicationConfigurationDto);
 
   return injector;
@@ -99,8 +105,7 @@ async function render(component: Component, injector: Injector, router: Router) 
       plugins: [router],
       provide: { [ABP_INJECTOR_KEY]: injector },
       mocks: {
-        $t: (key: string | { defaultValue: string }) =>
-          typeof key === 'string' ? key : key.defaultValue,
+        $t: (key: string) => injector.get(LocalizationService).t(key),
       },
     },
   });
@@ -151,103 +156,68 @@ describe('LoginPage', () => {
     await submit(wrapper);
 
     expect(login).not.toHaveBeenCalled();
-    // No localization is loaded, so a key resolves to its own last segment.
-    expect(wrapper.text()).toContain('ThisFieldIsRequired.');
+    expect(wrapper.text()).toContain('This field is required.');
   });
 
-  it('asks for the code from the authenticator when ABP wants a second factor', async () => {
-    const login = vi
-      .fn<(params: LoginParams) => Promise<void>>()
-      .mockRejectedValueOnce(new TwoFactorRequiredError('user-1', 'token'))
-      .mockResolvedValueOnce(undefined);
-    const wrapper = await render(
-      LoginPage,
-      injectorWith([authService(login)]),
-      await routerAt('/account/login'),
-    );
-
-    type('username', 'admin');
-    type('password', '1q2w3E*');
-    await wrapper.vm.$nextTick();
-    await submit(wrapper);
-    await wrapper.vm.$nextTick();
-
-    expect(document.querySelector('input[name="twoFactorCode"]')).not.toBeNull();
-
-    type('twoFactorCode', '123456');
-    await wrapper.vm.$nextTick();
-    await submit(wrapper);
-
-    expect(login).toHaveBeenLastCalledWith(
-      expect.objectContaining({ twoFactorProvider: 'Authenticator', twoFactorCode: '123456' }),
-    );
-  });
-
-  it('lets the user choose a provider, send and resend its code, and retry the same credentials', async () => {
-    const challenge = new TwoFactorRequiredError('user-1', 'delivery-token');
-    const login = vi.fn().mockRejectedValueOnce(challenge).mockResolvedValueOnce(undefined);
-    const sendCode = vi.fn(() => Promise.resolve());
-    const wrapper = await render(
-      LoginPage,
-      injectorWith([
-        authService(login),
-        {
-          provide: TwoFactorService,
-          useValue: {
-            getProviders: () =>
-              Promise.resolve([
-                { name: 'Authenticator', requiresCodeDelivery: false },
-                { name: 'Email', displayName: 'Email code', requiresCodeDelivery: true },
-              ]),
-            sendCode,
-          },
-        },
-      ]),
-      await routerAt('/account/login'),
-    );
-    type('username', 'admin');
-    type('password', '1q2w3E*');
-    await wrapper.vm.$nextTick();
-    await submit(wrapper);
-    await wrapper.get('select[name="twoFactorProvider"]').setValue('Email');
-    await wrapper
-      .findAll('button')
-      .find(button => button.text() === 'Send code')
-      ?.trigger('click');
-    await new Promise(resolve => setTimeout(resolve));
-    expect(sendCode).toHaveBeenCalledWith(challenge, 'Email');
-    await wrapper
-      .findAll('button')
-      .find(button => button.text() === 'Resend code')
-      ?.trigger('click');
-    await new Promise(resolve => setTimeout(resolve));
-    expect(sendCode).toHaveBeenCalledTimes(2);
-    type('twoFactorCode', '654321');
-    await wrapper.vm.$nextTick();
-    await submit(wrapper);
-    expect(login).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        username: 'admin',
-        password: '1q2w3E*',
-        twoFactorProvider: 'Email',
-        twoFactorCode: '654321',
-      }),
-    );
-  });
-
-  it('does not retry a second factor with an empty verification code', async () => {
+  it('does not render commercial second-factor fields against an OSS resource set', async () => {
     const login = vi.fn().mockRejectedValue(new TwoFactorRequiredError('user-1', 'token'));
-    const wrapper = await render(
-      LoginPage,
-      injectorWith([authService(login)]),
-      await routerAt('/account/login'),
-    );
+    const injector = injectorWith([authService(login)]);
+    const wrapper = await render(LoginPage, injector, await routerAt('/account/login'));
     type('username', 'admin');
     type('password', '1q2w3E*');
     await wrapper.vm.$nextTick();
     await submit(wrapper);
+    await wrapper.vm.$nextTick();
+    expect(document.querySelector('input[name="twoFactorCode"]')).toBeNull();
+    expect(injector.get(ToasterService).toasts.value.at(-1)?.message).toBe(
+      injector.get(LocalizationService).t('AbpUi::DefaultErrorMessage'),
+    );
+    expect(wrapper.text()).not.toContain('SelectedProvider');
+    expect(wrapper.text()).not.toContain('VerificationCode');
+  });
+
+  it.each([
+    new TypeError('Failed to fetch'),
+    new AbpHttpError({ status: 0, statusText: '', method: 'POST', url: '/connect/token' }),
+  ])(
+    'localizes frontend and transport failures without exposing diagnostics: %s',
+    async failure => {
+      const injector = injectorWith([authService(() => Promise.reject(failure))]);
+      const wrapper = await render(LoginPage, injector, await routerAt('/account/login'));
+      type('username', 'admin');
+      type('password', '1q2w3E*');
+      await wrapper.vm.$nextTick();
+      await submit(wrapper);
+      await new Promise(resolve => setTimeout(resolve));
+      expect(injector.get(ToasterService).toasts.value.at(-1)?.message).toBe(
+        injector.get(LocalizationService).t('AbpUi::DefaultErrorMessage'),
+      );
+      expect(injector.get(ToasterService).toasts.value.at(-1)?.message).not.toBe(failure.message);
+    },
+  );
+
+  it.each(['oauth', 'abp'])('retains the real %s backend error description', async kind => {
+    const injector = injectorWith([]);
+    const backendMessage = injector.get(LocalizationService).t('AbpAccount::UserLockedOutMessage');
+    const failure =
+      kind === 'oauth'
+        ? new AuthError('invalid_grant', backendMessage)
+        : new AbpHttpError({
+            status: 400,
+            statusText: '',
+            method: 'POST',
+            url: '/api/account/two-factor',
+            error: { message: backendMessage },
+          });
+    const configured = injectorWith([authService(() => Promise.reject(failure))]);
+    const wrapper = await render(LoginPage, configured, await routerAt('/account/login'));
+    type('username', 'admin');
+    type('password', '1q2w3E*');
+    await wrapper.vm.$nextTick();
     await submit(wrapper);
-    expect(login).toHaveBeenCalledTimes(1);
+    await new Promise(resolve => setTimeout(resolve));
+    expect(configured.get(ToasterService).toasts.value.at(-1)?.message).toBe(backendMessage);
+    injector.destroy();
   });
 
   it('says what the token endpoint refused with', async () => {
@@ -278,7 +248,7 @@ describe('LoginPage', () => {
       injectorWith([authService(() => Promise.resolve())]),
       await routerAt('/account/login'),
     );
-    expect(withRegistration.text()).toContain('AbpAccount::AreYouANewUser');
+    expect(withRegistration.text()).toContain('Are you a new user?');
 
     const without = await render(
       LoginPage,
@@ -287,7 +257,7 @@ describe('LoginPage', () => {
       }),
       await routerAt('/account/login'),
     );
-    expect(without.text()).not.toContain('AbpAccount::AreYouANewUser');
+    expect(without.text()).not.toContain('Are you a new user?');
   });
 });
 
@@ -339,7 +309,7 @@ describe('RegisterPage', () => {
     await submit(wrapper);
 
     expect(register).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain('PasswordTooShort');
+    expect(wrapper.text()).toContain('Passwords must be at least 8 characters.');
   });
 
   it('says so when the backend has self registration switched off', async () => {
@@ -373,7 +343,9 @@ describe('ForgotPasswordPage', () => {
     await new Promise(resolve => setTimeout(resolve));
 
     expect(send).toHaveBeenCalledWith({ email: 'admin@abp.io', appName: 'Vue' });
-    expect(wrapper.text()).toContain('AbpAccount::PasswordResetMailSentMessage');
+    expect(wrapper.text()).toContain(
+      injector.get(LocalizationService).t('AbpAccount::PasswordResetMailSentMessage').trim(),
+    );
   });
 });
 
@@ -396,7 +368,9 @@ describe('ResetPasswordPage', () => {
       resetToken: 'abc',
       password: '1q2w3E*',
     });
-    expect(wrapper.text()).toContain('AbpAccount::YourPasswordIsSuccessfullyReset');
+    expect(wrapper.text()).toContain(
+      injector.get(LocalizationService).t('AbpAccount::YourPasswordIsSuccessfullyReset'),
+    );
   });
 
   it('refuses two passwords that are not the same', async () => {
@@ -410,7 +384,11 @@ describe('ResetPasswordPage', () => {
     await submit(wrapper);
 
     expect(reset).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain('PasswordConfirmationFailed');
+    expect(wrapper.text()).toContain(
+      injector
+        .get(LocalizationService)
+        .t('AbpIdentity::Volo.Abp.Identity:PasswordConfirmationFailed'),
+    );
   });
 
   it('has nothing to offer when the link is missing what it needs', async () => {

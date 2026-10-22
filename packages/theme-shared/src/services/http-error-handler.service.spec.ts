@@ -1,8 +1,10 @@
 import {
   AbpHttpError,
+  ConfigStateService,
   createInjector,
   defineService,
   HttpErrorReporterService,
+  LocalizationService,
   type AbpHttpError as AbpHttpErrorType,
 } from '@lsw-abpvue/core';
 import { describe, expect, it, vi } from 'vitest';
@@ -13,14 +15,22 @@ import { provideErrorHandler } from '../providers/error-handler.provider.js';
 import { provideAbpThemeShared } from '../providers/theme-shared.provider.js';
 import { ErrorPageService } from './error-page.service.js';
 import { HttpErrorHandlerService } from './http-error-handler.service.js';
+import { ossLocalizationResources } from '../../../../e2e/fixtures/localization.js';
 
 const failure = (status: number, statusText = '') =>
   new AbpHttpError({ status, statusText, method: 'GET', url: '/api/books' });
 
 const create = () => {
   const injector = createInjector([provideAbpThemeShared()]);
+  const config = injector.get(ConfigStateService);
+  const state = config.snapshot();
+  config.setState({
+    ...state,
+    localization: { ...state.localization, resources: ossLocalizationResources() },
+  });
   return {
     injector,
+    localization: injector.get(LocalizationService),
     chain: injector.get(HttpErrorHandlerService),
     errorPage: injector.get(ErrorPageService),
     reporter: injector.get(HttpErrorReporterService),
@@ -160,8 +170,8 @@ describe('StatusCodeErrorHandler', () => {
 
     expect(errorPage.current.value).toMatchObject({
       status: 403,
-      title: { key: 'AbpUi::DefaultErrorMessage403' },
-      details: { key: 'AbpUi::DefaultErrorMessage403Detail' },
+      title: 'AbpUi::DefaultErrorMessage403',
+      details: 'AbpUi::DefaultErrorMessage403Detail',
       showHome: true,
     });
   });
@@ -180,15 +190,29 @@ describe('UnknownStatusCodeErrorHandler', () => {
 
     expect(errorPage.current.value).toMatchObject({
       status: 418,
-      title: { key: 'AbpUi::DefaultErrorMessage' },
+      title: 'AbpUi::DefaultErrorMessage',
+      details: 'AbpUi::DefaultErrorMessageDetail',
+      showHome: true,
     });
   });
 
-  it('quotes the transport when the request never landed, and offers no way home', async () => {
-    const { chain, errorPage } = create();
-    await chain.handle(failure(0));
+  it('uses the backend fallback when the request never landed, and offers no way home', async () => {
+    const { chain, errorPage, localization } = create();
+    const transport = failure(0);
+    await chain.handle(transport);
 
-    expect(errorPage.current.value?.details).toContain('no response');
+    expect(errorPage.current.value).toMatchObject({
+      status: 0,
+      title: 'AbpUi::DefaultErrorMessage',
+      details: 'AbpUi::DefaultErrorMessageDetail',
+    });
+    expect(localization.findKey(['AbpUi'], ['DefaultErrorMessageDetail'])).toBe(
+      'AbpUi::DefaultErrorMessageDetail',
+    );
+    expect(localization.t(errorPage.current.value?.details ?? '')).toBe(
+      localization.t('AbpUi::DefaultErrorMessageDetail'),
+    );
+    expect(errorPage.current.value?.details).not.toBe(transport.message);
     expect(errorPage.current.value?.showHome).toBe(false);
   });
 });

@@ -55,14 +55,17 @@ function available(): boolean {
 export const StorageService: InjectionToken<StorageService> = defineService(
   'StorageService',
   (): StorageService => {
-    const storage = available() ? nativeStorage(window.localStorage) : memoryStorage();
+    const hasNativeStorage = available();
+    const storage = hasNativeStorage ? nativeStorage(window.localStorage) : memoryStorage();
 
     return {
       ...storage,
       onChange: callback => {
-        if (typeof window === 'undefined') return () => {};
+        if (!hasNativeStorage) return () => {};
 
-        const listener = (event: StorageEvent) => callback(event.key, event.newValue);
+        const listener = (event: StorageEvent) => {
+          if (event.storageArea === window.localStorage) callback(event.key, event.newValue);
+        };
         window.addEventListener('storage', listener);
         return () => window.removeEventListener('storage', listener);
       },

@@ -3,11 +3,13 @@ import {
   ABP_INJECTOR_KEY,
   ConfigStateService,
   createInjector,
+  LocalizationService,
   type DateTimeFormatDto,
 } from '@lsw-abpvue/core';
 import type { AbpDatePickerProps } from '@lsw-abpvue/theme-shared';
 import { afterEach, describe, expect, it } from 'vitest';
 import AbpDatePicker from './AbpDatePicker.vue';
+import { ossLocalizationResources } from '../../../../e2e/fixtures/localization.js';
 
 const mounted: ReturnType<typeof mount>[] = [];
 afterEach(() => {
@@ -23,6 +25,7 @@ function render(props: AbpDatePickerProps, dateTimeFormat: DateTimeFormatDto = {
     ...state,
     localization: {
       ...state.localization,
+      resources: ossLocalizationResources(),
       currentCulture: {
         ...state.localization.currentCulture,
         cultureName: 'en',
@@ -36,8 +39,7 @@ function render(props: AbpDatePickerProps, dateTimeFormat: DateTimeFormatDto = {
     global: {
       provide: { [ABP_INJECTOR_KEY]: injector },
       mocks: {
-        $t: (key: string | { defaultValue: string }) =>
-          typeof key === 'string' ? key : key.defaultValue,
+        $t: (key: string) => injector.get(LocalizationService).t(key),
       },
     },
   });
@@ -46,6 +48,15 @@ function render(props: AbpDatePickerProps, dateTimeFormat: DateTimeFormatDto = {
 }
 
 describe('AbpDatePicker', () => {
+  it('names its calendar trigger from the selected date without requiring commercial texts', () => {
+    const wrapper = render({ modelValue: '2026-10-02' });
+    expect(wrapper.get('.abp-date-picker__trigger').attributes('aria-label')).toBe(
+      new Intl.DateTimeFormat('en', { dateStyle: 'long', timeZone: 'UTC' }).format(
+        new Date('2026-10-02T00:00:00Z'),
+      ),
+    );
+  });
+
   it.each([
     ['date', '2026-10-02T00:00:00Z', '2026-10-02'],
     ['date', '2026-10-02T23:30:00-05:00', '2026-10-02'],
@@ -115,7 +126,7 @@ describe('AbpDatePicker', () => {
     const calendar = document.querySelector<HTMLElement>('[role="dialog"]');
     expect(calendar).not.toBeNull();
     expect(calendar?.textContent).toContain('October 2026');
-    expect(calendar?.querySelector('button[aria-label="Next month"]')).not.toBeNull();
+    expect(calendar?.querySelector('button[aria-label="Next"]')).not.toBeNull();
     calendar?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await flushPromises();
     expect(document.querySelector('[role="dialog"]')).toBeNull();

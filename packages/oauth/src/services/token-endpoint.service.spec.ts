@@ -76,6 +76,29 @@ const ok = () =>
   );
 
 describe('the token endpoint', () => {
+  it('exchanges an authenticated custom grant without the scope parameter rejected by ABP custom grants', async () => {
+    const { exchanges, service } = endpoint(ok);
+    await service.grant('LinkLogin', { LinkUserId: 'target-user' }, 'source-token');
+    const exchange = exchanges.at(-1);
+    expect(exchange?.body).toEqual({
+      access_token: 'source-token',
+      grant_type: 'LinkLogin',
+      client_id: 'BookStore_App',
+      LinkUserId: 'target-user',
+    });
+    expect(exchange?.url).toBe(`${ISSUER}/connect/token`);
+    expect(exchange?.headers.Authorization).toBeUndefined();
+  });
+  it.each(['grant_type', 'ACCESS_TOKEN', 'client_id', 'Client_Secret', 'scope'])(
+    'rejects overriding the reserved %s custom-grant field before making a request',
+    async field => {
+      const { exchanges, service } = endpoint(ok);
+      await expect(
+        service.grant('LinkLogin', { [field]: 'override' }, 'source-token'),
+      ).rejects.toMatchObject({ error: 'invalid_request' });
+      expect(exchanges).toEqual([]);
+    },
+  );
   it('the endpoint URL comes from the metadata rather than a guessed path', async () => {
     const { exchanges, service } = endpoint(ok);
 

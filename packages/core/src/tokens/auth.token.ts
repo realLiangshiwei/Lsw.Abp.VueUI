@@ -1,7 +1,13 @@
 import type { ComputedRef } from 'vue';
 import { inject } from '../di/inject.js';
 import { defineToken } from '../di/token.js';
-import type { CheckAuthenticationStateFn, LoginParams, PipeToLoginFn } from '../models/auth.js';
+import type {
+  AuthGrantOptions,
+  AuthGrantResult,
+  CheckAuthenticationStateFn,
+  LoginParams,
+  PipeToLoginFn,
+} from '../models/auth.js';
 import { BrowserTokenStorage } from '../services/token-storage.service.js';
 
 /**
@@ -18,8 +24,20 @@ export interface AuthService {
    * the identity server. A login page shows or skips its form on this.
    */
   readonly isInternalAuth: boolean;
-  navigateToLogin(returnUrl?: string): Promise<void>;
+  /** Additional parameters are forwarded to the identity server's authorization request. */
+  navigateToLogin(
+    returnUrl?: string,
+    queryParams?: Readonly<Record<string, string>>,
+  ): Promise<void>;
   logout(queryParams?: Record<string, string>): Promise<void>;
+  /** Ends the local session and refreshes anonymous configuration without redirecting. */
+  clearSession?(): Promise<void>;
+  /** Exchanges a server-supported grant and commits its verified identity atomically. */
+  loginUsingGrant?(
+    grantType: string,
+    parameters: Readonly<Record<string, string>>,
+    options?: AuthGrantOptions,
+  ): Promise<AuthGrantResult>;
   /** The password flow. Throws `AuthError` when the token endpoint refuses. */
   login(params: LoginParams): Promise<void>;
   getAccessToken(): string | null;
@@ -37,6 +55,9 @@ export const AuthService = defineToken<AuthService>('AuthService', {
  * host is likely to want somewhere else -- in memory, in a cookie, in a worker.
  */
 export interface TokenStorage {
+  /** Reports updates made by another document when the chosen storage supports them. */
+  onChange?:
+    ((callback: (key: string | null, value: string | null) => void) => () => void) | undefined;
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;

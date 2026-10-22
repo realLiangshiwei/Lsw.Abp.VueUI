@@ -1,6 +1,8 @@
 import {
   AbpHttpError,
   AuthService,
+  ConfigStateService,
+  LocalizationService,
   createInjector,
   SessionStateService,
   type AbpErrorEnvelope,
@@ -14,6 +16,7 @@ import { ErrorPageService } from '../services/error-page.service.js';
 import { HttpErrorHandlerService } from '../services/http-error-handler.service.js';
 import { ToasterService } from '../services/toaster.service.js';
 import { ValidationErrorService } from '../services/validation-error.service.js';
+import { ossLocalizationResources } from '../../../../e2e/fixtures/localization.js';
 
 interface Failure {
   status?: number;
@@ -91,7 +94,7 @@ describe('TenantResolveErrorHandler', () => {
       .handle(failure({ status: 400, headers: { 'Abp-Tenant-Resolve-Error': '' } }));
 
     const toast = injector.get(ToasterService).toasts.value[0];
-    expect(toast?.message).toMatchObject({ key: 'AbpUiMultiTenancy::GivenTenantIsNotAvailable' });
+    expect(toast?.message).toBe('AbpUiMultiTenancy::GivenTenantIsNotAvailable');
     expect(toast?.options.messageLocalizationParams).toEqual(['acme']);
   });
 });
@@ -209,6 +212,28 @@ describe('AbpFormatErrorHandler', () => {
     await injector.get(HttpErrorHandlerService).handle(failure({ status: 500 }));
 
     expect(injector.get(ErrorPageService).current.value?.status).toBe(500);
+  });
+});
+
+describe('UnknownStatusCodeErrorHandler', () => {
+  it('localizes transport feedback without showing frontend diagnostic details', async () => {
+    const injector = create();
+    const config = injector.get(ConfigStateService);
+    const state = config.snapshot();
+    config.setState({
+      ...state,
+      localization: { ...state.localization, resources: ossLocalizationResources() },
+    });
+    const transport = failure({ status: 0 });
+    await injector.get(HttpErrorHandlerService).handle(transport);
+    const current = injector.get(ErrorPageService).current.value;
+    expect(current?.status).toBe(0);
+    expect(current?.showHome).toBe(false);
+    const localization = injector.get(LocalizationService);
+    expect(localization.t(current?.details ?? '')).toBe(
+      localization.t('AbpUi::DefaultErrorMessageDetail'),
+    );
+    expect(current?.details).not.toBe(transport.message);
   });
 });
 

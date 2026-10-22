@@ -7,8 +7,8 @@ import {
   type Injector,
 } from '@lsw-abpvue/core';
 import { ErrorPageService, PageAlertService } from '@lsw-abpvue/theme-shared';
-import { mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Component } from 'vue';
 import { createMemoryHistory, createRouter, type Router } from 'vue-router';
 import { provideAbpThemeBasic } from '../providers/theme-basic.provider.js';
@@ -33,6 +33,7 @@ async function render(layout: Component, injector: Injector, router: Router, pat
       },
     },
   });
+  mounted.push(wrapper);
   await wrapper.vm.$nextTick();
 
   return wrapper;
@@ -40,6 +41,13 @@ async function render(layout: Component, injector: Injector, router: Router, pat
 
 let injector: Injector;
 let router: Router;
+const mounted: VueWrapper[] = [];
+
+afterEach(() => {
+  for (const wrapper of mounted.splice(0)) wrapper.unmount();
+  injector.destroy();
+  document.body.innerHTML = '';
+});
 
 beforeEach(() => {
   injector = createInjector([provideAbpThemeBasic()]);
@@ -121,6 +129,19 @@ describe('ApplicationLayout', () => {
     expect(wrapper.find('.abp-shell--collapsed').exists()).toBe(true);
   });
 
+  it('names menu and breadcrumb controls from existing application and current-page content', async () => {
+    const wrapper = await render(ApplicationLayout, injector, router, '/books/authors');
+    const menu = wrapper.get('.abp-shell__menu-toggle');
+    expect(menu.attributes('aria-label')).toBe('ABP');
+    const sidebarId = menu.attributes('aria-controls');
+    expect(wrapper.get(`[id="${sidebarId}"]`).classes()).toContain('abp-shell__sidebar');
+    const breadcrumb = wrapper.get('.breadcrumb').element.parentElement;
+    const currentId = breadcrumb?.getAttribute('aria-labelledby');
+    expect(wrapper.get(`[id="${currentId}"]`).text()).toBe(
+      wrapper.get('.breadcrumb [aria-current="page"]').text(),
+    );
+  });
+
   it('shows the trail to the page in a breadcrumb', async () => {
     const wrapper = await render(ApplicationLayout, injector, router, '/books/authors');
 
@@ -138,11 +159,13 @@ describe('ApplicationLayout', () => {
 
   it('covers the page when a request ends it', async () => {
     injector.get(ErrorPageService).show({ status: 403, title: 'You are not authorized!' });
-    const wrapper = await render(ApplicationLayout, injector, router);
+    await render(ApplicationLayout, injector, router);
+    await flushPromises();
 
-    const errorPage = wrapper.find('.abp-error-page');
-    expect(errorPage.text()).toContain('You are not authorized!');
-    expect(errorPage.text()).toContain('403');
+    const errorPage = document.querySelector('[role="alertdialog"].abp-error-page');
+    expect(errorPage?.textContent).toContain('You are not authorized!');
+    expect(errorPage?.textContent).toContain('403');
+    expect(errorPage?.closest('[aria-hidden="true"], [inert]')).toBeNull();
   });
 });
 

@@ -187,6 +187,15 @@ export function testInput(theme: ThemeUnderTest): void {
 
 export function testToggle(theme: ThemeUnderTest): void {
   describe('AbpToggle', () => {
+    it('names the native checkbox from existing content and identifies the controlled rows', () => {
+      const rendered = renderContract(theme, AbpToggle, {
+        props: { ariaLabelledby: 'existing-caption', ariaControls: 'existing-rows' },
+      });
+      const checkbox = findRendered(rendered, 'input[type="checkbox"]');
+      expect(checkbox?.attributes('aria-labelledby')).toBe('existing-caption');
+      expect(checkbox?.attributes('aria-controls')).toBe('existing-rows');
+    });
+
     it('checks and unchecks, and reports each change', async () => {
       const rendered = renderContract(theme, AbpToggle, {
         props: { modelValue: false, label: 'Active' },

@@ -22,6 +22,8 @@ import { ref, shallowRef } from 'vue';
 import { IdentityComponents } from '../enums/components.js';
 import { USERS_PAGE } from '../tokens/extensions.token.js';
 
+defineSlots<{ dialogs?: (context: { refresh: () => void }) => unknown }>();
+
 const users = injectAbp(IdentityUserService);
 
 const list = useListService({ persistKey: IdentityComponents.Users });
@@ -168,5 +170,7 @@ function toggleRole(name: string, granted: boolean): void {
       :provider-key="permissionsFor.id ?? ''"
       :entity-display-name="permissionsFor.userName ?? ''"
     />
+
+    <slot name="dialogs" :refresh="list.getWithoutPageReset" />
   </AbpPage>
 </template>

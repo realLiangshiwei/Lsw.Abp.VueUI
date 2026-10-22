@@ -8,7 +8,7 @@ import {
 } from '@lsw-abpvue/core';
 import { AbpInput, AbpPagination } from '@lsw-abpvue/theme-shared';
 import { computed, watch, watchEffect, type Ref } from 'vue';
-import { ACTIONS, NO, PAGER_INFO, PAGER_SEARCH, PAGINATION, YES } from '../defaults/texts.js';
+import { ACTIONS, NO, PAGER_INFO, PAGER_SEARCH, YES } from '../defaults/texts.js';
 import { PropType } from '../enums/prop-type.js';
 import type { EntityProp, PropValue } from '../models/entity-props.js';
 import { unwrapResolvable, type PropData } from '../models/prop-data.js';
@@ -62,9 +62,11 @@ const expanded = defineModel<string[]>('expanded', { default: () => [] });
 /** The names of the props the user hid. Everything else is visible, new columns included. */
 const hiddenColumns = defineModel<string[]>('hiddenColumns', { default: () => [] });
 
-defineSlots<
+const slots = defineSlots<
   {
     toolbar?: () => unknown;
+    /** Replaces the row action cell, for example with an assignment checkbox. */
+    actions?: (props: { row: R; index: number }) => unknown;
     'expanded-row'?: (props: { row: R; index: number }) => unknown;
     empty?: () => unknown;
   } & {
@@ -112,8 +114,10 @@ const visibleProps = computed(() =>
 );
 
 /** Whether anybody may press anything, which is what decides the column's existence. */
-const hasActions = computed(() =>
-  actionList.some(action => !action.permission || permission.isGranted(action.permission)),
+const hasActions = computed(
+  () =>
+    !!slots.actions ||
+    actionList.some(action => !action.permission || permission.isGranted(action.permission)),
 );
 
 const dataFor = (record: R, index: number): PropData<R> => ({ record, index, getInjected });
@@ -256,7 +260,9 @@ const pageInfo = computed(() => {
       <template v-if="$slots.toolbar" #toolbar><slot name="toolbar" /></template>
 
       <template #[`cell-${ACTIONS_COLUMN}`]="{ row, index }">
-        <AbpGridActions :record="row" :index="index" :text="actionsText" />
+        <slot name="actions" :row="row" :index="index">
+          <AbpGridActions :record="row" :index="index" :text="actionsText" />
+        </slot>
       </template>
 
       <template
@@ -305,7 +311,7 @@ const pageInfo = computed(() => {
         :page="list.page.value"
         :page-size="list.maxResultCount.value"
         :total="list.totalCount.value"
-        :aria-label="$t(PAGINATION)"
+        :aria-label="pageInfo"
         show-size-selector
         @update:page="goToPage($event)"
         @update:page-size="setPageSize($event)"

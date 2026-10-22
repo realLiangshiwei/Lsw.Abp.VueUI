@@ -17,19 +17,22 @@ export const TenantService = defineService('TenantService', () => {
 
     delete: (id: string, config?: RestConfig): Promise<void> =>
       rest.request<never, void>(
-        { method: 'DELETE', url: `/api/multi-tenancy/tenants/${id}` },
+        { method: 'DELETE', url: `/api/multi-tenancy/tenants/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
     deleteDefaultConnectionString: (id: string, config?: RestConfig): Promise<void> =>
       rest.request<never, void>(
-        { method: 'DELETE', url: `/api/multi-tenancy/tenants/${id}/default-connection-string` },
+        {
+          method: 'DELETE',
+          url: `/api/multi-tenancy/tenants/${encodeURIComponent(String(id))}/default-connection-string`,
+        },
         { apiName, ...config },
       ),
 
     get: (id: string, config?: RestConfig): Promise<TenantDto> =>
       rest.request<never, TenantDto>(
-        { method: 'GET', url: `/api/multi-tenancy/tenants/${id}` },
+        { method: 'GET', url: `/api/multi-tenancy/tenants/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
@@ -38,7 +41,7 @@ export const TenantService = defineService('TenantService', () => {
         {
           method: 'GET',
           responseType: 'text',
-          url: `/api/multi-tenancy/tenants/${id}/default-connection-string`,
+          url: `/api/multi-tenancy/tenants/${encodeURIComponent(String(id))}/default-connection-string`,
         },
         { apiName, ...config },
       ),
@@ -60,7 +63,11 @@ export const TenantService = defineService('TenantService', () => {
 
     update: (id: string, input: TenantUpdateDto, config?: RestConfig): Promise<TenantDto> =>
       rest.request<TenantUpdateDto, TenantDto>(
-        { method: 'PUT', url: `/api/multi-tenancy/tenants/${id}`, body: input },
+        {
+          method: 'PUT',
+          url: `/api/multi-tenancy/tenants/${encodeURIComponent(String(id))}`,
+          body: input,
+        },
         { apiName, ...config },
       ),
 
@@ -72,7 +79,7 @@ export const TenantService = defineService('TenantService', () => {
       rest.request<never, void>(
         {
           method: 'PUT',
-          url: `/api/multi-tenancy/tenants/${id}/default-connection-string`,
+          url: `/api/multi-tenancy/tenants/${encodeURIComponent(String(id))}/default-connection-string`,
           params: { defaultConnectionString },
         },
         { apiName, ...config },

@@ -32,7 +32,7 @@
     "name": "@lsw-abpvue/oauth",
     "path": "packages/oauth/dist/index.js",
     "ignore": ["vue", "vue-router", "@lsw-abpvue/core", "oidc-client-ts"],
-    "limit": "6 kB"
+    "limit": "7.5 kB"
   },
   {
     "name": "@lsw-abpvue/theme-shared",
@@ -89,6 +89,46 @@
     "name": "@lsw-abpvue/identity/config",
     "path": "packages/identity/dist/config/index.js",
     "ignore": ["vue", "vue-router", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
+    "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/identity-pro",
+    "path": "packages/identity-pro/dist/index.js",
+    "ignore": [
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/identity",
+      "@lsw-abpvue/permission-management",
+      "@lsw-abpvue/setting-management",
+      "@lsw-abpvue/audit-logging",
+      "@lsw-abpvue/account-pro",
+      "@lsw-abpvue/identity-pro/config",
+      "@lsw-abpvue/identity-pro/proxy"
+    ],
+    "limit": "43 kB"
+  },
+  {
+    "name": "@lsw-abpvue/identity-pro/config",
+    "path": "packages/identity-pro/dist/config/index.js",
+    "ignore": [
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/identity/config",
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/identity",
+      "@lsw-abpvue/permission-management",
+      "@lsw-abpvue/setting-management",
+      "@lsw-abpvue/audit-logging",
+      "@lsw-abpvue/account-pro",
+      "../chunks/IdentitySettings-*",
+      "@lsw-abpvue/identity-pro/config",
+      "@lsw-abpvue/identity-pro/proxy"
+    ],
     "limit": "3 kB"
   },
   {
@@ -173,5 +213,100 @@
     "path": "packages/tenant-management/dist/config/index.js",
     "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
     "limit": "3 kB"
+  },
+  {
+    "name": "@lsw-abpvue/identity-pro (lazy settings)",
+    "path": "packages/identity-pro/dist/chunks/IdentitySettings-*.js",
+    "ignore": [
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/identity",
+      "@lsw-abpvue/permission-management",
+      "@lsw-abpvue/theme-shared",
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/setting-management",
+      "@lsw-abpvue/audit-logging",
+      "@lsw-abpvue/account-pro",
+      "@lsw-abpvue/identity-pro/config",
+      "@lsw-abpvue/identity-pro/proxy"
+    ],
+    "limit": "4.5 kB"
+  },
+  {
+    "name": "@lsw-abpvue/account-pro",
+    "path": "packages/account-pro/dist/index.js",
+    "ignore": [
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/account-core",
+      "@lsw-abpvue/account-pro/config",
+      "@lsw-abpvue/account-pro/proxy"
+    ],
+    "limit": "9.5 kB"
+  },
+  {
+    "name": "@lsw-abpvue/account-pro/config",
+    "path": "packages/account-pro/dist/config/index.js",
+    "ignore": [
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/account-core",
+      "@lsw-abpvue/account-pro/config",
+      "@lsw-abpvue/account-pro/proxy"
+    ],
+    "limit": "750 B"
+  },
+  {
+    "name": "@lsw-abpvue/audit-logging",
+    "path": "packages/audit-logging/dist/index.js",
+    "ignore": [
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/audit-logging/config",
+      "@lsw-abpvue/audit-logging/proxy"
+    ],
+    "limit": "2.5 kB"
+  },
+  {
+    "name": "@lsw-abpvue/audit-logging/config",
+    "path": "packages/audit-logging/dist/config/index.js",
+    "ignore": [
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/audit-logging/config",
+      "@lsw-abpvue/audit-logging/proxy"
+    ],
+    "limit": "500 B"
+  },
+  {
+    "name": "@lsw-abpvue/identity-pro/proxy",
+    "path": "packages/identity-pro/dist/proxy/index.js",
+    "ignore": ["@lsw-abpvue/core"],
+    "limit": "2.25 kB"
+  },
+  {
+    "name": "@lsw-abpvue/account-pro/proxy",
+    "path": "packages/account-pro/dist/proxy/index.js",
+    "ignore": ["@lsw-abpvue/core"],
+    "limit": "3.25 kB"
+  },
+  {
+    "name": "@lsw-abpvue/audit-logging/proxy",
+    "path": "packages/audit-logging/dist/proxy/index.js",
+    "ignore": ["@lsw-abpvue/core"],
+    "limit": "1.8 kB"
   }
 ]

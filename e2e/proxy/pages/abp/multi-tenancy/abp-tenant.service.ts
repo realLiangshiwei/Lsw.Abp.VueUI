@@ -11,13 +11,19 @@ export const AbpTenantService = defineService('AbpTenantService', () => {
 
     findTenantById: (id: string, config?: RestConfig): Promise<FindTenantResultDto> =>
       rest.request<never, FindTenantResultDto>(
-        { method: 'GET', url: `/api/abp/multi-tenancy/tenants/by-id/${id}` },
+        {
+          method: 'GET',
+          url: `/api/abp/multi-tenancy/tenants/by-id/${encodeURIComponent(String(id))}`,
+        },
         { apiName, ...config },
       ),
 
     findTenantByName: (name: string, config?: RestConfig): Promise<FindTenantResultDto> =>
       rest.request<never, FindTenantResultDto>(
-        { method: 'GET', url: `/api/abp/multi-tenancy/tenants/by-name/${name}` },
+        {
+          method: 'GET',
+          url: `/api/abp/multi-tenancy/tenants/by-name/${encodeURIComponent(String(name))}`,
+        },
         { apiName, ...config },
       ),
   };

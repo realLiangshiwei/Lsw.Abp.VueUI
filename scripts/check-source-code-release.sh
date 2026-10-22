@@ -25,6 +25,40 @@ mkdir -p "$work/project"
 
 app="$work/project/Acme.BookStore"
 
+python3 - "$app" <<'PY'
+import json
+import pathlib
+import sys
+
+app = pathlib.Path(sys.argv[1])
+manifest = app / 'package.json'
+data = json.loads(manifest.read_text())
+for package in ['identity-pro', 'account-pro', 'audit-logging']:
+    data['dependencies'][f'@lsw-abpvue/{package}'] = 'workspace:*'
+manifest.write_text(json.dumps(data, indent=2) + '\n')
+for name in ['src/main.ts', 'src/routes.ts']:
+    path = app / name
+    source = path.read_text().replace('@lsw-abpvue/identity', '@lsw-abpvue/identity-pro')
+    source = source.replace('provideIdentityConfig', 'provideIdentityProConfig')
+    source = source.replace('createIdentityRoutes', 'createIdentityProRoutes')
+    path.write_text(source)
+PY
+
+if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
+cp "${ABPVUE_CONSUMER_FIXTURES}/pro-consumer-contract.ts" "$app/src/pro-consumer-contract.ts"
+cp "${ABPVUE_CONSUMER_FIXTURES}/ProConsumerTable.vue" "$app/src/ProConsumerTable.vue"
+cp "$root/e2e/fixtures/application-configuration.json" "$app/src/pro-consumer-configuration.json"
+cat > "$app/src/pro-consumer.ts" <<'TS'
+import type { ApplicationConfigurationDto } from '@lsw-abpvue/core';
+import configuration from './pro-consumer-configuration.json';
+import { verifyCommercialConsumer } from './pro-consumer-contract.js';
+
+verifyCommercialConsumer(configuration as unknown as ApplicationConfigurationDto);
+TS
+printf '\nimport "./pro-consumer.js";\n' >> "$app/src/main.ts"
+
+fi
+
 # Install the candidate tarballs; every other dependency comes from the registry.
 (cd "$app" && python3 "$root/scripts/local-tarball-deps.py" "$work/tarballs")
 
@@ -48,11 +82,36 @@ echo "  the application's own source is untouched"
 
 for entry in packages/identity/src/index.ts packages/identity/config/src/index.ts \
              packages/identity/proxy/src/index.ts packages/account/config/src/index.ts \
+             packages/identity-pro/src/index.ts packages/identity-pro/config/src/index.ts \
+             packages/identity-pro/proxy/src/index.ts \
+             packages/account-pro/src/index.ts packages/account-pro/config/src/index.ts \
+             packages/account-pro/proxy/src/index.ts \
+             packages/audit-logging/src/index.ts packages/audit-logging/config/src/index.ts \
+             packages/audit-logging/proxy/src/index.ts \
              packages/tenant-management/proxy/src/index.ts \
              packages/theme-basic/src/styles/style.css .abpvue/source-code.json; do
   [ -f "$app/$entry" ] || { echo "Missing $entry" >&2; exit 1; }
 done
 echo "  every entry point and the record are there"
+
+node --input-type=module - "$app" "$root" <<'JS'
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+const root = process.argv[2];
+const { readConfigFile, sys } = createRequire(`${process.argv[3]}/package.json`)('typescript');
+const record = JSON.parse(readFileSync(`${root}/.abpvue/source-code.json`, 'utf8'));
+const result = readConfigFile(`${root}/tsconfig.json`, sys.readFile);
+if (result.error) throw new TypeError('The released TypeScript configuration cannot be read.');
+const config = result.config;
+for (const name of ['identity-pro', 'account-pro', 'audit-logging']) {
+  if (!record.packages[`@lsw-abpvue/${name}`]) throw new TypeError(`Missing source record for ${name}.`);
+  for (const entry of ['', '/config', '/proxy']) {
+    if (!config.compilerOptions.paths[`@lsw-abpvue/${name}${entry}`]) {
+      throw new TypeError(`Missing released source alias for ${name}${entry}.`);
+    }
+  }
+}
+JS
 
 # What `all` leaves on npm: the layers a provider replaces, and nothing else.
 remaining="$(node -e '
@@ -73,5 +132,13 @@ echo "Type-checking the project"
 
 echo "Building it"
 (cd "$app" && ./node_modules/.bin/vite build --logLevel error >/dev/null)
+
+if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
+echo "Running commercial contributors against the released source"
+(cd "$app" && ./node_modules/.bin/vite build --ssr src/pro-consumer.ts \
+  --outDir .pro-consumer-runtime --logLevel error >/dev/null)
+(cd "$app" && node .pro-consumer-runtime/pro-consumer.js)
+
+fi
 
 echo "OK"

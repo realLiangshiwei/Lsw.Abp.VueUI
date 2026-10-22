@@ -9,12 +9,11 @@ import {
   AlertDialogRoot,
   AlertDialogTitle,
 } from 'reka-ui';
-import { computed, useId } from 'vue';
+import { computed } from 'vue';
 
 const confirmation = useConfirmation();
 const localization = useLocalization();
 
-const titleId = useId();
 const current = confirmation.current;
 
 const ICON = {
@@ -47,8 +46,6 @@ const title = computed(() => {
       <AlertDialogContent
         v-if="current"
         class="modal d-block abp-confirm"
-        :aria-label="title ? undefined : message"
-        :aria-labelledby="title ? titleId : undefined"
         @escape-key-down="current.options.dismissible === false && $event.preventDefault()"
       >
         <div class="modal-dialog modal-dialog-centered">
@@ -56,8 +53,8 @@ const title = computed(() => {
             <div class="modal-body d-flex gap-3">
               <i :class="current.options.iconClass ?? ICON[current.severity]" aria-hidden="true" />
               <div>
-                <AlertDialogTitle v-if="title" :id="titleId" as="h5" class="modal-title">
-                  {{ title }}
+                <AlertDialogTitle as="h5" :class="title ? 'modal-title' : 'visually-hidden'">
+                  {{ title || message }}
                 </AlertDialogTitle>
                 <AlertDialogDescription as="p" class="mb-0">
                   {{ message }}

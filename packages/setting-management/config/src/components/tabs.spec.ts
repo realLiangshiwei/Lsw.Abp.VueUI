@@ -2,6 +2,7 @@ import {
   ABP_INJECTOR_KEY,
   ConfigStateService,
   createInjector,
+  LocalizationService,
   type ApplicationConfigurationDto,
   type Injector,
   type NameValue,
@@ -20,6 +21,7 @@ import EmailSettingsTab from './EmailSettingsTab.vue';
 import TimeZoneSettingsTab from './TimeZoneSettingsTab.vue';
 import AccountSettingsTab from './AccountSettingsTab.vue';
 import { AccountSettingsService } from '../services/account-settings.service.js';
+import { ossLocalizationResources } from '../../../../../e2e/fixtures/localization.js';
 
 const EMAIL: EmailSettingsDto = {
   smtpHost: 'smtp.abp.io',
@@ -86,6 +88,34 @@ async function render(page: Component, injector: Injector): Promise<VueWrapper> 
 }
 
 describe('AccountSettingsTab', () => {
+  it('uses the official OSS setting labels without an additional explanation', async () => {
+    const injector = injectorWith([]);
+    const config = injector.get(ConfigStateService);
+    const state = config.snapshot();
+    config.setState({
+      ...state,
+      localization: {
+        ...state.localization,
+        resources: ossLocalizationResources(),
+      },
+    });
+    const page = await render(AccountSettingsTab, injector);
+    const localization = injector.get(LocalizationService);
+    const key = localization.findKey(
+      ['AbpAccount'],
+      [
+        'DisplayName:IsSelfRegistrationEnabled',
+        'DisplayName:Abp.Account.IsSelfRegistrationEnabled',
+      ],
+    );
+    expect(key).toBeDefined();
+    expect(
+      page.get('input[name="isSelfRegistrationEnabled"]').element.parentElement?.textContent,
+    ).toContain(localization.t(key ?? ''));
+    expect(page.find('p.text-body-secondary').exists()).toBe(false);
+    expect(page.text()).not.toContain('SettingsManagedByAuthenticationServer');
+  });
+
   it('shows the open-source account switches without pretending they can be saved', async () => {
     const injector = injectorWith([]);
     const config = injector.get(ConfigStateService);

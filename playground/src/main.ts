@@ -15,6 +15,9 @@ import { provideManageProfileTabs } from '@lsw-abpvue/account';
 import { provideAccountConfig } from '@lsw-abpvue/account/config';
 import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/config';
 import { provideIdentityConfig } from '@lsw-abpvue/identity/config';
+import { provideIdentityProConfig } from '@lsw-abpvue/identity-pro/config';
+import { provideAuditLogging } from '@lsw-abpvue/audit-logging/config';
+import { provideAccountProConfig } from '@lsw-abpvue/account-pro/config';
 import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/config';
 import { provideTenantManagementConfig } from '@lsw-abpvue/tenant-management/config';
 import App from './App.vue';
@@ -38,7 +41,19 @@ const { mount } = await createAbpApp(App, {
     // The modules' menu entries and the profile page's tabs. Small and synchronous; the
     // pages themselves arrive on the first navigation into them (design 03 §2).
     provideAccountConfig(),
-    provideIdentityConfig(),
+    ...(import.meta.env.VITE_ABP_EDITION === 'pro'
+      ? [
+          provideAccountProConfig({
+            appName: 'Angular',
+            hostOrigin: 'http://localhost:5179',
+            trustedOrigins: ['http://localhost:5179', 'http://127.0.0.1:5179'],
+          }),
+        ]
+      : []),
+    import.meta.env.VITE_ABP_EDITION === 'pro'
+      ? provideIdentityProConfig()
+      : provideIdentityConfig(),
+    ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? provideAuditLogging() : []),
     provideTenantManagementConfig(),
     // Setting management before feature management: the tab tree lives in the first, and
     // the second puts one of its own into it.

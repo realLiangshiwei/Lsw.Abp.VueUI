@@ -1,10 +1,10 @@
 <script setup lang="ts" generic="R">
 import type { SortOrder } from '@lsw-abpvue/core';
 import { AbpSpinner, AbpToggle } from '@lsw-abpvue/theme-shared';
-import { getCoreRowModel, useVueTable, type ColumnDef } from '@tanstack/vue-table';
-import { computed } from 'vue';
+import { getCoreRowModel, useVueTable, type ColumnDef, type Row } from '@tanstack/vue-table';
+import { computed, useId } from 'vue';
 import type { AbpTableColumn, AbpTableRecordKey } from '../models/table.js';
-import { EMPTY_TEXT, EXPAND_ROW, LOADING, SELECT_ALL, SELECT_ROW } from '../defaults/texts.js';
+import { EMPTY_TEXT, LOADING } from '../defaults/texts.js';
 
 const props = withDefaults(
   defineProps<{
@@ -80,6 +80,21 @@ const table = useVueTable<R>({
 });
 
 const rows = computed(() => table.getRowModel().rows);
+const tableId = useId();
+const headerId = (columnId: string): string => `${tableId}-header-${encodeURIComponent(columnId)}`;
+const cellId = (cellKey: string): string => `${tableId}-cell-${encodeURIComponent(cellKey)}`;
+const rowLabel = (row: Row<R>): string | undefined => {
+  const cell = row.getVisibleCells().find(item => {
+    const value = item.getValue();
+    return value !== undefined && value !== null && value !== '';
+  });
+  return cell ? cellId(cell.id) : undefined;
+};
+const selectionLabel = computed(() => {
+  if (props.caption) return `${tableId}-caption`;
+  const column = props.columns.find(item => item.header?.trim());
+  return column ? headerId(column.id) : undefined;
+});
 
 const columnCount = computed(
   () => props.columns.length + (props.selectable ? 1 : 0) + (props.expandable ? 1 : 0),
@@ -142,7 +157,7 @@ function toggleExpanded(key: string): void {
 
     <div class="abp-table-scroll">
       <table class="abp-table">
-        <caption v-if="caption" class="abp-table-caption">
+        <caption v-if="caption" :id="`${tableId}-caption`" class="abp-table-caption">
           {{
             caption
           }}
@@ -152,18 +167,21 @@ function toggleExpanded(key: string): void {
           <tr>
             <th v-if="selectable" scope="col" class="abp-table-select">
               <AbpToggle
+                v-if="rows.length && selectionLabel"
                 variant="checkbox"
                 :model-value="allSelected"
                 :indeterminate="someSelected"
-                :aria-label="$t(SELECT_ALL)"
+                :aria-labelledby="selectionLabel"
+                :aria-controls="`${tableId}-rows`"
                 @update:model-value="toggleAll(Boolean($event))"
               />
             </th>
             <th v-if="expandable" scope="col" class="abp-table-expand">
-              <span class="abp-visually-hidden">{{ $t(EXPAND_ROW) }}</span>
+              <span class="abp-visually-hidden">{{ caption || columns[0]?.header }}</span>
             </th>
             <th
               v-for="column in columns"
+              :id="headerId(column.id)"
               :key="column.id"
               scope="col"
               :class="[column.headerClass, { 'abp-table-sortable': column.sortable }]"
@@ -183,14 +201,15 @@ function toggleExpanded(key: string): void {
           </tr>
         </thead>
 
-        <tbody class="abp-table-body">
+        <tbody :id="`${tableId}-rows`" class="abp-table-body">
           <template v-for="(row, index) in rows" :key="row.id">
             <tr :class="{ 'abp-table-row-selected': selected.includes(row.id) }">
               <td v-if="selectable" class="abp-table-select">
                 <AbpToggle
                   variant="checkbox"
                   :model-value="selected.includes(row.id)"
-                  :aria-label="$t(SELECT_ROW)"
+                  :aria-labelledby="rowLabel(row)"
+                  :aria-label="rowLabel(row) ? undefined : row.id"
                   @update:model-value="toggleSelected(row.id, Boolean($event))"
                 />
               </td>
@@ -199,7 +218,9 @@ function toggleExpanded(key: string): void {
                   type="button"
                   class="abp-table-expand-toggle"
                   :aria-expanded="expanded.includes(row.id)"
-                  :aria-label="$t(EXPAND_ROW)"
+                  :aria-labelledby="rowLabel(row)"
+                  :aria-label="rowLabel(row) ? undefined : row.id"
+                  :aria-controls="`${tableId}-detail-${encodeURIComponent(row.id)}`"
                   @click="toggleExpanded(row.id)"
                 >
                   <span aria-hidden="true">{{ expanded.includes(row.id) ? '−' : '+' }}</span>
@@ -207,6 +228,7 @@ function toggleExpanded(key: string): void {
               </td>
               <td
                 v-for="cell in row.getVisibleCells()"
+                :id="cellId(cell.id)"
                 :key="cell.id"
                 :data-column="cell.column.id"
                 :class="columns.find(column => column.id === cell.column.id)?.cellClass"
@@ -222,7 +244,11 @@ function toggleExpanded(key: string): void {
               </td>
             </tr>
 
-            <tr v-if="expandable && expanded.includes(row.id)" class="abp-table-detail">
+            <tr
+              v-if="expandable && expanded.includes(row.id)"
+              :id="`${tableId}-detail-${encodeURIComponent(row.id)}`"
+              class="abp-table-detail"
+            >
               <td :colspan="columnCount">
                 <slot name="expanded-row" :row="row.original" :index="index" />
               </td>

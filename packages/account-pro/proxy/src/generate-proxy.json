@@ -1,0 +1,47 @@
+{
+  "generated": [
+    "README.md",
+    "account/account-external-login.service.ts",
+    "account/account-external-provider.service.ts",
+    "account/account-session.service.ts",
+    "account/account.service.ts",
+    "account/dynamic-claims.service.ts",
+    "account/external-providers/index.ts",
+    "account/external-providers/models.ts",
+    "account/identity-link-user.service.ts",
+    "account/identity-user-delegation.service.ts",
+    "account/index.ts",
+    "account/models.ts",
+    "account/profile-picture-type.enum.ts",
+    "account/profile.service.ts",
+    "account/public/index.ts",
+    "account/public/web/areas/account/controllers/index.ts",
+    "account/public/web/areas/account/controllers/login.service.ts",
+    "account/public/web/areas/account/controllers/models/index.ts",
+    "account/public/web/areas/account/controllers/models/login-result-type.enum.ts",
+    "account/public/web/areas/account/controllers/models/models.ts",
+    "account/public/web/areas/account/controllers/models/validators.ts",
+    "account/public/web/areas/account/index.ts",
+    "account/public/web/areas/index.ts",
+    "account/public/web/index.ts",
+    "account/user-sharing.service.ts",
+    "account/validators.ts",
+    "identity/index.ts",
+    "identity/models.ts",
+    "index.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "account": {
+      "rootPath": "account",
+      "remoteServiceName": "AbpAccountPublic"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": true,
+    "policyNames": false
+  }
+}

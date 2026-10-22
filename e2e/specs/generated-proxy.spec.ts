@@ -64,6 +64,10 @@ async function accessToken(): Promise<string | undefined> {
 }
 
 const token = await accessToken();
+if (!token && process.env.ABP_E2E_REQUIRED === '1')
+  throw new Error(
+    `The required BookStore backend at ${BACKEND} could not authenticate the test client.`,
+  );
 if (!token) {
   // Rule 3 of the testing conventions: a test that has to authenticate has no fixture to
   // fall back on, so it says why it is not running and steps aside.

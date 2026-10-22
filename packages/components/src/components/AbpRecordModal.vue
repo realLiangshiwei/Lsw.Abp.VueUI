@@ -14,6 +14,8 @@ const props = defineProps<{
   /** The heading while editing one. */
   editTitle?: LocalizationParam | undefined;
   size?: 'sm' | 'md' | 'lg' | 'xl' | undefined;
+  /** Includes changes collected outside the extensible form. */
+  dirty?: boolean | undefined;
   /**
    * Overrides what the save button does. A page that collects something outside the
    * form -- the roles of a user -- saves it together with the form's own body.
@@ -45,7 +47,7 @@ const submit = (): void => {
   <AbpModal
     v-model:visible="open"
     :busy="busy"
-    :dirty="form?.form.dirty"
+    :dirty="dirty ?? form?.form.dirty"
     :size="size"
     :aria-label="$t(label)"
   >

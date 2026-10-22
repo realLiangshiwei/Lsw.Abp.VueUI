@@ -14,6 +14,7 @@ import {
   TokenStorage,
   WindowService,
   AuthService,
+  onServiceDestroy,
   type CheckAuthenticationStateFn,
   type EnvironmentProviders,
   type Feature,
@@ -55,9 +56,11 @@ function checkAccessToken(): CheckAuthenticationStateFn {
 
   return () => {
     if (!oauth.getAccessToken()) return;
-    if (configState.snapshot().currentUser.id) return;
-
-    state.persist(null);
+    if (configState.snapshot().currentUser.id) {
+      state.bindTenant(configState.snapshot().currentTenant.id ?? null);
+      return;
+    }
+    void oauth.clearSession().catch(() => undefined);
   };
 }
 
@@ -85,20 +88,29 @@ function navigateToManageProfile(): () => void {
 function dropTokenOfAnotherTenant(): void {
   const session = inject(SessionStateService);
   const state = inject(AuthStateService);
-  const configState = inject(ConfigStateService);
-
-  session.onTenantChange(tenant => {
+  const oauth = inject(AbpOAuthService);
+  const storage = inject(TokenStorage);
+  const stop = session.onTenantChange(tenant => {
+    if (oauth.isSynchronizingSession) return;
     const token = state.getAccessToken();
     if (!token) return;
-
-    const issuedFor = decodeJwt(token)?.[TENANT_CLAIM] ?? null;
+    const claims = decodeJwt(token);
+    const issuedFor =
+      state.getTenantId() === undefined
+        ? claims
+          ? (claims[TENANT_CLAIM] ?? null)
+          : undefined
+        : state.getTenantId();
     if (issuedFor === (tenant?.id ?? null)) return;
-
-    state.persist(null);
-    // A listener has no caller to hand a failure to, and `RestService` has already
-    // reported it; what mattered here -- the wrong token going -- has happened.
-    void configState.refreshAppState().catch(() => undefined);
+    const saved = state.readStored();
+    if (storage.onChange && saved && saved.accessToken !== token) {
+      void oauth.synchronizeSession().catch(() => undefined);
+      return;
+    }
+    // A listener has no caller; a later protected request reports the unavailable session.
+    void oauth.clearSession().catch(() => undefined);
   });
+  onServiceDestroy(stop);
 }
 
 /**

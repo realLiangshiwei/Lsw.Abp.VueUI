@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import ComponentsPage from './pages/ComponentsPage.vue';
 import FeedbackPage from './pages/FeedbackPage.vue';
 import HomePage from './pages/HomePage.vue';
-import { userContributors } from './extensions/user-contributors';
+import { proUserContributors, userContributors } from './extensions/user-contributors';
 
 /**
  * Menu entries live in `meta.routes`, which is how a page declares its own. A module's
@@ -36,10 +36,20 @@ export const routes: RouteRecordRaw[] = [
   // All five open source modules. The host's contributors are handed to identity here --
   // the one place an application says anything about a module's pages (design 05 §6).
   lazyRoutes('/identity', () =>
-    import('@lsw-abpvue/identity').then(module => module.createIdentityRoutes(userContributors)),
+    import.meta.env.VITE_ABP_EDITION === 'pro'
+      ? import('@lsw-abpvue/identity-pro').then(module =>
+          module.createIdentityProRoutes(proUserContributors),
+        )
+      : import('@lsw-abpvue/identity').then(module =>
+          module.createIdentityRoutes(userContributors),
+        ),
   ),
   lazyRoutes('/account', () =>
-    import('@lsw-abpvue/account').then(module => module.createAccountRoutes()),
+    import.meta.env.VITE_ABP_EDITION === 'pro'
+      ? Promise.all([import('@lsw-abpvue/account'), import('@lsw-abpvue/account-pro')]).then(
+          ([account, pro]) => [...account.createAccountRoutes(), ...pro.createAccountProRoutes()],
+        )
+      : import('@lsw-abpvue/account').then(module => module.createAccountRoutes()),
   ),
   lazyRoutes('/tenant-management', () =>
     import('@lsw-abpvue/tenant-management').then(module => module.createTenantManagementRoutes()),

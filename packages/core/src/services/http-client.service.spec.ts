@@ -164,13 +164,15 @@ describe('when it fails', () => {
     expect(failure.raw).toBe(cause);
   });
 
-  it('says the body could not be read when a 200 is not JSON', async () => {
+  it('retains a malformed response cause without inventing a remote error message', async () => {
     const http = client(() => Promise.resolve(new Response('not json', { status: 200 })));
 
     const failure = await http.request({ method: 'GET', url: '/api/books' }).catch(e => e);
 
     expect(failure).toBeInstanceOf(AbpHttpError);
-    expect(failure.error?.message).toContain('could not be read as JSON');
+    expect(failure.error).toBeUndefined();
+    expect(failure.status).toBe(200);
+    expect(failure.raw).toBeInstanceOf(SyntaxError);
   });
 });
 

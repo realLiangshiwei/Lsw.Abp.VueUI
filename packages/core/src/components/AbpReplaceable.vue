@@ -2,6 +2,8 @@
 import { computed } from 'vue';
 import { useReplaceableComponents } from '../services/replaceable-components.service.js';
 
+defineOptions({ inheritAttrs: false });
+
 const props = defineProps<{ replaceableKey: string }>();
 
 const replaceable = useReplaceableComponents();

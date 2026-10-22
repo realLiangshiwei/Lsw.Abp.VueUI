@@ -2,6 +2,7 @@ import {
   ABP_INJECTOR_KEY,
   ConfigStateService,
   createInjector,
+  LocalizationService,
   StorageService,
   type ApplicationConfigurationDto,
   type Injector,
@@ -25,6 +26,7 @@ import { IdentityComponents } from '../enums/components.js';
 import { identityExtensionsResolver } from '../resolvers/extensions.resolver.js';
 import RolesPage from './RolesPage.vue';
 import UsersPage from './UsersPage.vue';
+import { ossLocalizationResources } from '../../../../e2e/fixtures/localization.js';
 
 const ALL_POLICIES = [
   'AbpIdentity.Roles',
@@ -204,13 +206,26 @@ describe('list preferences', () => {
         keys: () => [...values.keys()],
         onChange: () => () => {},
       };
-      const wrapper = await render(
-        page,
-        injectorWith([service, permissionsService, { provide: StorageService, useValue: storage }]),
-      );
-      const selector = wrapper.get<HTMLSelectElement>('select[aria-label="Page size"]');
+      const injector = injectorWith([
+        service,
+        permissionsService,
+        { provide: StorageService, useValue: storage },
+      ]);
+      const config = injector.get(ConfigStateService);
+      const state = config.snapshot();
+      config.setState({
+        ...state,
+        localization: { ...state.localization, resources: ossLocalizationResources() },
+      });
+      const localization = injector.get(LocalizationService);
+      const wrapper = await render(page, injector);
+      const sizeLabel = localization.t('AbpUi::PagerShowMenuEntries').replace('_MENU_', '25');
+      const selector = wrapper.get<HTMLSelectElement>(`select[aria-label="${sizeLabel}"]`);
       expect(selector.element.value).toBe('25');
       await selector.setValue('50');
+      expect(selector.attributes('aria-label')).toBe(
+        localization.t('AbpUi::PagerShowMenuEntries').replace('_MENU_', '50'),
+      );
       expect(JSON.parse(values.get(storedKey) ?? '{}')).toMatchObject({ maxResultCount: 50 });
       expect([...values.keys()]).toEqual([storedKey]);
     },

@@ -2,6 +2,7 @@ import {
   ABP_INJECTOR_KEY,
   ConfigStateService,
   createInjector,
+  LocalizationService,
   StorageService,
   type ApplicationConfigurationDto,
   type Injector,
@@ -18,6 +19,7 @@ import { TenantManagementComponents } from '../enums/components.js';
 import { tenantManagementExtensionsResolver } from '../resolvers/extensions.resolver.js';
 import AbpTenantConnectionString from './AbpTenantConnectionString.vue';
 import TenantsPage from './TenantsPage.vue';
+import { ossLocalizationResources } from '../../../../e2e/fixtures/localization.js';
 
 const ALL_POLICIES = [
   'AbpTenantManagement.Tenants',
@@ -136,16 +138,26 @@ describe('TenantsPage', () => {
       keys: () => [...values.keys()],
       onChange: () => () => {},
     };
-    const page = await renderPage(
-      injectorWith([
-        tenantService(),
-        featuresService,
-        { provide: StorageService, useValue: storage },
-      ]),
-    );
-    const selector = page.get<HTMLSelectElement>('select[aria-label="Page size"]');
+    const injector = injectorWith([
+      tenantService(),
+      featuresService,
+      { provide: StorageService, useValue: storage },
+    ]);
+    const config = injector.get(ConfigStateService);
+    const state = config.snapshot();
+    config.setState({
+      ...state,
+      localization: { ...state.localization, resources: ossLocalizationResources() },
+    });
+    const localization = injector.get(LocalizationService);
+    const page = await renderPage(injector);
+    const sizeLabel = localization.t('AbpUi::PagerShowMenuEntries').replace('_MENU_', '25');
+    const selector = page.get<HTMLSelectElement>(`select[aria-label="${sizeLabel}"]`);
     expect(selector.element.value).toBe('25');
     await selector.setValue('50');
+    expect(selector.attributes('aria-label')).toBe(
+      localization.t('AbpUi::PagerShowMenuEntries').replace('_MENU_', '50'),
+    );
     expect(JSON.parse(values.get(key) ?? '{}')).toMatchObject({ maxResultCount: 50 });
     expect([...values.keys()]).toEqual([key]);
   });

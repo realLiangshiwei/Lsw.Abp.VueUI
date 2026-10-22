@@ -52,6 +52,8 @@ export { xsrfInterceptor } from './interceptors/xsrf.interceptor.js';
 export { AuthError, TwoFactorRequiredError } from './models/auth.js';
 export type {
   AuthErrorFilter,
+  AuthGrantOptions,
+  AuthGrantResult,
   CheckAuthenticationStateFn,
   LoginParams,
   PipeToLoginFn,

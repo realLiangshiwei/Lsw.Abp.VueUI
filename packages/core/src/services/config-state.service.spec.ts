@@ -27,6 +27,46 @@ describe('before the configuration arrives', () => {
 });
 
 describe('refreshing the configuration', () => {
+  it('reads candidate identity and localization with explicit headers without publishing them', async () => {
+    const headers: Headers[] = [];
+    const injector = createInjector([
+      {
+        provide: HTTP_FETCH,
+        useValue: (_url: string, init: RequestInit) => {
+          headers.push(new Headers(init.headers));
+          return Promise.resolve(json(fixture));
+        },
+      },
+    ]);
+    const state = injector.get(ConfigStateService);
+    const before = state.snapshot();
+    const candidate = await state.readAppState({
+      headers: { Authorization: 'Bearer candidate' },
+      skipAuthorization: true,
+      skipAddingHeader: true,
+    });
+    expect(candidate.currentUser).toEqual(fixture.currentUser);
+    expect(state.snapshot()).toBe(before);
+    expect(headers.length).toBeGreaterThan(0);
+    expect(headers.every(header => header.get('Authorization') === 'Bearer candidate')).toBe(true);
+    injector.destroy();
+  });
+
+  it('does not let an older refresh overwrite an explicitly committed identity', async () => {
+    let resolveResponse: ((value: Response) => void) | undefined;
+    const state = configState(() => new Promise<Response>(resolve => (resolveResponse = resolve)));
+    const pending = state.refreshAppState();
+    await Promise.resolve();
+    const committed = {
+      ...fixture,
+      currentUser: { ...fixture.currentUser, id: 'replacement-identity' },
+    };
+    state.setState(committed);
+    resolveResponse?.(json({ ...fixture, localization: {} }));
+    await pending;
+    expect(state.snapshot().currentUser.id).toBe('replacement-identity');
+  });
+
   it('a saved UI culture wins over the backend request culture on refresh', async () => {
     const urls: string[] = [];
     const injector = createInjector([

@@ -24,31 +24,34 @@ export const IdentityUserService = defineService('IdentityUserService', () => {
 
     delete: (id: string, config?: RestConfig): Promise<void> =>
       rest.request<never, void>(
-        { method: 'DELETE', url: `/api/identity/users/${id}` },
+        { method: 'DELETE', url: `/api/identity/users/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
     findByEmail: (email: string, config?: RestConfig): Promise<IdentityUserDto> =>
       rest.request<never, IdentityUserDto>(
-        { method: 'GET', url: `/api/identity/users/by-email/${email}` },
+        { method: 'GET', url: `/api/identity/users/by-email/${encodeURIComponent(String(email))}` },
         { apiName, ...config },
       ),
 
     findById: (id: string, config?: RestConfig): Promise<IdentityUserDto> =>
       rest.request<never, IdentityUserDto>(
-        { method: 'GET', url: `/api/identity/users/by-id/${id}` },
+        { method: 'GET', url: `/api/identity/users/by-id/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
     findByUsername: (userName: string, config?: RestConfig): Promise<IdentityUserDto> =>
       rest.request<never, IdentityUserDto>(
-        { method: 'GET', url: `/api/identity/users/by-username/${userName}` },
+        {
+          method: 'GET',
+          url: `/api/identity/users/by-username/${encodeURIComponent(String(userName))}`,
+        },
         { apiName, ...config },
       ),
 
     get: (id: string, config?: RestConfig): Promise<IdentityUserDto> =>
       rest.request<never, IdentityUserDto>(
-        { method: 'GET', url: `/api/identity/users/${id}` },
+        { method: 'GET', url: `/api/identity/users/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
@@ -67,11 +70,11 @@ export const IdentityUserService = defineService('IdentityUserService', () => {
           method: 'GET',
           url: '/api/identity/users',
           params: {
-            ...input.extraProperties,
             filter: input.filter,
             sorting: input.sorting,
             skipCount: input.skipCount,
             maxResultCount: input.maxResultCount,
+            extraProperties: input.extraProperties,
           },
         },
         { apiName, ...config },
@@ -79,7 +82,7 @@ export const IdentityUserService = defineService('IdentityUserService', () => {
 
     getRoles: (id: string, config?: RestConfig): Promise<ListResultDto<IdentityRoleDto>> =>
       rest.request<never, ListResultDto<IdentityRoleDto>>(
-        { method: 'GET', url: `/api/identity/users/${id}/roles` },
+        { method: 'GET', url: `/api/identity/users/${encodeURIComponent(String(id))}/roles` },
         { apiName, ...config },
       ),
 
@@ -89,7 +92,11 @@ export const IdentityUserService = defineService('IdentityUserService', () => {
       config?: RestConfig,
     ): Promise<IdentityUserDto> =>
       rest.request<IdentityUserUpdateDto, IdentityUserDto>(
-        { method: 'PUT', url: `/api/identity/users/${id}`, body: input },
+        {
+          method: 'PUT',
+          url: `/api/identity/users/${encodeURIComponent(String(id))}`,
+          body: input,
+        },
         { apiName, ...config },
       ),
 
@@ -99,7 +106,11 @@ export const IdentityUserService = defineService('IdentityUserService', () => {
       config?: RestConfig,
     ): Promise<void> =>
       rest.request<IdentityUserUpdateRolesDto, void>(
-        { method: 'PUT', url: `/api/identity/users/${id}/roles`, body: input },
+        {
+          method: 'PUT',
+          url: `/api/identity/users/${encodeURIComponent(String(id))}/roles`,
+          body: input,
+        },
         { apiName, ...config },
       ),
   };

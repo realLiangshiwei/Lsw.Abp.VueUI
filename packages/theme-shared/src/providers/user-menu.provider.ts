@@ -25,7 +25,7 @@ export function provideUserMenuItems(): EnvironmentProviders {
         {
           name: UserMenuItems.MyAccount,
           order: 100,
-          text: { key: 'AbpAccount::MyAccount', defaultValue: 'My account' },
+          text: 'AbpAccount::MyAccount',
           iconClass: 'bi bi-gear',
           visible: () => manageProfile !== null,
           action: () => manageProfile?.(),
@@ -33,7 +33,7 @@ export function provideUserMenuItems(): EnvironmentProviders {
         {
           name: UserMenuItems.Logout,
           order: 101,
-          text: { key: 'AbpUi::Logout', defaultValue: 'Logout' },
+          text: 'AbpUi::Logout',
           iconClass: 'bi bi-power',
           visible: () => auth !== null,
           action: async () => {

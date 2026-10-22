@@ -1,5 +1,6 @@
 import { isPlainObject } from '@lsw-abpvue/utils';
 import type { ComputedRef } from 'vue';
+import type { RestConfig } from '../models/http.js';
 import { inject } from '../di/inject.js';
 import { defineService, type ServiceOf } from '../di/token.js';
 import { AbpApplicationConfigurationService } from '../proxy/abp-application-configuration.service.js';
@@ -82,7 +83,7 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
    */
   async function textsOf(
     cultureName: string,
-    config?: { signal?: AbortSignal | undefined },
+    config?: RestConfig,
   ): Promise<Partial<ApplicationLocalizationConfigurationDto>> {
     const localization = await appLocalization.get({ cultureName, onlyDynamics: false }, config);
     const resources = localization.resources ?? {};
@@ -93,6 +94,18 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
         Object.entries(resources).map(([name, resource]) => [name, resource.texts]),
       ),
       ...(localization.currentCulture ? { currentCulture: localization.currentCulture } : {}),
+    };
+  }
+
+  async function readAppState(config?: RestConfig): Promise<ApplicationConfigurationDto> {
+    const application = await appConfiguration.get({ includeLocalizationResources: false }, config);
+    const culture =
+      session.getLanguage()?.split(';')[0] ||
+      application.localization?.currentCulture?.cultureName?.split(';')[0];
+    if (!culture) return application;
+    return {
+      ...application,
+      localization: { ...application.localization, ...(await textsOf(culture, config)) },
     };
   }
 
@@ -133,7 +146,23 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
     /** The current value, for guards and other places that cannot be reactive. */
     snapshot: (): ApplicationConfigurationDto => store.state.value,
 
-    setState: (configuration: ApplicationConfigurationDto): void => store.set(configuration),
+    setState: (configuration: ApplicationConfigurationDto): void => {
+      latest.cancel();
+      store.set(configuration);
+    },
+
+    clearIdentity: (): void => {
+      latest.cancel();
+      store.set({
+        ...emptyConfiguration(),
+        localization: store.state.value.localization,
+        multiTenancy: store.state.value.multiTenancy,
+        currentTenant: session.getTenant() ?? { isAvailable: false },
+      });
+    },
+
+    /** Reads configuration and localization without changing the active identity. */
+    readAppState,
 
     onUpdate: (callback: (configuration: ApplicationConfigurationDto) => void): (() => void) =>
       store.onUpdate(state => state, callback),
@@ -148,23 +177,7 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
      * them would blank every label in the UI, and a login triggers one.
      */
     refreshAppState: async (): Promise<ApplicationConfigurationDto> => {
-      const configuration = await latest.run(async signal => {
-        const application = await appConfiguration.get(
-          { includeLocalizationResources: false },
-          { signal },
-        );
-        // Optional chaining against a required field: a gateway answering 200 with
-        // something else must not take the application down.
-        const culture =
-          session.getLanguage()?.split(';')[0] ||
-          application.localization?.currentCulture?.cultureName?.split(';')[0];
-        if (!culture) return application;
-
-        return {
-          ...application,
-          localization: { ...application.localization, ...(await textsOf(culture, { signal })) },
-        };
-      });
+      const configuration = await latest.run(signal => readAppState({ signal }));
 
       if (configuration) store.set(configuration);
       return store.state.value;

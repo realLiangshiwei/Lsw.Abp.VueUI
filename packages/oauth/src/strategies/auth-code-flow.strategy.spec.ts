@@ -200,6 +200,23 @@ describe('the authorization code flow', () => {
     });
   });
 
+  it('forwards explicit reauthentication and tenant parameters to the authorization request', async () => {
+    const { fake, injector, auth } = flow();
+    injector.get(SessionStateService).setLanguage('en');
+
+    await auth.navigateToLogin('/account/workflows', { prompt: 'login', __tenant: 'tenant-a' });
+
+    expect(called(fake.calls, 'signinRedirect')[0]?.args[0]).toEqual({
+      state: '/account/workflows',
+      extraQueryParams: {
+        prompt: 'login',
+        __tenant: 'tenant-a',
+        culture: 'en',
+        'ui-culture': 'en',
+      },
+    });
+  });
+
   it('the token arrives after the callback and the address bar goes back to a clean return URL', async () => {
     const { fake, replaced, auth, injector } = flow({
       href: 'https://app.abp.io/?code=abc&state=xyz&ui-culture=tr',

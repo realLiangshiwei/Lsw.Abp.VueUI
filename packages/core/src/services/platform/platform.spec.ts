@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createInjector } from '../../di/injector.js';
 import { CookieService } from './cookie.service.js';
 import { DocumentService } from './document.service.js';
@@ -7,6 +7,12 @@ import { StorageService } from './storage.service.js';
 import { WindowService } from './window.service.js';
 
 const injector = () => createInjector([]);
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
 
 describe('WindowService', () => {
   it('window is there in a browser', () => {
@@ -19,6 +25,58 @@ describe('WindowService', () => {
     injector().get(WindowService).open('https://abp.io');
 
     expect(open).toHaveBeenCalledWith('https://abp.io', '_blank', 'noopener,noreferrer');
+  });
+
+  it('downloads a blob with its filename and releases the temporary link and URL', () => {
+    vi.useFakeTimers();
+    const createObjectURL = vi.fn(() => 'blob:synthetic-download');
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal(
+      'URL',
+      class extends URL {
+        static override createObjectURL = createObjectURL;
+        static override revokeObjectURL = revokeObjectURL;
+      },
+    );
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      expect(this.isConnected).toBe(true);
+      expect(this.download).toBe('UserList.csv');
+      expect(this.href).toBe('blob:synthetic-download');
+    });
+    const file = new Blob(['synthetic']);
+
+    injector().get(WindowService).downloadBlob(file, 'UserList.csv');
+
+    expect(createObjectURL).toHaveBeenCalledExactlyOnceWith(file);
+    expect(click).toHaveBeenCalledOnce();
+    expect(document.querySelector('a[download]')).toBeNull();
+    expect(revokeObjectURL).not.toHaveBeenCalled();
+    vi.runAllTimers();
+    expect(revokeObjectURL).toHaveBeenCalledExactlyOnceWith('blob:synthetic-download');
+  });
+
+  it('still releases download resources when the browser rejects the click', () => {
+    vi.useFakeTimers();
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal(
+      'URL',
+      class extends URL {
+        static override createObjectURL = () => 'blob:synthetic-download';
+        static override revokeObjectURL = revokeObjectURL;
+      },
+    );
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {
+      throw new TypeError('The synthetic browser rejected the download.');
+    });
+
+    expect(() => injector().get(WindowService).downloadBlob(new Blob(), 'UserList.csv')).toThrow(
+      'rejected',
+    );
+    expect(document.querySelector('a[download]')).toBeNull();
+    vi.runAllTimers();
+    expect(revokeObjectURL).toHaveBeenCalledExactlyOnceWith('blob:synthetic-download');
   });
 });
 
@@ -78,9 +136,30 @@ describe('StorageService', () => {
     const seen = vi.fn();
     storage.onChange(seen);
 
-    window.dispatchEvent(new StorageEvent('storage', { key: 'lang', newValue: 'ar' }));
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'lang',
+        newValue: 'ar',
+        storageArea: window.localStorage,
+      }),
+    );
 
     expect(seen).toHaveBeenCalledWith('lang', 'ar');
+  });
+
+  it('does not report another document session storage as a local storage write', () => {
+    const storage = injector().get(StorageService);
+    const seen = vi.fn();
+    const stop = storage.onChange(seen);
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'access_token',
+        newValue: 'other',
+        storageArea: window.sessionStorage,
+      }),
+    );
+    expect(seen).not.toHaveBeenCalled();
+    stop();
   });
 
   it('stops reporting once unsubscribed', () => {

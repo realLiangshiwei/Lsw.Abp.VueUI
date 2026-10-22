@@ -133,6 +133,32 @@ export const TokenEndpointService = defineService('TokenEndpointService', () => 
   }
 
   return {
+    grant: async (
+      grantType: string,
+      parameters: Readonly<Record<string, string>>,
+      accessToken: string,
+    ): Promise<TokenResponse> => {
+      if (!grantType || !accessToken)
+        throw new AuthError('invalid_request', 'An authenticated custom grant is required.');
+      const reserved = new Set([
+        'grant_type',
+        'access_token',
+        'client_id',
+        'client_secret',
+        'scope',
+      ]);
+      if (Object.keys(parameters).some(key => reserved.has(key.toLowerCase())))
+        throw new AuthError(
+          'invalid_request',
+          'Custom grant parameters cannot override client credentials.',
+        );
+      return post<TokenResponse>(await endpoint('token_endpoint'), {
+        ...parameters,
+        grant_type: grantType,
+        access_token: accessToken,
+        ...client(),
+      });
+    },
     /**
      * @param params The credentials, plus ABP's second factor when there is one
      * @throws `TwoFactorRequiredError` when the account has a second factor

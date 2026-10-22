@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useLocalization } from '@lsw-abpvue/core';
 import type { AbpInputEmits, AbpInputProps } from '@lsw-abpvue/theme-shared';
-import { computed, ref } from 'vue';
-import { HIDE_PASSWORD, SHOW_PASSWORD } from '../defaults/texts.js';
+import { computed, ref, useId } from 'vue';
 
 const props = withDefaults(defineProps<AbpInputProps>(), { type: 'text', rows: 3 });
 
@@ -10,8 +9,15 @@ const emit = defineEmits<AbpInputEmits>();
 
 const localization = useLocalization();
 const revealed = ref(false);
-const showPasswordText = computed(() => localization.t(SHOW_PASSWORD));
-const hidePasswordText = computed(() => localization.t(HIDE_PASSWORD));
+const generatedId = useId();
+const controlId = computed(() => props.id ?? generatedId);
+const revealLabel = computed(() => {
+  const key = localization.findKey(
+    ['AbpAccount'],
+    [revealed.value ? 'HidePassword' : 'ShowPassword'],
+  );
+  return key ? localization.t(key) : props.ariaLabel || localization.t('AbpAccount::Password');
+});
 const textarea = computed(() => props.type === 'textarea');
 const nativeType = computed(() =>
   props.type === 'password' && revealed.value ? 'text' : props.type,
@@ -27,7 +33,7 @@ function onInput(event: Event): void {
   <div :class="revealable && type === 'password' ? 'input-group' : null">
     <textarea
       v-if="textarea"
-      :id="id"
+      :id="controlId"
       :name="name"
       :rows="rows"
       :value="modelValue ?? ''"
@@ -48,7 +54,7 @@ function onInput(event: Event): void {
 
     <input
       v-else
-      :id="id"
+      :id="controlId"
       :name="name"
       :type="nativeType"
       :value="modelValue ?? ''"
@@ -74,7 +80,8 @@ function onInput(event: Event): void {
       v-if="revealable && type === 'password'"
       type="button"
       class="btn btn-outline-secondary"
-      :aria-label="revealed ? hidePasswordText : showPasswordText"
+      :aria-label="revealLabel"
+      :aria-controls="controlId"
       :aria-pressed="revealed ? 'true' : 'false'"
       @click="revealed = !revealed"
     >

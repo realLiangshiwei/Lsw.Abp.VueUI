@@ -22,6 +22,8 @@ export interface HttpResponse<T = unknown> {
 }
 
 export interface RestConfig {
+  /** Explicit request headers, overriding generated headers with the same name. */
+  headers?: Record<string, string> | undefined;
   /** Which backend of a microservice solution to talk to; `default` when omitted. */
   apiName?: string | undefined;
   /** Keeps the error away from `HttpErrorReporterService`, for a caller that handles it. */

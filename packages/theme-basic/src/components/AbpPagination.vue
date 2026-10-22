@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLocalization } from '@lsw-abpvue/core';
 import type { AbpPaginationEmits, AbpPaginationProps } from '@lsw-abpvue/theme-shared';
 import {
   PaginationEllipsis,
@@ -9,7 +10,6 @@ import {
   PaginationRoot,
 } from 'reka-ui';
 import { computed } from 'vue';
-import { PAGER_SIZE } from '../defaults/texts.js';
 
 const props = withDefaults(defineProps<AbpPaginationProps>(), {
   siblingCount: 1,
@@ -17,6 +17,10 @@ const props = withDefaults(defineProps<AbpPaginationProps>(), {
 });
 
 const emit = defineEmits<AbpPaginationEmits>();
+const localization = useLocalization();
+const sizeLabel = computed(() =>
+  localization.t('AbpUi::PagerShowMenuEntries').replace('_MENU_', String(props.pageSize)),
+);
 
 /** reka-ui counts pages from one; the contract counts from zero, as `ListService` does. */
 const oneBased = computed(() => props.page + 1);
@@ -48,6 +52,7 @@ const oneBased = computed(() => props.page + 1);
             class="page-link"
             :class="item.value === oneBased ? 'active' : null"
             :value="item.value"
+            :aria-label="String(item.value)"
           >
             {{ item.value }}
           </PaginationListItem>
@@ -66,7 +71,7 @@ const oneBased = computed(() => props.page + 1);
         class="form-select form-select-sm w-auto"
         :value="String(pageSize)"
         :disabled="disabled"
-        :aria-label="$t(PAGER_SIZE)"
+        :aria-label="sizeLabel"
         @change="emit('update:pageSize', Number(($event.target as HTMLSelectElement).value))"
       >
         <option v-for="size in pageSizes" :key="size" :value="String(size)">{{ size }}</option>

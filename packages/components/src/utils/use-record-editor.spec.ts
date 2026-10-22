@@ -85,6 +85,16 @@ function make(
   return result;
 }
 
+function pendingResult<T>() {
+  let resolve: (value: T) => void = () => {
+    throw new TypeError('The pending test operation has not been initialized.');
+  };
+  const promise = new Promise<T>(settle => {
+    resolve = settle;
+  });
+  return { promise, resolve };
+}
+
 describe('useRecordEditor', () => {
   it('opens on nothing to create, and on a record to edit it', () => {
     const { editor } = make();
@@ -213,5 +223,65 @@ describe('useRecordEditor', () => {
 
     expect(remove).not.toHaveBeenCalled();
     expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('does not delete after its context changes while confirmation is pending', async () => {
+    const answer = pendingResult<ConfirmationStatus>();
+    const remove = vi.fn(() => Promise.resolve());
+    const reload = vi.fn();
+    const { editor, injector } = make({ delete: remove, reload });
+    vi.spyOn(injector.get(ConfirmationService), 'warn').mockReturnValue(answer.promise);
+
+    const pending = editor.remove({ id: 'book-1', name: 'Dune' });
+    expect(editor.invalidate).toBeTypeOf('function');
+    editor.invalidate?.();
+    answer.resolve(ConfirmationStatus.confirm);
+    await pending;
+
+    expect(remove).not.toHaveBeenCalled();
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('keeps the new editor open when an invalidated create finishes', async () => {
+    const created = pendingResult<unknown>();
+    const create = vi.fn(() => created.promise);
+    const reload = vi.fn();
+    const { editor } = make({ create, reload });
+
+    editor.show();
+    editor.form.value?.form.controls['name']?.patch('Dune');
+    const pending = editor.save();
+    expect(create).toHaveBeenCalledOnce();
+    editor.invalidate?.();
+    expect(editor.open.value).toBe(false);
+    editor.show({ id: 'book-2', name: 'Solaris' });
+    created.resolve({ id: 'book-1' });
+    await pending;
+
+    expect(editor.open.value).toBe(true);
+    expect(editor.editing.value?.id).toBe('book-2');
+    expect(editor.form.value?.form.controls['name']?.value).toBe('Solaris');
+    expect(editor.busy.value).toBe(false);
+    expect(reload).not.toHaveBeenCalled();
+  });
+
+  it('asks once and deletes once when removal is repeated before confirmation', async () => {
+    const answer = pendingResult<ConfirmationStatus>();
+    const remove = vi.fn(() => Promise.resolve());
+    const reload = vi.fn();
+    const { editor, injector } = make({ delete: remove, reload });
+    const warn = vi
+      .spyOn(injector.get(ConfirmationService), 'warn')
+      .mockReturnValue(answer.promise);
+
+    const first = editor.remove({ id: 'book-1', name: 'Dune' });
+    const second = editor.remove({ id: 'book-2', name: 'Solaris' });
+    expect(warn).toHaveBeenCalledOnce();
+    expect(remove).not.toHaveBeenCalled();
+    answer.resolve(ConfirmationStatus.confirm);
+    await Promise.all([first, second]);
+
+    expect(remove).toHaveBeenCalledExactlyOnceWith('book-1');
+    expect(reload).toHaveBeenCalledOnce();
   });
 });

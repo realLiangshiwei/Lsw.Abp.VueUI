@@ -83,6 +83,30 @@ function app(options: { offline?: boolean } = {}) {
 }
 
 describe('after a failed renewal', () => {
+  it('clears a revoked local session without opening the identity server logout page', async () => {
+    const { injector, visited, requests } = app();
+    const auth = injector.get(AbpOAuthService) as unknown as {
+      clearSession?: () => Promise<void>;
+    };
+    expect(typeof auth.clearSession).toBe('function');
+    await auth.clearSession?.();
+    expect(injector.get(AuthStateService).getAccessToken()).toBeNull();
+    expect(injector.get(TokenStorage).getItem('refresh_token')).toBeNull();
+    expect(requests.some(url => url.includes('application-configuration'))).toBe(true);
+    expect(visited).toEqual([]);
+  });
+
+  it('keeps local tokens cleared even when refreshing anonymous configuration fails', async () => {
+    const { injector, visited } = app({ offline: true });
+    const auth = injector.get(AbpOAuthService) as unknown as {
+      clearSession?: () => Promise<void>;
+    };
+    expect(typeof auth.clearSession).toBe('function');
+    await expect(auth.clearSession?.()).rejects.toBeDefined();
+    expect(injector.get(AuthStateService).getAccessToken()).toBeNull();
+    expect(visited).toEqual([]);
+  });
+
   it('the session is treated as over: tokens cleared, off to log in', async () => {
     const { oauth, visited, injector } = app();
 

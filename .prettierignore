@@ -3,8 +3,8 @@ coverage/
 .turbo/
 docs/.vitepress/cache/
 pnpm-lock.yaml
-e2e/backend/
-e2e/fixtures/
+e2e/**/backend/
+e2e/**/fixtures/
 e2e/**/artifacts/
 e2e/**/results/
 e2e/**/reports/

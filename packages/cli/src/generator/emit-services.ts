@@ -5,7 +5,7 @@ import type {
   ModuleDefinition,
 } from '../api-definition/models.js';
 import { namespaceOf, parseClrType } from './clr-type.js';
-import { renderDeclaredType } from './declared-type.js';
+import { renderDeclaredType, type DeclaredType } from './declared-type.js';
 import { CORE_PACKAGE, REMOTE_STREAM_TYPES } from './framework-types.js';
 import { ImportCollector, moduleSpecifier } from './imports.js';
 import { camelCase, isIdentifier, kebabCase, namespaceToDirectory, quoteName } from './names.js';
@@ -69,6 +69,22 @@ function isStreamType(type: string): boolean {
   return named.kind === 'name' && REMOTE_STREAM_TYPES.has(named.name);
 }
 
+function spreadsQueryDictionary(parameter: BoundParameter): boolean {
+  return [parameter.type, parameter.typeSimple].some(type => {
+    const parsed = parseClrType(type);
+    return (
+      parsed.kind === 'name' &&
+      parsed.args.length === 2 &&
+      [
+        'Dictionary',
+        'IDictionary',
+        'System.Collections.Generic.Dictionary',
+        'System.Collections.Generic.IDictionary',
+      ].includes(parsed.name)
+    );
+  });
+}
+
 /**
  * How a bound parameter is read off the method's own parameters.
  * @param parameter The parameter as the request carries it
@@ -105,6 +121,16 @@ interface RequestParts {
   headers: string[];
   body: string | undefined;
   requestType: string;
+}
+
+function requestInputType(text: string): string {
+  return text.endsWith('[]') ? `readonly ${text}` : text;
+}
+
+function renderParameterType(registry: TypeRegistry, parameter: DeclaredType) {
+  const rendered = renderDeclaredType(registry, parameter, new Set());
+  const nullable = parameter.type.trim().endsWith('?') || parameter.typeSimple.trim().endsWith('?');
+  return { ...rendered, text: nullable ? `${rendered.text} | null` : rendered.text };
 }
 
 function buildRequest(
@@ -144,16 +170,19 @@ function buildRequest(
       case 'Path': {
         const names = new Set([parameter.name, camelCase(parameter.name), parameter.jsonName]);
         for (const name of names) {
-          if (name) parts.url = parts.url.split(`{${name}}`).join(`\${${value}}`);
+          if (name)
+            parts.url = parts.url
+              .split(`{${name}}`)
+              .join(`\${encodeURIComponent(String(${value}))}`);
         }
         break;
       }
 
       case 'Body': {
-        const rendered = renderDeclaredType(registry, parameter, new Set());
+        const rendered = renderParameterType(registry, parameter);
         rendered.refs.forEach(ref => refs.request.push(ref));
 
-        if (parameter.typeSimple === 'string') {
+        if (parameter.typeSimple.trim().replace(/\?$/, '') === 'string') {
           // A bare string body is JSON, not text: the server's input formatter reads it
           // with the JSON reader and a raw string is not valid JSON.
           parts.body = `JSON.stringify(${value})`;
@@ -161,7 +190,7 @@ function buildRequest(
           parts.requestType = 'string';
         } else {
           parts.body = value;
-          parts.requestType = rendered.text;
+          parts.requestType = requestInputType(rendered.text);
         }
         break;
       }
@@ -172,8 +201,7 @@ function buildRequest(
 
       case 'ModelBinding':
       case 'Query': {
-        const parsed = parseClrType(parameter.typeSimple);
-        if (parsed.kind === 'dictionary') {
+        if (spreadsQueryDictionary(parameter)) {
           parts.spreadParams.push(value);
           break;
         }
@@ -213,12 +241,12 @@ function emitMethod(
   const signature = action.parametersOnMethod.map(parameter => {
     const rendered = fileParameters.has(parameter.name)
       ? { text: 'FormData', refs: [] }
-      : renderDeclaredType(registry, parameter, new Set());
+      : renderParameterType(registry, parameter);
     rendered.refs.forEach(ref => refs.request.push(ref));
 
     // An array parameter is only forwarded, never written to, so a readonly array is
     // just as good and a caller with one does not have to copy it.
-    const type = rendered.text.endsWith('[]') ? `readonly ${rendered.text}` : rendered.text;
+    const type = requestInputType(rendered.text);
 
     return `${camelizeHyphen(parameter.name)}${parameter.isOptional ? '?' : ''}: ${type}`;
   });

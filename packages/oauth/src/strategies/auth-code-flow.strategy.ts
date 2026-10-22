@@ -8,9 +8,14 @@ import {
   TENANT_KEY,
   TokenStorage,
   type OAuthConfig,
+  type ApplicationConfigurationDto,
   type ServiceOf,
+  onServiceDestroy,
 } from '@lsw-abpvue/core';
-import { UserManager, type User, type UserManagerSettings } from 'oidc-client-ts';
+import { UserManager, User, type UserManagerSettings } from 'oidc-client-ts';
+import type { TokenResponse } from '../models/oauth.js';
+import { AuthError } from '@lsw-abpvue/core';
+import { decodeJwt } from '../utils/jwt.js';
 import { AuthNavigationService } from '../services/auth-navigation.service.js';
 import { AuthStateService } from '../services/auth-state.service.js';
 import { RememberMeService } from '../services/remember-me.service.js';
@@ -21,7 +26,7 @@ import {
   isAuthorizationCallback,
   withoutCallbackParams,
 } from '../utils/callback-url.js';
-import type { AuthFlowStrategy } from './strategy.js';
+import type { AuthFlowStrategy, StoredAuthSession } from './strategy.js';
 
 /**
  * Where the library itself is built. A token for the same reason `HTTP_FETCH` is one:
@@ -43,6 +48,7 @@ export function buildSettings(
   config: OAuthConfig,
   storage: TokenStorage,
   tenant?: { key: string; id: string } | undefined,
+  isActive: () => boolean = () => true,
 ): UserManagerSettings {
   return {
     authority: config.issuer ?? '',
@@ -54,8 +60,8 @@ export function buildSettings(
     // The library sends the token request itself, so the tenant has to travel on the
     // settings rather than through our interceptors.
     extraHeaders: tenant ? { [tenant.key]: tenant.id } : {},
-    stateStore: new TokenStateStore(storage, 'oidc.'),
-    userStore: new TokenStateStore(storage, 'oidc.user.'),
+    stateStore: new TokenStateStore(storage, 'oidc.', isActive),
+    userStore: new TokenStateStore(storage, 'oidc.user.', isActive),
     ...(config.metadataUrl ? { metadataUrl: config.metadataUrl } : {}),
     ...(config.metadataSeed
       ? {
@@ -96,30 +102,85 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
   const tenantKey = inject(TENANT_KEY);
   const create = inject(USER_MANAGER_FACTORY);
   let manager: UserManager | undefined;
+  let generation = 0;
+  let expiry: ReturnType<typeof setTimeout> | undefined;
+  onServiceDestroy(() => {
+    clearTimeout(expiry);
+    retire();
+  });
+
+  function retire(): void {
+    generation += 1;
+    clearTimeout(expiry);
+    manager?.stopSilentRenew?.();
+    manager = undefined;
+  }
+
+  function createManager(
+    tenantId: string | null | undefined = session.getTenant()?.id,
+  ): UserManager {
+    const own = generation;
+    const settings = buildSettings(
+      environment.getEnvironment().oAuthConfig ?? {},
+      storage,
+      tenantId ? { key: tenantKey, id: tenantId } : undefined,
+      () => own === generation,
+    );
+    const next = create({ ...settings, automaticSilentRenew: false });
+    next.events.addUserLoaded(user => {
+      if (own === generation) adopt(user);
+    });
+    next.events.addUserUnloaded(() => {
+      if (own === generation) state.set(null);
+    });
+    return next;
+  }
 
   function userManager(): UserManager {
     if (manager) return manager;
 
-    const tenantId = session.getTenant()?.id;
-    manager = create(
-      buildSettings(
-        environment.getEnvironment().oAuthConfig ?? {},
-        storage,
-        tenantId ? { key: tenantKey, id: tenantId } : undefined,
-      ),
-    );
-
-    manager.events.addUserLoaded(user => adopt(user));
-    manager.events.addUserUnloaded(() => state.set(null));
-
+    manager = createManager();
     return manager;
   }
 
   function adopt(user: User): void {
+    clearTimeout(expiry);
+    if (user.profile?.abpvue_grant_session === true && !user.refresh_token) {
+      manager?.stopSilentRenew?.();
+      if (user.expires_at !== undefined) {
+        const own = generation;
+        const expiresAt = user.expires_at * 1000;
+        const schedule = (): void => {
+          expiry = setTimeout(
+            () => {
+              if (own !== generation) return;
+              if (expiresAt > Date.now()) {
+                schedule();
+                return;
+              }
+              state.set(null);
+              configState.clearIdentity();
+              void clearLocal().catch(() => undefined);
+            },
+            Math.min(Math.max(expiresAt - Date.now(), 0), 2_147_483_647),
+          );
+        };
+        schedule();
+      }
+    } else manager?.startSilentRenew?.();
+    const explicitBinding = user.profile?.abpvue_tenant_id;
+    const saved = state.readStored();
+    const binding =
+      explicitBinding === undefined
+        ? (user.profile?.tenantid ??
+          decodeJwt(user.access_token)?.tenantid ??
+          (saved?.accessToken === user.access_token ? saved.tenantId : undefined))
+        : explicitBinding;
     state.set({
       accessToken: user.access_token,
       refreshToken: user.refresh_token,
       expiresAt: user.expires_at === undefined ? Infinity : user.expires_at * 1000,
+      ...(binding === null || typeof binding === 'string' ? { tenantId: binding } : {}),
     });
   }
 
@@ -147,6 +208,21 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
     navigation.replaceUrl(returnUrl ?? withoutCallbackParams(url));
   }
 
+  async function clearLocal(): Promise<void> {
+    rememberMe.remove();
+    retire();
+    const own = generation;
+    const next = createManager(undefined);
+    manager = next;
+    try {
+      await next.removeUser();
+      if (own !== generation) return;
+      await next.clearStaleState();
+    } finally {
+      if (own === generation) state.persist(null);
+    }
+  }
+
   return {
     isInternalAuth: false,
 
@@ -162,6 +238,11 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
 
       const user = await userManager().getUser();
       if (!user) return;
+
+      if (user.expired && user.profile?.abpvue_grant_session === true && !user.refresh_token) {
+        await clearLocal();
+        return;
+      }
 
       if (!user.expired) {
         adopt(user);
@@ -180,10 +261,13 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
         .catch(() => userManager().removeUser());
     },
 
-    navigateToLogin: async (returnUrl?: string): Promise<void> => {
+    navigateToLogin: async (
+      returnUrl?: string,
+      queryParams?: Readonly<Record<string, string>>,
+    ): Promise<void> => {
       await userManager().signinRedirect({
         ...(returnUrl ? { state: returnUrl } : {}),
-        extraQueryParams: cultureParams(session.getLanguage()),
+        extraQueryParams: { ...queryParams, ...cultureParams(session.getLanguage()) },
       });
     },
 
@@ -198,28 +282,124 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
       // would otherwise be bounced through the identity server and back.
       if (queryParams?.noRedirectToLogoutUrl) {
         // Same as the password flow: a refused revocation does not keep the user in.
-        await userManager()
+        const revocation = userManager()
           .revokeTokens()
           .catch(() => undefined);
-        await userManager().removeUser();
+        retire();
+        const own = generation;
+        await revocation;
+        if (own !== generation) return;
+        manager = createManager(undefined);
+        await manager.removeUser();
+        state.persist(null);
         await configState.refreshAppState();
+        if (own !== generation) return;
         await navigation.go('/');
         return;
       }
 
-      await userManager().signoutRedirect({
+      const previous = userManager();
+      const storedUser = previous.getUser().catch(() => null);
+      const revocation = previous.revokeTokens().catch(() => undefined);
+      retire();
+      const own = generation;
+      try {
+        state.persist(null);
+      } finally {
+        const next = createManager(undefined);
+        manager = next;
+        try {
+          await next.removeUser();
+          if (own === generation) await next.clearStaleState();
+        } finally {
+          if (own === generation) state.persist(null);
+        }
+      }
+      const [user] = await Promise.all([storedUser, revocation]);
+      if (own !== generation) return;
+      await previous.signoutRedirect({
+        ...(user?.id_token ? { id_token_hint: user.id_token } : {}),
         extraQueryParams: { ...cultureParams(session.getLanguage()), ...queryParams },
       });
     },
 
     refresh: async (): Promise<void> => {
-      await userManager().signinSilent();
+      const next = userManager();
+      const own = generation;
+      const user = await next.getUser();
+      if (own !== generation) throw new AuthError('session_changed');
+      if (user?.profile?.abpvue_grant_session === true && !user.refresh_token)
+        throw new AuthError(
+          'login_required',
+          'This account session requires an explicit login after expiry.',
+        );
+      await next.signinSilent();
     },
 
-    clear: async (): Promise<void> => {
-      rememberMe.remove();
-      await userManager().removeUser();
-      await userManager().clearStaleState();
+    clear: clearLocal,
+
+    prepareSession: async (
+      response: TokenResponse,
+      configuration: ApplicationConfigurationDto,
+      customGrant = true,
+    ): Promise<() => void> => {
+      const subject = configuration.currentUser.id;
+      if (!subject)
+        throw new AuthError('invalid_grant', 'The replacement identity has no subject.');
+      retire();
+      const own = generation;
+      const tenantId = configuration.currentTenant.id ?? null;
+      manager = createManager(tenantId);
+      const next = manager;
+      const now = Math.floor(Date.now() / 1000);
+      const user = new User({
+        access_token: response.access_token,
+        token_type: response.token_type ?? 'Bearer',
+        ...(response.refresh_token ? { refresh_token: response.refresh_token } : {}),
+        ...(response.id_token ? { id_token: response.id_token } : {}),
+        ...(response.scope ? { scope: response.scope } : {}),
+        ...(response.expires_in === undefined ? {} : { expires_at: now + response.expires_in }),
+        profile: {
+          iss: environment.getEnvironment().oAuthConfig?.issuer ?? '',
+          sub: subject,
+          aud: environment.getEnvironment().oAuthConfig?.clientId ?? '',
+          iat: now,
+          exp: now + (response.expires_in ?? 3600),
+          ...((configuration.currentUser.name ?? configuration.currentUser.userName)
+            ? { name: configuration.currentUser.name ?? configuration.currentUser.userName ?? '' }
+            : {}),
+          abpvue_tenant_id: tenantId,
+          abpvue_grant_session: customGrant,
+        },
+      });
+      await next.storeUser(user);
+      if (own !== generation) throw new AuthError('session_changed');
+      await next.events.load?.(user, false);
+      return () => {
+        if (own !== generation) throw new AuthError('session_changed');
+        adopt(user);
+        rememberMe.set(rememberMe.fromToken(user.access_token));
+      };
+    },
+
+    readSession: async (): Promise<StoredAuthSession | null> => {
+      retire();
+      manager = createManager(undefined);
+      const own = generation;
+      const user = await manager.getUser();
+      if (own !== generation) throw new AuthError('session_changed');
+      if (!user) return null;
+      return {
+        customGrant: user.profile?.abpvue_grant_session === true,
+        response: {
+          access_token: user.access_token,
+          refresh_token: user.refresh_token,
+          id_token: user.id_token,
+          token_type: user.token_type,
+          scope: user.scope,
+          expires_in: user.expires_in,
+        },
+      };
     },
   };
 });

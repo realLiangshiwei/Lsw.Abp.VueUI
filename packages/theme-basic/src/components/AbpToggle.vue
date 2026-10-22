@@ -27,7 +27,13 @@ watchEffect(() => {
 </script>
 
 <template>
-  <fieldset v-if="variant === 'radio'" class="border-0 p-0 m-0">
+  <fieldset
+    v-if="variant === 'radio'"
+    class="border-0 p-0 m-0"
+    :aria-label="ariaLabel"
+    :aria-labelledby="ariaLabelledby"
+    :aria-controls="ariaControls"
+  >
     <legend v-if="label" class="form-label fs-6">{{ label }}</legend>
 
     <div v-for="option in options" :key="String(option.value)" class="form-check">
@@ -62,6 +68,8 @@ watchEffect(() => {
       :aria-invalid="invalid ? 'true' : undefined"
       :aria-describedby="ariaDescribedby"
       :aria-label="ariaLabel"
+      :aria-labelledby="ariaLabelledby"
+      :aria-controls="ariaControls"
       @change="onCheckedChange"
     />
     <label v-if="label" class="form-check-label" :for="controlId">{{ label }}</label>

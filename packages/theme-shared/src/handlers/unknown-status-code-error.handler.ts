@@ -22,11 +22,7 @@ export const UnknownStatusCodeErrorHandler = defineService<AbpErrorHandler>(
         errorPage.show({
           status: error.status,
           title: DEFAULT_ERROR_MESSAGES.default.title,
-          // A request that never landed has nothing from the server to quote, so the
-          // transport's own message is the only thing that says what went wrong.
-          details: error.isTransportFailure
-            ? error.message
-            : DEFAULT_ERROR_MESSAGES.default.details,
+          details: DEFAULT_ERROR_MESSAGES.default.details,
           showHome: !error.isTransportFailure,
         });
       },

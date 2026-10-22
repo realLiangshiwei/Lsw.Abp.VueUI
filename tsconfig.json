@@ -17,5 +17,13 @@
     // The documentation site's own configuration; its pages are markdown.
     "docs/.vitepress/**/*.ts"
   ],
-  "exclude": ["node_modules", "**/dist", "e2e/backend", "playground", "templates"]
+  "exclude": [
+    "node_modules",
+    "**/dist",
+    ".local/abp-pro-reference",
+    "e2e/backend",
+    "e2e/pro",
+    "playground",
+    "templates"
+  ]
 }

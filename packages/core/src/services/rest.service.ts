@@ -52,13 +52,21 @@ export const RestService = defineService('RestService', () => {
     config: RestConfig,
   ): Promise<HttpResponse> {
     const base = request.url.startsWith('http') ? '' : environment.getApiUrl(config.apiName);
-    const hasAjaxHeader = Object.keys(request.headers ?? {}).some(
+    const explicitHeaders = { ...request.headers };
+    for (const [name, value] of Object.entries(config.headers ?? {})) {
+      for (const previous of Object.keys(explicitHeaders)) {
+        if (previous.toLowerCase() === name.toLowerCase()) delete explicitHeaders[previous];
+      }
+      explicitHeaders[name] = value;
+    }
+    const hasAjaxHeader = Object.keys(explicitHeaders).some(
       name => name.toLowerCase() === 'x-requested-with',
     );
     const headers =
       config.skipAddingHeader || hasAjaxHeader
-        ? request.headers
-        : { ...request.headers, 'X-Requested-With': 'XMLHttpRequest' };
+        ? explicitHeaders
+        : { ...explicitHeaders, 'X-Requested-With': 'XMLHttpRequest' };
+    const signal = config.signal ?? request.signal;
     const done = wait.start();
 
     try {
@@ -68,10 +76,10 @@ export const RestService = defineService('RestService', () => {
         params: filterParams(request.params),
         headers,
         context: config,
-        ...(config.signal ? { signal: config.signal } : {}),
+        ...(signal ? { signal } : {}),
       });
     } catch (error) {
-      if (error instanceof AbpHttpError && !config.skipHandleError)
+      if (error instanceof AbpHttpError && !config.skipHandleError && !signal?.aborted)
         errorReporter.reportError(error);
       throw error;
     } finally {

@@ -125,7 +125,7 @@ export const PlainToastHost = defineComponent({
                     'button',
                     {
                       type: 'button',
-                      'aria-label': 'Close',
+                      'aria-label': localization.t('AbpUi::Close'),
                       onClick: () => toaster.remove(toast.id),
                     },
                     '×',
@@ -174,7 +174,7 @@ export const PlainConfirmHost = defineComponent({
                   type: 'button',
                   onClick: () => confirmation.clear(ConfirmationStatus.confirm),
                 },
-                localization.t(options.yesText ?? 'Yes'),
+                localization.t(options.yesText ?? 'AbpUi::Yes'),
               ),
           options.hideCancelBtn
             ? null
@@ -184,7 +184,7 @@ export const PlainConfirmHost = defineComponent({
                   type: 'button',
                   onClick: () => confirmation.clear(ConfirmationStatus.reject),
                 },
-                localization.t(options.cancelText ?? 'Cancel'),
+                localization.t(options.cancelText ?? 'AbpUi::Cancel'),
               ),
         ],
       );
@@ -277,6 +277,7 @@ export const PlainDatePicker = defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
+    const localization = useLocalization();
     return () =>
       h('span', [
         h('input', {
@@ -299,7 +300,7 @@ export const PlainDatePicker = defineComponent({
               'button',
               {
                 type: 'button',
-                'aria-label': 'Clear',
+                'aria-label': localization.t('AbpUi::Clear'),
                 onClick: () => emit('update:modelValue', null),
               },
               '×',

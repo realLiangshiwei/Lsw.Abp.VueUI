@@ -64,11 +64,11 @@ async function submit(): Promise<void> {
 
   <template v-if="done">
     <p role="status">{{ $t('AbpAccount::YourPasswordIsSuccessfullyReset') }}</p>
-    <RouterLink to="/account/login">{{ $t('AbpAccount::GoToTheApplication') }}</RouterLink>
+    <RouterLink to="/account/login">{{ $t('AbpAccount::BackToLogin') }}</RouterLink>
   </template>
 
   <template v-else-if="!linkIsUsable">
-    <p role="alert">{{ $t('AbpAccount::InvalidLoginRequest') }}</p>
+    <p role="alert">{{ $t('AbpUi::ValidationErrorMessage') }}</p>
     <RouterLink to="/account/login">{{ $t('AbpAccount::BackToLogin') }}</RouterLink>
   </template>
 

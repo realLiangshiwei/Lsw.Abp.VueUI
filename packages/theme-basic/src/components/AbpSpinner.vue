@@ -6,10 +6,7 @@ import { computed } from 'vue';
 const props = withDefaults(defineProps<AbpSpinnerProps>(), { size: 'md' });
 
 const localization = useLocalization();
-const name = computed(
-  () =>
-    props.label ?? localization.t({ key: 'AbpUi::LoadingWithThreeDot', defaultValue: 'Loading…' }),
-);
+const name = computed(() => props.label ?? localization.t('AbpUi::LoadingWithThreeDot'));
 </script>
 
 <template>

@@ -92,6 +92,37 @@ const headers = (wrapper: VueWrapper) => wrapper.findAll('th').map(cell => cell.
 const column = (wrapper: VueWrapper, name: string) =>
   wrapper.findAll(`td[data-column="${name}"]`).map(cell => cell.text());
 
+describe('a supplied row action template', () => {
+  it('renders custom actions without a contributed action and retains contributed columns', () => {
+    const { wrapper } = render(
+      {},
+      {},
+      {
+        actions: ({ row, index }: { row: Book; index: number }) =>
+          h('button', { 'aria-label': `Select ${row.name}` }, `Choose ${index}`),
+      },
+    );
+    expect(headers(wrapper)).toEqual(['Actions', 'name', 'isPublished']);
+    expect(wrapper.get('button[aria-label="Select Dune"]').text()).toBe('Choose 0');
+    expect(column(wrapper, 'name')).toEqual(['Dune', 'Neuromancer']);
+  });
+
+  it('replaces contributed row actions only while the template is supplied', () => {
+    const remove = vi.fn();
+    const { wrapper } = render(
+      { actions: [EntityAction.create<Book>({ text: 'Delete', action: remove })] },
+      {},
+      {
+        actions: ({ row }: { row: Book; index: number }) =>
+          h('button', { 'aria-label': `Select ${row.name}` }, 'Choose'),
+      },
+    );
+    expect(wrapper.text()).not.toContain('Delete');
+    expect(wrapper.findAll('button').filter(button => button.text() === 'Choose')).toHaveLength(2);
+    expect(remove).not.toHaveBeenCalled();
+  });
+});
+
 describe('the columns come from the extension point', () => {
   it('renders a column per prop, in the order the contributors left them', () => {
     const { wrapper } = render();

@@ -17,13 +17,13 @@ export const BookService = defineService('BookService', () => {
 
     delete: (id: string, config?: RestConfig): Promise<void> =>
       rest.request<never, void>(
-        { method: 'DELETE', url: `/api/app/book/${id}` },
+        { method: 'DELETE', url: `/api/app/book/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
     get: (id: string, config?: RestConfig): Promise<BookDto> =>
       rest.request<never, BookDto>(
-        { method: 'GET', url: `/api/app/book/${id}` },
+        { method: 'GET', url: `/api/app/book/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
@@ -44,7 +44,7 @@ export const BookService = defineService('BookService', () => {
 
     update: (id: string, input: CreateUpdateBookDto, config?: RestConfig): Promise<BookDto> =>
       rest.request<CreateUpdateBookDto, BookDto>(
-        { method: 'PUT', url: `/api/app/book/${id}`, body: input },
+        { method: 'PUT', url: `/api/app/book/${encodeURIComponent(String(id))}`, body: input },
         { apiName, ...config },
       ),
   };

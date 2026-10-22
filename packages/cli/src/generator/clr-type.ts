@@ -49,8 +49,8 @@ function isWrappedIn(text: string, open: string, close: string): boolean {
 }
 
 /**
- * Parses one type name. Nullability is dropped: a property says whether it is nullable
- * in a field of its own, and a parameter says whether it is optional.
+ * Parses one type name. Declaration emitters retain nullability separately from the
+ * parsed name, and method parameter optionality is a different declaration flag.
  * @param text The type as the backend wrote it
  */
 export function parseClrType(text: string): ClrType {

@@ -30,6 +30,12 @@ describe('with no browser', () => {
     expect(() => service.setLang?.('ar')).not.toThrow();
   });
 
+  it('downloading a blob is a no-op without a browser', () => {
+    expect(() =>
+      injector().get(WindowService).downloadBlob(new Blob(), 'UserList.csv'),
+    ).not.toThrow();
+  });
+
   it('storage falls back to memory and reads and writes as usual', () => {
     const storage = injector().get(StorageService);
 

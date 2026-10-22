@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { AccountComponents, useAuthWrapper } from '@lsw-abpvue/account-core';
-import { useReplaceableComponents } from '@lsw-abpvue/core';
+import { useLocalization, useReplaceableComponents } from '@lsw-abpvue/core';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import AbpTenantBox from './AbpTenantBox.vue';
 
 const wrapper = useAuthWrapper();
+const localization = useLocalization();
+const localLoginDisabled = computed(() =>
+  localization.findKey(['AbpAccount'], ['LocalLoginIsNotEnabled', 'LocalLoginDisabledMessage']),
+);
 const replaceable = useReplaceableComponents();
 const route = useRoute();
 
@@ -30,8 +34,9 @@ const showTenantBox = computed(
     </div>
 
     <div v-else class="alert alert-warning" role="alert">
-      <strong>{{ $t('AbpAccount::InvalidLoginRequest') }}</strong>
-      {{ $t('AbpAccount::ThereAreNoLoginSchemesConfiguredForThisClient') }}
+      {{
+        localLoginDisabled ? localization.t(localLoginDisabled) : $t('AbpUi::DefaultErrorMessage')
+      }}
     </div>
   </div>
 </template>

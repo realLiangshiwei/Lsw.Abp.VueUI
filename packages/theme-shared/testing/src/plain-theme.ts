@@ -1,3 +1,4 @@
+import { useLocalization } from '@lsw-abpvue/core';
 import { provideThemeComponents, type AbpOption } from '@lsw-abpvue/theme-shared';
 import { computed, defineComponent, h, useId, type PropType, type VNodeChild } from 'vue';
 import type { ThemeUnderTest } from './harness.js';
@@ -51,11 +52,16 @@ const PlainSpinner = defineComponent({
   name: 'PlainSpinner',
   props: {
     size: { type: String, default: undefined },
-    label: { type: String, default: 'Loading' },
+    label: { type: String, default: undefined },
     overlay: Boolean,
   },
   setup(props) {
-    return () => h('span', { role: 'status', 'aria-label': props.label });
+    const localization = useLocalization();
+    return () =>
+      h('span', {
+        role: 'status',
+        'aria-label': props.label ?? localization.t('AbpUi::LoadingWithThreeDot'),
+      });
   },
 });
 
@@ -157,13 +163,20 @@ const PlainToggle = defineComponent({
     id: { type: String, default: undefined },
     name: { type: String, default: undefined },
     ariaLabel: { type: String, default: undefined },
+    ariaLabelledby: { type: String, default: undefined },
+    ariaControls: { type: String, default: undefined },
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     const group = (): VNodeChild =>
       h(
         'div',
-        { role: 'radiogroup', 'aria-label': props.ariaLabel ?? props.label },
+        {
+          role: 'radiogroup',
+          'aria-label': props.ariaLabel ?? props.label,
+          'aria-labelledby': props.ariaLabelledby,
+          'aria-controls': props.ariaControls,
+        },
         props.options.map(option =>
           h('label', [
             h('input', {
@@ -190,6 +203,8 @@ const PlainToggle = defineComponent({
           disabled: props.disabled,
           'aria-invalid': props.invalid ? 'true' : undefined,
           'aria-label': props.ariaLabel,
+          'aria-labelledby': props.ariaLabelledby,
+          'aria-controls': props.ariaControls,
           onChange: (event: Event) =>
             emit('update:modelValue', (event.target as HTMLInputElement).checked),
         }),
@@ -210,17 +225,29 @@ const PlainPagination = defineComponent({
     showSizeSelector: Boolean,
     pageSizes: { type: Array as PropType<readonly number[]>, default: () => [10, 25, 50] },
     disabled: Boolean,
-    ariaLabel: { type: String, default: 'Pagination' },
+    ariaLabel: { type: String, default: undefined },
   },
   emits: ['update:page', 'update:pageSize'],
   setup(props, { emit }) {
+    const localization = useLocalization();
+    const pageInfo = computed(() =>
+      localization.t(
+        'AbpUi::PagerInfo{0}{1}{2}',
+        props.total ? props.page * props.pageSize + 1 : 0,
+        Math.min((props.page + 1) * props.pageSize, props.total),
+        props.total,
+      ),
+    );
+    const sizeLabel = computed(() =>
+      localization.t('AbpUi::PagerShowMenuEntries').replace('_MENU_', String(props.pageSize)),
+    );
     const pages = computed(() => {
       const count = Math.max(1, Math.ceil(props.total / props.pageSize));
       return Array.from({ length: count }, (_unused, index) => index);
     });
 
     return () =>
-      h('nav', { 'aria-label': props.ariaLabel }, [
+      h('nav', { 'aria-label': props.ariaLabel ?? pageInfo.value }, [
         h(
           'ul',
           pages.value.map(index =>
@@ -242,7 +269,7 @@ const PlainPagination = defineComponent({
           ? h(
               'select',
               {
-                'aria-label': 'Page size',
+                'aria-label': sizeLabel.value,
                 value: String(props.pageSize),
                 onChange: (event: Event) =>
                   emit('update:pageSize', Number((event.target as HTMLSelectElement).value)),

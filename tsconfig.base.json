@@ -10,7 +10,6 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
@@ -18,13 +17,11 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "jsx": "preserve",
     "types": [],
-
     "paths": {
       "@lsw-abpvue/account": ["./packages/account/src/index.ts"],
       "@lsw-abpvue/account/config": ["./packages/account/config/src/index.ts"],
@@ -44,6 +41,9 @@
       "@lsw-abpvue/identity": ["./packages/identity/src/index.ts"],
       "@lsw-abpvue/identity/config": ["./packages/identity/config/src/index.ts"],
       "@lsw-abpvue/identity/proxy": ["./packages/identity/proxy/src/index.ts"],
+      "@lsw-abpvue/identity-pro": ["./packages/identity-pro/src/index.ts"],
+      "@lsw-abpvue/identity-pro/config": ["./packages/identity-pro/config/src/index.ts"],
+      "@lsw-abpvue/identity-pro/proxy": ["./packages/identity-pro/proxy/src/index.ts"],
       "@lsw-abpvue/oauth": ["./packages/oauth/src/index.ts"],
       "@lsw-abpvue/permission-management": ["./packages/permission-management/src/index.ts"],
       "@lsw-abpvue/permission-management/proxy": [
@@ -60,7 +60,13 @@
       "@lsw-abpvue/theme-basic": ["./packages/theme-basic/src/index.ts"],
       "@lsw-abpvue/theme-shared": ["./packages/theme-shared/src/index.ts"],
       "@lsw-abpvue/theme-shared/testing": ["./packages/theme-shared/testing/src/index.ts"],
-      "@lsw-abpvue/utils": ["./packages/utils/src/index.ts"]
+      "@lsw-abpvue/utils": ["./packages/utils/src/index.ts"],
+      "@lsw-abpvue/account-pro": ["./packages/account-pro/src/index.ts"],
+      "@lsw-abpvue/account-pro/config": ["./packages/account-pro/config/src/index.ts"],
+      "@lsw-abpvue/account-pro/proxy": ["./packages/account-pro/proxy/src/index.ts"],
+      "@lsw-abpvue/audit-logging": ["./packages/audit-logging/src/index.ts"],
+      "@lsw-abpvue/audit-logging/config": ["./packages/audit-logging/config/src/index.ts"],
+      "@lsw-abpvue/audit-logging/proxy": ["./packages/audit-logging/proxy/src/index.ts"]
     }
   }
 }

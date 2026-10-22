@@ -6,10 +6,12 @@
  */
 export function useLatest<T>(): {
   run(fn: (signal: AbortSignal) => Promise<T>): Promise<T | undefined>;
+  cancel(): void;
 } {
   let pending: AbortController | null = null;
 
   return {
+    cancel: () => pending?.abort(),
     async run(fn) {
       pending?.abort();
 

@@ -22,13 +22,13 @@ export const IdentityRoleService = defineService('IdentityRoleService', () => {
 
     delete: (id: string, config?: RestConfig): Promise<void> =>
       rest.request<never, void>(
-        { method: 'DELETE', url: `/api/identity/roles/${id}` },
+        { method: 'DELETE', url: `/api/identity/roles/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
     get: (id: string, config?: RestConfig): Promise<IdentityRoleDto> =>
       rest.request<never, IdentityRoleDto>(
-        { method: 'GET', url: `/api/identity/roles/${id}` },
+        { method: 'GET', url: `/api/identity/roles/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
@@ -47,11 +47,11 @@ export const IdentityRoleService = defineService('IdentityRoleService', () => {
           method: 'GET',
           url: '/api/identity/roles',
           params: {
-            ...input.extraProperties,
             filter: input.filter,
             sorting: input.sorting,
             skipCount: input.skipCount,
             maxResultCount: input.maxResultCount,
+            extraProperties: input.extraProperties,
           },
         },
         { apiName, ...config },
@@ -63,7 +63,11 @@ export const IdentityRoleService = defineService('IdentityRoleService', () => {
       config?: RestConfig,
     ): Promise<IdentityRoleDto> =>
       rest.request<IdentityRoleUpdateDto, IdentityRoleDto>(
-        { method: 'PUT', url: `/api/identity/roles/${id}`, body: input },
+        {
+          method: 'PUT',
+          url: `/api/identity/roles/${encodeURIComponent(String(id))}`,
+          body: input,
+        },
         { apiName, ...config },
       ),
   };

@@ -8,13 +8,16 @@ import {
   PIPE_TO_LOGIN_FN,
   StorageService,
   type LoginParams,
+  type ApplicationConfigurationDto,
   type ServiceOf,
 } from '@lsw-abpvue/core';
 import { AuthNavigationService } from '../services/auth-navigation.service.js';
 import { AuthStateService, toTokens } from '../services/auth-state.service.js';
 import { RememberMeService } from '../services/remember-me.service.js';
 import { TokenEndpointService } from '../services/token-endpoint.service.js';
-import type { AuthFlowStrategy } from './strategy.js';
+import type { AuthFlowStrategy, StoredAuthSession } from './strategy.js';
+import type { TokenResponse } from '../models/oauth.js';
+import { AuthError } from '@lsw-abpvue/core';
 
 /** Where an anonymous visitor is sent. The account module owns this route. */
 export const LOGIN_ROUTE = defineToken<string>('LOGIN_ROUTE', {
@@ -48,10 +51,12 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
   const pipeToLogin = inject(PIPE_TO_LOGIN_FN);
   const loginRoute = inject(LOGIN_ROUTE);
   let renewal: ReturnType<typeof setTimeout> | undefined;
+  let generation = 0;
 
   onServiceDestroy(() => clearTimeout(renewal));
 
   function forget(): void {
+    generation += 1;
     clearListPreferences(storage, configState.snapshot().currentUser.id);
     clearTimeout(renewal);
     state.persist(null);
@@ -70,14 +75,24 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
     const delay = Math.min(Math.max(expiresAt - Date.now() - RENEW_MARGIN_MS, 0), MAX_TIMEOUT_MS);
     // A timer has no caller to hand a failure to, and a renewal that cannot happen is
     // the session ending -- which is something to do, not something to report.
-    renewal = setTimeout(() => void renew().catch(endSession), delay);
+    const own = generation;
+    renewal = setTimeout(
+      () => void renew().catch(() => (own === generation ? endSession() : undefined)),
+      delay,
+    );
   }
 
   async function renew(): Promise<void> {
+    const own = generation;
     const refreshToken = state.getRefreshToken();
     if (!refreshToken) throw new NoRefreshTokenError();
 
-    state.persist(toTokens(await tokenEndpoint.refresh(refreshToken)));
+    const response = await tokenEndpoint.refresh(refreshToken);
+    if (own !== generation) return;
+    state.persist({
+      ...toTokens(response),
+      ...(state.getTenantId() === undefined ? {} : { tenantId: state.getTenantId() }),
+    });
     scheduleRenewal();
   }
 
@@ -126,7 +141,9 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
     navigateToLogin,
 
     login: async (params: LoginParams): Promise<void> => {
+      const own = ++generation;
       const response = await tokenEndpoint.password(params);
+      if (own !== generation) throw new AuthError('session_changed');
 
       state.persist(toTokens(response));
       rememberMe.set(params.rememberMe ?? rememberMe.fromToken(response.access_token));
@@ -138,6 +155,8 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
     logout: async (): Promise<void> => {
       const refreshToken = state.getRefreshToken();
       const accessToken = state.getAccessToken();
+      forget();
+      const own = generation;
 
       // Revoked before the local copy goes, because revoking needs the token itself --
       // but a server that will not take it back is no reason to keep the user signed in.
@@ -149,8 +168,9 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
         // Reported by `RestService`; logging out locally is what the user asked for.
       }
 
-      forget();
+      if (own !== generation) return;
       await configState.refreshAppState();
+      if (own !== generation) return;
       await navigation.go('/');
     },
 
@@ -159,6 +179,40 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
     clear: (): Promise<void> => {
       forget();
       return Promise.resolve();
+    },
+
+    prepareSession: (
+      response: TokenResponse,
+      configuration: ApplicationConfigurationDto,
+    ): Promise<() => void> => {
+      generation += 1;
+      const own = generation;
+      clearTimeout(renewal);
+      return Promise.resolve(() => {
+        if (own !== generation) throw new AuthError('session_changed');
+        state.persist({ ...toTokens(response), tenantId: configuration.currentTenant.id ?? null });
+        rememberMe.set(rememberMe.fromToken(response.access_token));
+        scheduleRenewal();
+      });
+    },
+
+    readSession: (): Promise<StoredAuthSession | null> => {
+      const saved = state.readStored();
+      return Promise.resolve(
+        saved
+          ? {
+              customGrant: false,
+              response: {
+                access_token: saved.accessToken,
+                refresh_token: saved.refreshToken,
+                token_type: 'Bearer',
+                expires_in: Number.isFinite(saved.expiresAt)
+                  ? (saved.expiresAt - Date.now()) / 1000
+                  : undefined,
+              },
+            }
+          : null,
+      );
     },
   };
 });

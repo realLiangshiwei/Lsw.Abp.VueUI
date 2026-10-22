@@ -80,9 +80,10 @@ function onChange(next: unknown): void {
       class="abp-select__trigger form-select"
       :class="invalid ? 'is-invalid' : null"
       :aria-describedby="ariaDescribedby"
+      :aria-invalid="invalid ? 'true' : undefined"
       :aria-label="ariaLabel"
     >
-      <SelectValue :placeholder="placeholder ?? ''">{{ selectedLabel }}</SelectValue>
+      <SelectValue :placeholder="placeholder ?? ''">{{ selectedLabel || placeholder }}</SelectValue>
     </SelectTrigger>
 
     <!-- Portalled to `body`, which is why `.abp-select__content` is styled in the

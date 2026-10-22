@@ -1,6 +1,7 @@
 import {
   EntityAction,
   EntityProp,
+  FormProp,
   PropType,
   ToolbarAction,
   type EntityActionList,
@@ -9,7 +10,10 @@ import {
   type ToolbarActionList,
 } from '@lsw-abpvue/components';
 import { IdentityComponents, type IdentityConfigOptions } from '@lsw-abpvue/identity';
-import type { IdentityUserDto } from '@lsw-abpvue/identity/proxy';
+import type {
+  IdentityProConfigOptions,
+  IdentityProFormPropContributors,
+} from '@lsw-abpvue/identity-pro';
 import { ToasterService } from '@lsw-abpvue/theme-shared';
 import FullNameCell from './FullNameCell.vue';
 
@@ -22,10 +26,10 @@ import FullNameCell from './FullNameCell.vue';
  */
 
 /** A column, placed after another one by name rather than by index. */
-function addFullNameColumn(propList: EntityPropList<IdentityUserDto>): void {
+function addFullNameColumn<R>(propList: EntityPropList<R>): void {
   propList
     .add(
-      EntityProp.create<IdentityUserDto>({
+      EntityProp.create<R>({
         type: PropType.String,
         name: 'fullName',
         displayName: 'AbpIdentity::DisplayName:Name',
@@ -38,14 +42,16 @@ function addFullNameColumn(propList: EntityPropList<IdentityUserDto>): void {
 }
 
 /** A field the host takes off the create form; the server does not require it. */
-function dropPhoneNumberField(propList: FormPropList<IdentityUserDto>): void {
+function dropPhoneNumberField<R>(propList: FormPropList<R>): void {
   propList.dropByValue('phoneNumber', (prop, name) => prop.name === name);
 }
 
 /** A row button. `getInjected` is how a callback reaches a service from outside DI. */
-function addGreetAction(actionList: EntityActionList<IdentityUserDto>): void {
+function addGreetAction<R extends { userName?: string | undefined }>(
+  actionList: EntityActionList<R>,
+): void {
   actionList.addTail(
-    EntityAction.create<IdentityUserDto>({
+    EntityAction.create<R>({
       // A key with no resource passes through the localizer unchanged, which is how a
       // host labels something ABP has no word for.
       text: 'Greet',
@@ -57,9 +63,9 @@ function addGreetAction(actionList: EntityActionList<IdentityUserDto>): void {
 }
 
 /** A toolbar button, which is handed the whole page of records. */
-function addCountAction(actionList: ToolbarActionList<readonly IdentityUserDto[]>): void {
+function addCountAction<R>(actionList: ToolbarActionList<readonly R[]>): void {
   actionList.addTail(
-    ToolbarAction.create<readonly IdentityUserDto[]>({
+    ToolbarAction.create<readonly R[]>({
       text: 'AbpUi::Total',
       icon: 'bi bi-123',
       action: data =>
@@ -75,4 +81,32 @@ export const userContributors: IdentityConfigOptions = {
   createFormPropContributors: { [IdentityComponents.Users]: [dropPhoneNumberField] },
   entityActionContributors: { [IdentityComponents.Users]: [addGreetAction] },
   toolbarActionContributors: { [IdentityComponents.Users]: [addCountAction] },
+};
+
+function readOnlyFixtureTag<R>(props: FormPropList<R>): void {
+  const index = props.toArray().findIndex(prop => prop.name === 'E2eReadOnlyTag');
+  if (index < 0)
+    throw new TypeError('The opt-in extension fixture requires the real E2eReadOnlyTag field.');
+  const existing = props.dropByIndex(index)?.value;
+  if (!existing)
+    throw new TypeError('The opt-in extension fixture requires the real E2eReadOnlyTag field.');
+  props.addByIndex(FormProp.create({ ...existing, readonly: () => true }), index);
+}
+
+const fixtureForms: IdentityProFormPropContributors =
+  import.meta.env.VITE_PRO_E2E_EXTENSION_FIELDS === '1'
+    ? {
+        [IdentityComponents.Users]: [readOnlyFixtureTag],
+        [IdentityComponents.Roles]: [readOnlyFixtureTag],
+        'Identity.ClaimsComponent': [readOnlyFixtureTag],
+        'Identity.OrganizationUnitsComponent': [readOnlyFixtureTag],
+      }
+    : {};
+
+export const proUserContributors: IdentityProConfigOptions = {
+  entityPropContributors: { [IdentityComponents.Users]: [addFullNameColumn] },
+  entityActionContributors: { [IdentityComponents.Users]: [addGreetAction] },
+  toolbarActionContributors: { [IdentityComponents.Users]: [addCountAction] },
+  createFormPropContributors: fixtureForms,
+  editFormPropContributors: fixtureForms,
 };

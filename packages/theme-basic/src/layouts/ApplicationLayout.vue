@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { useLocalization, useReplaceableComponents, WindowService } from '@lsw-abpvue/core';
+import {
+  useEnvironment,
+  useLocalization,
+  useReplaceableComponents,
+  WindowService,
+} from '@lsw-abpvue/core';
 import { inject as injectAbp, StorageService } from '@lsw-abpvue/core';
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import AbpBreadcrumb from '../components/AbpBreadcrumb.vue';
 import AbpConfirmHost from '../components/AbpConfirmHost.vue';
@@ -12,7 +17,6 @@ import AbpToastHost from '../components/AbpToastHost.vue';
 import AbpLogo from '../components/nav/AbpLogo.vue';
 import AbpNavItems from '../components/nav/AbpNavItems.vue';
 import AbpRoutes from '../components/nav/AbpRoutes.vue';
-import { MENU } from '../defaults/texts.js';
 import { ThemeBasicComponents } from '../enums/components.js';
 
 const COLLAPSED_KEY = 'abpThemeBasicSidebarCollapsed';
@@ -23,6 +27,8 @@ const windowService = injectAbp(WindowService);
 const replaceable = useReplaceableComponents();
 const localization = useLocalization();
 const route = useRoute();
+const environment = useEnvironment().getEnvironment$();
+const sidebarId = useId();
 
 const collapsed = ref(storage.getItem(COLLAPSED_KEY) === 'true');
 const drawerOpen = ref(false);
@@ -62,6 +68,7 @@ function toggleSidebar(): void {
 
   <div class="abp-shell" :class="{ 'abp-shell--collapsed': collapsed && !narrow }">
     <aside
+      :id="sidebarId"
       class="abp-shell__sidebar"
       :class="{ 'abp-shell__sidebar--drawer': narrow, 'abp-shell__sidebar--open': drawerOpen }"
       :inert="narrow && !drawerOpen ? true : undefined"
@@ -81,19 +88,22 @@ function toggleSidebar(): void {
 
     <div class="abp-shell__main">
       <nav class="abp-shell__navbar navbar navbar-expand flex-nowrap">
-        <component :is="logo" v-if="narrow || collapsed" />
+        <div v-if="narrow || collapsed" class="abp-shell__navbar-brand">
+          <component :is="logo" />
+        </div>
 
         <button
           type="button"
           class="abp-shell__menu-toggle btn btn-link"
           :aria-expanded="narrow ? drawerOpen : !collapsed"
-          :aria-label="localization.t(MENU)"
+          :aria-label="environment.application.name"
+          :aria-controls="sidebarId"
           @click="toggleSidebar"
         >
           <i class="bi bi-list" aria-hidden="true" />
         </button>
 
-        <component :is="navItems" />
+        <div class="abp-shell__nav-items"><component :is="navItems" /></div>
       </nav>
 
       <main class="abp-shell__content" @keydown.esc="drawerOpen = false">
@@ -152,11 +162,22 @@ function toggleSidebar(): void {
 }
 
 .abp-shell__menu-toggle {
+  flex-shrink: 0;
   width: 2.5rem;
   padding: 0;
   color: var(--abp-muted);
   font-size: 1.25rem;
   text-decoration: none;
+}
+
+.abp-shell__navbar-brand {
+  min-width: 0;
+}
+
+.abp-shell__nav-items {
+  display: flex;
+  flex-shrink: 0;
+  margin-inline-start: auto;
 }
 
 .abp-shell__content {

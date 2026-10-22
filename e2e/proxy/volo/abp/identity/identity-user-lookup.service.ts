@@ -12,13 +12,16 @@ export const IdentityUserLookupService = defineService('IdentityUserLookupServic
 
     findById: (id: string, config?: RestConfig): Promise<UserData> =>
       rest.request<never, UserData>(
-        { method: 'GET', url: `/api/identity/users/lookup/${id}` },
+        { method: 'GET', url: `/api/identity/users/lookup/${encodeURIComponent(String(id))}` },
         { apiName, ...config },
       ),
 
     findByUserName: (userName: string, config?: RestConfig): Promise<UserData> =>
       rest.request<never, UserData>(
-        { method: 'GET', url: `/api/identity/users/lookup/by-username/${userName}` },
+        {
+          method: 'GET',
+          url: `/api/identity/users/lookup/by-username/${encodeURIComponent(String(userName))}`,
+        },
         { apiName, ...config },
       ),
 
@@ -41,11 +44,11 @@ export const IdentityUserLookupService = defineService('IdentityUserLookupServic
           method: 'GET',
           url: '/api/identity/users/lookup/search',
           params: {
-            ...input.extraProperties,
             filter: input.filter,
             sorting: input.sorting,
             skipCount: input.skipCount,
             maxResultCount: input.maxResultCount,
+            extraProperties: input.extraProperties,
           },
         },
         { apiName, ...config },

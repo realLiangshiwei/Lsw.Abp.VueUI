@@ -1,4 +1,16 @@
 import type { AbpHttpError } from './http.js';
+import type { CurrentTenantDto } from '../proxy/models.js';
+
+/** The verified tenant and local destination of a custom authentication grant. */
+export interface AuthGrantOptions {
+  tenant?: CurrentTenantDto | null | undefined;
+  redirectUrl?: string | undefined;
+  allowedTenantOrigins?: readonly string[] | undefined;
+}
+
+export interface AuthGrantResult {
+  tenantDomain?: string | undefined;
+}
 
 /** What a login form hands to `AuthService.login()`; the password flow's request body. */
 export interface LoginParams {

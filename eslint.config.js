@@ -14,8 +14,11 @@ const ACCOUNT_CORE = '@lsw-abpvue/account-core';
 
 const BUSINESS_MODULES = [
   '@lsw-abpvue/account',
+  '@lsw-abpvue/account-pro',
+  '@lsw-abpvue/audit-logging',
   '@lsw-abpvue/feature-management',
   '@lsw-abpvue/identity',
+  '@lsw-abpvue/identity-pro',
   '@lsw-abpvue/permission-management',
   '@lsw-abpvue/setting-management',
   '@lsw-abpvue/tenant-management',
@@ -133,11 +136,12 @@ const layerRules = Object.entries(ALLOWED_IMPORTS).flatMap(([pkg, allowed]) => [
 export default tseslint.config(
   {
     ignores: [
+      '.local/abp-pro-reference/**',
       '**/dist/**',
       '**/coverage/**',
       '**/.turbo/**',
       'docs/.vitepress/cache/**',
-      'e2e/backend/**',
+      'e2e/**/backend/**',
       'e2e/**/artifacts/**',
       'e2e/**/results/**',
       'e2e/**/reports/**',

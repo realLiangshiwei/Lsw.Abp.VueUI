@@ -1,0 +1,41 @@
+{
+  "generated": [
+    "README.md",
+    "identity/identity-claim-type.service.ts",
+    "identity/identity-claim-value-type.enum.ts",
+    "identity/identity-external-login.service.ts",
+    "identity/identity-role.service.ts",
+    "identity/identity-security-log.service.ts",
+    "identity/identity-session.service.ts",
+    "identity/identity-settings.service.ts",
+    "identity/identity-user-lookup.service.ts",
+    "identity/identity-user.service.ts",
+    "identity/import-users-from-file-type.enum.ts",
+    "identity/index.ts",
+    "identity/models.ts",
+    "identity/organization-unit.service.ts",
+    "identity/settings/identity-pro-prevent-concurrent-login-behaviour.enum.ts",
+    "identity/settings/index.ts",
+    "identity/user-invitations/index.ts",
+    "identity/user-invitations/user-invitation-status.enum.ts",
+    "identity/user-sharing/index.ts",
+    "identity/user-sharing/models.ts",
+    "index.ts",
+    "users/index.ts",
+    "users/models.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "identity": {
+      "rootPath": "identity",
+      "remoteServiceName": "AbpIdentity"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

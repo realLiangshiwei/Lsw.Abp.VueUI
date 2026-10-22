@@ -1,6 +1,6 @@
 import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { createServer, normalizePath } from 'vite';
 import { expect, it } from 'vitest';
 import { templateRoot } from '../packages/cli/src/template/paths.js';
@@ -19,6 +19,37 @@ it('prebundles installed application entry points before auto imports discover t
     result.include.some(name => name.includes('style.css') || name.includes('package.json')),
   ).toBe(false);
   expect(result.include).not.toContain('@lsw-abpvue/cli');
+});
+
+it('prebundles all three commercial entry points without guessing a module catalogue', async () => {
+  const target = await mkdtemp(join(tmpdir(), 'abpvue-commercial-resolution-'));
+  const packages = ['identity-pro', 'account-pro', 'audit-logging'];
+  try {
+    await mkdir(join(target, 'node_modules/@lsw-abpvue'), { recursive: true });
+    await writeFile(join(target, 'tsconfig.json'), JSON.stringify({ compilerOptions: {} }));
+    await writeFile(
+      join(target, 'package.json'),
+      JSON.stringify({
+        dependencies: Object.fromEntries(packages.map(name => [`@lsw-abpvue/${name}`, '0.1.0'])),
+      }),
+    );
+    for (const name of packages) {
+      await symlink(
+        resolve('packages', name),
+        join(target, 'node_modules/@lsw-abpvue', name),
+        'dir',
+      );
+    }
+    const result = abpSourceResolution(join(target, 'tsconfig.json'));
+    expect(result.include.sort()).toEqual(
+      packages
+        .flatMap(name => ['', '/config', '/proxy'].map(entry => `@lsw-abpvue/${name}${entry}`))
+        .sort(),
+    );
+    expect(result.alias).toEqual([]);
+  } finally {
+    await rm(target, { recursive: true, force: true });
+  }
 });
 
 it('released core has one identity for application and installed package imports', async () => {

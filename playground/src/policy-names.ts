@@ -1,4 +1,5 @@
 import type { AbpPolicyName } from '@lsw-abpvue/core';
+import type { IdentityProPolicyName } from '@lsw-abpvue/identity-pro/config';
 import type { AbpIdentityPolicyName } from './proxy/policy-names.js';
 
 /**
@@ -7,7 +8,10 @@ import type { AbpIdentityPolicyName } from './proxy/policy-names.js';
  * quietly answering no. An application that skips this keeps working exactly as before.
  */
 declare module '@lsw-abpvue/core' {
-  interface AbpKnownPolicyName extends Record<AbpIdentityPolicyName, true> {}
+  interface AbpKnownPolicyName extends Record<
+    AbpIdentityPolicyName | IdentityProPolicyName,
+    true
+  > {}
 }
 
 type Assert<T extends true> = T;

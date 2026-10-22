@@ -66,7 +66,7 @@ async function submit(): Promise<void> {
 
       <div class="abp-settings__actions">
         <AbpButton type="submit" variant="primary" :loading="busy">
-          {{ $t('AbpSettingManagement::Save') }}
+          {{ $t('AbpUi::Save') }}
         </AbpButton>
       </div>
     </form>

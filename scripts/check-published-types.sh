@@ -41,4 +41,33 @@ node "$tsc" \
   --skipLibCheck \
   "${declarations[@]}"
 
+if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
+echo "Checking the commercial contributor consumer with TypeScript $version"
+consumer_config="$(mktemp)"
+trap 'rm -f "$consumer_config"' EXIT
+node --input-type=module - "$consumer_config" <<'JS'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+const paths = {};
+for (const directory of readdirSync('packages')) {
+  const root = resolve('packages', directory);
+  const manifest = JSON.parse(readFileSync(`${root}/package.json`, 'utf8'));
+  for (const [entry, definition] of Object.entries(manifest.exports ?? {})) {
+    if (typeof definition !== 'object' || !definition.types) continue;
+    paths[manifest.name + (entry === '.' ? '' : entry.slice(1))] = [resolve(root, definition.types)];
+  }
+}
+writeFileSync(process.argv[2], JSON.stringify({
+  compilerOptions: {
+    noEmit: true, strict: true, exactOptionalPropertyTypes: true,
+    target: 'es2022', module: 'esnext', moduleResolution: 'bundler',
+    skipLibCheck: true, paths,
+  },
+  files: [resolve(process.env.ABPVUE_CONSUMER_FIXTURES, 'pro-consumer-contract.ts')],
+}));
+JS
+node "$tsc" -p "$consumer_config"
+
+fi
+
 echo "OK"

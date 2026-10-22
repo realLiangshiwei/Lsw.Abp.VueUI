@@ -12,7 +12,7 @@ import {
 } from '@lsw-abpvue/permission-management/proxy';
 import { ToasterService } from '@lsw-abpvue/theme-shared';
 import { expectAccessible, plainTheme } from '@lsw-abpvue/theme-shared/testing';
-import { mount, type VueWrapper } from '@vue/test-utils';
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { computed } from 'vue';
 import AbpPermissionManagement from './AbpPermissionManagement.vue';
@@ -122,6 +122,76 @@ async function open(providers: ProviderInput[] = []): Promise<{
 }
 
 describe('AbpPermissionManagement', () => {
+  it('keeps saving disabled after a failed read and explicitly retries that read', async () => {
+    const get = vi
+      .fn<PermissionsService['get']>()
+      .mockRejectedValueOnce(new Error('synthetic read failure'))
+      .mockResolvedValueOnce(ANSWER);
+    const update = vi.fn<PermissionsService['update']>();
+    const { wrapper } = await open([{ provide: PermissionsService, useValue: { get, update } }]);
+    await flushPromises();
+    const save = () =>
+      wrapper.findAll('button').find(button => button.text().includes('AbpUi::Save'));
+    expect(save()?.attributes('disabled')).toBeDefined();
+    expect(wrapper.text()).not.toContain('synthetic read failure');
+    const refresh = wrapper
+      .findAll('button')
+      .find(button => button.text().includes('AbpUi::Refresh'));
+    await refresh?.trigger('click');
+    await flushPromises();
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(update).not.toHaveBeenCalled();
+    expect(save()?.attributes('disabled')).toBeUndefined();
+    expect(document.body.textContent).toContain('Role management');
+  });
+
+  it('aborts a pending write on provider change and leaves the new provider open', async () => {
+    let finish: (() => void) | undefined;
+    const writing = new Promise<void>(resolve => {
+      finish = resolve;
+    });
+    const update = vi.fn<PermissionsService['update']>(() => writing);
+    const get = vi.fn<PermissionsService['get']>(() => Promise.resolve(ANSWER));
+    const { wrapper, injector } = await open([
+      { provide: PermissionsService, useValue: { get, update } },
+    ]);
+    checkboxes()[3]?.click();
+    await wrapper.vm.$nextTick();
+    clickSave();
+    await flushPromises();
+    expect(update).toHaveBeenCalledOnce();
+    await wrapper.setProps({ providerKey: 'user-2' });
+    await flushPromises();
+    expect(update.mock.calls[0]?.[3]?.signal?.aborted).toBe(true);
+    finish?.();
+    await flushPromises();
+    expect(wrapper.emitted('update:visible')).toBeUndefined();
+    expect(injector.get(ToasterService).toasts.value).toHaveLength(0);
+  });
+
+  it('reads a changed provider and ignores an earlier provider response', async () => {
+    let finish: ((value: GetPermissionListResultDto) => void) | undefined;
+    const first = new Promise<GetPermissionListResultDto>(resolve => {
+      finish = resolve;
+    });
+    const get = vi
+      .fn<PermissionsService['get']>()
+      .mockReturnValueOnce(first)
+      .mockResolvedValueOnce({ entityDisplayName: 'second provider', groups: [] });
+    const { wrapper } = await open([
+      { provide: PermissionsService, useValue: { get, update: vi.fn() } },
+    ]);
+    await wrapper.setProps({ providerKey: 'user-2' });
+    await flushPromises();
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(document.body.textContent).toContain('second provider');
+    finish?.(ANSWER);
+    await flushPromises();
+    expect(document.body.textContent).toContain('second provider');
+    expect(document.body.textContent).not.toContain('Role management');
+    expect(get.mock.calls[0]?.[2]?.signal?.aborted).toBe(true);
+  });
+
   it('lists the groups as tabs and the first group as checkboxes', async () => {
     await open();
 
@@ -199,12 +269,17 @@ describe('AbpPermissionManagement', () => {
     clickSave();
     await new Promise(resolve => setTimeout(resolve));
 
-    expect(update).toHaveBeenCalledWith('U', 'user-1', {
-      permissions: [
-        { name: 'AbpIdentity.Roles', isGranted: true },
-        { name: 'AbpIdentity.Roles.Create', isGranted: true },
-      ],
-    });
+    expect(update).toHaveBeenCalledWith(
+      'U',
+      'user-1',
+      {
+        permissions: [
+          { name: 'AbpIdentity.Roles', isGranted: true },
+          { name: 'AbpIdentity.Roles.Create', isGranted: true },
+        ],
+      },
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it('closes without a request when nothing was changed', async () => {

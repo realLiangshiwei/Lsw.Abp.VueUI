@@ -30,7 +30,7 @@ export const AbpFormatErrorHandler = defineService<AbpErrorHandler>('AbpFormatEr
       if (envelope.details) {
         await confirmation.error(envelope.details, envelope.message ?? fallback, {
           hideCancelBtn: true,
-          yesText: { key: 'AbpUi::Close', defaultValue: 'Close' },
+          yesText: 'AbpUi::Close',
         });
         return;
       }

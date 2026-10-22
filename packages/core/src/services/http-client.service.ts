@@ -137,7 +137,6 @@ export const HttpClient = defineService('HttpClient', () => {
         statusText: response.statusText,
         method,
         url,
-        error: { message: 'The response body could not be read as JSON.' },
         headers: response.headers,
         raw: cause,
       });

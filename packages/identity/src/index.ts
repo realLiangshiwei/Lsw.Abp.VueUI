@@ -23,7 +23,10 @@ export type { IdentityConfigOptions } from './models/config-options.js';
 
 export { provideIdentity } from './providers/identity.provider.js';
 
-export { identityExtensionsResolver } from './resolvers/extensions.resolver.js';
+export {
+  identityExtensionsResolver,
+  identityRolesExtensionsResolver,
+} from './resolvers/extensions.resolver.js';
 
 export { createIdentityRoutes } from './routes.js';
 

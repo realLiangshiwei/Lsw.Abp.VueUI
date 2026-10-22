@@ -11,6 +11,25 @@ const service = injectAbp(AccountSettingsService);
 const config = useConfigState();
 const localization = useLocalization();
 const toaster = useToaster();
+const registrationLabel = computed(() =>
+  localization.t(
+    localization.findKey(
+      ['AbpAccount'],
+      [
+        'DisplayName:IsSelfRegistrationEnabled',
+        'DisplayName:Abp.Account.IsSelfRegistrationEnabled',
+      ],
+    ) ?? 'AbpUi::DefaultErrorMessage',
+  ),
+);
+const localLoginLabel = computed(() =>
+  localization.t(
+    localization.findKey(
+      ['AbpAccount'],
+      ['DisplayName:EnableLocalLogin', 'DisplayName:Abp.Account.EnableLocalLogin'],
+    ) ?? 'AbpUi::DefaultErrorMessage',
+  ),
+);
 const settings = ref<AccountSettings>({
   isSelfRegistrationEnabled: false,
   enableLocalLogin: false,
@@ -25,10 +44,6 @@ const dirty = computed(
     (settings.value.isSelfRegistrationEnabled !== saved.value.isSelfRegistrationEnabled ||
       settings.value.enableLocalLogin !== saved.value.enableLocalLogin),
 );
-const managedLabel = {
-  key: 'AbpAccount::SettingsManagedByAuthenticationServer',
-  defaultValue: 'These settings are managed by your authentication server.',
-};
 
 onMounted(async () => {
   try {
@@ -59,26 +74,25 @@ async function submit(): Promise<void> {
 
 <template>
   <AbpSpinner v-if="loading" />
-  <p v-else-if="failed" role="alert">{{ $t('AbpUi::Error') }}</p>
+  <p v-else-if="failed" role="alert">{{ $t('AbpUi::DefaultErrorMessage') }}</p>
   <template v-else>
     <h2 class="h5 mb-3">{{ $t('AbpAccount::Menu:Account') }}</h2>
-    <p v-if="!service.update" class="text-body-secondary">{{ localization.t(managedLabel) }}</p>
     <form class="abp-settings__form" novalidate @submit.prevent="submit">
       <AbpToggle
         v-model="settings.isSelfRegistrationEnabled"
         name="isSelfRegistrationEnabled"
-        :label="localization.t('AbpAccount::DisplayName:Abp.Account.IsSelfRegistrationEnabled')"
+        :label="registrationLabel"
         :disabled="!service.update || busy"
       />
       <AbpToggle
         v-model="settings.enableLocalLogin"
         name="enableLocalLogin"
-        :label="localization.t('AbpAccount::DisplayName:Abp.Account.EnableLocalLogin')"
+        :label="localLoginLabel"
         :disabled="!service.update || busy"
       />
       <div v-if="service.update" class="abp-settings__actions">
         <AbpButton type="submit" variant="primary" :loading="busy" :disabled="!dirty">
-          {{ $t('AbpSettingManagement::Save') }}
+          {{ $t('AbpUi::Save') }}
         </AbpButton>
       </div>
     </form>

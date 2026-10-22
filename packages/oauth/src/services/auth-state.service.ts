@@ -7,6 +7,7 @@ import type { AuthTokens, TokenResponse } from '../models/oauth.js';
 const ACCESS_TOKEN = 'access_token';
 const REFRESH_TOKEN = 'refresh_token';
 const EXPIRES_AT = 'expires_at';
+const TENANT_BINDING = 'abpOAuthTenantBinding';
 
 /** Turns a token response into what is kept, resolving `expires_in` against now. */
 export function toTokens(response: TokenResponse): AuthTokens {
@@ -27,47 +28,65 @@ export const AuthStateService = defineService('AuthStateService', () => {
   const storage = inject(TokenStorage);
   const tokens = shallowRef<AuthTokens | null>(null);
 
+  function readStored(): AuthTokens | null {
+    const accessToken = storage.getItem(ACCESS_TOKEN);
+    if (!accessToken) return null;
+    const rawExpiry = storage.getItem(EXPIRES_AT);
+    const expiresAt = rawExpiry === null ? Number.NaN : Number(rawExpiry);
+    let tenantId: string | null | undefined;
+    const rawTenant = storage.getItem(TENANT_BINDING);
+    if (rawTenant !== null) {
+      try {
+        const parsed: unknown = JSON.parse(rawTenant);
+        if (parsed === null || typeof parsed === 'string') tenantId = parsed;
+      } catch {
+        // Invalid legacy metadata cannot establish a tenant binding.
+      }
+    }
+    return {
+      accessToken,
+      refreshToken: storage.getItem(REFRESH_TOKEN) ?? undefined,
+      expiresAt: Number.isNaN(expiresAt) ? 0 : expiresAt,
+      ...(tenantId === undefined ? {} : { tenantId }),
+    };
+  }
+
+  function persist(next: AuthTokens | null): void {
+    tokens.value = next;
+    if (!next) {
+      for (const key of [ACCESS_TOKEN, REFRESH_TOKEN, EXPIRES_AT, TENANT_BINDING])
+        storage.removeItem(key);
+      return;
+    }
+    storage.setItem(ACCESS_TOKEN, next.accessToken);
+    storage.setItem(EXPIRES_AT, String(next.expiresAt));
+    if (next.refreshToken) storage.setItem(REFRESH_TOKEN, next.refreshToken);
+    else storage.removeItem(REFRESH_TOKEN);
+    if (next.tenantId === undefined) storage.removeItem(TENANT_BINDING);
+    else storage.setItem(TENANT_BINDING, JSON.stringify(next.tenantId));
+  }
+
   return {
     isAuthenticated: computed(() => tokens.value !== null) as ComputedRef<boolean>,
     getAccessToken: (): string | null => tokens.value?.accessToken ?? null,
     getRefreshToken: (): string | null => tokens.value?.refreshToken ?? null,
     getExpiresAt: (): number | null => tokens.value?.expiresAt ?? null,
+    getTenantId: (): string | null | undefined => tokens.value?.tenantId,
+    readStored,
+    bindTenant: (tenantId: string | null): void => {
+      if (tokens.value) persist({ ...tokens.value, tenantId });
+    },
 
     set: (next: AuthTokens | null): void => {
       tokens.value = next;
     },
 
     /** Writes the tokens where a reload will find them again. */
-    persist: (next: AuthTokens | null): void => {
-      tokens.value = next;
-
-      if (!next) {
-        for (const key of [ACCESS_TOKEN, REFRESH_TOKEN, EXPIRES_AT]) storage.removeItem(key);
-        return;
-      }
-
-      storage.setItem(ACCESS_TOKEN, next.accessToken);
-      storage.setItem(EXPIRES_AT, String(next.expiresAt));
-      if (next.refreshToken) storage.setItem(REFRESH_TOKEN, next.refreshToken);
-      else storage.removeItem(REFRESH_TOKEN);
-    },
+    persist,
 
     /** Reads back what a previous visit persisted, expired or not. */
     restore: (): AuthTokens | null => {
-      const accessToken = storage.getItem(ACCESS_TOKEN);
-      if (!accessToken) return null;
-
-      // `Number('Infinity')` is `Infinity`, which is how a token the endpoint gave no
-      // lifetime for comes back. Anything unreadable counts as expired: not knowing when
-      // a token lapses is a reason to renew it, not to trust it forever.
-      const stored = storage.getItem(EXPIRES_AT);
-      const expiresAt = stored === null ? Number.NaN : Number(stored);
-      const restored: AuthTokens = {
-        accessToken,
-        refreshToken: storage.getItem(REFRESH_TOKEN) ?? undefined,
-        expiresAt: Number.isNaN(expiresAt) ? 0 : expiresAt,
-      };
-
+      const restored = readStored();
       tokens.value = restored;
       return restored;
     },

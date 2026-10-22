@@ -40,7 +40,7 @@ cat > package.json <<'JSON'
   "private": true,
   "type": "module",
   "dependencies": {
-    "vue": "^3.5.41",
+    "vue": "3.5.41",
     "vue-router": "^4.5.1",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1"
@@ -69,6 +69,10 @@ import { provideAccountConfig } from '@lsw-abpvue/account/config';
 import { createIdentityRoutes, IdentityComponents } from '@lsw-abpvue/identity';
 import { provideIdentityConfig, IdentityPolicyNames } from '@lsw-abpvue/identity/config';
 import type { IdentityUserDto } from '@lsw-abpvue/identity/proxy';
+import { createIdentityProRoutes, IdentityComponents as ProIdentityComponents, UsersPage as ProUsersPage, type IdentityProConfigOptions } from '@lsw-abpvue/identity-pro';
+import { provideIdentityProConfig } from '@lsw-abpvue/identity-pro/config';
+import { IdentityUserService as ProIdentityUserService } from '@lsw-abpvue/identity-pro/proxy';
+import type { IdentityUserDto as ProIdentityUserDto, IdentityUserUpdatePasswordInput } from '@lsw-abpvue/identity-pro/proxy';
 import { flatten, PermissionManagementComponents } from '@lsw-abpvue/permission-management';
 import { changedFeatures, FeatureManagementComponents, flattenFeatures } from '@lsw-abpvue/feature-management';
 import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/config';
@@ -92,6 +96,21 @@ export const injected = () => inject(Greeter);
 // (milestone V6): `any` would make every misuse in a consumer's template compile.
 type IsAny<T> = 0 extends 1 & T ? true : false;
 export const componentIsTyped: IsAny<typeof AbpPermission> extends false ? true : never = true;
+export const proComponentIsTyped: IsAny<typeof ProUsersPage> extends false ? true : never = true;
+export const proUserComponentKey: typeof IdentityComponents.Users = ProIdentityComponents.Users;
+export const proRoleComponentKey: typeof IdentityComponents.Roles = ProIdentityComponents.Roles;
+export const proOptions: IdentityProConfigOptions = {
+  entityPropContributors: {
+    [ProIdentityComponents.Users]: [props => props.addTail(EntityProp.create<ProIdentityUserDto>({
+      name: 'twoFactorEnabled', type: PropType.Boolean,
+      valueResolver: data => data.record.supportTwoFactor && data.record.twoFactorEnabled,
+    }))],
+  },
+};
+export const proRoutes = createIdentityProRoutes(proOptions);
+export const proConfig = provideIdentityProConfig();
+export const proPassword = (id: string, input: IdentityUserUpdatePasswordInput): Promise<void> =>
+  createInjector([]).get(ProIdentityUserService).updatePassword(id, input);
 
 // The secondary entry point resolves, and the main one it imports is the same instance.
 export const routing = provideAbpRouter([
@@ -189,6 +208,13 @@ export const runtimeStringCompiles: boolean = permission.isGranted(userName);
 export const misspelledDoesNot: boolean = permission.isGranted('AbpIdentity.Userz');
 TS
 
+if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
+cp "${ABPVUE_CONSUMER_FIXTURES}/pro-consumer-contract.ts" ./pro-consumer-contract.ts
+cp "${ABPVUE_CONSUMER_FIXTURES}/ProConsumerTable.vue" ./ProConsumerTable.vue
+cp "$root/e2e/fixtures/application-configuration.json" ./configuration.json
+
+fi
+
 cat > tsconfig.json <<'JSON'
 {
   "compilerOptions": {
@@ -199,7 +225,7 @@ cat > tsconfig.json <<'JSON'
     "noEmit": true,
     "types": []
   },
-  "include": ["app.ts"]
+  "include": ["*.ts", "*.vue"]
 }
 JSON
 
@@ -218,5 +244,17 @@ else
 fi
 
 echo "Type-checking the consumer with the workspace TypeScript"
-"$root/node_modules/typescript/bin/tsc" -p tsconfig.json
+"$root/node_modules/.bin/vue-tsc" -p tsconfig.json
+
+if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
+echo "Running the packed commercial contributor and DI contracts"
+"$root/node_modules/typescript/bin/tsc" --ignoreConfig pro-consumer-contract.ts \
+  --strict --exactOptionalPropertyTypes --skipLibCheck --target es2022 \
+  --module esnext --moduleResolution bundler --outDir .runtime
+node --input-type=module <<'JS'
+import { readFileSync } from 'node:fs';
+import { verifyCommercialConsumer } from './.runtime/pro-consumer-contract.js';
+verifyCommercialConsumer(JSON.parse(readFileSync('./configuration.json', 'utf8')));
+JS
+fi
 echo "OK"

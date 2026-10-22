@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { defineComponent, h } from 'vue';
 import { ABP_INJECTOR_KEY } from '../di/inject.js';
 import { createInjector } from '../di/injector.js';
@@ -21,6 +21,20 @@ const render = (injector: ReturnType<typeof createInjector>) =>
   });
 
 describe('AbpReplaceable', () => {
+  it('keeps replacement attributes from falling through onto fallback fragments', () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const injector = createInjector([]);
+    const wrapper = mount(AbpReplaceable, {
+      props: { replaceableKey: 'Identity.OrganizationMembersComponent' },
+      attrs: { selectedOrganizationUnit: { id: 'unit' }, onAdded: () => {} },
+      slots: { default: '<p>Members</p><p>Roles</p>' },
+      global: { provide: { [ABP_INJECTOR_KEY]: injector } },
+    });
+    expect(warning.mock.calls.some(call => String(call[0]).includes('Extraneous'))).toBe(false);
+    wrapper.unmount();
+    injector.destroy();
+    warning.mockRestore();
+  });
   it('renders the default content the module ships when nobody replaced it', () => {
     expect(render(createInjector([])).text()).toBe('the module default');
   });

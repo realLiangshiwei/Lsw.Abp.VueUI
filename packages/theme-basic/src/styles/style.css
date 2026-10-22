@@ -315,6 +315,17 @@
   color: var(--abp-text);
 }
 
+.breadcrumb-item + .breadcrumb-item {
+  padding-inline-start: var(--bs-breadcrumb-item-padding-x);
+  padding-inline-end: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  float: inline-start;
+  padding-inline-start: 0;
+  padding-inline-end: var(--bs-breadcrumb-item-padding-x);
+}
+
 :focus-visible {
   outline: 2px solid var(--abp-link);
   outline-offset: 3px;
@@ -1114,4 +1125,18 @@
   .abp-table td {
     padding-inline: 1rem;
   }
+}
+
+.abp-identity-ou-list {
+  list-style: none;
+  margin: 0;
+  padding-inline-start: 0;
+}
+
+.abp-identity-ou-list .abp-identity-ou-list {
+  padding-inline-start: 1.5rem;
+}
+
+.abp-identity-ou-list li {
+  margin-block: 0.5rem;
 }

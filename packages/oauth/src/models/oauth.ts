@@ -6,10 +6,13 @@ export interface TokenResponse {
   refresh_token?: string | undefined;
   scope?: string | undefined;
   id_token?: string | undefined;
+  tenant_domain?: string | undefined;
 }
 
 /** The tokens as the application holds them, whichever flow produced them. */
 export interface AuthTokens {
+  /** Undefined for legacy sessions whose tenant binding has not been verified. */
+  tenantId?: string | null | undefined;
   accessToken: string;
   refreshToken: string | undefined;
   /** Epoch milliseconds. `Infinity` when the endpoint did not say when it lapses. */

@@ -22,6 +22,8 @@ export interface AbpToggleProps {
   name?: string | undefined;
   ariaDescribedby?: string | undefined;
   ariaLabel?: string | undefined;
+  ariaLabelledby?: string | undefined;
+  ariaControls?: string | undefined;
 }
 
 export interface AbpToggleEmits {
