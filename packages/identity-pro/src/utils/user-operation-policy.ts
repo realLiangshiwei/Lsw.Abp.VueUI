@@ -1,9 +1,9 @@
-import type { ApplicationConfigurationDto } from '@lsw-abpvue/core';
+import type { ApplicationConfiguration } from '@lsw-abpvue/core';
 import type { IdentityUserDto } from '@lsw-abpvue/identity-pro/proxy';
 
 /** The effective configuration used by commercial user operation guards. */
 export type IdentityProUserOperationContext = Pick<
-  ApplicationConfigurationDto,
+  ApplicationConfiguration,
   'multiTenancy' | 'currentTenant' | 'currentUser' | 'features' | 'setting'
 >;
 

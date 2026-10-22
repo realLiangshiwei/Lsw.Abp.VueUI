@@ -1,7 +1,7 @@
 {
   "name": "@lsw-abpvue/account-pro",
   "version": "0.1.0",
-  "description": "Identity-facing Account Pro sessions and account integrations for ABP Vue applications.",
+  "description": "Account Pro authentication, profile, security and administration for ABP Vue applications.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -10,7 +10,8 @@
     "src",
     "config/src",
     "proxy/src",
-    "README.md"
+    "README.md",
+    "admin"
   ],
   "exports": {
     ".": {
@@ -25,29 +26,44 @@
       "types": "./dist/proxy/index.d.ts",
       "import": "./dist/proxy/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./admin": {
+      "types": "./dist/admin/index.d.ts",
+      "import": "./dist/admin/index.js"
+    },
+    "./admin/config": {
+      "types": "./dist/admin/config/index.d.ts",
+      "import": "./dist/admin/config/index.js"
+    }
   },
   "scripts": {
-    "build": "vite build && vue-tsc -p tsconfig.build.proxy.json && vue-tsc -p tsconfig.build.config.json && vue-tsc -p tsconfig.build.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
+    "build": "vite build && vue-tsc -p tsconfig.build.proxy.json && vue-tsc -p tsconfig.build.config.json && vue-tsc -p tsconfig.build.json && vue-tsc -p tsconfig.build.admin.json && vue-tsc -p tsconfig.build.admin-config.json && node ../../scripts/rewrite-vue-declarations.mjs dist",
     "typecheck": "vue-tsc -p tsconfig.json",
     "test": "vitest run",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "peerDependencies": {
+    "@lsw-abpvue/account": "workspace:^",
+    "@lsw-abpvue/account-core": "workspace:^",
     "@lsw-abpvue/components": "workspace:^",
     "@lsw-abpvue/core": "workspace:^",
+    "@lsw-abpvue/setting-management": "workspace:^",
     "@lsw-abpvue/theme-shared": "workspace:^",
+    "qrcode": "1.5.4",
     "vue": "^3.5.0",
-    "vue-router": "^4.5.0",
-    "@lsw-abpvue/account-core": "workspace:^"
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@lsw-abpvue/account": "workspace:^",
+    "@lsw-abpvue/account-core": "workspace:*",
     "@lsw-abpvue/components": "workspace:*",
     "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/setting-management": "workspace:^",
     "@lsw-abpvue/theme-shared": "workspace:*",
+    "@types/qrcode": "1.5.6",
+    "qrcode": "1.5.4",
     "vue": "3.5.41",
-    "vue-router": "^4.5.1",
-    "@lsw-abpvue/account-core": "workspace:*"
+    "vue-router": "^4.5.1"
   },
   "repository": {
     "type": "git",

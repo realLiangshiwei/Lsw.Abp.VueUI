@@ -3,7 +3,7 @@ import { inject } from '../di/inject.js';
 import { defineService, type ServiceOf } from '../di/token.js';
 import type { Environment } from '../models/environment.js';
 import { TenantNotFoundError } from '../models/tenant.js';
-import { AbpTenantService } from '../proxy/abp-tenant.service.js';
+import { AbpTenantService } from '../proxy/pages/abp/multi-tenancy/abp-tenant.service.js';
 import type { CurrentTenantDto, FindTenantResultDto } from '../proxy/models.js';
 import { TENANT_KEY } from '../tokens/tenant-key.token.js';
 import { TENANT_NOT_FOUND_BY_NAME } from '../tokens/tenant-not-found.token.js';

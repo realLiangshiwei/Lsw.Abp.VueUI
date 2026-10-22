@@ -31,6 +31,10 @@ describe('the layer dependency rule', () => {
     ['packages/components/src/a.ts', '@lsw-abpvue/theme-basic'],
     ['packages/identity/src/a.ts', '@lsw-abpvue/theme-basic'],
     ['packages/oauth/src/a.ts', '@lsw-abpvue/identity'],
+    ['packages/cli/src/a.ts', '@lsw-abpvue/core'],
+    ['packages/cli/src/a.ts', '@lsw-abpvue/core/router'],
+    ['packages/identity/src/a.ts', 'qrcode'],
+    ['packages/theme-shared/src/a.ts', 'qrcode'],
   ])('%s may not import %s', async (path, specifier) => {
     await expect(ruleIdsFor(path, anImport(specifier))).resolves.toContain('no-restricted-imports');
   });
@@ -44,6 +48,8 @@ describe('the layer dependency rule', () => {
     ['packages/identity/src/a.ts', '@lsw-abpvue/permission-management'],
     ['packages/utils/src/a.ts', './sibling'],
     ['packages/utils/src/a.ts', '../parent'],
+    ['packages/account-pro/src/a.ts', 'qrcode'],
+    ['packages/cli/src/a.ts', '@lsw-abpvue/core/object-extensions'],
   ])('%s may import %s', async (path, specifier) => {
     await expect(ruleIdsFor(path, anImport(specifier))).resolves.not.toContain(
       'no-restricted-imports',
@@ -58,6 +64,17 @@ describe('the layer dependency rule', () => {
     await expect(
       ruleIdsFor('packages/theme-shared/src/a.spec.ts', anImport('reka-ui')),
     ).resolves.toContain('no-restricted-imports');
+  });
+
+  it('allows CLI type imports and re-exports from Core without a runtime dependency', async () => {
+    for (const code of [
+      "import type { ApplicationConfigurationDto } from '@lsw-abpvue/core';\nexport type Config = ApplicationConfigurationDto;",
+      "export type { ApplicationConfigurationDto } from '@lsw-abpvue/core';",
+    ]) {
+      expect(await ruleIdsFor('packages/cli/src/types.ts', code)).not.toContain(
+        'no-restricted-imports',
+      );
+    }
   });
 });
 

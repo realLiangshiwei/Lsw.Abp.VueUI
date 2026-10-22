@@ -1,3 +1,4 @@
+import type { ApplicationConfiguration } from '../services/config-state.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
 import { APP_INITIALIZERS } from '../di/app-initializer.js';
@@ -13,7 +14,7 @@ import { HTTP_FETCH, type FetchLike } from '../tokens/http.token.js';
 import { provideAbpCore, withOptions } from './core.provider.js';
 import { getInitialData } from './initial-data.js';
 
-const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
+const fixture = configurationFixture as unknown as ApplicationConfiguration;
 
 const environment: Environment = {
   apis: { default: { url: 'https://localhost:44384' } },

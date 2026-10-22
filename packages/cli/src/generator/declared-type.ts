@@ -25,6 +25,11 @@ export function renderDeclaredType(
 ): RenderedType {
   const simple = parseClrType(declared.typeSimple);
   const mentionsEnum = /(^|[[{:,<])enum([\]}:,>]|$)/.test(declared.typeSimple);
+  const mentionsBytes =
+    declared.type.includes('[System.Byte]') || declared.type.includes('System.Byte[]');
 
-  return registry.render(mentionsEnum ? parseClrType(declared.type) : simple, scope);
+  return registry.render(
+    mentionsEnum || mentionsBytes ? parseClrType(declared.type) : simple,
+    scope,
+  );
 }

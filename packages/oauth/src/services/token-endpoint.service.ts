@@ -174,6 +174,10 @@ export const TokenEndpointService = defineService('TokenEndpointService', () => 
         TwoFactorProvider: params.twoFactorProvider,
         TwoFactorCode: params.twoFactorCode,
         RecoveryCode: params.recoveryCode,
+        RememberBrowser:
+          params.rememberBrowser === undefined ? undefined : String(params.rememberBrowser),
+        NewPassword: params.newPassword,
+        ChangePasswordToken: params.changePasswordToken,
       });
     },
 

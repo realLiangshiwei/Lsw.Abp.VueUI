@@ -133,7 +133,7 @@ export function formatIdentityUserDetailsDate(
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return undefined;
   const locale = culture.cultureName || culture.name || 'en';
-  const { shortDatePattern, shortTimePattern, dateSeparator } = culture.dateTimeFormat;
+  const { shortDatePattern, shortTimePattern, dateSeparator } = culture.dateTimeFormat ?? {};
   const pattern =
     shortDatePattern && shortTimePattern ? `${shortDatePattern} ${shortTimePattern}` : undefined;
   if (!pattern)

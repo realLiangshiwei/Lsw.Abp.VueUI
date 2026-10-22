@@ -98,7 +98,7 @@ export interface ExportAuditLogsInput {
 
 export interface ExportAuditLogsOutput {
   message?: string | undefined;
-  fileData?: number[] | undefined;
+  fileData?: string | number[] | undefined;
   fileName?: string | undefined;
   isBackgroundJob: boolean;
 }
@@ -114,7 +114,7 @@ export interface ExportEntityChangesInput {
 
 export interface ExportEntityChangesOutput {
   message?: string | undefined;
-  fileData?: number[] | undefined;
+  fileData?: string | number[] | undefined;
   fileName?: string | undefined;
   isBackgroundJob: boolean;
 }

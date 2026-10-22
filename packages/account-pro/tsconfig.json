@@ -1,5 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "noEmit": true },
-  "include": ["src/**/*.ts", "src/**/*.vue", "config/src/**/*.ts", "proxy/src/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "config/src/**/*.ts",
+    "proxy/src/**/*.ts",
+    "admin/**/*.ts",
+    "admin/**/*.vue"
+  ]
 }

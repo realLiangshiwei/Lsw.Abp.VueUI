@@ -243,10 +243,13 @@
       "vue",
       "vue-router",
       "@lsw-abpvue/account-core",
+      "@lsw-abpvue/account",
+      "@lsw-abpvue/setting-management",
+      "qrcode",
       "@lsw-abpvue/account-pro/config",
       "@lsw-abpvue/account-pro/proxy"
     ],
-    "limit": "9.5 kB"
+    "limit": "24 kB"
   },
   {
     "name": "@lsw-abpvue/account-pro/config",
@@ -258,10 +261,30 @@
       "vue",
       "vue-router",
       "@lsw-abpvue/account-core",
+      "@lsw-abpvue/account",
+      "@lsw-abpvue/setting-management",
+      "qrcode",
       "@lsw-abpvue/account-pro/config",
       "@lsw-abpvue/account-pro/proxy"
     ],
-    "limit": "750 B"
+    "limit": "1.5 kB"
+  },
+  {
+    "name": "@lsw-abpvue/account-pro/admin",
+    "path": "packages/account-pro/dist/admin/index.js",
+    "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/components", "@lsw-abpvue/theme-shared"],
+    "limit": "6 kB"
+  },
+  {
+    "name": "@lsw-abpvue/account-pro/admin/config",
+    "path": "packages/account-pro/dist/admin/config/index.js",
+    "ignore": [
+      "vue",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/setting-management",
+      "@lsw-abpvue/account-pro/admin"
+    ],
+    "limit": "1 kB"
   },
   {
     "name": "@lsw-abpvue/audit-logging",

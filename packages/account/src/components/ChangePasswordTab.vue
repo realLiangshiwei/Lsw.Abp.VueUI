@@ -15,6 +15,8 @@ import {
 } from '@lsw-abpvue/theme-shared';
 import { computed, ref } from 'vue';
 
+defineSlots<{ 'password-strength'?: (context: { password: string }) => unknown }>();
+
 const profiles = injectAbp(ProfileService);
 const state = useManageProfileState();
 const localization = useLocalization();
@@ -51,6 +53,7 @@ const newErrors = errorsOf('newPassword');
 const repeatErrors = errorsOf('repeatNewPassword');
 
 async function submit(): Promise<void> {
+  if (busy.value) return;
   const missingCurrent = hasPassword.value && !form.value.currentPassword;
   if (!form.validate() || missingCurrent) {
     form.controls.currentPassword.markAsTouched();
@@ -138,6 +141,8 @@ async function submit(): Promise<void> {
         />
       </template>
     </AbpFormField>
+
+    <slot name="password-strength" :password="form.value.newPassword" />
 
     <AbpButton type="submit" variant="primary" :loading="busy">
       {{ $t('AbpUi::Save') }}

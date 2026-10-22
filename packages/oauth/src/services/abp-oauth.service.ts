@@ -13,7 +13,7 @@ import {
   onServiceDestroy,
   type AuthGrantOptions,
   type AuthGrantResult,
-  type ApplicationConfigurationDto,
+  type ApplicationConfiguration,
   type AuthService,
   type LoginParams,
   type ServiceOf,
@@ -122,7 +122,7 @@ export const AbpOAuthService = defineService('AbpOAuthService', () => {
   async function candidate(
     response: TokenResponse,
     options: AuthGrantOptions,
-  ): Promise<ApplicationConfigurationDto> {
+  ): Promise<ApplicationConfiguration> {
     if (
       typeof response.access_token !== 'string' ||
       !response.access_token ||
@@ -178,7 +178,7 @@ export const AbpOAuthService = defineService('AbpOAuthService', () => {
 
   async function commit(
     response: TokenResponse,
-    configuration: ApplicationConfigurationDto,
+    configuration: ApplicationConfiguration,
     own: number,
     customGrant = true,
   ): Promise<void> {

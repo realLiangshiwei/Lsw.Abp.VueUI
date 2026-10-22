@@ -27,7 +27,10 @@ const showTenantBox = computed(
   <div class="abp-auth-wrapper mx-auto">
     <component :is="tenantBox" v-if="showTenantBox" />
 
-    <div v-if="wrapper.isLocalLoginEnabled.value" class="abp-auth-wrapper__card card">
+    <div
+      v-if="wrapper.isLocalLoginEnabled.value || route.meta.localLoginRequired === false"
+      class="abp-auth-wrapper__card card"
+    >
       <div class="card-body p-4 p-md-5">
         <slot />
       </div>

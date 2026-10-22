@@ -1,3 +1,4 @@
+import type { ApplicationConfiguration } from '@lsw-abpvue/core';
 import {
   ConfigStateService,
   createInjector,
@@ -19,9 +20,9 @@ import { unwrapResolvable } from '../models/prop-data.js';
 import { getObjectExtensionEntities, mapEntitiesToContributors } from './object-extensions.js';
 
 /** The real answer of a running ABP backend, captured by `scripts/capture-fixtures.sh`. */
-const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
+const fixture = configurationFixture as unknown as ApplicationConfiguration;
 const texts = localizationFixture as unknown as {
-  resources: ApplicationConfigurationDto['localization']['resources'];
+  resources: ApplicationConfiguration['localization']['resources'];
 };
 
 const USERS = 'Identity.UsersComponent';
@@ -128,7 +129,7 @@ describe('what the backend puts on the table', () => {
   });
 
   it('sortable follows the flag ABP declares for it', () => {
-    const property = (fixture.objectExtensions.modules.Identity?.entities.User?.properties.Age ??
+    const property = (fixture.objectExtensions.modules.Identity?.entities?.User?.properties?.Age ??
       {}) as ExtensionPropertyDto;
     const { contributors } = setup({
       entities: {
@@ -189,8 +190,8 @@ describe('what the backend puts on the forms', () => {
   });
 
   it('form text is passed on when the backend sends one', () => {
-    const property = (fixture.objectExtensions.modules.Identity?.entities.User?.properties
-      .SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
+    const property = (fixture.objectExtensions.modules.Identity?.entities?.User?.properties
+      ?.SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
     const { contributors } = setup({
       entities: {
         [USERS]: {
@@ -257,8 +258,8 @@ describe('lookups', () => {
   };
 
   const withLookup = (providers: ProviderInput[] = []) => {
-    const base = (fixture.objectExtensions.modules.Identity?.entities.User?.properties
-      .SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
+    const base = (fixture.objectExtensions.modules.Identity?.entities?.User?.properties
+      ?.SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
     const visible = { isVisible: true };
 
     return setup({
@@ -334,8 +335,8 @@ describe('lookups', () => {
 
 describe('display names', () => {
   const propertyNamed = (name: string, displayName?: { name?: string; resource?: string }) => {
-    const base = (fixture.objectExtensions.modules.Identity?.entities.User?.properties
-      .SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
+    const base = (fixture.objectExtensions.modules.Identity?.entities?.User?.properties
+      ?.SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
 
     return setup({
       entities: {
@@ -393,8 +394,8 @@ describe('policies', () => {
   });
 
   it('a feature the tenant does not have hides the property too', () => {
-    const base = (fixture.objectExtensions.modules.Identity?.entities.User?.properties
-      .SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
+    const base = (fixture.objectExtensions.modules.Identity?.entities?.User?.properties
+      ?.SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
     const entities = {
       [USERS]: {
         properties: {
@@ -422,8 +423,8 @@ describe('policies', () => {
     const { configState } = setup();
 
     expect(
-      configState.snapshot().objectExtensions.modules.Identity?.entities.User?.properties
-        .InternalNote,
+      configState.snapshot().objectExtensions.modules.Identity?.entities?.User?.properties
+        ?.InternalNote,
     ).toBeDefined();
   });
 });
@@ -441,8 +442,8 @@ describe('an entity nobody extended', () => {
 describe('a type the UI does not know', () => {
   it('renders as text and says so in development', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const base = (fixture.objectExtensions.modules.Identity?.entities.User?.properties
-      .SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
+    const base = (fixture.objectExtensions.modules.Identity?.entities?.User?.properties
+      ?.SocialSecurityNumber ?? {}) as ExtensionPropertyDto;
 
     const { contributors } = setup({
       entities: {

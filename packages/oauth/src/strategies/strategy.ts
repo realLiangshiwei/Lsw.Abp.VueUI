@@ -1,4 +1,4 @@
-import type { ApplicationConfigurationDto, LoginParams } from '@lsw-abpvue/core';
+import type { ApplicationConfiguration, LoginParams } from '@lsw-abpvue/core';
 import type { TokenResponse } from '../models/oauth.js';
 
 export interface StoredAuthSession {
@@ -26,7 +26,7 @@ export interface AuthFlowStrategy {
   /** Prepares storage, then returns the synchronous identity commit. */
   prepareSession?(
     response: TokenResponse,
-    configuration: ApplicationConfigurationDto,
+    configuration: ApplicationConfiguration,
     customGrant?: boolean,
   ): Promise<() => void>;
   readSession?(): Promise<StoredAuthSession | null>;

@@ -121,9 +121,11 @@ export {
 export type { CoreFeature } from './providers/core.provider.js';
 export { getInitialData } from './providers/initial-data.js';
 
-export { AbpApplicationConfigurationService } from './proxy/abp-application-configuration.service.js';
-export { AbpApplicationLocalizationService } from './proxy/abp-application-localization.service.js';
-export { AbpTenantService } from './proxy/abp-tenant.service.js';
+export { AbpApplicationConfigurationService } from './proxy/asp-net-core/mvc/application-configurations/abp-application-configuration.service.js';
+export { AbpApplicationLocalizationService } from './proxy/asp-net-core/mvc/application-configurations/abp-application-localization.service.js';
+export { AbpTenantService } from './proxy/pages/abp/multi-tenancy/abp-tenant.service.js';
+export { AbpApiDefinitionService } from './proxy/asp-net-core/mvc/api-exploring/abp-api-definition.service.js';
+export type * from './proxy/http/modeling/models.js';
 export type {
   ApplicationAuthConfigurationDto,
   ApplicationConfigurationDto,
@@ -168,6 +170,7 @@ export {
   useAuthErrorFilter,
 } from './services/auth-error-filter.service.js';
 export { ConfigStateService, useConfigState } from './services/config-state.service.js';
+export type { ApplicationConfiguration } from './services/config-state.service.js';
 export { CurrentUserService, useCurrentUser } from './services/current-user.service.js';
 export { EnvironmentService, useEnvironment } from './services/environment.service.js';
 export { HttpClient } from './services/http-client.service.js';

@@ -4,8 +4,10 @@
     "account/account-external-login.service.ts",
     "account/account-external-provider.service.ts",
     "account/account-session.service.ts",
+    "account/account-settings.service.ts",
     "account/account.service.ts",
     "account/dynamic-claims.service.ts",
+    "account/email-login-type.enum.ts",
     "account/external-providers/index.ts",
     "account/external-providers/models.ts",
     "account/identity-link-user.service.ts",
@@ -26,6 +28,8 @@
     "account/public/web/index.ts",
     "account/user-sharing.service.ts",
     "account/validators.ts",
+    "identity/features/identity-pro-two-factor-behaviour.enum.ts",
+    "identity/features/index.ts",
     "identity/index.ts",
     "identity/models.ts",
     "index.ts"
@@ -35,6 +39,10 @@
     "account": {
       "rootPath": "account",
       "remoteServiceName": "AbpAccountPublic"
+    },
+    "accountAdmin": {
+      "rootPath": "accountAdmin",
+      "remoteServiceName": "AbpAccountAdmin"
     }
   },
   "source": {

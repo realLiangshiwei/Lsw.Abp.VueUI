@@ -1,9 +1,4 @@
-import {
-  ConfigStateService,
-  createInjector,
-  PermissionService,
-  type ApplicationConfigurationDto,
-} from '@lsw-abpvue/core';
+import { ConfigStateService, createInjector, PermissionService } from '@lsw-abpvue/core';
 import type { IdentityUserDto } from '@lsw-abpvue/identity-pro/proxy';
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -133,7 +128,7 @@ describe('commercial user defaults', () => {
     expect(phone?.disabled(data)).toBe(false);
     values.phoneNumber = ' ';
     expect(phone?.disabled(data)).toBe(true);
-    const state: ApplicationConfigurationDto = config.snapshot();
+    const state = config.snapshot();
     config.setState({
       ...state,
       multiTenancy: { ...state.multiTenancy, userSharingStrategy: 1 },

@@ -150,7 +150,9 @@ export class TypeRegistry {
 
   private renderInto(type: ClrType, scope: ReadonlySet<string>, refs: RegisteredType[]): string {
     if (type.kind === 'array') {
-      return `${this.renderInto(type.item, scope, refs)}[]`;
+      if (type.item.kind === 'name' && type.item.name === 'System.Byte') return 'string | number[]';
+      const item = this.renderInto(type.item, scope, refs);
+      return `${item.includes(' | ') ? `(${item})` : item}[]`;
     }
 
     if (type.kind === 'dictionary') {

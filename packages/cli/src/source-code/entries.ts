@@ -14,6 +14,8 @@ export interface PackageManifest {
   name: string;
   version?: string | undefined;
   dependencies?: Record<string, string> | undefined;
+  peerDependencies?: Record<string, string> | undefined;
+  devDependencies?: Record<string, string> | undefined;
   exports?: Record<string, unknown> | undefined;
 }
 

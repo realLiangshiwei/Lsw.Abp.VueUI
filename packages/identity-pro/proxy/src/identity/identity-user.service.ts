@@ -331,7 +331,12 @@ export const IdentityUserService = defineService('IdentityUserService', () => {
       config?: RestConfig,
     ): Promise<ImportUsersFromFileOutput> =>
       rest.request<FormData, ImportUsersFromFileOutput>(
-        { method: 'POST', url: '/api/identity/users/import-users-from-file', body: input },
+        {
+          method: 'POST',
+          url: '/api/identity/users/import-users-from-file',
+          params: { fileType: input.get('FileType') ?? input.get('fileType') },
+          body: input,
+        },
         { apiName, ...config },
       ),
 

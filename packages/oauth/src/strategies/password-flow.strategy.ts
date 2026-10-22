@@ -8,7 +8,7 @@ import {
   PIPE_TO_LOGIN_FN,
   StorageService,
   type LoginParams,
-  type ApplicationConfigurationDto,
+  type ApplicationConfiguration,
   type ServiceOf,
 } from '@lsw-abpvue/core';
 import { AuthNavigationService } from '../services/auth-navigation.service.js';
@@ -183,7 +183,7 @@ export const PasswordFlowStrategy = defineService('PasswordFlowStrategy', (): Au
 
     prepareSession: (
       response: TokenResponse,
-      configuration: ApplicationConfigurationDto,
+      configuration: ApplicationConfiguration,
     ): Promise<() => void> => {
       generation += 1;
       const own = generation;

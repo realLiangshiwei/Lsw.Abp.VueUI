@@ -47,6 +47,14 @@ function emit(
 }
 
 describe('an interface', () => {
+  it('keeps both JSON byte-collection representations instead of claiming Base64 is a number array', () => {
+    const { content } = emit({
+      'Acme.ProfilePictureDto': dto({
+        properties: [property('FileContent', '[number]', { type: '[System.Byte]' })],
+      }),
+    });
+    expect(content('acme/models.ts')).toContain('fileContent?: string | number[] | undefined;');
+  });
   it('is written to models.ts under its namespace', () => {
     const { files } = emit({ 'Acme.Books.BookDto': dto() });
 

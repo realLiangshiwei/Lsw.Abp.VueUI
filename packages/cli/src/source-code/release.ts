@@ -153,7 +153,16 @@ async function addDependencies(
   let text = original;
 
   for (const manifest of manifests) {
-    for (const [name, range] of Object.entries(manifest.dependencies ?? {})) {
+    const dependencies = {
+      ...manifest.peerDependencies,
+      ...manifest.dependencies,
+      ...Object.fromEntries(
+        Object.entries(manifest.devDependencies ?? {}).filter(([name]) =>
+          name.startsWith('@types/'),
+        ),
+      ),
+    };
+    for (const [name, range] of Object.entries(dependencies)) {
       if (has(name) || name in added) continue;
 
       added[name] = range;

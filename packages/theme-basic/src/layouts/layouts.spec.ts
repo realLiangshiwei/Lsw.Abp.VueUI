@@ -2,6 +2,7 @@ import {
   ABP_INJECTOR_KEY,
   createInjector,
   LocalizationService,
+  ReplaceableComponentsService,
   RoutesService,
   StorageService,
   type Injector,
@@ -170,6 +171,28 @@ describe('ApplicationLayout', () => {
 });
 
 describe('AccountLayout', () => {
+  it('uses route-declared commercial wrapper and logo replacement keys', async () => {
+    router.addRoute({
+      path: '/account/pro',
+      component: page,
+      meta: {
+        accountAuthWrapperKey: 'Account.AuthWrapper',
+        accountLogoKey: 'Account.LogoComponent',
+      },
+    });
+    injector.get(ReplaceableComponentsService).add({
+      key: 'Account.AuthWrapper',
+      component: { template: '<section>Commercial wrapper<slot /></section>' },
+    });
+    injector.get(ReplaceableComponentsService).add({
+      key: 'Account.LogoComponent',
+      component: { template: '<span>Custom account logo</span>' },
+    });
+    const wrapper = await render(AccountLayout, injector, router, '/account/pro');
+    expect(wrapper.text()).toContain('Commercial wrapper');
+    expect(wrapper.text()).toContain('Custom account logo');
+    expect(wrapper.text()).toContain('the page');
+  });
   it('is a card with the language switcher above it', async () => {
     const wrapper = await render(AccountLayout, injector, router);
 

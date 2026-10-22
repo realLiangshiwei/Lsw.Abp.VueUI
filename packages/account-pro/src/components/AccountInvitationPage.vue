@@ -1,102 +1,98 @@
 <template>
-  <main>
-    <h1>{{ localization.t('AbpIdentity::AcceptInvitation') }}</h1>
-    <AbpSpinner v-if="loading" />
-    <p v-if="error" role="alert">{{ error }}</p>
-    <p v-if="completed" role="status">{{ completed }}</p>
-    <AbpButton v-if="failed || uncertain" :disabled="busy" @click="load">{{
-      localization.t('AbpUi::Refresh')
-    }}</AbpButton>
-    <template v-if="info && !completed">
-      <p>
-        {{ info.inviteeEmail }} ·
-        {{ info.tenantName || localization.t('AbpAccount::HostDisplayName') }}
-      </p>
-      <form :id="formId" novalidate @submit.prevent="accept">
-        <AbpFormField
-          v-if="info.requireRegister"
-          v-slot="field"
-          :label="localization.t('AbpAccount::UserName')"
-          required
-          ><AbpInput
-            :id="field.id"
-            v-model="userName"
-            name="invitationUserName"
-            :disabled="busy || uncertain"
-            autocomplete="username"
-        /></AbpFormField>
-        <AbpFormField
-          v-if="info.requireRegister"
-          v-slot="field"
-          :label="localization.t('AbpAccount::Password')"
-          :errors="passwordErrors"
-          required
-          ><AbpInput
-            :id="field.id"
-            v-model="password"
-            name="invitationPassword"
-            type="password"
-            :disabled="busy || uncertain"
-            :invalid="field.invalid"
-            :aria-describedby="field.describedBy"
-            autocomplete="new-password"
-            @blur="registrationForm.controls.password.markAsTouched()"
-        /></AbpFormField>
-        <div v-if="info.requireRegister && passwordStrength > 0" class="mb-3">
-          <progress
-            role="progressbar"
-            :value="passwordStrength"
-            :max="5"
-            :aria-label="localization.t('AbpAccount::Strength')"
-            :aria-valuetext="localization.t(passwordStrengthKey)"
-          />
-          <p class="mb-0">
-            {{ localization.t('AbpAccount::Strength') }}:
-            {{ localization.t(passwordStrengthKey) }}
-          </p>
-        </div>
-        <AbpFormField
-          v-if="info.requireRegister"
-          v-slot="field"
-          :label="localization.t('AbpAccount::ConfirmPassword')"
-          :errors="confirmationErrors"
-          required
-          ><AbpInput
-            :id="field.id"
-            v-model="registrationForm.controls.confirmPassword.value"
-            name="invitationPasswordConfirm"
-            type="password"
-            :disabled="busy || uncertain"
-            :invalid="field.invalid"
-            :aria-describedby="field.describedBy"
-            autocomplete="new-password"
-            @blur="registrationForm.controls.confirmPassword.markAsTouched()"
-        /></AbpFormField>
-        <div class="d-flex flex-wrap gap-2">
-          <AbpButton type="submit" :disabled="busy || loading || failed || uncertain">{{
-            localization.t(
-              info.requireRegister
-                ? 'AbpIdentity::RegisterAndAcceptInvitation'
-                : 'AbpIdentity::AcceptInvitation',
-            )
-          }}</AbpButton
-          ><AbpButton
-            variant="danger"
-            :disabled="busy || loading || failed || uncertain"
-            @click="reject"
-            >{{ localization.t('AbpAccount::RejectInvitation') }}</AbpButton
-          >
-        </div>
-      </form>
-    </template>
-    <AbpButton v-if="completed" :disabled="busy" :loading="busy" @click="signIn">{{
-      localization.t('AbpAccount::Login')
-    }}</AbpButton>
-  </main>
+  <AbpReplaceable replaceable-key="Account.InviteComponent">
+    <main>
+      <h1>{{ localization.t('AbpIdentity::AcceptInvitation') }}</h1>
+      <AbpSpinner v-if="loading" />
+      <p v-if="error" role="alert">{{ error }}</p>
+      <p v-if="completed" role="status">{{ completed }}</p>
+      <AbpButton v-if="failed || uncertain" :disabled="busy" @click="load">{{
+        localization.t('AbpUi::Refresh')
+      }}</AbpButton>
+      <template v-if="info && !completed">
+        <p>
+          {{ info.inviteeEmail }} ·
+          {{ info.tenantName || localization.t('AbpAccount::HostDisplayName') }}
+        </p>
+        <form :id="formId" novalidate @submit.prevent="accept">
+          <AbpFormField
+            v-if="info.requireRegister"
+            v-slot="field"
+            :label="localization.t('AbpAccount::UserName')"
+            required
+            ><AbpInput
+              :id="field.id"
+              v-model="userName"
+              name="invitationUserName"
+              :disabled="busy || uncertain"
+              autocomplete="username"
+          /></AbpFormField>
+          <AbpFormField
+            v-if="info.requireRegister"
+            v-slot="field"
+            :label="localization.t('AbpAccount::Password')"
+            :errors="passwordErrors"
+            required
+            ><AbpInput
+              :id="field.id"
+              v-model="password"
+              name="invitationPassword"
+              type="password"
+              :disabled="busy || uncertain"
+              :invalid="field.invalid"
+              :aria-describedby="field.describedBy"
+              autocomplete="new-password"
+              @blur="registrationForm.controls.password.markAsTouched()"
+          /></AbpFormField>
+          <PasswordStrength v-if="info.requireRegister" :password="password" />
+          <AbpFormField
+            v-if="info.requireRegister"
+            v-slot="field"
+            :label="localization.t('AbpAccount::ConfirmPassword')"
+            :errors="confirmationErrors"
+            required
+            ><AbpInput
+              :id="field.id"
+              v-model="registrationForm.controls.confirmPassword.value"
+              name="invitationPasswordConfirm"
+              type="password"
+              :disabled="busy || uncertain"
+              :invalid="field.invalid"
+              :aria-describedby="field.describedBy"
+              autocomplete="new-password"
+              @blur="registrationForm.controls.confirmPassword.markAsTouched()"
+          /></AbpFormField>
+          <div class="d-flex flex-wrap gap-2">
+            <AbpButton type="submit" :disabled="busy || loading || failed || uncertain">{{
+              localization.t(
+                info.requireRegister
+                  ? 'AbpIdentity::RegisterAndAcceptInvitation'
+                  : 'AbpIdentity::AcceptInvitation',
+              )
+            }}</AbpButton
+            ><AbpButton
+              variant="danger"
+              :disabled="busy || loading || failed || uncertain"
+              @click="reject"
+              >{{ localization.t('AbpAccount::RejectInvitation') }}</AbpButton
+            >
+          </div>
+        </form>
+      </template>
+      <AbpButton v-if="completed" :disabled="busy" :loading="busy" @click="signIn">{{
+        localization.t('AbpAccount::Login')
+      }}</AbpButton>
+    </main>
+  </AbpReplaceable>
 </template>
 <script setup lang="ts">
 import { TenantBoxService } from '@lsw-abpvue/account-core';
-import { AuthService, inject as injectAbp, useLocalization, WindowService } from '@lsw-abpvue/core';
+import {
+  AbpReplaceable,
+  AuthService,
+  inject as injectAbp,
+  useLocalization,
+  WindowService,
+} from '@lsw-abpvue/core';
 import { UserSharingService } from '@lsw-abpvue/account-pro/proxy';
 import type { InvitationInfoDto } from '@lsw-abpvue/account-pro/proxy';
 import {
@@ -112,6 +108,7 @@ import {
 } from '@lsw-abpvue/theme-shared';
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import PasswordStrength from './PasswordStrength.vue';
 const service = injectAbp(UserSharingService);
 const auth = injectAbp(AuthService);
 const tenantBox = injectAbp(TenantBoxService);
@@ -151,26 +148,6 @@ const confirmationErrors = computed(() =>
   registrationForm.controls.confirmPassword.touched
     ? validationMessages(registrationForm.controls.confirmPassword.errors)
     : [],
-);
-const passwordStrength = computed(
-  () =>
-    [
-      password.value.length >= 6,
-      /[0-9]/.test(password.value),
-      /[a-z ]/.test(password.value),
-      /[A-Z]/.test(password.value),
-      /[^a-zA-Z0-9 ]/.test(password.value),
-    ].filter(Boolean).length,
-);
-const passwordStrengthKeys = [
-  'AbpAccount::Weak',
-  'AbpAccount::Fair',
-  'AbpAccount::Normal',
-  'AbpAccount::Good',
-  'AbpAccount::Strong',
-];
-const passwordStrengthKey = computed(
-  () => passwordStrengthKeys[passwordStrength.value - 1] ?? 'AbpAccount::Weak',
 );
 const loading = ref(false);
 const busy = ref(false);

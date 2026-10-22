@@ -146,7 +146,7 @@ function enumOptions(
   enumType: string,
   enumeration: ExtensionEnumDto,
 ): AbpOption[] {
-  return enumeration.fields.map(field => ({
+  return (enumeration.fields ?? []).map(field => ({
     value: field.value as AbpOption['value'],
     label: localization.t(enumLabelKey(localization, enumType, enumeration, field.name ?? '')),
   }));
@@ -205,7 +205,7 @@ export function mapEntitiesToContributors<R = unknown>(
     const properties = permittedProperties(injector, entity?.properties ?? {});
 
     for (const [name, property] of Object.entries(properties)) {
-      const lookup = property.ui.lookup;
+      const lookup = property.ui?.lookup;
       const mapped = mapExtensionProperty(name, property, enums);
       const type = mapped.type;
       if (!mapped.recognised && isDevMode())
@@ -236,7 +236,7 @@ export function mapEntitiesToContributors<R = unknown>(
             ? {
                 valueResolver: (data: PropData<R>) => () => {
                   const value = readValue(data.record, name, true);
-                  const field = enumeration.fields.find(entry => entry.value === value);
+                  const field = enumeration.fields?.find(entry => entry.value === value);
 
                   return field
                     ? localization.t(

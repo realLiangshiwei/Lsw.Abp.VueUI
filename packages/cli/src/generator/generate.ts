@@ -23,6 +23,8 @@ export interface GenerateOptions {
   rootNamespace?: string | undefined;
   /** Overrides `remoteServiceName`, for a backend that registers it under another name. */
   apiName?: string | undefined;
+  /** A local Core entry, relative to the output root, for generating Core itself. */
+  coreImport?: string | undefined;
   /** Barrel files; off when the proxy is re-exported by hand. */
   index?: boolean | undefined;
   /** Validator maps out of what the backend declares; on unless asked otherwise. */
@@ -222,6 +224,7 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
       report,
       rootNamespace: options.rootNamespace,
       apiName: options.apiName,
+      coreImport: options.coreImport,
       names,
     });
 
@@ -231,7 +234,9 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
   }
 
   const closure = closureOf(referenced, registry);
-  files.push(...emitModels(closure.types, registry, report, closure.directions));
+  files.push(
+    ...emitModels(closure.types, registry, report, closure.directions, options.coreImport),
+  );
 
   if (options.validators !== false) {
     files.push(...emitDtoValidators(closure.types, report));

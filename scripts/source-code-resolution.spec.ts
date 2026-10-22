@@ -21,7 +21,7 @@ it('prebundles installed application entry points before auto imports discover t
   expect(result.include).not.toContain('@lsw-abpvue/cli');
 });
 
-it('prebundles all three commercial entry points without guessing a module catalogue', async () => {
+it('prebundles commercial entry points including separate account administration', async () => {
   const target = await mkdtemp(join(tmpdir(), 'abpvue-commercial-resolution-'));
   const packages = ['identity-pro', 'account-pro', 'audit-logging'];
   try {
@@ -44,6 +44,7 @@ it('prebundles all three commercial entry points without guessing a module catal
     expect(result.include.sort()).toEqual(
       packages
         .flatMap(name => ['', '/config', '/proxy'].map(entry => `@lsw-abpvue/${name}${entry}`))
+        .concat('@lsw-abpvue/account-pro/admin', '@lsw-abpvue/account-pro/admin/config')
         .sort(),
     );
     expect(result.alias).toEqual([]);

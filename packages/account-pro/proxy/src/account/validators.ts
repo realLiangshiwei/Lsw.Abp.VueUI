@@ -11,6 +11,8 @@ import { Validators } from '@lsw-abpvue/theme-shared';
 import type { ValidatorMap } from '@lsw-abpvue/theme-shared';
 import type {
   AcceptInvitationInput,
+  AccountEmailLoginSettingsDto,
+  AccountRecaptchaSettingsDto,
   ChangeEmailInput,
   ChangePasswordInput,
   CheckEmailConfirmationCodeDto,
@@ -44,6 +46,15 @@ export const acceptInvitationInputValidators = {
   userName: [Validators.maxLength(256)],
   password: [Validators.maxLength(128)],
 } satisfies ValidatorMap<AcceptInvitationInput>;
+
+export const accountEmailLoginSettingsDtoValidators = {
+  tokenLifespan: [Validators.range(30, 86400)],
+} satisfies ValidatorMap<AccountEmailLoginSettingsDto>;
+
+export const accountRecaptchaSettingsDtoValidators = {
+  version: [Validators.range(2, 3)],
+  score: [Validators.range(0.1, 1)],
+} satisfies ValidatorMap<AccountRecaptchaSettingsDto>;
 
 export const changeEmailInputValidators = {
   userId: [Validators.required()],

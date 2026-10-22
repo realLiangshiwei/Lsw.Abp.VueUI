@@ -25,8 +25,7 @@ export interface IdentityUserDetailsLoader {
   reset(): void;
 }
 
-export interface IdentityUserDetailsOrganizationUnit {
-  readonly id: string;
-  readonly parentId?: string | null | undefined;
-  readonly displayName?: string | undefined;
-}
+export type IdentityUserDetailsOrganizationUnit = Pick<
+  OrganizationUnitWithDetailsDto,
+  'parentId' | 'displayName'
+> & { readonly id: NonNullable<OrganizationUnitWithDetailsDto['id']> };

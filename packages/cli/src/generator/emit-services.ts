@@ -6,8 +6,8 @@ import type {
 } from '../api-definition/models.js';
 import { namespaceOf, parseClrType } from './clr-type.js';
 import { renderDeclaredType, type DeclaredType } from './declared-type.js';
-import { CORE_PACKAGE, REMOTE_STREAM_TYPES } from './framework-types.js';
-import { ImportCollector, moduleSpecifier } from './imports.js';
+import { REMOTE_STREAM_TYPES } from './framework-types.js';
+import { coreModuleSpecifier, ImportCollector, moduleSpecifier } from './imports.js';
 import { camelCase, isIdentifier, kebabCase, namespaceToDirectory, quoteName } from './names.js';
 import type { GenerationReport } from './report.js';
 import { stripRootNamespace, type RegisteredType, type TypeRegistry } from './type-registry.js';
@@ -20,6 +20,7 @@ export interface ServiceEmitOptions {
   rootNamespace?: string | undefined;
   /** Overrides the module's `remoteServiceName`, for a backend that renames it. */
   apiName?: string | undefined;
+  coreImport?: string | undefined;
   /** What each controller's service is called, keyed by the controller's CLR type. */
   names: ReadonlyMap<string, string>;
 }
@@ -90,9 +91,16 @@ function spreadsQueryDictionary(parameter: BoundParameter): boolean {
  * @param parameter The parameter as the request carries it
  * @param optional Whether the method parameter it is read from may be left out
  */
-function valueExpression(parameter: BoundParameter, optional: boolean): string {
+function valueExpression(parameter: BoundParameter, optional: boolean, formData = false): string {
   const own = camelizeHyphen(parameter.nameOnMethod);
   if (!parameter.descriptorName) return own;
+  if (formData) {
+    const read = (name: string) => `${own}${optional ? '?.' : '.'}get(${JSON.stringify(name)})`;
+    const alias = parameter.jsonName ?? camelCase(parameter.name);
+    return alias === parameter.name
+      ? read(parameter.name)
+      : `${read(parameter.name)} ?? ${read(alias)}`;
+  }
 
   const segments = (parameter.jsonName ?? parameter.name).split('.');
   const descriptor = camelizeHyphen(parameter.descriptorName);
@@ -124,6 +132,7 @@ interface RequestParts {
 }
 
 function requestInputType(text: string): string {
+  if (text === 'string | number[]') return 'string | readonly number[]';
   return text.endsWith('[]') ? `readonly ${text}` : text;
 }
 
@@ -150,6 +159,7 @@ function buildRequest(
   const fileParameters = action.parameters.filter(
     parameter => parameter.bindingSourceId === 'FormFile' || isStreamType(parameter.type),
   );
+  const fileInputs = new Set(fileParameters.map(parameter => parameter.nameOnMethod));
 
   const optionalOnMethod = new Set(
     action.parametersOnMethod
@@ -158,13 +168,13 @@ function buildRequest(
   );
 
   for (const parameter of action.parameters) {
-    const value = valueExpression(parameter, optionalOnMethod.has(parameter.nameOnMethod));
-
-    if (fileParameters.length > 0 && parameter.bindingSourceId !== 'Path') {
-      // A form post carries everything in the FormData the caller built, so the rest of
-      // the form fields are not sent again as query parameters.
-      if (parameter.bindingSourceId !== 'Query') continue;
-    }
+    const fromFormData =
+      fileInputs.has(parameter.nameOnMethod) && Boolean(parameter.descriptorName);
+    const value = valueExpression(
+      parameter,
+      optionalOnMethod.has(parameter.nameOnMethod),
+      fromFormData,
+    );
 
     switch (parameter.bindingSourceId) {
       case 'Path': {
@@ -201,7 +211,7 @@ function buildRequest(
 
       case 'ModelBinding':
       case 'Query': {
-        if (spreadsQueryDictionary(parameter)) {
+        if (spreadsQueryDictionary(parameter) && !fromFormData) {
           parts.spreadParams.push(value);
           break;
         }
@@ -292,12 +302,13 @@ function emitService(
   const namespace = stripRootNamespace(namespaceOf(controller.type), options.rootNamespace);
   const identifier = options.names.get(controller.type) ?? `${controller.controllerName}Service`;
   const imports = new ImportCollector();
+  const core = coreModuleSpecifier(namespace, options.coreImport);
 
-  imports.addValue(CORE_PACKAGE, 'defineService');
-  imports.addValue(CORE_PACKAGE, 'inject');
-  imports.addValue(CORE_PACKAGE, 'RestService');
-  imports.addType(CORE_PACKAGE, 'RestConfig');
-  imports.addType(CORE_PACKAGE, 'ServiceOf');
+  imports.addValue(core, 'defineService');
+  imports.addValue(core, 'inject');
+  imports.addValue(core, 'RestService');
+  imports.addType(core, 'RestConfig');
+  imports.addType(core, 'ServiceOf');
 
   const actions = Object.values(controller.actions);
   const counts = new Map<string, number>();
@@ -325,7 +336,7 @@ function emitService(
 
   for (const ref of [...refs.request, ...refs.response]) {
     if (ref.frameworkName) {
-      imports.addType(CORE_PACKAGE, ref.frameworkName);
+      imports.addType(core, ref.frameworkName);
       continue;
     }
 

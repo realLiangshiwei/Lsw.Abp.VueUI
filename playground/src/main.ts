@@ -18,6 +18,7 @@ import { provideIdentityConfig } from '@lsw-abpvue/identity/config';
 import { provideIdentityProConfig } from '@lsw-abpvue/identity-pro/config';
 import { provideAuditLogging } from '@lsw-abpvue/audit-logging/config';
 import { provideAccountProConfig } from '@lsw-abpvue/account-pro/config';
+import { provideAccountProAdminConfig } from '@lsw-abpvue/account-pro/admin/config';
 import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/config';
 import { provideTenantManagementConfig } from '@lsw-abpvue/tenant-management/config';
 import App from './App.vue';
@@ -40,7 +41,6 @@ const { mount } = await createAbpApp(App, {
     provideAbpThemeBasic(),
     // The modules' menu entries and the profile page's tabs. Small and synchronous; the
     // pages themselves arrive on the first navigation into them (design 03 §2).
-    provideAccountConfig(),
     ...(import.meta.env.VITE_ABP_EDITION === 'pro'
       ? [
           provideAccountProConfig({
@@ -49,7 +49,7 @@ const { mount } = await createAbpApp(App, {
             trustedOrigins: ['http://localhost:5179', 'http://127.0.0.1:5179'],
           }),
         ]
-      : []),
+      : [provideAccountConfig(), provideManageProfileTabs()]),
     import.meta.env.VITE_ABP_EDITION === 'pro'
       ? provideIdentityProConfig()
       : provideIdentityConfig(),
@@ -58,8 +58,8 @@ const { mount } = await createAbpApp(App, {
     // Setting management before feature management: the tab tree lives in the first, and
     // the second puts one of its own into it.
     provideSettingManagementConfig(),
+    ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? [provideAccountProAdminConfig()] : []),
     provideFeatureManagementConfig(),
-    provideManageProfileTabs(),
     // Without one of these an unreachable backend would leave a blank page.
     provideAppInitErrorHandler(error => {
       startupError.value = describeStartupError(error);

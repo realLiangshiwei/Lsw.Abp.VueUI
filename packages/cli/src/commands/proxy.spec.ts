@@ -47,6 +47,40 @@ async function filesIn(directory: string): Promise<string[]> {
 }
 
 describe('proxy add', () => {
+  it('generates framework proxies with local core imports and replays them on refresh', async () => {
+    const cwd = await project();
+    await runProxy(
+      'add',
+      args(cwd, {
+        module: 'abp',
+        'root-namespace': 'Volo.Abp',
+        'core-import': '../core.js',
+        validators: false,
+        'policy-names': false,
+        index: false,
+      }),
+    );
+    const target = join(cwd, 'src/proxy');
+    const files = (await filesIn(target)).filter(path => path.endsWith('.ts'));
+    const before = await Promise.all(files.map(file => readFile(join(target, file), 'utf8')));
+    const service =
+      before[
+        files.indexOf(
+          'asp-net-core/mvc/application-configurations/abp-application-configuration.service.ts',
+        )
+      ];
+    expect(service).toContain("from '../../../../core.js'");
+    const models = before[files.indexOf('asp-net-core/mvc/application-configurations/models.ts')];
+    expect(models).toContain("from '../../../../core.js'");
+    const strategy = before[files.indexOf('multi-tenancy/tenant-user-sharing-strategy.enum.ts')];
+    expect(strategy).toContain("from '../../core.js'");
+    expect(before.every(content => !content.includes("from '@lsw-abpvue/core'"))).toBe(true);
+    await runProxy('refresh', args(cwd));
+    expect(await Promise.all(files.map(file => readFile(join(target, file), 'utf8')))).toEqual(
+      before,
+    );
+  });
+
   it('writes the module and records what it wrote', async () => {
     const cwd = await project();
 
@@ -117,6 +151,27 @@ describe('proxy add', () => {
 });
 
 describe('proxy refresh', () => {
+  it('replays saved generation options and allows an explicit override', async () => {
+    const cwd = await project();
+    const first = await runProxy(
+      'add',
+      args(cwd, {
+        module: 'account',
+        'root-namespace': 'Volo.Abp',
+        'api-name': 'CustomAccount',
+        index: false,
+        validators: false,
+        'policy-names': false,
+        'service-type': 'all',
+      }),
+    );
+    const before = await readProxyConfig(join(cwd, 'src/proxy'));
+    const refreshed = await runProxy('refresh', args(cwd));
+    expect(refreshed.written).toEqual(first.written);
+    expect((await readProxyConfig(join(cwd, 'src/proxy'))).source).toEqual(before.source);
+    await runProxy('refresh', args(cwd, { index: true }));
+    expect(await filesIn(join(cwd, 'src/proxy'))).toContain('index.ts');
+  });
   it('changes nothing when nothing changed', async () => {
     const cwd = await project();
     await runProxy('add', args(cwd, { module: 'identity,account' }));

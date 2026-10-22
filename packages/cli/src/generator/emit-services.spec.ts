@@ -57,6 +57,29 @@ function emit(
 }
 
 describe('a service', () => {
+  it('accepts both Base64 strings and immutable byte arrays in a body parameter', () => {
+    const { content } = emit({
+      UploadAsync: action({
+        httpMethod: 'POST',
+        parametersOnMethod: [
+          { name: 'input', type: '[System.Byte]', typeSimple: '[number]', isOptional: false },
+        ],
+        parameters: [
+          {
+            nameOnMethod: 'input',
+            name: 'input',
+            type: '[System.Byte]',
+            typeSimple: '[number]',
+            isOptional: false,
+            bindingSourceId: 'Body',
+            descriptorName: null,
+          },
+        ],
+      }),
+    });
+    expect(content).toContain('input: string | readonly number[]');
+    expect(content).toContain('rest.request<string | readonly number[], void>');
+  });
   it.each([
     ['Volo.Abp.Data.ExtraPropertyDictionary', '{string:object}', 'ModelBinding'],
     ['{System.String:System.Object}', '{string:object}', 'Query'],
@@ -450,6 +473,79 @@ BookService.replace(immutable);
     expect(content).toContain('upload: (id: string, file: FormData, config?: RestConfig)');
     expect(content).toContain('rest.request<FormData, void>(');
     expect(content).toContain('body: file');
+  });
+
+  it('keeps model-binding, query and header parameters alongside a multipart upload', () => {
+    const { content } = emit({
+      UploadAsyncByInput: action({
+        uniqueName: 'UploadAsyncByInput',
+        httpMethod: 'POST',
+        parametersOnMethod: [
+          {
+            name: 'input',
+            type: 'Acme.PictureInput',
+            typeSimple: 'Acme.PictureInput',
+            isOptional: false,
+          },
+          { name: 'culture', type: 'System.String', typeSimple: 'string', isOptional: true },
+          { name: 'apiKey', type: 'System.String', typeSimple: 'string', isOptional: true },
+        ],
+        parameters: [
+          {
+            nameOnMethod: 'input',
+            name: 'Type',
+            type: 'System.Int32',
+            typeSimple: 'number',
+            bindingSourceId: 'ModelBinding',
+            descriptorName: 'input',
+            isOptional: false,
+          },
+          {
+            nameOnMethod: 'input',
+            name: 'Caption',
+            type: 'System.String',
+            typeSimple: 'string',
+            bindingSourceId: 'Form',
+            descriptorName: 'input',
+            isOptional: false,
+          },
+          {
+            nameOnMethod: 'input',
+            name: 'ImageContent',
+            type: 'Volo.Abp.Content.IRemoteStreamContent',
+            typeSimple: 'Volo.Abp.Content.IRemoteStreamContent',
+            bindingSourceId: 'FormFile',
+            descriptorName: 'input',
+            isOptional: false,
+          },
+          {
+            nameOnMethod: 'culture',
+            name: 'culture',
+            type: 'System.String',
+            typeSimple: 'string',
+            bindingSourceId: 'Query',
+            descriptorName: '',
+            isOptional: true,
+          },
+          {
+            nameOnMethod: 'apiKey',
+            name: 'X-Api-Key',
+            type: 'System.String',
+            typeSimple: 'string',
+            bindingSourceId: 'Header',
+            descriptorName: '',
+            isOptional: true,
+          },
+        ],
+      }),
+    });
+    expect(content).toContain('input: FormData, culture?: string, apiKey?: string');
+    expect(content).toContain('type: input.get("Type") ?? input.get("type")');
+    expect(content).toContain('culture');
+    expect(content).toContain("'X-Api-Key': String(apiKey)");
+    expect(content).toContain('body: input');
+    expect(content).not.toContain('input.type');
+    expect(content).not.toContain('caption:');
   });
 
   it('asks for a blob when the endpoint answers with a stream', () => {

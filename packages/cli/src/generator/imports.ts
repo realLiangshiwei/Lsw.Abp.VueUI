@@ -1,4 +1,12 @@
-import { relativeNamespacePath } from './names.js';
+import { posix } from 'node:path';
+import { CORE_PACKAGE } from './framework-types.js';
+import { namespaceToDirectory, relativeNamespacePath } from './names.js';
+
+export function coreModuleSpecifier(namespace: string, coreImport?: string): string {
+  if (!coreImport?.startsWith('.')) return coreImport ?? CORE_PACKAGE;
+  const path = posix.relative(namespaceToDirectory(namespace), coreImport);
+  return path.startsWith('.') ? path : `./${path}`;
+}
 
 /**
  * The import specifier for a file in another namespace's directory.

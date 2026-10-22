@@ -1,3 +1,4 @@
+import type { ApplicationConfiguration } from './config-state.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import { computed } from 'vue';
 import configurationFixture from '../../../../e2e/fixtures/application-configuration.json';
@@ -8,7 +9,7 @@ import { ConfigStateService } from './config-state.service.js';
 import { SessionStateService } from './session-state.service.js';
 
 /** The real answer of a running ABP backend, captured by `scripts/capture-fixtures.sh`. */
-const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
+const fixture = configurationFixture as unknown as ApplicationConfiguration;
 
 const json = (body: unknown) => new Response(JSON.stringify(body));
 
@@ -17,6 +18,17 @@ function configState(responder: FetchLike = () => Promise.resolve(json(fixture))
 }
 
 describe('before the configuration arrives', () => {
+  it('keeps complete default state when a response omits configuration sections', () => {
+    const state = configState();
+    state.setState({
+      currentUser: { isAuthenticated: true, emailVerified: false, phoneNumberVerified: false },
+    });
+    expect(state.snapshot().currentUser.isAuthenticated).toBe(true);
+    expect(state.snapshot().currentUser.roles).toEqual([]);
+    expect(state.snapshot().setting.values).toEqual({});
+    expect(state.snapshot().localization.resources).toEqual({});
+  });
+
   it('every node is there, so reading down does not throw', () => {
     const state = configState();
 

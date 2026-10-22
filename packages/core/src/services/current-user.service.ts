@@ -1,14 +1,13 @@
-import { computed, type ComputedRef } from 'vue';
+import { computed } from 'vue';
 import { inject } from '../di/inject.js';
 import { defineService, type ServiceOf } from '../di/token.js';
-import type { CurrentUserDto } from '../proxy/models.js';
 import { ConfigStateService } from './config-state.service.js';
 
 export const CurrentUserService = defineService('CurrentUserService', () => {
   const user = inject(ConfigStateService).getOne('currentUser');
 
   return {
-    user: user as ComputedRef<CurrentUserDto>,
+    user,
     isAuthenticated: computed(() => user.value.isAuthenticated),
     roles: computed(() => user.value.roles),
     /** True while an administrator is acting as this user. */

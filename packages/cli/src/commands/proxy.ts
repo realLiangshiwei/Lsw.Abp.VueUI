@@ -37,6 +37,7 @@ export interface ProxyArgs {
   'service-type'?: string | undefined;
   'root-namespace'?: string | undefined;
   'api-name'?: string | undefined;
+  'core-import'?: string | undefined;
   index?: boolean | undefined;
   validators?: boolean | undefined;
   'policy-names'?: boolean | undefined;
@@ -76,7 +77,6 @@ const sharedArgs = {
   'service-type': {
     type: 'string',
     description: 'application, integration or all',
-    default: 'application',
   },
   'root-namespace': {
     type: 'string',
@@ -86,9 +86,13 @@ const sharedArgs = {
     type: 'string',
     description: 'Overrides the remote service name the services are generated with',
   },
-  index: { type: 'boolean', description: 'Write the barrel files', default: true },
-  validators: { type: 'boolean', description: 'Write the validator maps', default: true },
-  'policy-names': { type: 'boolean', description: 'Write the permission names', default: true },
+  'core-import': {
+    type: 'string',
+    description: 'Core import path, relative to the output root when generating Core itself',
+  },
+  index: { type: 'boolean', description: 'Write the barrel files' },
+  validators: { type: 'boolean', description: 'Write the validator maps' },
+  'policy-names': { type: 'boolean', description: 'Write the permission names' },
   'dry-run': {
     type: 'boolean',
     description: 'Say what would change and write nothing',
@@ -143,6 +147,16 @@ export async function runProxy(action: ProxyAction, args: ProxyArgs): Promise<Pr
   const cwd = args.cwd ?? process.cwd();
   const target = isAbsolute(args.target) ? args.target : resolve(cwd, args.target);
   const previous = await readProxyConfig(target);
+  args = {
+    ...args,
+    'root-namespace': args['root-namespace'] ?? previous.source.rootNamespace,
+    'api-name': args['api-name'] ?? previous.source.apiName,
+    'core-import': args['core-import'] ?? previous.source.coreImport,
+    'service-type': args['service-type'] ?? previous.source.serviceType,
+    index: args.index ?? previous.source.index,
+    validators: args.validators ?? previous.source.validators,
+    'policy-names': args['policy-names'] ?? previous.source.policyNames,
+  };
 
   if (args.insecure) {
     // A local ABP backend serves the ASP.NET development certificate, which Node does
@@ -187,6 +201,7 @@ export async function runProxy(action: ProxyAction, args: ProxyArgs): Promise<Pr
           serviceType: serviceTypeOf(args),
           rootNamespace: args['root-namespace'],
           apiName: args['api-name'],
+          coreImport: args['core-import'],
           index: args.index,
           validators: args.validators,
           policyNames: args['policy-names'],
@@ -229,6 +244,7 @@ export async function runProxy(action: ProxyAction, args: ProxyArgs): Promise<Pr
           serviceType: serviceTypeOf(args),
           rootNamespace: args['root-namespace'],
           apiName: args['api-name'],
+          coreImport: args['core-import'],
           index: args.index,
           validators: args.validators,
           policyNames: args['policy-names'],

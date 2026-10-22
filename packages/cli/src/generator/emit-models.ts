@@ -1,7 +1,7 @@
 import { parseClrType } from './clr-type.js';
 import { renderDeclaredType } from './declared-type.js';
-import { CORE_PACKAGE, VALUE_TYPES } from './framework-types.js';
-import { ImportCollector, moduleSpecifier } from './imports.js';
+import { VALUE_TYPES } from './framework-types.js';
+import { coreModuleSpecifier, ImportCollector, moduleSpecifier } from './imports.js';
 import { camelCase, kebabCase, namespaceToDirectory, quoteName } from './names.js';
 import type { TypeDirection } from './generate.js';
 import type { GenerationReport } from './report.js';
@@ -26,9 +26,14 @@ export function fileOf(type: RegisteredType): string {
  * Adds the import one type needs, if it needs one: a framework type comes from core, a
  * type from this very file needs nothing, and everything else is a relative path.
  */
-function importType(imports: ImportCollector, from: RegisteredType, to: RegisteredType): void {
+function importType(
+  imports: ImportCollector,
+  from: RegisteredType,
+  to: RegisteredType,
+  coreImport?: string,
+): void {
   if (to.frameworkName) {
-    imports.addType(CORE_PACKAGE, to.frameworkName);
+    imports.addType(coreModuleSpecifier(from.namespace, coreImport), to.frameworkName);
     return;
   }
 
@@ -99,6 +104,7 @@ function emitInterface(
   imports: ImportCollector,
   report: GenerationReport,
   direction: TypeDirection,
+  coreImport?: string,
 ): string {
   const scope = new Set(type.genericParameters);
   const lines: string[] = [];
@@ -118,13 +124,13 @@ function emitInterface(
       );
     } else {
       heritage = ` extends ${base.text}`;
-      base.refs.forEach(ref => importType(imports, type, ref));
+      base.refs.forEach(ref => importType(imports, type, ref, coreImport));
     }
   }
 
   for (const property of type.definition.properties ?? []) {
     const rendered = renderDeclaredType(registry, property, scope);
-    rendered.refs.forEach(ref => importType(imports, type, ref));
+    rendered.refs.forEach(ref => importType(imports, type, ref, coreImport));
 
     const name = quoteName(property.jsonName ?? camelCase(property.name));
     const nullable = property.isNullable ? ' | null' : '';
@@ -149,11 +155,11 @@ function emitInterface(
   return `export interface ${type.identifier}${genericsOf(type)}${heritage} ${body}`;
 }
 
-function emitEnum(type: RegisteredType, imports: ImportCollector): string {
+function emitEnum(type: RegisteredType, imports: ImportCollector, coreImport?: string): string {
   const names = type.definition.enumNames ?? [];
   const values = type.definition.enumValues ?? [];
 
-  imports.addValue(CORE_PACKAGE, 'mapEnumToOptions');
+  imports.addValue(coreModuleSpecifier(type.namespace, coreImport), 'mapEnumToOptions');
 
   const members = names.map((name, index) => `  ${quoteName(name)} = ${values[index] ?? index},`);
 
@@ -193,6 +199,7 @@ export function emitModels(
   registry: TypeRegistry,
   report: GenerationReport,
   directions: ReadonlyMap<string, TypeDirection> = new Map(),
+  coreImport?: string,
 ): EmittedFile[] {
   const files: EmittedFile[] = [];
   const byNamespace = new Map<string, RegisteredType[]>();
@@ -208,7 +215,7 @@ export function emitModels(
 
     for (const type of sorted.filter(entry => entry.isEnum)) {
       const imports = new ImportCollector();
-      const body = emitEnum(type, imports);
+      const body = emitEnum(type, imports, coreImport);
 
       files.push({
         path: `${fileOf(type)}.ts`,
@@ -223,7 +230,14 @@ export function emitModels(
     const bodies = interfaces.map(type =>
       // A type nothing reached is generated as if the caller built it, which is the
       // weaker of the two promises.
-      emitInterface(type, registry, imports, report, directions.get(type.name) ?? 'request'),
+      emitInterface(
+        type,
+        registry,
+        imports,
+        report,
+        directions.get(type.name) ?? 'request',
+        coreImport,
+      ),
     );
     const header = imports.isEmpty ? '' : `${imports.render()}\n\n`;
     const directory = namespaceToDirectory(namespace);

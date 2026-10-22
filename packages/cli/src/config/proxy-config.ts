@@ -25,6 +25,7 @@ export interface ProxyConfigSource {
   serviceType?: ServiceType | undefined;
   rootNamespace?: string | undefined;
   apiName?: string | undefined;
+  coreImport?: string | undefined;
   index?: boolean | undefined;
   validators?: boolean | undefined;
   policyNames?: boolean | undefined;

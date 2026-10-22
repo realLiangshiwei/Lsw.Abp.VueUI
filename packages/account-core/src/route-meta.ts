@@ -9,6 +9,9 @@ declare module 'vue-router' {
      * page where switching would be wrong: a password reset link is issued by a tenant.
      */
     tenantBoxVisible?: boolean;
+    localLoginRequired?: boolean | undefined;
+    accountAuthWrapperKey?: string | undefined;
+    accountLogoKey?: string | undefined;
   }
 }
 

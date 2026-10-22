@@ -46,9 +46,7 @@ export const routes: RouteRecordRaw[] = [
   ),
   lazyRoutes('/account', () =>
     import.meta.env.VITE_ABP_EDITION === 'pro'
-      ? Promise.all([import('@lsw-abpvue/account'), import('@lsw-abpvue/account-pro')]).then(
-          ([account, pro]) => [...account.createAccountRoutes(), ...pro.createAccountProRoutes()],
-        )
+      ? import('@lsw-abpvue/account-pro').then(pro => pro.createAccountProRoutes())
       : import('@lsw-abpvue/account').then(module => module.createAccountRoutes()),
   ),
   lazyRoutes('/tenant-management', () =>

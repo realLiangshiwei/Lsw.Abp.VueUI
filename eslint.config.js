@@ -51,7 +51,7 @@ const NODE_BUILTINS = [
 
 const ALLOWED_IMPORTS = {
   utils: [],
-  // The CLI may use the pure mapping entry, but never the Vue or DI entry points.
+  // Core's main entry is only used for erased DTO types by the Node CLI.
   cli: [
     ...NODE_BUILTINS,
     '@clack/prompts',
@@ -80,7 +80,16 @@ const ALLOWED_IMPORTS = {
   ...Object.fromEntries(
     BUSINESS_MODULES.map(name => [
       name.slice('@lsw-abpvue/'.length),
-      [...FRAMEWORK, UTILS, CORE, THEME_SHARED, COMPONENTS, ACCOUNT_CORE, ...BUSINESS_MODULES],
+      [
+        ...FRAMEWORK,
+        UTILS,
+        CORE,
+        THEME_SHARED,
+        COMPONENTS,
+        ACCOUNT_CORE,
+        ...BUSINESS_MODULES,
+        ...(name === '@lsw-abpvue/account-pro' ? ['qrcode'] : []),
+      ],
     ]),
   ),
 };
@@ -91,9 +100,10 @@ const ALLOWED_IMPORTS = {
  * regex rather than a glob group because gitignore semantics refuse to re-include a path
  * whose parent directory is already excluded, which every `@scope/name` hits.
  */
-function onlyAllow(allowed) {
+function onlyAllow(allowed, typeOnly = []) {
   const escape = name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const exceptions = ['\\.', ...allowed.flatMap(name => [`${escape(name)}$`, `${escape(name)}/`])];
+  exceptions.push(...typeOnly.map(name => `${escape(name)}$`));
 
   return `^(?!${exceptions.join('|')})`;
 }
@@ -102,6 +112,7 @@ function onlyAllow(allowed) {
 const TEST_TOOLS = ['vitest', '@vue/test-utils', 'happy-dom', 'axe-core'];
 
 function layerRule(pkg, allowed, files) {
+  const typeOnly = pkg === 'cli' ? [CORE] : [];
   return {
     files,
     rules: {
@@ -110,9 +121,14 @@ function layerRule(pkg, allowed, files) {
         {
           patterns: [
             {
-              regex: onlyAllow(allowed),
+              regex: onlyAllow(allowed, typeOnly),
               message: `packages/${pkg} may only import ${allowed.join(', ') || 'nothing'} (design 03 §1). Crossing a layer here is how the DI tokens end up duplicated.`,
             },
+            ...typeOnly.map(name => ({
+              regex: `^${name}$`,
+              allowTypeImports: true,
+              message: 'The Node CLI may only import or re-export types from the Core main entry.',
+            })),
           ],
         },
       ],

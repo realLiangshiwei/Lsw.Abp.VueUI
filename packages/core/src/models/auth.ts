@@ -24,6 +24,9 @@ export interface LoginParams {
   twoFactorCode?: string | undefined;
   /** Redeems one of the codes handed out when two-factor was enabled. */
   recoveryCode?: string | undefined;
+  rememberBrowser?: boolean | undefined;
+  newPassword?: string | undefined;
+  changePasswordToken?: string | undefined;
 }
 
 /**

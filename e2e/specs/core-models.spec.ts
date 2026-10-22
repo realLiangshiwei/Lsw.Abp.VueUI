@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { fixtureSets } from './fixtures.js';
 
 const BACKEND = process.env.ABP_BACKEND_URL ?? 'https://localhost:44384';
-const CORE_MODELS = resolve(import.meta.dirname, '../../packages/core/src/proxy/models.ts');
+const CORE_PROXY = resolve(import.meta.dirname, '../../packages/core/src/proxy');
 
 const strictTls = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -91,26 +91,19 @@ function generatedFrom(definition: ApiDefinition): Map<string, Map<string, Prope
   );
 }
 
-const handWritten = interfacesIn(await readFile(CORE_MODELS, 'utf8'));
-const matrix = await subjects();
-
-/**
- * `core` writes the DTOs of ABP's framework endpoints by hand rather than generating
- * them: it asserts the configuration endpoint answers with every section, and the
- * backend's metadata cannot say so -- ABP's own modules compile without nullable
- * reference types, so every reference property comes back as "not nullable" whether or
- * not it is. Everything below is what that hand-written copy is allowed to differ in.
- */
-/**
- * What core declares that the backend does not send, on purpose. Each one is part of
- * ABP's UI model rather than its wire model, and the extension system reads it from
- * contributors rather than from the configuration endpoint.
- */
-const DECLARED_ON_PURPOSE: Record<string, string[]> = {
-  // Help text under a form field. `isSortable` on `ExtensionPropertyUiDto` is the same
-  // case, and is not listed because it sits inside an inline object type.
-  ExtensionPropertyDto: ['formText'],
+const manifest = JSON.parse(await readFile(resolve(CORE_PROXY, 'generate-proxy.json'), 'utf8')) as {
+  generated: string[];
 };
+const shipped = interfacesIn(
+  (
+    await Promise.all(
+      manifest.generated
+        .filter(path => path.endsWith('models.ts') && !path.startsWith('http/modeling/'))
+        .map(path => readFile(resolve(CORE_PROXY, path), 'utf8')),
+    )
+  ).join('\n'),
+);
+const matrix = await subjects();
 
 describe('the contract matrix', () => {
   it('keeps both tested ABP minors in the captured matrix', () => {
@@ -128,34 +121,33 @@ describe('the contract matrix', () => {
 });
 
 describe.each(matrix)(
-  'the framework DTOs core writes by hand, against $version',
+  'the generated configuration and tenant DTOs, against $version',
   ({ definition }) => {
     const generated = generatedFrom(definition);
-    const shared = [...handWritten.keys()].filter(name => generated.has(name));
+    const shared = [...shipped.keys()].filter(name => generated.has(name));
 
     it('covers the same types the generator produces for the abp module', () => {
       expect(shared.length).toBeGreaterThan(30);
     });
 
-    it.each(shared)('%s declares no property the backend does not have', name => {
-      const ours = handWritten.get(name) as Map<string, Property>;
+    it.each(shared)('%s requires no property the backend does not have', name => {
+      const ours = shipped.get(name) as Map<string, Property>;
       const theirs = generated.get(name) as Map<string, Property>;
-      const allowed = DECLARED_ON_PURPOSE[name] ?? [];
 
       expect(
-        [...ours.keys()].filter(property => !theirs.has(property) && !allowed.includes(property)),
+        [...ours].filter(([property, info]) => !info.optional && !theirs.has(property)),
       ).toEqual([]);
     });
 
     it.each(shared)('%s declares every property the backend has', name => {
-      const ours = handWritten.get(name) as Map<string, Property>;
+      const ours = shipped.get(name) as Map<string, Property>;
       const theirs = generated.get(name) as Map<string, Property>;
 
       expect([...theirs.keys()].filter(property => !ours.has(property))).toEqual([]);
     });
 
     it.each(shared)('%s admits null wherever the backend says the value may be null', name => {
-      const ours = handWritten.get(name) as Map<string, Property>;
+      const ours = shipped.get(name) as Map<string, Property>;
       const theirs = generated.get(name) as Map<string, Property>;
 
       const missing = [...theirs]

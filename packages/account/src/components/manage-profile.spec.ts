@@ -177,6 +177,21 @@ describe('ManageProfilePage', () => {
 });
 
 describe('ChangePasswordTab', () => {
+  it('submits a password change only once while the request is pending', async () => {
+    let release: () => void = () => {};
+    const pending = new Promise<void>(resolve => {
+      release = resolve;
+    });
+    const changePassword = vi.fn(() => pending);
+    const wrapper = await render(ChangePasswordTab, seeded([profileService({ changePassword })]));
+    await wrapper.get('input[name="currentPassword"]').setValue('current-password');
+    await wrapper.get('input[name="newPassword"]').setValue('New-password1!');
+    await wrapper.get('input[name="repeatNewPassword"]').setValue('New-password1!');
+    await wrapper.get('form').trigger('submit');
+    await wrapper.get('form').trigger('submit');
+    expect(changePassword).toHaveBeenCalledTimes(1);
+    release();
+  });
   function seeded(providers: ProviderInput[] = [], profile = PROFILE): Injector {
     const injector = injectorWith([profileService(), ...providers]);
     injector.get(ManageProfileStateService).set(profile);

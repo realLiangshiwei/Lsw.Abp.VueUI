@@ -86,6 +86,8 @@ for entry in packages/identity/src/index.ts packages/identity/config/src/index.t
              packages/identity-pro/proxy/src/index.ts \
              packages/account-pro/src/index.ts packages/account-pro/config/src/index.ts \
              packages/account-pro/proxy/src/index.ts \
+             packages/account-pro/admin/src/index.ts \
+             packages/account-pro/admin/config/src/index.ts \
              packages/audit-logging/src/index.ts packages/audit-logging/config/src/index.ts \
              packages/audit-logging/proxy/src/index.ts \
              packages/tenant-management/proxy/src/index.ts \

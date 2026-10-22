@@ -8,7 +8,7 @@ import {
   TENANT_KEY,
   TokenStorage,
   type OAuthConfig,
-  type ApplicationConfigurationDto,
+  type ApplicationConfiguration,
   type ServiceOf,
   onServiceDestroy,
 } from '@lsw-abpvue/core';
@@ -340,7 +340,7 @@ export const AuthCodeFlowStrategy = defineService('AuthCodeFlowStrategy', (): Au
 
     prepareSession: async (
       response: TokenResponse,
-      configuration: ApplicationConfigurationDto,
+      configuration: ApplicationConfiguration,
       customGrant = true,
     ): Promise<() => void> => {
       const subject = configuration.currentUser.id;

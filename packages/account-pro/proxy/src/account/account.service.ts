@@ -243,7 +243,12 @@ export const AccountService = defineService('AccountService', () => {
 
     setProfilePicture: (input: FormData, config?: RestConfig): Promise<void> =>
       rest.request<FormData, void>(
-        { method: 'POST', url: '/api/account/profile-picture', body: input },
+        {
+          method: 'POST',
+          url: '/api/account/profile-picture',
+          params: { type: input.get('Type') ?? input.get('type') },
+          body: input,
+        },
         { apiName, ...config },
       ),
 

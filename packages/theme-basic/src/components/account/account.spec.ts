@@ -27,6 +27,7 @@ function tenantsAnswering(result: FindTenantResultDto): ProviderInput {
   return {
     provide: AbpTenantService,
     useValue: {
+      apiName: 'abp',
       findTenantByName: () => Promise.resolve(result),
       findTenantById: () => Promise.resolve(result),
     } as AbpTenantService,
@@ -81,6 +82,16 @@ async function render(component: Component, injector: Injector, router: Router) 
 }
 
 describe('AbpAuthWrapper', () => {
+  it('shows a confirmation page that does not require local login', async () => {
+    const injector = createInjector([provideAbpThemeBasic()]);
+    configured(injector, { setting: { values: { 'Abp.Account.EnableLocalLogin': 'false' } } });
+    const wrapper = await render(
+      AbpAuthWrapper,
+      injector,
+      await routerAt('/account/login', { localLoginRequired: false }),
+    );
+    expect(wrapper.text()).toContain('the page');
+  });
   it('puts the page in a card', async () => {
     const injector = createInjector([provideAbpThemeBasic()]);
     const wrapper = await render(AbpAuthWrapper, injector, await routerAt('/account/login'));
@@ -107,7 +118,7 @@ describe('AbpAuthWrapper', () => {
 
   it('shows the tenant box when multi-tenancy is on', async () => {
     const injector = createInjector([provideAbpThemeBasic()]);
-    configured(injector, { multiTenancy: { isEnabled: true } });
+    configured(injector, { multiTenancy: { isEnabled: true, userSharingStrategy: 0 } });
 
     const wrapper = await render(AbpAuthWrapper, injector, await routerAt('/account/login'));
 
@@ -116,7 +127,7 @@ describe('AbpAuthWrapper', () => {
 
   it('hides the tenant box on a route that says so', async () => {
     const injector = createInjector([provideAbpThemeBasic()]);
-    configured(injector, { multiTenancy: { isEnabled: true } });
+    configured(injector, { multiTenancy: { isEnabled: true, userSharingStrategy: 0 } });
 
     const router = await routerAt('/account/login', { tenantBoxVisible: false });
     const wrapper = await render(AbpAuthWrapper, injector, router);
@@ -126,7 +137,7 @@ describe('AbpAuthWrapper', () => {
 
   it('renders the tenant box a host registered in place of its own', async () => {
     const injector = createInjector([provideAbpThemeBasic()]);
-    configured(injector, { multiTenancy: { isEnabled: true } });
+    configured(injector, { multiTenancy: { isEnabled: true, userSharingStrategy: 0 } });
     injector.get(ReplaceableComponentsService).add({
       key: AccountComponents.TenantBox,
       component: defineComponent({ template: '<p>my tenant box</p>' }),

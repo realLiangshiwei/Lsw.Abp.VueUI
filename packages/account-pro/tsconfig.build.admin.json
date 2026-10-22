@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "rootDir": "admin/src",
+    "paths": {},
+    "outDir": "dist/admin"
+  },
+  "include": ["admin/src/**/*.ts", "admin/src/**/*.vue"],
+  "exclude": ["admin/src/**/*.spec.ts"]
+}

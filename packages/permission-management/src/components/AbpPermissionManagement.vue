@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  ConfigStateService,
-  inject as injectAbp,
-  useLocalization,
-  type CurrentUserDto,
-} from '@lsw-abpvue/core';
+import { ConfigStateService, inject as injectAbp, useLocalization } from '@lsw-abpvue/core';
 import {
   PermissionsService,
   type GetPermissionListResultDto,
@@ -187,7 +182,7 @@ function setAll(): void {
  * application's own configuration has to be reloaded before the menu is right again.
  */
 function changesCurrentUser(): boolean {
-  const user = configState.getOne('currentUser').value as CurrentUserDto;
+  const user = configState.getOne('currentUser').value;
 
   if (props.providerName === 'U') return user.id === props.providerKey;
   if (props.providerName === 'R') return user.roles.includes(props.providerKey);

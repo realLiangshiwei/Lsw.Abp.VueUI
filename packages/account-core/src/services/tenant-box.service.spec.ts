@@ -13,6 +13,7 @@ function tenantsAnswering(result: FindTenantResultDto): ProviderInput {
   return {
     provide: AbpTenantService,
     useValue: {
+      apiName: 'abp',
       findTenantByName: () => Promise.resolve(result),
       findTenantById: () => Promise.resolve(result),
     } as AbpTenantService,

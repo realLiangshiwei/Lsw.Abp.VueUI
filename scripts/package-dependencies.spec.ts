@@ -77,10 +77,13 @@ const ALLOWED = {
     'vue-router',
   ],
   'account-pro': [
+    '@lsw-abpvue/account',
     '@lsw-abpvue/core',
     '@lsw-abpvue/components',
     '@lsw-abpvue/account-core',
     '@lsw-abpvue/theme-shared',
+    '@lsw-abpvue/setting-management',
+    'qrcode',
     'vue',
     'vue-router',
   ],

@@ -2,6 +2,7 @@
 import { AccountComponents } from '@lsw-abpvue/account-core';
 import { useReplaceableComponents } from '@lsw-abpvue/core';
 import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import AbpConfirmHost from '../components/AbpConfirmHost.vue';
 import AbpErrorPage from '../components/AbpErrorPage.vue';
 import AbpLoaderBar from '../components/AbpLoaderBar.vue';
@@ -12,10 +13,14 @@ import AbpLogo from '../components/nav/AbpLogo.vue';
 import AbpLanguages from '../components/nav/AbpLanguages.vue';
 
 const replaceable = useReplaceableComponents();
+const route = useRoute();
 
 const authWrapper = computed(
-  () => replaceable.getRef(AccountComponents.AuthWrapper).value ?? AbpAuthWrapper,
+  () =>
+    replaceable.getRef(route.meta.accountAuthWrapperKey ?? AccountComponents.AuthWrapper).value ??
+    AbpAuthWrapper,
 );
+const logo = computed(() => replaceable.getRef(route.meta.accountLogoKey ?? '').value ?? AbpLogo);
 </script>
 
 <template>
@@ -23,7 +28,7 @@ const authWrapper = computed(
 
   <div class="abp-account d-flex flex-column align-items-center justify-content-center">
     <header class="abp-account__header d-flex align-items-center justify-content-between">
-      <AbpLogo />
+      <component :is="logo" />
       <ul class="navbar-nav">
         <AbpLanguages />
       </ul>

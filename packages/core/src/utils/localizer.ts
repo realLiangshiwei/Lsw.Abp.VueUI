@@ -21,7 +21,9 @@ function withBaseResources(
   if (!resource || seen.has(name)) return {};
   seen.add(name);
 
-  const inherited = resource.baseResources.map(base => withBaseResources(base, resources, seen));
+  const inherited = (resource.baseResources ?? []).map(base =>
+    withBaseResources(base, resources, seen),
+  );
   return Object.assign({}, ...inherited, resource.texts) as Record<string, string>;
 }
 
@@ -34,8 +36,11 @@ export function flattenResources(
 ): ResourceTexts {
   const flattened: ResourceTexts = { ...localization.values };
 
-  for (const name of Object.keys(localization.resources)) {
-    flattened[name] = { ...flattened[name], ...withBaseResources(name, localization.resources) };
+  for (const name of Object.keys(localization.resources ?? {})) {
+    flattened[name] = {
+      ...flattened[name],
+      ...withBaseResources(name, localization.resources ?? {}),
+    };
   }
 
   return flattened;

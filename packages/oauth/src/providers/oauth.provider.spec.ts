@@ -15,7 +15,7 @@ import {
   TokenStorage,
   withOptions,
   WindowService,
-  type ApplicationConfigurationDto,
+  type ApplicationConfiguration,
   type Environment,
   type FetchLike,
 } from '@lsw-abpvue/core';
@@ -35,7 +35,7 @@ const environment: Environment = {
   oAuthConfig: { issuer: `${ISSUER}/`, clientId: 'BookStore_App' },
 };
 
-const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
+const fixture = configurationFixture as unknown as ApplicationConfiguration;
 
 function app(...extra: Parameters<typeof createInjector>[0]) {
   const opened: string[] = [];

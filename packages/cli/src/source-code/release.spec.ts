@@ -23,6 +23,8 @@ async function installPackage(
     directories: string[];
     version?: string;
     dependencies?: Record<string, string>;
+    peerDependencies?: Record<string, string> | undefined;
+    devDependencies?: Record<string, string> | undefined;
   },
 ): Promise<void> {
   const root = join(project, 'node_modules', name);
@@ -35,6 +37,8 @@ async function installPackage(
       version: options.version ?? '1.2.3',
       exports: options.exports,
       dependencies: options.dependencies ?? {},
+      peerDependencies: options.peerDependencies ?? {},
+      devDependencies: options.devDependencies ?? {},
     }),
     'utf8',
   );
@@ -185,6 +189,23 @@ describe('releaseSourceCode', () => {
       vue: '^3.5.41',
       'reka-ui': '^2.10.4',
     });
+  });
+
+  it('carries runtime peers and authoring types into the source-release project', async () => {
+    await installPackage(project, '@lsw-abpvue/account-pro', {
+      exports: { '.': { import: './dist/index.js' } },
+      directories: ['src'],
+      peerDependencies: { qrcode: '1.5.4', '@lsw-abpvue/core': '1.2.3' },
+      devDependencies: { '@types/qrcode': '1.5.6', typescript: '6.0.3' },
+    });
+    const result = await releaseSourceCode({ project, packages: ['@lsw-abpvue/account-pro'] });
+    const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8')) as {
+      dependencies: Record<string, string>;
+    };
+    expect(result.added).toEqual({ qrcode: '1.5.4', '@types/qrcode': '1.5.6' });
+    expect(manifest.dependencies.qrcode).toBe('1.5.4');
+    expect(manifest.dependencies['@types/qrcode']).toBe('1.5.6');
+    expect(manifest.dependencies.typescript).toBeUndefined();
   });
 
   it('records what was taken over and when', async () => {

@@ -16,7 +16,7 @@ import {
   TokenStorage,
   WindowService,
   withOptions,
-  type ApplicationConfigurationDto,
+  type ApplicationConfiguration,
   type CurrentTenantDto,
   type FetchLike,
   type Injector,
@@ -62,8 +62,8 @@ function json(value: unknown, status = 200): Response {
     headers: { 'Content-Type': 'application/json' },
   });
 }
-function configuration(subject: 'a' | 'b' | 'anonymous'): ApplicationConfigurationDto {
-  const fixture = configurationFixture as unknown as ApplicationConfigurationDto;
+function configuration(subject: 'a' | 'b' | 'anonymous'): ApplicationConfiguration {
+  const fixture = configurationFixture as unknown as ApplicationConfiguration;
   return {
     ...fixture,
     currentUser: {

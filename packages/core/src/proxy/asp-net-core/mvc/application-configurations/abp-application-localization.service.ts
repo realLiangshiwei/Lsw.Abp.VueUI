@@ -1,7 +1,5 @@
-import { inject } from '../di/inject.js';
-import { defineService, type ServiceOf } from '../di/token.js';
-import type { RestConfig } from '../models/http.js';
-import { RestService } from '../services/rest.service.js';
+import { defineService, inject, RestService } from '../../../../proxy-core.js';
+import type { RestConfig, ServiceOf } from '../../../../proxy-core.js';
 import type { ApplicationLocalizationDto, ApplicationLocalizationRequestDto } from './models.js';
 
 export const AbpApplicationLocalizationService = defineService(
@@ -11,6 +9,8 @@ export const AbpApplicationLocalizationService = defineService(
     const apiName = 'abp';
 
     return {
+      apiName,
+
       get: (
         input: ApplicationLocalizationRequestDto,
         config?: RestConfig,

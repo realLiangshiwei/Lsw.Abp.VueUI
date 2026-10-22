@@ -220,6 +220,24 @@ describe('the token endpoint', () => {
     });
   });
 
+  it('sends password-change challenges, recovery codes and the remember-browser choice by their wire names', async () => {
+    const { exchanges, service } = endpoint(ok);
+    await service.password({
+      username: 'member',
+      password: 'current-password',
+      newPassword: 'replacement-password',
+      changePasswordToken: 'challenge',
+      rememberBrowser: false,
+      recoveryCode: 'ABCDE-FGHIJ',
+    });
+    expect(exchanges[1]?.body).toMatchObject({
+      NewPassword: 'replacement-password',
+      ChangePasswordToken: 'challenge',
+      RememberBrowser: 'false',
+      RecoveryCode: 'ABCDE-FGHIJ',
+    });
+  });
+
   it('a second factor throws an error carrying userId and twoFactorToken', async () => {
     const { service } = endpoint(
       () =>

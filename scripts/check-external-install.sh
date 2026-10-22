@@ -66,6 +66,12 @@ import { AccountComponents, TenantBoxService } from '@lsw-abpvue/account-core';
 import type { ProfileDto } from '@lsw-abpvue/account-core/proxy';
 import { createAccountRoutes, ManageProfileTabs } from '@lsw-abpvue/account';
 import { provideAccountConfig } from '@lsw-abpvue/account/config';
+import { createAccountProRoutes, AccountProComponents, PersonalSettingsTab as ProPersonalSettingsTab, type AccountProConfigOptions } from '@lsw-abpvue/account-pro';
+import { provideAccountProConfig, AccountProProfileTabs } from '@lsw-abpvue/account-pro/config';
+import { AccountSettings as ProAccountSettings } from '@lsw-abpvue/account-pro/admin';
+import { AccountSettingsService as ProAccountSettingsService } from '@lsw-abpvue/account-pro/proxy';
+import { provideAccountProAdminConfig } from '@lsw-abpvue/account-pro/admin/config';
+import type { ProfileDto as ProProfileDto, ProfilePictureSourceDto } from '@lsw-abpvue/account-pro/proxy';
 import { createIdentityRoutes, IdentityComponents } from '@lsw-abpvue/identity';
 import { provideIdentityConfig, IdentityPolicyNames } from '@lsw-abpvue/identity/config';
 import type { IdentityUserDto } from '@lsw-abpvue/identity/proxy';
@@ -99,6 +105,19 @@ export const componentIsTyped: IsAny<typeof AbpPermission> extends false ? true 
 export const proComponentIsTyped: IsAny<typeof ProUsersPage> extends false ? true : never = true;
 export const proUserComponentKey: typeof IdentityComponents.Users = ProIdentityComponents.Users;
 export const proRoleComponentKey: typeof IdentityComponents.Roles = ProIdentityComponents.Roles;
+export const accountTabIsTyped: IsAny<typeof ProPersonalSettingsTab> extends false ? true : never = true;
+export const accountSettingsIsTyped: IsAny<typeof ProAccountSettings> extends false ? true : never = true;
+export const proAccountOptions: AccountProConfigOptions = {
+  personelInfoEntityPropContributors: {
+    [AccountProComponents.PersonalSettings]: [props => props.dropByValue('timezone', (p, n) => p.name === n)],
+  },
+};
+export const proAccountRoutes = createAccountProRoutes(proAccountOptions);
+export const proAccountConfig = [provideAccountProConfig(), provideAccountProAdminConfig()];
+export const proAccountTab: string = AccountProProfileTabs.PersonalInfo;
+export const proAccountTimezone: ProProfileDto['timezone'] = 'UTC';
+export const proProfilePicture: ProfilePictureSourceDto['fileContent'] = 'base64-picture';
+export const accountIdleSettings = () => createInjector([]).get(ProAccountSettingsService).getIdle();
 export const proOptions: IdentityProConfigOptions = {
   entityPropContributors: {
     [ProIdentityComponents.Users]: [props => props.addTail(EntityProp.create<ProIdentityUserDto>({

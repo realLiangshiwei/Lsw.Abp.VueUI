@@ -1,0 +1,30 @@
+{
+  "generated": [
+    "README.md",
+    "asp-net-core/mvc/api-exploring/abp-api-definition.service.ts",
+    "asp-net-core/mvc/application-configurations/abp-application-configuration.service.ts",
+    "asp-net-core/mvc/application-configurations/abp-application-localization.service.ts",
+    "asp-net-core/mvc/application-configurations/models.ts",
+    "asp-net-core/mvc/application-configurations/object-extending/models.ts",
+    "asp-net-core/mvc/multi-tenancy/models.ts",
+    "http/modeling/models.ts",
+    "localization/models.ts",
+    "multi-tenancy/tenant-user-sharing-strategy.enum.ts",
+    "pages/abp/multi-tenancy/abp-tenant.service.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "abp": {
+      "rootPath": "abp",
+      "remoteServiceName": "abp"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "coreImport": "../proxy-core.js",
+    "index": false,
+    "validators": false,
+    "policyNames": false
+  }
+}

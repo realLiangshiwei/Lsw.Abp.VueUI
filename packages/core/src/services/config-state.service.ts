@@ -3,8 +3,8 @@ import type { ComputedRef } from 'vue';
 import type { RestConfig } from '../models/http.js';
 import { inject } from '../di/inject.js';
 import { defineService, type ServiceOf } from '../di/token.js';
-import { AbpApplicationConfigurationService } from '../proxy/abp-application-configuration.service.js';
-import { AbpApplicationLocalizationService } from '../proxy/abp-application-localization.service.js';
+import { AbpApplicationConfigurationService } from '../proxy/asp-net-core/mvc/application-configurations/abp-application-configuration.service.js';
+import { AbpApplicationLocalizationService } from '../proxy/asp-net-core/mvc/application-configurations/abp-application-localization.service.js';
 import type {
   ApplicationConfigurationDto,
   ApplicationLocalizationConfigurationDto,
@@ -13,40 +13,65 @@ import { InternalStore } from '../utils/internal-store.js';
 import { useLatest } from '../utils/use-latest.js';
 import { SessionStateService } from './session-state.service.js';
 
-/**
- * A complete but empty configuration, so everything reading it works before the first
- * response arrives. Angular starts from `{}` and makes every caller guard; this is the
- * same information with the guards paid for once.
- */
-function emptyConfiguration(): ApplicationConfigurationDto {
+function configurationState(configuration: ApplicationConfigurationDto = {}) {
+  const localization = configuration.localization;
+  const currentCulture = localization?.currentCulture;
+  const user = configuration.currentUser;
+  const zone = configuration.timing?.timeZone;
   return {
+    ...configuration,
     localization: {
-      values: {},
-      resources: {},
-      languages: [],
-      currentCulture: { isRightToLeft: false, dateTimeFormat: {} },
-      languagesMap: {},
-      languageFilesMap: {},
-      useRouteBasedCulture: false,
+      ...localization,
+      values: localization?.values ?? {},
+      resources: localization?.resources ?? {},
+      languages: localization?.languages ?? [],
+      currentCulture: {
+        ...currentCulture,
+        isRightToLeft: currentCulture?.isRightToLeft ?? false,
+        dateTimeFormat: currentCulture?.dateTimeFormat ?? {},
+      },
+      languagesMap: localization?.languagesMap ?? {},
+      languageFilesMap: localization?.languageFilesMap ?? {},
+      useRouteBasedCulture: localization?.useRouteBasedCulture ?? false,
     },
-    auth: { grantedPolicies: {} },
-    setting: { values: {} },
+    auth: { ...configuration.auth, grantedPolicies: configuration.auth?.grantedPolicies ?? {} },
+    setting: { ...configuration.setting, values: configuration.setting?.values ?? {} },
     currentUser: {
-      isAuthenticated: false,
-      emailVerified: false,
-      phoneNumberVerified: false,
-      roles: [],
+      ...user,
+      isAuthenticated: user?.isAuthenticated ?? false,
+      emailVerified: user?.emailVerified ?? false,
+      phoneNumberVerified: user?.phoneNumberVerified ?? false,
+      roles: user?.roles ?? [],
     },
-    features: { values: {} },
-    globalFeatures: { enabledFeatures: [] },
-    multiTenancy: { isEnabled: false },
-    currentTenant: { isAvailable: false },
-    timing: { timeZone: { iana: {}, windows: {} } },
-    clock: {},
-    objectExtensions: { modules: {}, enums: {} },
-    extraProperties: {},
+    features: { ...configuration.features, values: configuration.features?.values ?? {} },
+    globalFeatures: {
+      ...configuration.globalFeatures,
+      enabledFeatures: configuration.globalFeatures?.enabledFeatures ?? [],
+    },
+    multiTenancy: {
+      ...configuration.multiTenancy,
+      isEnabled: configuration.multiTenancy?.isEnabled ?? false,
+      userSharingStrategy: configuration.multiTenancy?.userSharingStrategy ?? 0,
+    },
+    currentTenant: {
+      ...configuration.currentTenant,
+      isAvailable: configuration.currentTenant?.isAvailable ?? false,
+    },
+    timing: {
+      ...configuration.timing,
+      timeZone: { ...zone, iana: zone?.iana ?? {}, windows: zone?.windows ?? {} },
+    },
+    clock: { ...configuration.clock },
+    objectExtensions: {
+      ...configuration.objectExtensions,
+      modules: configuration.objectExtensions?.modules ?? {},
+      enums: configuration.objectExtensions?.enums ?? {},
+    },
+    extraProperties: configuration.extraProperties ?? {},
   };
 }
+
+export type ApplicationConfiguration = ReturnType<typeof configurationState>;
 
 function resolvePath(source: unknown, path: string | string[]): unknown {
   const segments = Array.isArray(path) ? path : path.split('.');
@@ -72,8 +97,8 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
   const appConfiguration = inject(AbpApplicationConfigurationService);
   const appLocalization = inject(AbpApplicationLocalizationService);
   const session = inject(SessionStateService);
-  const store = new InternalStore<ApplicationConfigurationDto>(emptyConfiguration());
-  const latest = useLatest<ApplicationConfigurationDto>();
+  const store = new InternalStore<ApplicationConfiguration>(configurationState());
+  const latest = useLatest<ApplicationConfiguration>();
 
   /**
    * The texts of one culture, in the shape the store keeps them.
@@ -91,30 +116,32 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
     return {
       resources,
       values: Object.fromEntries(
-        Object.entries(resources).map(([name, resource]) => [name, resource.texts]),
+        Object.entries(resources).map(([name, resource]) => [name, resource.texts ?? {}]),
       ),
       ...(localization.currentCulture ? { currentCulture: localization.currentCulture } : {}),
     };
   }
 
-  async function readAppState(config?: RestConfig): Promise<ApplicationConfigurationDto> {
-    const application = await appConfiguration.get({ includeLocalizationResources: false }, config);
+  async function readAppState(config?: RestConfig): Promise<ApplicationConfiguration> {
+    const application = configurationState(
+      await appConfiguration.get({ includeLocalizationResources: false }, config),
+    );
     const culture =
       session.getLanguage()?.split(';')[0] ||
       application.localization?.currentCulture?.cultureName?.split(';')[0];
     if (!culture) return application;
-    return {
+    return configurationState({
       ...application,
       localization: { ...application.localization, ...(await textsOf(culture, config)) },
-    };
+    });
   }
 
   return {
-    getAll: (): ComputedRef<ApplicationConfigurationDto> => store.slice(state => state),
+    getAll: (): ComputedRef<ApplicationConfiguration> => store.slice(state => state),
 
-    getOne: <K extends keyof ApplicationConfigurationDto>(
+    getOne: <K extends keyof ApplicationConfiguration>(
       key: K,
-    ): ComputedRef<ApplicationConfigurationDto[K]> => store.slice(state => state[key]),
+    ): ComputedRef<ApplicationConfiguration[K]> => store.slice(state => state[key]),
 
     /** @param path Dotted path, e.g. `localization.currentCulture.cultureName` */
     getDeep: <T = unknown>(path: string | string[]): ComputedRef<T> =>
@@ -144,17 +171,17 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
       store.slice(state => state.globalFeatures.enabledFeatures.includes(key)),
 
     /** The current value, for guards and other places that cannot be reactive. */
-    snapshot: (): ApplicationConfigurationDto => store.state.value,
+    snapshot: (): ApplicationConfiguration => store.state.value,
 
     setState: (configuration: ApplicationConfigurationDto): void => {
       latest.cancel();
-      store.set(configuration);
+      store.set(configurationState(configuration));
     },
 
     clearIdentity: (): void => {
       latest.cancel();
       store.set({
-        ...emptyConfiguration(),
+        ...configurationState(),
         localization: store.state.value.localization,
         multiTenancy: store.state.value.multiTenancy,
         currentTenant: session.getTenant() ?? { isAvailable: false },
@@ -164,7 +191,7 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
     /** Reads configuration and localization without changing the active identity. */
     readAppState,
 
-    onUpdate: (callback: (configuration: ApplicationConfigurationDto) => void): (() => void) =>
+    onUpdate: (callback: (configuration: ApplicationConfiguration) => void): (() => void) =>
       store.onUpdate(state => state, callback),
 
     /**
@@ -176,7 +203,7 @@ export const ConfigStateService = defineService('ConfigStateService', () => {
      * out, and they are put back before the store is replaced: a refresh that dropped
      * them would blank every label in the UI, and a login triggers one.
      */
-    refreshAppState: async (): Promise<ApplicationConfigurationDto> => {
+    refreshAppState: async (): Promise<ApplicationConfiguration> => {
       const configuration = await latest.run(signal => readAppState({ signal }));
 
       if (configuration) store.set(configuration);

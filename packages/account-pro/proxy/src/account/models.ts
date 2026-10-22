@@ -3,6 +3,9 @@ import type {
   ExtensibleObject,
   ExtensiblePagedAndSortedResultRequestDto,
 } from '@lsw-abpvue/core';
+import type { IdentityProTwoFactorBehaviour } from '../identity/features/identity-pro-two-factor-behaviour.enum.js';
+import type { EmailLoginType } from './email-login-type.enum.js';
+import type { ExternalProviderSettings } from './external-providers/models.js';
 import type { ProfilePictureType } from './profile-picture-type.enum.js';
 
 export interface AcceptInvitationInput {
@@ -11,10 +14,55 @@ export interface AcceptInvitationInput {
   password?: string | undefined;
 }
 
+export interface AccountEmailLoginSettingsDto {
+  enabled?: boolean | undefined;
+  loginType?: EmailLoginType | undefined;
+  tokenLifespan?: number | undefined;
+}
+
 export interface AccountExternalLoginDto {
   loginProvider?: string | undefined;
   providerKey?: string | undefined;
   providerDisplayName?: string | undefined;
+}
+
+export interface AccountExternalProviderSettingsDto {
+  verifyPasswordDuringExternalLogin?: boolean | undefined;
+  externalProviders?: ExternalProviderSettings[] | undefined;
+}
+
+export interface AccountIdleSettingsDto {
+  enabled?: boolean | undefined;
+  idleTimeoutMinutes?: number | undefined;
+  countdownSeconds?: number | undefined;
+}
+
+export interface AccountPasskeySettingsDto {
+  enabled?: boolean | undefined;
+  maximumPasskeysPerUser?: number | undefined;
+}
+
+export interface AccountRecaptchaSettingsDto {
+  useCaptchaOnLogin?: boolean | undefined;
+  useCaptchaOnRegistration?: boolean | undefined;
+  useCaptchaOnForgotPassword?: boolean | undefined;
+  verifyBaseUrl?: string | undefined;
+  siteKey?: string | undefined;
+  siteSecret?: string | undefined;
+  version?: number | undefined;
+  score?: number | undefined;
+}
+
+export interface AccountSettingsDto {
+  isSelfRegistrationEnabled?: boolean | undefined;
+  enableLocalLogin?: boolean | undefined;
+  preventEmailEnumeration?: boolean | undefined;
+}
+
+export interface AccountTwoFactorSettingsDto {
+  twoFactorBehaviour?: IdentityProTwoFactorBehaviour | undefined;
+  isRememberBrowserEnabled?: boolean | undefined;
+  usersCanChange?: boolean | undefined;
 }
 
 export interface AuthenticatorInfoDto {
@@ -142,7 +190,7 @@ export interface ProfileDto extends ExtensibleObject {
 export interface ProfilePictureSourceDto {
   type: ProfilePictureType;
   source?: string | undefined;
-  fileContent?: number[] | undefined;
+  fileContent?: string | number[] | undefined;
 }
 
 export interface RegisterDto extends ExtensibleObject {

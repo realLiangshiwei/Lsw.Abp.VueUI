@@ -19,6 +19,15 @@ export interface ExternalProviderItemWithSecretDto {
   secretProperties?: ExternalProviderSettingsProperty[] | undefined;
 }
 
+export interface ExternalProviderSettings {
+  name?: string | undefined;
+  enabled?: boolean | undefined;
+  enabledForTenantUser?: boolean | undefined;
+  useCustomSettings?: boolean | undefined;
+  properties?: ExternalProviderSettingsProperty[] | undefined;
+  secretProperties?: ExternalProviderSettingsProperty[] | undefined;
+}
+
 export type ExternalProviderSettingsProperty = NameValue<string>;
 
 export interface GetByNameInput {
