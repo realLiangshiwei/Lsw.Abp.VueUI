@@ -26,7 +26,9 @@
         >{{ localization.t('AbpIdentity::PendingInvitation') }}</AbpButton
       >
     </div>
-    <p v-if="error" role="alert">{{ error }}</p>
+    <p v-if="error || failed" role="alert">
+      {{ error || localization.t('AbpUi::ErrorLoadingDatatable') }}
+    </p>
     <AbpButton
       v-if="failed || uncertain"
       variant="secondary"
@@ -253,10 +255,16 @@ const sorting = ref<
   'inviteeEmail asc' | 'inviteeEmail desc' | 'invitationDate asc' | 'invitationDate desc'
 >('invitationDate desc');
 const pageSize = 10;
-const loading = ref(false);
+const rolesLoading = ref(false);
+const pendingLoading = ref(false);
 const busy = ref(false);
 const confirming = ref(false);
-const failed = ref(false);
+const rolesFailed = ref(false);
+const pendingFailed = ref(false);
+const loading = computed(() =>
+  tab.value === 'invite' ? rolesLoading.value : pendingLoading.value,
+);
+const failed = computed(() => (tab.value === 'invite' ? rolesFailed.value : pendingFailed.value));
 const uncertain = ref(false);
 const error = ref('');
 let revision = 0;
@@ -298,13 +306,21 @@ function toggleRole(name: string, checked: boolean) {
 async function loadRoles() {
   const own = revision;
   rolesReady.value = false;
-  const response = await service.getAssignableRoles(requestConfig());
-  if (!current(own)) return;
-  roles.value = response.items ?? [];
-  selectedRoles.value = selectedRoles.value.filter(name =>
-    roles.value.some(role => role.name === name),
-  );
-  rolesReady.value = true;
+  rolesLoading.value = true;
+  rolesFailed.value = false;
+  try {
+    const response = await service.getAssignableRoles(requestConfig());
+    if (!current(own)) return;
+    roles.value = response.items ?? [];
+    selectedRoles.value = selectedRoles.value.filter(name =>
+      roles.value.some(role => role.name === name),
+    );
+    rolesReady.value = true;
+  } catch {
+    if (current(own)) rolesFailed.value = true;
+  } finally {
+    if (current(own)) rolesLoading.value = false;
+  }
 }
 function sortDirection(field: 'inviteeEmail' | 'invitationDate') {
   if (!sorting.value.startsWith(`${field} `)) return 'none';
@@ -326,12 +342,11 @@ async function loadPending(reuseSnapshot = false) {
   const queryFilter = filter.value.trim().toLowerCase();
   const querySorting = sorting.value;
   const key = JSON.stringify([queryFilter, querySorting]);
-  loading.value = true;
+  pendingLoading.value = true;
   pendingReady.value = false;
   pending.value = [];
   total.value = 0;
-  failed.value = false;
-  error.value = '';
+  pendingFailed.value = false;
   const publish = (rows: UserSharingInvitationDto[], count: number) => {
     total.value = count;
     page.value = Math.min(page.value, Math.max(0, Math.ceil(count / pageSize) - 1));
@@ -399,12 +414,19 @@ async function loadPending(reuseSnapshot = false) {
       completePending.value = null;
       pending.value = [];
       total.value = 0;
-      failed.value = true;
-      error.value = localization.t('AbpUi::ErrorLoadingDatatable');
+      pendingFailed.value = true;
     }
   } finally {
-    if (isCurrentQuery()) loading.value = false;
+    if (isCurrentQuery()) pendingLoading.value = false;
   }
+}
+
+function invalidatePending() {
+  pendingController.abort();
+  pendingRevision++;
+  completePending.value = null;
+  pendingReady.value = false;
+  pendingLoading.value = false;
 }
 
 async function reload() {
@@ -412,26 +434,23 @@ async function reload() {
   const own = ++revision;
   controller.abort();
   controller = new AbortController();
-  pendingController.abort();
-  completePending.value = null;
-  pendingReady.value = false;
+  invalidatePending();
   pending.value = [];
   total.value = 0;
-  loading.value = true;
-  failed.value = false;
-  error.value = '';
-  try {
-    await loadRoles();
-    if (!current(own)) return;
-    await loadPending();
-    if (current(own) && rolesReady.value && pendingReady.value) uncertain.value = false;
-  } catch {
-    if (current(own)) {
-      failed.value = true;
-      error.value = localization.t('AbpUi::ErrorLoadingDatatable');
-    }
-  } finally {
-    if (current(own) && (pendingReady.value || failed.value)) loading.value = false;
+  pendingFailed.value = false;
+  if (!uncertain.value) {
+    error.value = '';
+    const reads = [loadRoles()];
+    if (tab.value === 'pending') reads.push(loadPending());
+    await Promise.all(reads);
+    return;
+  }
+  await loadRoles();
+  if (!current(own) || !rolesReady.value) return;
+  await loadPending();
+  if (current(own) && pendingReady.value) {
+    uncertain.value = false;
+    error.value = '';
   }
 }
 async function mutate(action: () => Promise<void>) {
@@ -446,13 +465,14 @@ async function mutate(action: () => Promise<void>) {
     return;
   const own = revision;
   busy.value = true;
+  invalidatePending();
   error.value = '';
   try {
     await action();
     if (!current(own)) return;
     emit('saved');
     busy.value = false;
-    await loadPending();
+    if (tab.value === 'pending') await loadPending();
   } catch {
     if (current(own)) {
       uncertain.value = true;
@@ -522,24 +542,26 @@ async function cancelAll() {
   if (status === 'confirm' && current(own))
     await mutate(() => service.cancelAllPendingInvitations(requestConfig()));
 }
-function close() {
-  if (closed) return;
+function dispose() {
   closed = true;
   revision++;
   controller.abort();
-  pendingController.abort();
-  completePending.value = null;
+  invalidatePending();
+}
+function close() {
+  if (closed) return;
+  dispose();
   emit('close');
 }
 watch(filter, () => {
   page.value = 0;
-  pendingRevision++;
-  pendingController.abort();
-  completePending.value = null;
+  invalidatePending();
   pending.value = [];
   total.value = 0;
-  pendingReady.value = false;
-  loading.value = false;
+});
+watch(tab, value => {
+  if (!uncertain.value) error.value = '';
+  if (value === 'pending' && !pendingReady.value && !pendingLoading.value) void loadPending();
 });
 watch(
   context,
@@ -550,11 +572,5 @@ watch(
   },
   { immediate: true, flush: 'sync' },
 );
-onBeforeUnmount(() => {
-  closed = true;
-  revision++;
-  controller.abort();
-  pendingController.abort();
-  completePending.value = null;
-});
+onBeforeUnmount(dispose);
 </script>
