@@ -170,6 +170,29 @@ describe('an interface', () => {
 });
 
 describe('an enum', () => {
+  it('keeps a nullable enum filter typed as its declared CLR enum', () => {
+    const { content, report } = emit({
+      'Volo.Saas.Host.Dtos.GetTenantsInput': dto({
+        properties: [
+          property('ActivationState', 'enum?', {
+            type: 'Volo.Saas.TenantActivationState?',
+            isNullable: true,
+          }),
+        ],
+      }),
+      'Volo.Saas.TenantActivationState': dto({
+        isEnum: true,
+        enumNames: ['Active', 'ActiveWithLimitedTime', 'Passive'],
+        enumValues: [0, 1, 2],
+      }),
+    });
+
+    expect(content('volo/saas/host/dtos/models.ts')).toContain(
+      'activationState?: TenantActivationState | null | undefined;',
+    );
+    expect(report.of('unresolved')).toEqual([]);
+  });
+
   const { files, content } = emit({
     'Acme.Books.BookType': dto({
       isEnum: true,

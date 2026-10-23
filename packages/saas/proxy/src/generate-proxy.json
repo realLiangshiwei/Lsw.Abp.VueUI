@@ -1,0 +1,37 @@
+{
+  "generated": [
+    "README.md",
+    "index.ts",
+    "payment/index.ts",
+    "payment/plans/index.ts",
+    "payment/plans/models.ts",
+    "payment/requests/index.ts",
+    "payment/requests/models.ts",
+    "payment/requests/payment-request-state.enum.ts",
+    "payment/requests/payment-type.enum.ts",
+    "saas/host/dtos/index.ts",
+    "saas/host/dtos/models.ts",
+    "saas/host/edition.service.ts",
+    "saas/host/index.ts",
+    "saas/host/models.ts",
+    "saas/host/settings.service.ts",
+    "saas/host/subscription.service.ts",
+    "saas/host/tenant.service.ts",
+    "saas/index.ts",
+    "saas/tenant-activation-state.enum.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "saas": {
+      "rootPath": "saas",
+      "remoteServiceName": "SaasHost"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

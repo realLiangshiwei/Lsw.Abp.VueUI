@@ -1,6 +1,6 @@
 import { passwordValidators, type PasswordRules } from '@lsw-abpvue/theme-shared';
 import { describe, expect, it, vi } from 'vitest';
-import { generateIdentityPassword, PasswordGenerationError } from './generate-password.js';
+import { generatePassword, PasswordGenerationError } from './generate-password.js';
 const baseline: PasswordRules = {
   requiredLength: 6,
   requiredUniqueChars: 1,
@@ -20,7 +20,7 @@ describe('generated Identity passwords', () => {
     (requiredLength, requiredUniqueChars) => {
       const rules = { ...baseline, requiredLength, requiredUniqueChars };
       const secureRandom = vi.spyOn(globalThis.crypto, 'getRandomValues');
-      const value = generateIdentityPassword(rules);
+      const value = generatePassword(rules);
       expect(value.length).toBeLessThanOrEqual(128);
       expect(
         passwordValidators(rules).every(
@@ -29,12 +29,15 @@ describe('generated Identity passwords', () => {
       ).toBe(true);
       expect(secureRandom).toHaveBeenCalled();
       secureRandom.mockRestore();
-      expect(generateIdentityPassword(rules)).not.toBe(value);
+      expect(generatePassword(rules)).not.toBe(value);
     },
   );
   it('reports an impossible policy without silently truncating its requirements', () => {
-    expect(() => generateIdentityPassword({ ...baseline, requiredLength: 129 })).toThrow(
+    expect(() => generatePassword({ ...baseline, requiredLength: 129 })).toThrow(
       PasswordGenerationError,
     );
+  });
+  it('identifies a generation failure with an existing backend localization key', () => {
+    expect(new PasswordGenerationError().message).toBe('AbpValidation::ThisFieldIsNotValid.');
   });
 });

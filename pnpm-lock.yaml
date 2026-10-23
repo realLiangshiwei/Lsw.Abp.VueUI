@@ -384,6 +384,33 @@ importers:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)
 
+  packages/saas:
+    devDependencies:
+      '@lsw-abpvue/audit-logging':
+        specifier: workspace:*
+        version: link:../audit-logging
+      '@lsw-abpvue/components':
+        specifier: workspace:*
+        version: link:../components
+      '@lsw-abpvue/core':
+        specifier: workspace:*
+        version: link:../core
+      '@lsw-abpvue/feature-management':
+        specifier: workspace:*
+        version: link:../feature-management
+      '@lsw-abpvue/setting-management':
+        specifier: workspace:*
+        version: link:../setting-management
+      '@lsw-abpvue/theme-shared':
+        specifier: workspace:*
+        version: link:../theme-shared
+      vue:
+        specifier: 3.5.41
+        version: 3.5.41(typescript@6.0.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.6.4(vue@3.5.41(typescript@6.0.3))
+
   packages/setting-management:
     devDependencies:
       '@lsw-abpvue/components':
@@ -521,6 +548,9 @@ importers:
       '@lsw-abpvue/permission-management':
         specifier: workspace:*
         version: link:../packages/permission-management
+      '@lsw-abpvue/saas':
+        specifier: workspace:*
+        version: link:../packages/saas
       '@lsw-abpvue/setting-management':
         specifier: workspace:*
         version: link:../packages/setting-management

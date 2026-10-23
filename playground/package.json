@@ -32,7 +32,8 @@
     "vue": "3.5.41",
     "vue-router": "^4.5.1",
     "@lsw-abpvue/account-pro": "workspace:*",
-    "@lsw-abpvue/audit-logging": "workspace:*"
+    "@lsw-abpvue/audit-logging": "workspace:*",
+    "@lsw-abpvue/saas": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",

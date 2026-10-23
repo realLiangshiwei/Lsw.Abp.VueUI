@@ -21,6 +21,7 @@ import { provideAccountProConfig } from '@lsw-abpvue/account-pro/config';
 import { provideAccountProAdminConfig } from '@lsw-abpvue/account-pro/admin/config';
 import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/config';
 import { provideTenantManagementConfig } from '@lsw-abpvue/tenant-management/config';
+import { provideSaasConfig } from '@lsw-abpvue/saas/config';
 import App from './App.vue';
 import { routes } from './routes';
 import { defaultEnvironment, describeStartupError, startupError } from './startup';
@@ -54,7 +55,9 @@ const { mount } = await createAbpApp(App, {
       ? provideIdentityProConfig()
       : provideIdentityConfig(),
     ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? provideAuditLogging() : []),
-    provideTenantManagementConfig(),
+    import.meta.env.VITE_ABP_EDITION === 'pro'
+      ? provideSaasConfig()
+      : provideTenantManagementConfig(),
     // Setting management before feature management: the tab tree lives in the first, and
     // the second puts one of its own into it.
     provideSettingManagementConfig(),

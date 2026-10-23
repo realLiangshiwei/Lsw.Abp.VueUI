@@ -24,7 +24,7 @@ export function renderDeclaredType(
   scope: ReadonlySet<string> = new Set(),
 ): RenderedType {
   const simple = parseClrType(declared.typeSimple);
-  const mentionsEnum = /(^|[[{:,<])enum([\]}:,>]|$)/.test(declared.typeSimple);
+  const mentionsEnum = /(^|[[{:,<])enum(?=\?|[\]}:,>]|$)/.test(declared.typeSimple);
   const mentionsBytes =
     declared.type.includes('[System.Byte]') || declared.type.includes('System.Byte[]');
 

@@ -20,6 +20,7 @@ const BUSINESS_MODULES = [
   '@lsw-abpvue/identity',
   '@lsw-abpvue/identity-pro',
   '@lsw-abpvue/permission-management',
+  '@lsw-abpvue/saas',
   '@lsw-abpvue/setting-management',
   '@lsw-abpvue/tenant-management',
 ];

@@ -109,6 +109,19 @@ describe('generating the identity module', () => {
     expect(result.content('volo/abp/users/models.ts')).toContain('export interface UserData');
   });
 
+  it('keeps exports stable when an unrelated module describes a type with the same name', () => {
+    const expanded: ApiDefinition = {
+      ...definition,
+      types: {
+        ...definition.types,
+        'Acme.Unrelated.IdentityUserDto': { isEnum: false, properties: [] },
+      },
+    };
+    expect(generateProxy({ definition: expanded, modules: ['identity'] }).files).toEqual(
+      result.files,
+    );
+  });
+
   it('writes a barrel per directory, up to the root', () => {
     expect(result.content('index.ts')).toBe("export * from './volo/index.js';\n");
     expect(result.content('volo/abp/identity/index.ts')).toContain(

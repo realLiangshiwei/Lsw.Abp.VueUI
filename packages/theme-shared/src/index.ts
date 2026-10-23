@@ -1,3 +1,4 @@
+export { generatePassword, PasswordGenerationError } from './utils/generate-password.js';
 export {
   AbpButton,
   AbpConfirmHost,

@@ -86,6 +86,9 @@ import type { FeatureDto } from '@lsw-abpvue/feature-management/proxy';
 import { createTenantManagementRoutes, TenantManagementComponents } from '@lsw-abpvue/tenant-management';
 import { provideTenantManagementConfig, TenantManagementPolicyNames } from '@lsw-abpvue/tenant-management/config';
 import type { TenantDto } from '@lsw-abpvue/tenant-management/proxy';
+import { AbpTenantsPage as SaasTenantsPage, createSaasRoutes, SaasComponents, type SaasConfigOptions } from '@lsw-abpvue/saas';
+import { provideSaasConfig, SaasPolicyNames } from '@lsw-abpvue/saas/config';
+import { TenantService as SaasTenantService, TenantActivationState, type SaasTenantDto } from '@lsw-abpvue/saas/proxy';
 import { createSettingManagementRoutes, SettingManagementComponents } from '@lsw-abpvue/setting-management';
 import { provideSettingManagementConfig, SettingTabsService } from '@lsw-abpvue/setting-management/config';
 import type { EmailSettingsDto } from '@lsw-abpvue/setting-management/proxy';
@@ -187,6 +190,19 @@ export const grants = flatten([{ name: 'g', displayName: 'g', permissions: [] }]
 export const featureKey: string = FeatureManagementComponents.FeatureManagement;
 export const settingsKey: string = SettingManagementComponents.SettingManagement;
 export const tenantPolicy: string = TenantManagementPolicyNames.TenantsManageConnectionStrings;
+export const saasPageIsTyped: IsAny<typeof SaasTenantsPage> extends false ? true : never = true;
+export const saasOptions: SaasConfigOptions = {
+  entityPropContributors: {
+    [SaasComponents.Tenants]: [props => props.addTail(EntityProp.create<SaasTenantDto>({
+      name: 'activationState', type: PropType.Number, valueResolver: data => data.record.activationState,
+    }))],
+  },
+};
+export const saasRoutes = createSaasRoutes(saasOptions);
+export const saasConfig = provideSaasConfig();
+export const saasPolicy: string = SaasPolicyNames.TenantsManageConnectionStrings;
+export const saasActivation: SaasTenantDto['activationState'] = TenantActivationState.Active;
+export const saasList = () => createInjector([]).get(SaasTenantService).getList({ activationState: saasActivation });
 export const changed = changedFeatures(flattenFeatures([{ name: 'g', displayName: 'g', features: [] }]));
 export const settingTabs = createInjector([]).get(SettingTabsService).visible.value;
 

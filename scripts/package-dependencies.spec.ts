@@ -124,6 +124,16 @@ const ALLOWED = {
     'vue',
     'vue-router',
   ],
+  saas: [
+    '@lsw-abpvue/audit-logging',
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/feature-management',
+    '@lsw-abpvue/setting-management',
+    '@lsw-abpvue/theme-shared',
+    'vue',
+    'vue-router',
+  ],
   'theme-basic': [
     // The account layout draws the tenant box and the card the account pages sit in, and
     // neither has any UI of its own to bring (design 03 §1).

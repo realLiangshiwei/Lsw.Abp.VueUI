@@ -23,7 +23,7 @@ it('prebundles installed application entry points before auto imports discover t
 
 it('prebundles commercial entry points including separate account administration', async () => {
   const target = await mkdtemp(join(tmpdir(), 'abpvue-commercial-resolution-'));
-  const packages = ['identity-pro', 'account-pro', 'audit-logging'];
+  const packages = ['identity-pro', 'account-pro', 'audit-logging', 'saas'];
   try {
     await mkdir(join(target, 'node_modules/@lsw-abpvue'), { recursive: true });
     await writeFile(join(target, 'tsconfig.json'), JSON.stringify({ compilerOptions: {} }));

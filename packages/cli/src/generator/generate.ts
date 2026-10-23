@@ -179,11 +179,6 @@ function assertOnePerPath(files: EmittedFile[]): void {
  */
 export function generateProxy(options: GenerateOptions): GenerationResult {
   const report = new GenerationReport();
-  const registry = new TypeRegistry(options.definition.types ?? {}, {
-    rootNamespace: options.rootNamespace,
-    report,
-  });
-
   const available = Object.keys(options.definition.modules ?? {});
   const wanted = options.modules.includes('all') ? available : options.modules;
 
@@ -214,6 +209,36 @@ export function generateProxy(options: GenerateOptions): GenerationResult {
       })),
     ),
     report,
+  );
+
+  const pool = options.definition.types ?? {};
+  const discoveryReport = new GenerationReport();
+  const discovery = new TypeRegistry(pool, {
+    rootNamespace: options.rootNamespace,
+    report: discoveryReport,
+  });
+  const seeds = selected.flatMap(({ module }) => {
+    const { referenced } = emitServices(controllersOf(module.controllers, serviceType), {
+      module,
+      registry: discovery,
+      report: discoveryReport,
+      rootNamespace: options.rootNamespace,
+      apiName: options.apiName,
+      coreImport: options.coreImport,
+      names,
+    });
+    return [...referenced.request, ...referenced.response];
+  });
+  // Unused modules must not rename the types this generation exports.
+  const families = new Set([...reachableFrom(seeds, discovery).values()].map(type => type.name));
+  const registry = new TypeRegistry(
+    Object.fromEntries(
+      Object.entries(pool).filter(([key]) => {
+        const type = discovery.get(key);
+        return type && (type.frameworkName || families.has(type.name));
+      }),
+    ),
+    { rootNamespace: options.rootNamespace, report },
   );
 
   for (const { module } of selected) {

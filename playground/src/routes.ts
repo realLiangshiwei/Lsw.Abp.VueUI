@@ -49,9 +49,15 @@ export const routes: RouteRecordRaw[] = [
       ? import('@lsw-abpvue/account-pro').then(pro => pro.createAccountProRoutes())
       : import('@lsw-abpvue/account').then(module => module.createAccountRoutes()),
   ),
-  lazyRoutes('/tenant-management', () =>
-    import('@lsw-abpvue/tenant-management').then(module => module.createTenantManagementRoutes()),
-  ),
+  import.meta.env.VITE_ABP_EDITION === 'pro'
+    ? lazyRoutes('/saas', () =>
+        import('@lsw-abpvue/saas').then(module => module.createSaasRoutes()),
+      )
+    : lazyRoutes('/tenant-management', () =>
+        import('@lsw-abpvue/tenant-management').then(module =>
+          module.createTenantManagementRoutes(),
+        ),
+      ),
   lazyRoutes('/setting-management', () =>
     import('@lsw-abpvue/setting-management').then(module => module.createSettingManagementRoutes()),
   ),

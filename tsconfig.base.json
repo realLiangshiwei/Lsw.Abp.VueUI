@@ -68,7 +68,10 @@
       "@lsw-abpvue/audit-logging/config": ["./packages/audit-logging/config/src/index.ts"],
       "@lsw-abpvue/audit-logging/proxy": ["./packages/audit-logging/proxy/src/index.ts"],
       "@lsw-abpvue/account-pro/admin": ["./packages/account-pro/admin/src/index.ts"],
-      "@lsw-abpvue/account-pro/admin/config": ["./packages/account-pro/admin/config/src/index.ts"]
+      "@lsw-abpvue/account-pro/admin/config": ["./packages/account-pro/admin/config/src/index.ts"],
+      "@lsw-abpvue/saas": ["./packages/saas/src/index.ts"],
+      "@lsw-abpvue/saas/config": ["./packages/saas/config/src/index.ts"],
+      "@lsw-abpvue/saas/proxy": ["./packages/saas/proxy/src/index.ts"]
     }
   }
 }
