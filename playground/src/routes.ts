@@ -66,6 +66,11 @@ export const routes: RouteRecordRaw[] = [
         lazyRoutes('/audit-logs', () =>
           import('@lsw-abpvue/audit-logging').then(module => module.createAuditLoggingRoutes()),
         ),
+        lazyRoutes('/language-management', () =>
+          import('@lsw-abpvue/language-management').then(module =>
+            module.createLanguageManagementRoutes(),
+          ),
+        ),
       ]
     : []),
 

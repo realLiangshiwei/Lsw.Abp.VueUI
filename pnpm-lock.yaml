@@ -350,6 +350,24 @@ importers:
         specifier: ^4.5.1
         version: 4.6.4(vue@3.5.41(typescript@6.0.3))
 
+  packages/language-management:
+    devDependencies:
+      '@lsw-abpvue/components':
+        specifier: workspace:*
+        version: link:../components
+      '@lsw-abpvue/core':
+        specifier: workspace:*
+        version: link:../core
+      '@lsw-abpvue/theme-shared':
+        specifier: workspace:*
+        version: link:../theme-shared
+      vue:
+        specifier: 3.5.41
+        version: 3.5.41(typescript@6.0.3)
+      vue-router:
+        specifier: ^4.5.1
+        version: 4.6.4(vue@3.5.41(typescript@6.0.3))
+
   packages/oauth:
     dependencies:
       oidc-client-ts:
@@ -545,6 +563,9 @@ importers:
       '@lsw-abpvue/identity-pro':
         specifier: workspace:*
         version: link:../packages/identity-pro
+      '@lsw-abpvue/language-management':
+        specifier: workspace:*
+        version: link:../packages/language-management
       '@lsw-abpvue/oauth':
         specifier: workspace:*
         version: link:../packages/oauth

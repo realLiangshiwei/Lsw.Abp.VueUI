@@ -59,7 +59,7 @@ import { AbpDynamicLayout, lazyRoutes, provideAbpRouter } from '@lsw-abpvue/core
 import { provideAbpOAuth, withTokenStorage } from '@lsw-abpvue/oauth';
 import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
 import { AbpModal, provideThemeComponents, useAbpForm, Validators } from '@lsw-abpvue/theme-shared';
-import { EntityProp, ExtensionsService, PropType } from '@lsw-abpvue/components';
+import { EntityAction, EntityProp, ExtensionsService, PropType } from '@lsw-abpvue/components';
 import { EntityProp as EntityPropFromSubpath } from '@lsw-abpvue/components/extensible';
 import { interpolate } from '@lsw-abpvue/utils';
 import { AccountComponents, TenantBoxService } from '@lsw-abpvue/account-core';
@@ -92,6 +92,9 @@ import { TenantService as SaasTenantService, TenantActivationState, type SaasTen
 import { createSettingManagementRoutes, SettingManagementComponents } from '@lsw-abpvue/setting-management';
 import { provideSettingManagementConfig, SettingTabsService } from '@lsw-abpvue/setting-management/config';
 import type { EmailSettingsDto } from '@lsw-abpvue/setting-management/proxy';
+import { AbpLanguagesPage, createLanguageManagementRoutes, LanguageManagementComponents, type LanguageManagementConfigOptions } from '@lsw-abpvue/language-management';
+import { provideLanguageManagementConfig, LANGUAGE_MANAGEMENT_FEATURES } from '@lsw-abpvue/language-management/config';
+import { LanguageService, LanguageTextService, type LanguageDto } from '@lsw-abpvue/language-management/proxy';
 
 const Greeter = defineService('Greeter', () => {
   const store = new InternalStore<{ template: string }>({ template: 'Hei {0}.' });
@@ -236,6 +239,18 @@ declare module '@lsw-abpvue/core' {
 }
 
 const permission = createInjector([]).get(PermissionService);
+export const languagesPageIsTyped: IsAny<typeof AbpLanguagesPage> extends false ? true : never = true;
+export const languageOptions: LanguageManagementConfigOptions = {
+  entityActionContributors: {
+    [LanguageManagementComponents.Languages]: [actions => actions.addTail(EntityAction.create<LanguageDto>({ text: 'AbpUi::Refresh', action: data => data.record.cultureName }))],
+  },
+};
+export const languageRoutes = createLanguageManagementRoutes(languageOptions);
+export const languageConfig = provideLanguageManagementConfig();
+export const languageFeatures: boolean = createInjector([]).get(LANGUAGE_MANAGEMENT_FEATURES).value.enable;
+export const languageApi: string = createInjector([]).get(LanguageService).apiName;
+export const languageTextApi: string = createInjector([]).get(LanguageTextService).apiName;
+
 export const declaredNameCompiles: boolean = permission.isGranted('AbpIdentity.Users');
 export const expressionCompiles: boolean = permission.isGranted('AbpIdentity.Users || Whatever');
 export const runtimeStringCompiles: boolean = permission.isGranted(userName);
@@ -305,10 +320,15 @@ import assert from 'node:assert/strict';
 import { createInjector, EventBusService } from '@lsw-abpvue/core';
 import { SaasEvents } from '@lsw-abpvue/saas/config';
 import { SaasEvents as consumerEvents, observeSaasChanges } from './.runtime/events-consumer.js';
+import { LanguageService, LanguageTextService } from '@lsw-abpvue/language-management/proxy';
+import { LANGUAGE_MANAGEMENT_FEATURES } from '@lsw-abpvue/language-management/config';
 
 assert.equal(consumerEvents.TenantsChanged, SaasEvents.TenantsChanged);
 assert.equal(consumerEvents.EditionsChanged, SaasEvents.EditionsChanged);
 const injector = createInjector([]);
+assert.equal(injector.get(LanguageService).apiName, 'LanguageManagement');
+assert.equal(injector.get(LanguageTextService).apiName, 'LanguageManagement');
+assert.equal(injector.get(LANGUAGE_MANAGEMENT_FEATURES).value.enable, true);
 const seen = observeSaasChanges(injector);
 const bus = injector.get(EventBusService);
 const context = { userId: 'consumer-user', tenantId: null };

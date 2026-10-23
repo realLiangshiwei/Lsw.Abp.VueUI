@@ -1,6 +1,7 @@
 import type { AbpPolicyName } from '@lsw-abpvue/core';
 import type { IdentityProPolicyName } from '@lsw-abpvue/identity-pro/config';
 import type { AuditLoggingPolicyName } from '@lsw-abpvue/audit-logging/config';
+import type { LanguageManagementPolicyName } from '@lsw-abpvue/language-management/config';
 import type { AbpIdentityPolicyName } from './proxy/policy-names.js';
 
 /**
@@ -10,7 +11,10 @@ import type { AbpIdentityPolicyName } from './proxy/policy-names.js';
  */
 declare module '@lsw-abpvue/core' {
   interface AbpKnownPolicyName extends Record<
-    AbpIdentityPolicyName | IdentityProPolicyName | AuditLoggingPolicyName,
+    | AbpIdentityPolicyName
+    | IdentityProPolicyName
+    | AuditLoggingPolicyName
+    | LanguageManagementPolicyName,
     true
   > {}
 }

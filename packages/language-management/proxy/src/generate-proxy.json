@@ -1,0 +1,25 @@
+{
+  "generated": [
+    "README.md",
+    "index.ts",
+    "language-management/dto/index.ts",
+    "language-management/dto/models.ts",
+    "language-management/index.ts",
+    "language-management/language-text.service.ts",
+    "language-management/language.service.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "languageManagement": {
+      "rootPath": "languageManagement",
+      "remoteServiceName": "LanguageManagement"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

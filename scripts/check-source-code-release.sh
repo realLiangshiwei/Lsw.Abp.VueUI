@@ -33,7 +33,7 @@ import sys
 app = pathlib.Path(sys.argv[1])
 manifest = app / 'package.json'
 data = json.loads(manifest.read_text())
-for package in ['identity-pro', 'account-pro', 'audit-logging', 'saas']:
+for package in ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management']:
     data['dependencies'][f'@lsw-abpvue/{package}'] = 'workspace:*'
 manifest.write_text(json.dumps(data, indent=2) + '\n')
 for name in ['src/main.ts', 'src/routes.ts']:
@@ -92,6 +92,8 @@ for entry in packages/identity/src/index.ts packages/identity/config/src/index.t
              packages/audit-logging/proxy/src/index.ts \
              packages/saas/src/index.ts packages/saas/config/src/index.ts \
              packages/saas/proxy/src/index.ts \
+             packages/language-management/src/index.ts packages/language-management/config/src/index.ts \
+             packages/language-management/proxy/src/index.ts \
              packages/tenant-management/proxy/src/index.ts \
              packages/theme-basic/src/styles/style.css .abpvue/source-code.json; do
   [ -f "$app/$entry" ] || { echo "Missing $entry" >&2; exit 1; }
@@ -107,7 +109,7 @@ const record = JSON.parse(readFileSync(`${root}/.abpvue/source-code.json`, 'utf8
 const result = readConfigFile(`${root}/tsconfig.json`, sys.readFile);
 if (result.error) throw new TypeError('The released TypeScript configuration cannot be read.');
 const config = result.config;
-for (const name of ['identity-pro', 'account-pro', 'audit-logging', 'saas']) {
+for (const name of ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management']) {
   if (!record.packages[`@lsw-abpvue/${name}`]) throw new TypeError(`Missing source record for ${name}.`);
   for (const entry of ['', '/config', '/proxy']) {
     if (!config.compilerOptions.paths[`@lsw-abpvue/${name}${entry}`]) {
