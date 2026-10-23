@@ -61,6 +61,13 @@ export const routes: RouteRecordRaw[] = [
   lazyRoutes('/setting-management', () =>
     import('@lsw-abpvue/setting-management').then(module => module.createSettingManagementRoutes()),
   ),
+  ...(import.meta.env.VITE_ABP_EDITION === 'pro'
+    ? [
+        lazyRoutes('/audit-logs', () =>
+          import('@lsw-abpvue/audit-logging').then(module => module.createAuditLoggingRoutes()),
+        ),
+      ]
+    : []),
 
   // abpv:begin route:books
   {

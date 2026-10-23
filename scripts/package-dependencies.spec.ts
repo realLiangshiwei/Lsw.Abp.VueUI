@@ -91,6 +91,7 @@ const ALLOWED = {
     '@lsw-abpvue/core',
     '@lsw-abpvue/components',
     '@lsw-abpvue/theme-shared',
+    '@lsw-abpvue/setting-management',
     'vue',
     'vue-router',
   ],

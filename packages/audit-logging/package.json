@@ -1,7 +1,7 @@
 {
   "name": "@lsw-abpvue/audit-logging",
   "version": "0.1.0",
-  "description": "Entity change history for ABP Vue applications.",
+  "description": "Audit logs, entity changes, statistics and settings for ABP Vue applications.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -36,6 +36,7 @@
   "peerDependencies": {
     "@lsw-abpvue/components": "workspace:^",
     "@lsw-abpvue/core": "workspace:^",
+    "@lsw-abpvue/setting-management": "workspace:^",
     "@lsw-abpvue/theme-shared": "workspace:^",
     "vue": "^3.5.0",
     "vue-router": "^4.5.0"
@@ -43,6 +44,7 @@
   "devDependencies": {
     "@lsw-abpvue/components": "workspace:*",
     "@lsw-abpvue/core": "workspace:*",
+    "@lsw-abpvue/setting-management": "workspace:*",
     "@lsw-abpvue/theme-shared": "workspace:*",
     "vue": "3.5.41",
     "vue-router": "^4.5.1"

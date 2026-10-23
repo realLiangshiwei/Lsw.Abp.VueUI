@@ -25,15 +25,23 @@
   </form>
   <component :is="host" />
   <AbpModal
-    v-if="failed && history.selected.value"
+    v-if="failed && (history.selected.value || history.selectedChangeId.value)"
     :visible="true"
     :dirty="false"
     @update:visible="$event || history.close()"
   >
     <template #header>
-      {{ localization.t('AbpAuditLogging::ChangeHistory') }}
-      <span style="display: block">{{ history.selected.value.entityTypeFullName }}</span>
-      <small style="display: block">({{ history.selected.value.entityId }})</small>
+      {{
+        localization.t(
+          history.selectedChangeId.value
+            ? 'AbpAuditLogging::ChangeDetails'
+            : 'AbpAuditLogging::ChangeHistory',
+        )
+      }}
+      <template v-if="history.selected.value">
+        <span style="display: block">{{ history.selected.value.entityTypeFullName }}</span>
+        <small style="display: block">({{ history.selected.value.entityId }})</small>
+      </template>
     </template>
     <div role="alert">
       <p>

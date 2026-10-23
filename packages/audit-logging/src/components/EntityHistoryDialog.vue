@@ -39,7 +39,7 @@
                 }}</AbpButton>
               </td>
             </tr>
-            <tr v-if="!changes.length">
+            <tr v-if="!changes?.length">
               <td colspan="4">{{ localization.t('AbpUi::NoDataAvailableInDatatable') }}</td>
             </tr>
           </tbody>
@@ -52,39 +52,7 @@
           localization.t('AbpUi::Refresh')
         }}</AbpButton>
       </p>
-      <section v-if="detail" :aria-label="localization.t('AbpAuditLogging::Detail')">
-        <h4>{{ localization.t('AbpAuditLogging::Detail') }}</h4>
-        <dl>
-          <dt>{{ localization.t('AbpAuditLogging::EntityId') }}</dt>
-          <dd>{{ detail.entityChange?.entityId }}</dd>
-          <dt>{{ localization.t('AbpAuditLogging::EntityTypeFullName') }}</dt>
-          <dd>{{ detail.entityChange?.entityTypeFullName }}</dd>
-          <dt>{{ localization.t('AbpAuditLogging::UserName') }}</dt>
-          <dd>{{ detail.userName }}</dd>
-        </dl>
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
-              <tr>
-                <th scope="col">{{ localization.t('AbpAuditLogging::PropertyName') }}</th>
-                <th scope="col">{{ localization.t('AbpAuditLogging::OriginalValue') }}</th>
-                <th scope="col">{{ localization.t('AbpAuditLogging::NewValue') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="property in detail.entityChange?.propertyChanges" :key="property.id">
-                <th scope="row">{{ property.propertyName }}</th>
-                <td style="white-space: pre-wrap; overflow-wrap: anywhere">
-                  {{ property.originalValue }}
-                </td>
-                <td style="white-space: pre-wrap; overflow-wrap: anywhere">
-                  {{ property.newValue }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <EntityChangeDetails v-if="detail" :item-with-user-name="detail" />
     </template>
     <template #footer="{ close }"
       ><AbpButton variant="secondary" @click="close">{{
@@ -100,22 +68,17 @@ import {
 } from '@lsw-abpvue/audit-logging/proxy';
 import { ConfigStateService, inject as injectAbp, useLocalization } from '@lsw-abpvue/core';
 import { AbpButton, AbpModal, AbpSpinner } from '@lsw-abpvue/theme-shared';
-import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { computed, shallowRef, watch } from 'vue';
+import { AuditLogResponseError } from '../utils/response-error.js';
+import { formatAuditDate } from '../utils/use-audit-logging.js';
+import { useAuditRequest } from '../utils/use-audit-request.js';
+import EntityChangeDetails from './EntityChangeDetails.vue';
 const props = defineProps<{ entityId: string; entityTypeFullName: string }>();
 const emit = defineEmits<{ close: [] }>();
 const service = injectAbp(AuditLogsService);
 const config = injectAbp(ConfigStateService);
 const localization = useLocalization();
-const changes = shallowRef<EntityChangeWithUsernameDto[]>([]);
 const selected = shallowRef<EntityChangeWithUsernameDto>();
-const detail = shallowRef<EntityChangeWithUsernameDto>();
-const loading = ref(false);
-const failed = ref(false);
-const loadingDetails = ref(false);
-const detailsFailed = ref(false);
-let revision = 0;
-let controller = new AbortController();
-let detailController: AbortController | undefined;
 const context = computed(() =>
   JSON.stringify([
     config.snapshot().currentUser.id,
@@ -125,13 +88,26 @@ const context = computed(() =>
     config.snapshot().auth.grantedPolicies,
   ]),
 );
+const {
+  data: changes,
+  loading,
+  failed,
+  run: readHistory,
+  reset: resetHistory,
+} = useAuditRequest<EntityChangeWithUsernameDto[]>(context);
+const {
+  data: detail,
+  loading: loadingDetails,
+  failed: detailsFailed,
+  run: readDetail,
+  reset: resetDetail,
+} = useAuditRequest<EntityChangeWithUsernameDto>(context);
 const failureText = computed(() => localization.t('AbpUi::ErrorLoadingDatatable'));
 function date(value?: string): string {
-  if (!value || !Number.isFinite(Date.parse(value))) return value ?? '';
-  return new Intl.DateTimeFormat(
+  return formatAuditDate(
+    value,
     config.snapshot().localization.currentCulture?.cultureName ?? undefined,
-    { dateStyle: 'short', timeStyle: 'short' },
-  ).format(new Date(value));
+  );
 }
 function changeType(value?: number): string {
   if (value === undefined) return '';
@@ -146,74 +122,42 @@ function matches(value: EntityChangeWithUsernameDto): boolean {
     value.entityChange.entityTypeFullName === props.entityTypeFullName
   );
 }
-function reset(): void {
-  revision += 1;
-  controller.abort();
-  controller = new AbortController();
-  detailController?.abort();
-  changes.value = [];
-  selected.value = undefined;
-  detail.value = undefined;
-  loading.value = false;
-  failed.value = false;
-  loadingDetails.value = false;
-  detailsFailed.value = false;
-}
 async function load(): Promise<void> {
-  reset();
-  if (!props.entityId || !props.entityTypeFullName) return;
-  const own = revision;
-  const signal = controller.signal;
-  loading.value = true;
-  try {
+  resetDetail();
+  selected.value = undefined;
+  if (!props.entityId || !props.entityTypeFullName) {
+    resetHistory();
+    return;
+  }
+  await readHistory(async signal => {
     const values = await service.getEntityChangesWithUsername(
       { entityId: props.entityId, entityTypeFullName: props.entityTypeFullName },
       { signal, skipHandleError: true },
     );
-    if (own !== revision || signal.aborted) return;
-    if (values.some(value => !matches(value)))
-      throw new TypeError('The entity history does not match the selected entity.');
-    changes.value = values;
-  } catch {
-    if (own === revision && !signal.aborted) failed.value = true;
-  } finally {
-    if (own === revision) loading.value = false;
-  }
+    if (values.some(value => !matches(value))) throw new AuditLogResponseError();
+    return values;
+  });
 }
 async function details(item: EntityChangeWithUsernameDto): Promise<void> {
   if (!matches(item) || !item.entityChange?.id) return;
-  detailController?.abort();
-  const request = new AbortController();
-  detailController = request;
-  const own = revision;
-  const signal = AbortSignal.any([request.signal, controller.signal]);
+  const id = item.entityChange.id;
   selected.value = item;
-  detail.value = undefined;
-  loadingDetails.value = true;
-  detailsFailed.value = false;
-  try {
-    const value = await service.getEntityChangeWithUsername(item.entityChange.id, {
+  await readDetail(async signal => {
+    const value = await service.getEntityChangeWithUsername(id, {
       signal,
       skipHandleError: true,
     });
-    if (own !== revision || signal.aborted) return;
-    if (!matches(value) || value.entityChange?.id !== item.entityChange.id)
-      throw new TypeError('The entity change does not match the selected record.');
-    detail.value = value;
-  } catch {
-    if (own === revision && !signal.aborted) detailsFailed.value = true;
-  } finally {
-    if (own === revision && !signal.aborted) loadingDetails.value = false;
-  }
+    if (!matches(value) || value.entityChange?.id !== id) throw new AuditLogResponseError();
+    return value;
+  });
 }
 watch([() => props.entityId, () => props.entityTypeFullName], load, { immediate: true });
 watch(
   context,
   () => {
-    reset();
+    selected.value = undefined;
     emit('close');
   },
   { flush: 'sync' },
 );
-onBeforeUnmount(reset);
 </script>

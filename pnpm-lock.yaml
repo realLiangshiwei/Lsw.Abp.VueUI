@@ -209,6 +209,9 @@ importers:
       '@lsw-abpvue/core':
         specifier: workspace:*
         version: link:../core
+      '@lsw-abpvue/setting-management':
+        specifier: workspace:*
+        version: link:../setting-management
       '@lsw-abpvue/theme-shared':
         specifier: workspace:*
         version: link:../theme-shared

@@ -16,7 +16,7 @@ import { provideAccountConfig } from '@lsw-abpvue/account/config';
 import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/config';
 import { provideIdentityConfig } from '@lsw-abpvue/identity/config';
 import { provideIdentityProConfig } from '@lsw-abpvue/identity-pro/config';
-import { provideAuditLogging } from '@lsw-abpvue/audit-logging/config';
+import { provideAuditLoggingConfig } from '@lsw-abpvue/audit-logging/config';
 import { provideAccountProConfig } from '@lsw-abpvue/account-pro/config';
 import { provideAccountProAdminConfig } from '@lsw-abpvue/account-pro/admin/config';
 import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/config';
@@ -54,7 +54,7 @@ const { mount } = await createAbpApp(App, {
     import.meta.env.VITE_ABP_EDITION === 'pro'
       ? provideIdentityProConfig()
       : provideIdentityConfig(),
-    ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? provideAuditLogging() : []),
+    ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? [provideAuditLoggingConfig()] : []),
     import.meta.env.VITE_ABP_EDITION === 'pro'
       ? provideSaasConfig()
       : provideTenantManagementConfig(),

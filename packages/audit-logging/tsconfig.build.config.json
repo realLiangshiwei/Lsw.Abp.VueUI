@@ -7,6 +7,6 @@
     "paths": {},
     "outDir": "dist/config"
   },
-  "include": ["config/src/**/*.ts"],
+  "include": ["config/src/**/*.ts", "config/src/**/*.vue"],
   "exclude": ["config/src/**/*.spec.ts"]
 }
