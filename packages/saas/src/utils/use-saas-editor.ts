@@ -13,6 +13,7 @@ import {
   type RestConfig,
 } from '@lsw-abpvue/core';
 import { useServerValidation, useToaster } from '@lsw-abpvue/theme-shared';
+import type { SaasEventContext } from '@lsw-abpvue/saas/config';
 import { computed, ref, shallowRef, watch } from 'vue';
 import type {
   SaasTenantFormAsyncValidator,
@@ -32,9 +33,10 @@ export function useSaasEditor<R extends EditorRecord>(options: {
   policy: string;
   providers: ProviderInput[];
   load(record: R | undefined, signal: AbortSignal): Promise<R | undefined>;
-  create(values: Record<string, unknown>, config: RestConfig): Promise<unknown>;
-  update(id: string, values: Record<string, unknown>, config: RestConfig): Promise<unknown>;
+  create(values: Record<string, unknown>, config: RestConfig): Promise<R>;
+  update(id: string, values: Record<string, unknown>, config: RestConfig): Promise<R>;
   reload(): void;
+  onSaved(reason: 'created' | 'updated', record: R, context: SaasEventContext): void;
   validators?: readonly SaasTenantFormValidator[] | undefined;
   asyncValidators?: readonly SaasTenantFormAsyncValidator[] | undefined;
 }) {
@@ -99,6 +101,7 @@ export function useSaasEditor<R extends EditorRecord>(options: {
   async function save() {
     const form = editor.form.value;
     if (!form || !canSave.value || !form.form.validate()) return;
+    const context = operation.eventContext.value;
     await operation.run(
       async signal => {
         form.form.clearServerErrors();
@@ -108,22 +111,24 @@ export function useSaasEditor<R extends EditorRecord>(options: {
             await Promise.all((options.asyncValidators ?? []).map(validate => validate(form.form)))
           ).flatMap(result => result ?? []),
         ];
-        if (signal.aborted || !mayEdit.value) return false;
+        if (signal.aborted || !mayEdit.value) return;
         if (errors.length) {
           form.form.setServerErrors(errors);
-          return false;
+          return;
         }
         const values = collectSaasFormValues(form, editor.editing.value, injector);
         const id = editor.editing.value?.id;
-        if (id) await options.update(id, values, { signal });
-        else await options.create(values, { signal });
-        return true;
+        const record = id
+          ? await options.update(id, values, { signal })
+          : await options.create(values, { signal });
+        return { record, reason: id ? ('updated' as const) : ('created' as const) };
       },
       saved => {
         if (!saved) return;
         editor.open.value = false;
         toaster.success('AbpUi::SavedSuccessfully');
         options.reload();
+        options.onSaved(saved.reason, saved.record, context);
       },
     );
   }

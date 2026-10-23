@@ -6,3 +6,5 @@ export {
   SAAS_CONNECTION_STRING_SETTING,
 } from './enums/route-names.js';
 export { provideSaasConfig } from './providers/saas-config.provider.js';
+export { SaasEvents } from './tokens/events.token.js';
+export type { SaasEditionsChanged, SaasEventContext, SaasTenantsChanged } from './models/events.js';

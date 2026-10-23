@@ -47,10 +47,11 @@ import {
   ConfigStateService,
   inject as injectAbp,
   useListService,
+  useEventBus,
   usePermission,
 } from '@lsw-abpvue/core';
 import { AbpFeatureManagement, FeatureManagementComponents } from '@lsw-abpvue/feature-management';
-import { SaasPolicyNames } from '@lsw-abpvue/saas/config';
+import { SaasEvents, SaasPolicyNames } from '@lsw-abpvue/saas/config';
 import { EditionService, type EditionDto, type PlanDto } from '@lsw-abpvue/saas/proxy';
 import { AbpButton } from '@lsw-abpvue/theme-shared';
 import { computed, ref, shallowRef, watch } from 'vue';
@@ -67,6 +68,7 @@ const config = injectAbp(ConfigStateService);
 const history = injectAbp(SHOW_ENTITY_HISTORY, { optional: true });
 const permission = usePermission();
 const operation = useSaasOperation(SaasPolicyNames.Editions);
+const events = useEventBus();
 const list = useListService({ persistKey: SaasComponents.Editions });
 const { items, error } = list.hookToQuery(async (query, listSignal) => {
   if (!operation.allowed.value) return { items: [], totalCount: 0 };
@@ -117,6 +119,12 @@ const state = useSaasEditor<EditionDto>({
   create: (values, options) => editions.create(editionCreate(values), options),
   update: (id, values, options) => editions.update(id, editionUpdate(values), options),
   reload: () => list.getWithoutPageReset(),
+  onSaved: (reason, record, context) =>
+    events.emit(SaasEvents.EditionsChanged, {
+      context,
+      reason,
+      editionId: record.id,
+    }),
 });
 function may(policy: string) {
   return operation.allowed.value && permission.isGranted(policy);

@@ -243,6 +243,21 @@ export const runtimeStringCompiles: boolean = permission.isGranted(userName);
 export const misspelledDoesNot: boolean = permission.isGranted('AbpIdentity.Userz');
 TS
 
+cat > events-consumer.ts <<'TS'
+import { EventBusService, type Injector } from '@lsw-abpvue/core';
+import { SaasEvents } from '@lsw-abpvue/saas/config';
+
+export { SaasEvents };
+
+export function observeSaasChanges(injector: Injector): string[] {
+  const seen: string[] = [];
+  const bus = injector.get(EventBusService);
+  bus.on(SaasEvents.TenantsChanged, payload => { seen.push(payload.reason); });
+  bus.on(SaasEvents.EditionsChanged, payload => { seen.push(payload.reason); });
+  return seen;
+}
+TS
+
 if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
 cp "${ABPVUE_CONSUMER_FIXTURES}/pro-consumer-contract.ts" ./pro-consumer-contract.ts
 cp "${ABPVUE_CONSUMER_FIXTURES}/ProConsumerTable.vue" ./ProConsumerTable.vue
@@ -280,6 +295,28 @@ fi
 
 echo "Type-checking the consumer with the workspace TypeScript"
 "$root/node_modules/.bin/vue-tsc" -p tsconfig.json
+
+echo "Checking packed SaaS token identity and event delivery"
+"$root/node_modules/typescript/bin/tsc" --ignoreConfig events-consumer.ts \
+  --strict --exactOptionalPropertyTypes --skipLibCheck --target es2022 \
+  --module esnext --moduleResolution bundler --outDir .runtime
+node --input-type=module <<'JS'
+import assert from 'node:assert/strict';
+import { createInjector, EventBusService } from '@lsw-abpvue/core';
+import { SaasEvents } from '@lsw-abpvue/saas/config';
+import { SaasEvents as consumerEvents, observeSaasChanges } from './.runtime/events-consumer.js';
+
+assert.equal(consumerEvents.TenantsChanged, SaasEvents.TenantsChanged);
+assert.equal(consumerEvents.EditionsChanged, SaasEvents.EditionsChanged);
+const injector = createInjector([]);
+const seen = observeSaasChanges(injector);
+const bus = injector.get(EventBusService);
+const context = { userId: 'consumer-user', tenantId: null };
+bus.emit(SaasEvents.TenantsChanged, { context, reason: 'created' });
+bus.emit(SaasEvents.EditionsChanged, { context, reason: 'updated' });
+assert.deepEqual(seen, ['created', 'updated']);
+injector.destroy();
+JS
 
 if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
 echo "Running the packed commercial contributor and DI contracts"

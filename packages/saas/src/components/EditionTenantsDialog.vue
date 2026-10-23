@@ -57,8 +57,8 @@
 </template>
 
 <script setup lang="ts">
-import { inject as injectAbp, useLocalization, usePermission } from '@lsw-abpvue/core';
-import { SaasPolicyNames } from '@lsw-abpvue/saas/config';
+import { inject as injectAbp, useEventBus, useLocalization, usePermission } from '@lsw-abpvue/core';
+import { SaasEvents, SaasPolicyNames } from '@lsw-abpvue/saas/config';
 import { EditionService, type EditionDto } from '@lsw-abpvue/saas/proxy';
 import {
   AbpButton,
@@ -75,6 +75,7 @@ import { useSaasOperation } from '../utils/use-saas-operation.js';
 const props = defineProps<{ edition: EditionDto; mode: 'move' | 'delete' }>();
 const emit = defineEmits<{ close: []; saved: [] }>();
 const service = injectAbp(EditionService);
+const events = useEventBus();
 const permission = usePermission();
 const localization = useLocalization();
 const toaster = useToaster();
@@ -135,14 +136,21 @@ async function save() {
   )
     return;
   const id = current.value.id;
+  const context = operation.eventContext.value;
   const success = await operation.run(
     async signal => {
       if (!moved && (props.mode === 'move' || assign.value)) {
         await service.moveAllTenants(id, targetId.value || null, { signal });
         if (signal.aborted) return;
         moved = true;
+        events.emit(SaasEvents.TenantsChanged, { context, reason: 'editionChanged' });
       }
-      if (props.mode === 'delete') await service.delete(id, { signal });
+      if (signal.aborted) return;
+      if (props.mode === 'delete') {
+        await service.delete(id, { signal });
+        if (!signal.aborted)
+          events.emit(SaasEvents.EditionsChanged, { context, reason: 'deleted', editionId: id });
+      }
     },
     () => {
       toaster.success(

@@ -1,9 +1,14 @@
 import { ConfigStateService, inject, usePermission } from '@lsw-abpvue/core';
+import type { SaasEventContext } from '@lsw-abpvue/saas/config';
 import { computed, onScopeDispose, ref, watch } from 'vue';
 
 export function useSaasOperation(policy: string) {
   const config = inject(ConfigStateService);
   const permission = usePermission();
+  const eventContext = computed<SaasEventContext>(() => ({
+    userId: config.snapshot().currentUser.id ?? null,
+    tenantId: config.snapshot().currentTenant.id ?? null,
+  }));
   const context = computed(() =>
     JSON.stringify([
       config.snapshot().currentUser.id,
@@ -62,6 +67,7 @@ export function useSaasOperation(policy: string) {
 
   return {
     context,
+    eventContext,
     allowed,
     busy,
     failed,

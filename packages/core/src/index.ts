@@ -84,6 +84,8 @@ export type {
   OAuthConfig,
   RemoteEnv,
 } from './models/environment.js';
+export { EventHandlerError } from './models/events.js';
+export type { EventBus, EventBusErrorHandler, EventHandler, EventToken } from './models/events.js';
 export { AbpHttpError } from './models/http.js';
 export type {
   AbpErrorEnvelope,
@@ -173,6 +175,7 @@ export { ConfigStateService, useConfigState } from './services/config-state.serv
 export type { ApplicationConfiguration } from './services/config-state.service.js';
 export { CurrentUserService, useCurrentUser } from './services/current-user.service.js';
 export { EnvironmentService, useEnvironment } from './services/environment.service.js';
+export { EventBusService, useEventBus } from './services/event-bus.service.js';
 export { HttpClient } from './services/http-client.service.js';
 export {
   HttpErrorReporterService,
@@ -212,6 +215,7 @@ export {
   TokenStorage,
 } from './tokens/auth.token.js';
 export { HTTP_FETCH, HTTP_INTERCEPTORS } from './tokens/http.token.js';
+export { EVENT_BUS_ERROR_HANDLER } from './tokens/event-bus.token.js';
 export type { FetchLike } from './tokens/http.token.js';
 export { LOCALIZATIONS, REGISTER_LOCALE } from './tokens/localization.token.js';
 export { NAV_COMPARE_FN } from './tokens/nav.token.js';
@@ -220,6 +224,7 @@ export { TENANT_KEY } from './tokens/tenant-key.token.js';
 export { TENANT_NOT_FOUND_BY_NAME } from './tokens/tenant-not-found.token.js';
 
 export { mapEnumToOptions } from './utils/enum-options.js';
+export { defineEvent } from './utils/define-event.js';
 export type { EnumOption } from './utils/enum-options.js';
 export { InternalStore } from './utils/internal-store.js';
 export { createNavTabs, createNavTree } from './utils/nav-tree.js';

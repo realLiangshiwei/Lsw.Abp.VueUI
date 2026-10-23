@@ -101,12 +101,17 @@ import {
   ConfigStateService,
   EnvironmentService,
   inject as injectAbp,
+  useEventBus,
   useListService,
   useLocalization,
   usePermission,
 } from '@lsw-abpvue/core';
 import { AbpFeatureManagement, FeatureManagementComponents } from '@lsw-abpvue/feature-management';
-import { SAAS_CONNECTION_STRING_SETTING, SaasPolicyNames } from '@lsw-abpvue/saas/config';
+import {
+  SAAS_CONNECTION_STRING_SETTING,
+  SaasEvents,
+  SaasPolicyNames,
+} from '@lsw-abpvue/saas/config';
 import {
   TenantService,
   type EditionLookupDto,
@@ -143,6 +148,7 @@ const localization = useLocalization();
 const confirmation = useConfirmation();
 const toaster = useToaster();
 const operation = useSaasOperation(SaasPolicyNames.Tenants);
+const events = useEventBus();
 const list = useListService({ persistKey: SaasComponents.Tenants });
 const filters = shallowRef<GetTenantsInput>({});
 const { items, error } = list.hookToQuery(async (query, listSignal) => {
@@ -240,6 +246,12 @@ const state = useSaasEditor<SaasTenantDto>({
     ),
   update: (id, values, options) => tenants.update(id, tenantUpdate(values), options),
   reload: () => list.getWithoutPageReset(),
+  onSaved: (reason, record, context) =>
+    events.emit(SaasEvents.TenantsChanged, {
+      context,
+      reason,
+      tenantIds: record.id ? [record.id] : undefined,
+    }),
 });
 const { editor } = state;
 const baseSave = state.save;
@@ -268,6 +280,8 @@ async function remove(tenant: SaasTenantDto) {
     return;
   confirming.value = true;
   const context = operation.context.value;
+  const eventContext = operation.eventContext.value;
+  const tenantId = tenant.id;
   try {
     const answer = await confirmation.warn(
       'Saas::TenantDeletionConfirmationMessage',
@@ -285,6 +299,11 @@ async function remove(tenant: SaasTenantDto) {
       () => {
         toaster.success('AbpUi::DeletedSuccessfully');
         list.getWithoutPageReset();
+        events.emit(SaasEvents.TenantsChanged, {
+          context: eventContext,
+          reason: 'deleted',
+          tenantIds: [tenantId],
+        });
       },
     );
   } finally {

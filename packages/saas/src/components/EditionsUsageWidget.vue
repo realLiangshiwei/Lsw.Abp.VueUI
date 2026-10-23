@@ -56,8 +56,9 @@ import { inject as injectAbp } from '@lsw-abpvue/core';
 import { SaasPolicyNames } from '@lsw-abpvue/saas/config';
 import { EditionService } from '@lsw-abpvue/saas/proxy';
 import { AbpButton, AbpSpinner } from '@lsw-abpvue/theme-shared';
-import { computed, onMounted, shallowRef, watch } from 'vue';
+import { computed, onMounted, shallowRef } from 'vue';
 import { useSaasOperation } from '../utils/use-saas-operation.js';
+import { useSaasWidgetRefresh } from '../utils/use-saas-widget-refresh.js';
 
 withDefaults(
   defineProps<{ width?: number | string | undefined; height?: number | string | undefined }>(),
@@ -83,7 +84,7 @@ const segments = computed(() => {
   });
 });
 const cssSize = (value: number | string) => (typeof value === 'number' ? `${value}px` : value);
-async function draw() {
+async function load() {
   await operation.run(
     signal => service.getUsageStatistics({ signal }),
     result => {
@@ -91,14 +92,9 @@ async function draw() {
     },
   );
 }
-watch(
-  [operation.context, allowed],
-  () => {
-    data.value = {};
-    void draw();
-  },
-  { immediate: true },
-);
+const draw = useSaasWidgetRefresh(operation, load, () => {
+  data.value = {};
+});
 onMounted(() => emit('initialized', { draw }));
 defineExpose({ draw, data: computed(() => data.value) });
 </script>
