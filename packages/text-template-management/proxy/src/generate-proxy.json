@@ -1,0 +1,25 @@
+{
+  "generated": [
+    "README.md",
+    "index.ts",
+    "text-template-management/index.ts",
+    "text-template-management/text-templates/index.ts",
+    "text-template-management/text-templates/models.ts",
+    "text-template-management/text-templates/template-content.service.ts",
+    "text-template-management/text-templates/template-definition.service.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "textTemplateManagement": {
+      "rootPath": "textTemplateManagement",
+      "remoteServiceName": "TextTemplateManagement"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

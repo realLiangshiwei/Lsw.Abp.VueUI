@@ -1,0 +1,11 @@
+export { default as AbpTextTemplatesPage } from './components/TextTemplatesPage.vue';
+export { default as AbpTemplateContentsPage } from './components/TemplateContentsPage.vue';
+export { default as AbpInlineTemplateContentPage } from './components/InlineTemplateContentPage.vue';
+export { TextTemplateManagementComponents } from './enums/components.js';
+export { createTextTemplateManagementRoutes } from './routes.js';
+export { provideTextTemplateManagement } from './providers/text-template-management.provider.js';
+export { textTemplateManagementGuard } from './guards/text-template-management.guard.js';
+export { textTemplateManagementExtensionsResolver } from './resolvers/extensions.resolver.js';
+export * from './tokens/extensions.token.js';
+export * from './tokens/pages.token.js';
+export * from './defaults/extensions.js';

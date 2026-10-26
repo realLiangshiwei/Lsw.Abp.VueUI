@@ -24,6 +24,7 @@
     "@lsw-abpvue/permission-management": "workspace:*",
     "@lsw-abpvue/setting-management": "workspace:*",
     "@lsw-abpvue/tenant-management": "workspace:*",
+    "@lsw-abpvue/text-template-management": "workspace:*",
     "@lsw-abpvue/theme-basic": "workspace:*",
     "@lsw-abpvue/theme-shared": "workspace:*",
     "@lsw-abpvue/utils": "workspace:*",

@@ -71,6 +71,11 @@ export const routes: RouteRecordRaw[] = [
             module.createLanguageManagementRoutes(),
           ),
         ),
+        lazyRoutes('/text-template-management', () =>
+          import('@lsw-abpvue/text-template-management').then(module =>
+            module.createTextTemplateManagementRoutes(),
+          ),
+        ),
       ]
     : []),
 

@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "rootDir": "common/src",
+    "paths": {},
+    "outDir": "dist/common"
+  },
+  "include": ["common/src/**/*.ts"],
+  "exclude": ["common/src/**/*.spec.ts"]
+}

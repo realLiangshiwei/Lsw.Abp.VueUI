@@ -102,6 +102,13 @@ const ALLOWED = {
     'vue',
     'vue-router',
   ],
+  'text-template-management': [
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/theme-shared',
+    'vue',
+    'vue-router',
+  ],
   'identity-pro': [
     '@lsw-abpvue/account-pro',
     '@lsw-abpvue/audit-logging',

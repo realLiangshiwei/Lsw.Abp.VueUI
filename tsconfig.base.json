@@ -76,7 +76,19 @@
       "@lsw-abpvue/language-management/config": [
         "./packages/language-management/config/src/index.ts"
       ],
-      "@lsw-abpvue/language-management/proxy": ["./packages/language-management/proxy/src/index.ts"]
+      "@lsw-abpvue/language-management/proxy": [
+        "./packages/language-management/proxy/src/index.ts"
+      ],
+      "@lsw-abpvue/text-template-management": ["./packages/text-template-management/src/index.ts"],
+      "@lsw-abpvue/text-template-management/common": [
+        "./packages/text-template-management/common/src/index.ts"
+      ],
+      "@lsw-abpvue/text-template-management/config": [
+        "./packages/text-template-management/config/src/index.ts"
+      ],
+      "@lsw-abpvue/text-template-management/proxy": [
+        "./packages/text-template-management/proxy/src/index.ts"
+      ]
     }
   }
 }

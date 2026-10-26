@@ -24,6 +24,7 @@ const BUSINESS_MODULES = [
   '@lsw-abpvue/saas',
   '@lsw-abpvue/setting-management',
   '@lsw-abpvue/tenant-management',
+  '@lsw-abpvue/text-template-management',
 ];
 
 /**

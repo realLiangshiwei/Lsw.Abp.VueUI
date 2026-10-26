@@ -98,9 +98,14 @@ function isOssSource(file: string): boolean {
   return (
     !file.startsWith(`playground${sep}`) &&
     file !== join('packages', 'account', 'src', 'defaults', 'texts.ts') &&
-    !['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management'].some(name =>
-      file.startsWith(`${join('packages', name)}${sep}`),
-    )
+    ![
+      'identity-pro',
+      'account-pro',
+      'audit-logging',
+      'saas',
+      'language-management',
+      'text-template-management',
+    ].some(name => file.startsWith(`${join('packages', name)}${sep}`))
   );
 }
 

@@ -95,6 +95,9 @@ import type { EmailSettingsDto } from '@lsw-abpvue/setting-management/proxy';
 import { AbpLanguagesPage, createLanguageManagementRoutes, LanguageManagementComponents, type LanguageManagementConfigOptions } from '@lsw-abpvue/language-management';
 import { provideLanguageManagementConfig, LANGUAGE_MANAGEMENT_FEATURES } from '@lsw-abpvue/language-management/config';
 import { LanguageService, LanguageTextService, type LanguageDto } from '@lsw-abpvue/language-management/proxy';
+import { AbpTextTemplatesPage, AbpTemplateContentsPage, AbpInlineTemplateContentPage, createTextTemplateManagementRoutes, TextTemplateManagementComponents, type TextTemplateManagementConfigOptions } from '@lsw-abpvue/text-template-management';
+import { provideTextTemplateManagementConfig, TEXT_TEMPLATE_MANAGEMENT_FEATURES } from '@lsw-abpvue/text-template-management/config';
+import { TemplateContentService, type TemplateDefinitionDto } from '@lsw-abpvue/text-template-management/proxy';
 
 const Greeter = defineService('Greeter', () => {
   const store = new InternalStore<{ template: string }>({ template: 'Hei {0}.' });
@@ -206,6 +209,16 @@ export const saasConfig = provideSaasConfig();
 export const saasPolicy: string = SaasPolicyNames.TenantsManageConnectionStrings;
 export const saasActivation: SaasTenantDto['activationState'] = TenantActivationState.Active;
 export const saasList = () => createInjector([]).get(SaasTenantService).getList({ activationState: saasActivation });
+export const textTemplatePagesAreTyped: [IsAny<typeof AbpTextTemplatesPage>, IsAny<typeof AbpTemplateContentsPage>, IsAny<typeof AbpInlineTemplateContentPage>] = [false, false, false];
+export const textTemplateOptions: TextTemplateManagementConfigOptions = {
+  entityPropContributors: {
+    [TextTemplateManagementComponents.TextTemplates]: [props => props.addTail(EntityProp.create<TemplateDefinitionDto>({ name: 'renderEngine', type: PropType.String }))],
+  },
+};
+export const textTemplateRoutes = createTextTemplateManagementRoutes(textTemplateOptions);
+export const textTemplateConfig = provideTextTemplateManagementConfig();
+export const textTemplateFeature = TEXT_TEMPLATE_MANAGEMENT_FEATURES;
+export const textTemplateContent = () => createInjector([]).get(TemplateContentService).get({ templateName: 'Example' });
 export const changed = changedFeatures(flattenFeatures([{ name: 'g', displayName: 'g', features: [] }]));
 export const settingTabs = createInjector([]).get(SettingTabsService).visible.value;
 
@@ -317,11 +330,16 @@ echo "Checking packed SaaS token identity and event delivery"
   --module esnext --moduleResolution bundler --outDir .runtime
 node --input-type=module <<'JS'
 import assert from 'node:assert/strict';
-import { createInjector, EventBusService } from '@lsw-abpvue/core';
+import { ConfigStateService, createInjector, EventBusService } from '@lsw-abpvue/core';
+import { ExtensionsService } from '@lsw-abpvue/components';
 import { SaasEvents } from '@lsw-abpvue/saas/config';
 import { SaasEvents as consumerEvents, observeSaasChanges } from './.runtime/events-consumer.js';
 import { LanguageService, LanguageTextService } from '@lsw-abpvue/language-management/proxy';
 import { LANGUAGE_MANAGEMENT_FEATURES } from '@lsw-abpvue/language-management/config';
+import { TemplateContentService, TemplateDefinitionService } from '@lsw-abpvue/text-template-management/proxy';
+import { TEXT_TEMPLATE_MANAGEMENT_FEATURES as commonFeature } from '@lsw-abpvue/text-template-management/common';
+import { TEXT_TEMPLATE_MANAGEMENT_FEATURES as configFeature } from '@lsw-abpvue/text-template-management/config';
+import { textTemplateManagementExtensionsResolver, TextTemplateManagementComponents } from '@lsw-abpvue/text-template-management';
 
 assert.equal(consumerEvents.TenantsChanged, SaasEvents.TenantsChanged);
 assert.equal(consumerEvents.EditionsChanged, SaasEvents.EditionsChanged);
@@ -329,6 +347,22 @@ const injector = createInjector([]);
 assert.equal(injector.get(LanguageService).apiName, 'LanguageManagement');
 assert.equal(injector.get(LanguageTextService).apiName, 'LanguageManagement');
 assert.equal(injector.get(LANGUAGE_MANAGEMENT_FEATURES).value.enable, true);
+assert.equal(commonFeature, configFeature);
+assert.equal(injector.get(commonFeature).value.enable, true);
+assert.equal(injector.get(TemplateContentService).apiName, 'TextTemplateManagement');
+assert.equal(injector.get(TemplateDefinitionService).apiName, 'TextTemplateManagement');
+const config = injector.get(ConfigStateService);
+config.setState({
+  ...config.snapshot(),
+  objectExtensions: { modules: { TextTemplateManagement: { entities: {
+    TextDefinition: { properties: { ConsumerTag: {
+      type: 'System.String', typeSimple: 'string', ui: { onTable: { isVisible: true } },
+    } } },
+  } } } },
+});
+injector.runInContext(textTemplateManagementExtensionsResolver);
+assert.equal(injector.get(ExtensionsService).entityProps.get(TextTemplateManagementComponents.TextTemplates)
+  .props.toArray().some(prop => prop.name === 'ConsumerTag' && prop.isExtra), true);
 const seen = observeSaasChanges(injector);
 const bus = injector.get(EventBusService);
 const context = { userId: 'consumer-user', tenantId: null };
