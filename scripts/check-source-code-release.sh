@@ -33,7 +33,7 @@ import sys
 app = pathlib.Path(sys.argv[1])
 manifest = app / 'package.json'
 data = json.loads(manifest.read_text())
-for package in ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management']:
+for package in ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management', 'openiddict-pro']:
     data['dependencies'][f'@lsw-abpvue/{package}'] = 'workspace:*'
 manifest.write_text(json.dumps(data, indent=2) + '\n')
 for name in ['src/main.ts', 'src/routes.ts']:
@@ -43,6 +43,18 @@ for name in ['src/main.ts', 'src/routes.ts']:
     source = source.replace('createIdentityRoutes', 'createIdentityProRoutes')
     path.write_text(source)
 PY
+
+cat > "$app/src/openiddict-consumer.ts" <<'TS'
+import { createOpenIddictProRoutes, OpenIddictProComponents } from '@lsw-abpvue/openiddict-pro';
+import { provideOpenIddictProConfig, type OpenIddictProPolicyName } from '@lsw-abpvue/openiddict-pro/config';
+import { ApplicationService, ScopeService } from '@lsw-abpvue/openiddict-pro/proxy';
+import type { IdentityProPolicyName } from '@lsw-abpvue/identity-pro/config';
+import type { AuditLoggingPolicyName } from '@lsw-abpvue/audit-logging/config';
+declare module '@lsw-abpvue/core' {
+  interface AbpKnownPolicyName extends Record<OpenIddictProPolicyName | IdentityProPolicyName | AuditLoggingPolicyName, true> {}
+}
+export const openIddictConsumer = [createOpenIddictProRoutes(), provideOpenIddictProConfig(), OpenIddictProComponents, ApplicationService, ScopeService];
+TS
 
 if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
 cp "${ABPVUE_CONSUMER_FIXTURES}/pro-consumer-contract.ts" "$app/src/pro-consumer-contract.ts"
@@ -96,6 +108,8 @@ for entry in packages/identity/src/index.ts packages/identity/config/src/index.t
              packages/language-management/proxy/src/index.ts \
              packages/text-template-management/src/index.ts packages/text-template-management/common/src/index.ts \
              packages/text-template-management/config/src/index.ts packages/text-template-management/proxy/src/index.ts \
+             packages/openiddict-pro/src/index.ts packages/openiddict-pro/config/src/index.ts \
+             packages/openiddict-pro/proxy/src/index.ts \
              packages/tenant-management/proxy/src/index.ts \
              packages/theme-basic/src/styles/style.css .abpvue/source-code.json; do
   [ -f "$app/$entry" ] || { echo "Missing $entry" >&2; exit 1; }
@@ -111,7 +125,7 @@ const record = JSON.parse(readFileSync(`${root}/.abpvue/source-code.json`, 'utf8
 const result = readConfigFile(`${root}/tsconfig.json`, sys.readFile);
 if (result.error) throw new TypeError('The released TypeScript configuration cannot be read.');
 const config = result.config;
-for (const name of ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management']) {
+for (const name of ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management', 'openiddict-pro']) {
   if (!record.packages[`@lsw-abpvue/${name}`]) throw new TypeError(`Missing source record for ${name}.`);
   for (const entry of ['', '/config', '/proxy', ...(name === 'text-template-management' ? ['/common'] : [])]) {
     if (!config.compilerOptions.paths[`@lsw-abpvue/${name}${entry}`]) {

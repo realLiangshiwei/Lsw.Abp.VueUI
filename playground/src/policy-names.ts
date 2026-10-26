@@ -3,6 +3,7 @@ import type { IdentityProPolicyName } from '@lsw-abpvue/identity-pro/config';
 import type { AuditLoggingPolicyName } from '@lsw-abpvue/audit-logging/config';
 import type { LanguageManagementPolicyName } from '@lsw-abpvue/language-management/config';
 import type { TextTemplateManagementPolicyName } from '@lsw-abpvue/text-template-management/config';
+import type { OpenIddictProPolicyName } from '@lsw-abpvue/openiddict-pro/config';
 import type { AbpIdentityPolicyName } from './proxy/policy-names.js';
 
 /**
@@ -16,7 +17,8 @@ declare module '@lsw-abpvue/core' {
     | IdentityProPolicyName
     | AuditLoggingPolicyName
     | LanguageManagementPolicyName
-    | TextTemplateManagementPolicyName,
+    | TextTemplateManagementPolicyName
+    | OpenIddictProPolicyName,
     true
   > {}
 }

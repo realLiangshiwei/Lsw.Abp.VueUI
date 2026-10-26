@@ -24,7 +24,7 @@ export interface AbpInputProps {
 }
 
 export interface AbpInputEmits {
-  /** A `number` input emits a number, everything else a string. */
+  /** Number inputs emit a number or null when cleared; other inputs emit a string. */
   'update:modelValue': [value: string | number | null];
   blur: [event: FocusEvent];
   focus: [event: FocusEvent];

@@ -8,7 +8,7 @@ import { Validators } from '@lsw-abpvue/theme-shared';
 import { plainTheme } from '@lsw-abpvue/theme-shared/testing';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
-import { defineComponent, h, ref } from 'vue';
+import { defineComponent, h, nextTick, ref } from 'vue';
 import { PropType } from '../enums/prop-type.js';
 import { FormProp } from '../models/form-props.js';
 import { ExtensionsService } from '../services/extensions.service.js';
@@ -66,6 +66,26 @@ function render(setup: Setup = {}, record?: Book, slots = {}) {
 const labels = (wrapper: VueWrapper) => wrapper.findAll('label').map(label => label.text());
 
 describe('the fields come from the extension point', () => {
+  it('keeps an explicitly empty resolved label empty', () => {
+    const { wrapper } = render({
+      create: [field({ displayName: 'Original label', displayTextResolver: () => '' })],
+    });
+    expect(labels(wrapper)).toEqual([]);
+    wrapper.unmount();
+  });
+
+  it('uses reactive text supplied by the form label resolver', async () => {
+    const text = ref('Custom label');
+    const { wrapper } = render({
+      create: [field({ displayName: 'Original label', displayTextResolver: () => text.value })],
+    });
+    expect(labels(wrapper)).toEqual(['Custom label']);
+    text.value = 'Updated label';
+    await nextTick();
+    expect(labels(wrapper)).toEqual(['Updated label']);
+    wrapper.unmount();
+  });
+
   it('the create form is used when there is no record, the edit form when there is', () => {
     const create = [field({ name: 'name' }), field({ name: 'password', type: PropType.Password })];
     const edit = [field({ name: 'name' })];

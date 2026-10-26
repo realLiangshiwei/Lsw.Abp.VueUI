@@ -63,6 +63,9 @@ export const routes: RouteRecordRaw[] = [
   ),
   ...(import.meta.env.VITE_ABP_EDITION === 'pro'
     ? [
+        lazyRoutes('/openiddict', () =>
+          import('@lsw-abpvue/openiddict-pro').then(module => module.createOpenIddictProRoutes()),
+        ),
         lazyRoutes('/audit-logs', () =>
           import('@lsw-abpvue/audit-logging').then(module => module.createAuditLoggingRoutes()),
         ),

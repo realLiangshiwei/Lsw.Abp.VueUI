@@ -23,6 +23,7 @@ import { provideSettingManagementConfig } from '@lsw-abpvue/setting-management/c
 import { provideTenantManagementConfig } from '@lsw-abpvue/tenant-management/config';
 import { provideSaasConfig } from '@lsw-abpvue/saas/config';
 import { provideLanguageManagementConfig } from '@lsw-abpvue/language-management/config';
+import { provideOpenIddictProConfig } from '@lsw-abpvue/openiddict-pro/config';
 import { provideTextTemplateManagementConfig } from '@lsw-abpvue/text-template-management/config';
 import App from './App.vue';
 import { routes } from './routes';
@@ -58,7 +59,9 @@ const { mount } = await createAbpApp(App, {
       : provideIdentityConfig(),
     ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? [provideAuditLoggingConfig()] : []),
     ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? [provideLanguageManagementConfig()] : []),
-    ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? [provideTextTemplateManagementConfig()] : []),
+    ...(import.meta.env.VITE_ABP_EDITION === 'pro'
+      ? [provideTextTemplateManagementConfig(), provideOpenIddictProConfig()]
+      : []),
     import.meta.env.VITE_ABP_EDITION === 'pro'
       ? provideSaasConfig()
       : provideTenantManagementConfig(),

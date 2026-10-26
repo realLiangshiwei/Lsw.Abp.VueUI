@@ -21,6 +21,7 @@
     "@lsw-abpvue/identity-pro": "workspace:*",
     "@lsw-abpvue/language-management": "workspace:*",
     "@lsw-abpvue/oauth": "workspace:*",
+    "@lsw-abpvue/openiddict-pro": "workspace:*",
     "@lsw-abpvue/permission-management": "workspace:*",
     "@lsw-abpvue/setting-management": "workspace:*",
     "@lsw-abpvue/tenant-management": "workspace:*",

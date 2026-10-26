@@ -169,6 +169,18 @@ export function testInput(theme: ThemeUnderTest): void {
       expect(rendered.emitted('update:modelValue').at(-1)).toEqual([42]);
     });
 
+    it('keeps an empty number distinct from an explicit zero', async () => {
+      const rendered = renderContract(theme, AbpInput, {
+        props: { type: 'number', modelValue: 42 },
+        events: ['update:modelValue'],
+      });
+      const input = findRendered(rendered, 'input');
+      await input?.setValue('');
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual([null]);
+      await input?.setValue('0');
+      expect(rendered.emitted('update:modelValue').at(-1)).toEqual([0]);
+    });
+
     it('cannot be typed into when disabled or read only', () => {
       const disabled = renderContract(theme, AbpInput, { props: { disabled: true } });
       const readonly = renderContract(theme, AbpInput, { props: { readonly: true } });

@@ -121,6 +121,15 @@ const ALLOWED = {
     'vue',
     'vue-router',
   ],
+  'openiddict-pro': [
+    '@lsw-abpvue/audit-logging',
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/permission-management',
+    '@lsw-abpvue/theme-shared',
+    'vue',
+    'vue-router',
+  ],
   'permission-management': [
     // The tab list every module's grouped dialog renders (design 03 §1).
     '@lsw-abpvue/components',

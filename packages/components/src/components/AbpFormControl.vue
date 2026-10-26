@@ -124,7 +124,9 @@ async function search(term: string): Promise<AbpTypeaheadItem[]> {
     <slot :prop="prop" :control="control">
       <AbpFormField
         v-bind="$attrs"
-        :label="prop.displayName ? $t(prop.displayName) : undefined"
+        :label="
+          prop.displayTextResolver?.(data) ?? (prop.displayName ? $t(prop.displayName) : undefined)
+        "
         :for="prop.id"
         :required="required"
         :hint="prop.formText ? $t(prop.formText) : undefined"

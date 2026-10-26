@@ -104,6 +104,7 @@ function isOssSource(file: string): boolean {
       'audit-logging',
       'saas',
       'language-management',
+      'openiddict-pro',
       'text-template-management',
     ].some(name => file.startsWith(`${join('packages', name)}${sep}`))
   );

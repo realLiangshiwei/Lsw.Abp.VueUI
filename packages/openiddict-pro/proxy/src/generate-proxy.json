@@ -1,0 +1,28 @@
+{
+  "generated": [
+    "README.md",
+    "application.service.ts",
+    "applications/dtos/index.ts",
+    "applications/dtos/models.ts",
+    "applications/index.ts",
+    "index.ts",
+    "scope.service.ts",
+    "scopes/dtos/index.ts",
+    "scopes/dtos/models.ts",
+    "scopes/index.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "openiddictpro": {
+      "rootPath": "openiddictpro",
+      "remoteServiceName": "OpenIddictPro"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp.OpenIddict",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

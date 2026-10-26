@@ -79,6 +79,9 @@
       "@lsw-abpvue/language-management/proxy": [
         "./packages/language-management/proxy/src/index.ts"
       ],
+      "@lsw-abpvue/openiddict-pro": ["./packages/openiddict-pro/src/index.ts"],
+      "@lsw-abpvue/openiddict-pro/config": ["./packages/openiddict-pro/config/src/index.ts"],
+      "@lsw-abpvue/openiddict-pro/proxy": ["./packages/openiddict-pro/proxy/src/index.ts"],
       "@lsw-abpvue/text-template-management": ["./packages/text-template-management/src/index.ts"],
       "@lsw-abpvue/text-template-management/common": [
         "./packages/text-template-management/common/src/index.ts"

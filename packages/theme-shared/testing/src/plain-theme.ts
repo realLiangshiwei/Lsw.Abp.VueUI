@@ -141,7 +141,10 @@ const PlainInput = defineComponent({
         'aria-label': props.ariaLabel,
         onInput: (event: Event) => {
           const value = (event.target as HTMLInputElement).value;
-          emit('update:modelValue', props.type === 'number' ? Number(value) : value);
+          emit(
+            'update:modelValue',
+            props.type === 'number' ? (value === '' ? null : Number(value)) : value,
+          );
         },
         onBlur: (event: FocusEvent) => emit('blur', event),
         onFocus: (event: FocusEvent) => emit('focus', event),

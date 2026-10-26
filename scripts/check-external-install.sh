@@ -92,6 +92,9 @@ import { TenantService as SaasTenantService, TenantActivationState, type SaasTen
 import { createSettingManagementRoutes, SettingManagementComponents } from '@lsw-abpvue/setting-management';
 import { provideSettingManagementConfig, SettingTabsService } from '@lsw-abpvue/setting-management/config';
 import type { EmailSettingsDto } from '@lsw-abpvue/setting-management/proxy';
+import { AbpApplicationsPage, AbpScopesPage, createOpenIddictProRoutes, OpenIddictProComponents, defaultApplicationsTypeList, defaultUriPattern, hashSetParser, type OpenIddictProConfigOptions } from '@lsw-abpvue/openiddict-pro';
+import { provideOpenIddictProConfig } from '@lsw-abpvue/openiddict-pro/config';
+import { ApplicationService, ScopeService, type ApplicationDto } from '@lsw-abpvue/openiddict-pro/proxy';
 import { AbpLanguagesPage, createLanguageManagementRoutes, LanguageManagementComponents, type LanguageManagementConfigOptions } from '@lsw-abpvue/language-management';
 import { provideLanguageManagementConfig, LANGUAGE_MANAGEMENT_FEATURES } from '@lsw-abpvue/language-management/config';
 import { LanguageService, LanguageTextService, type LanguageDto } from '@lsw-abpvue/language-management/proxy';
@@ -252,6 +255,18 @@ declare module '@lsw-abpvue/core' {
 }
 
 const permission = createInjector([]).get(PermissionService);
+export const openIddictPagesAreTyped: [IsAny<typeof AbpApplicationsPage>, IsAny<typeof AbpScopesPage>] = [false, false];
+export const openIddictOptions: OpenIddictProConfigOptions = {
+  entityPropContributors: {
+    [OpenIddictProComponents.Applications]: [props => props.addTail(EntityProp.create<ApplicationDto>({ name: 'clientUri', type: PropType.String }))],
+  },
+};
+export const openIddictRoutes = createOpenIddictProRoutes(openIddictOptions);
+export const openIddictConfig = provideOpenIddictProConfig();
+export const openIddictProtocolChoices = defaultApplicationsTypeList.map(option => option.value);
+export const openIddictNativeUri = defaultUriPattern.test('com.example:/callback');
+export const openIddictText = hashSetParser(['one', 'two']);
+export const openIddictApis = [createInjector([]).get(ApplicationService).apiName, createInjector([]).get(ScopeService).apiName];
 export const languagesPageIsTyped: IsAny<typeof AbpLanguagesPage> extends false ? true : never = true;
 export const languageOptions: LanguageManagementConfigOptions = {
   entityActionContributors: {
@@ -332,6 +347,8 @@ node --input-type=module <<'JS'
 import assert from 'node:assert/strict';
 import { ConfigStateService, createInjector, EventBusService } from '@lsw-abpvue/core';
 import { ExtensionsService } from '@lsw-abpvue/components';
+import { defaultUriPattern, hashSetParser } from '@lsw-abpvue/openiddict-pro';
+import { ApplicationService, ScopeService } from '@lsw-abpvue/openiddict-pro/proxy';
 import { SaasEvents } from '@lsw-abpvue/saas/config';
 import { SaasEvents as consumerEvents, observeSaasChanges } from './.runtime/events-consumer.js';
 import { LanguageService, LanguageTextService } from '@lsw-abpvue/language-management/proxy';
@@ -344,6 +361,10 @@ import { textTemplateManagementExtensionsResolver, TextTemplateManagementCompone
 assert.equal(consumerEvents.TenantsChanged, SaasEvents.TenantsChanged);
 assert.equal(consumerEvents.EditionsChanged, SaasEvents.EditionsChanged);
 const injector = createInjector([]);
+assert.equal(defaultUriPattern.test('com.example:/callback'), true);
+assert.equal(hashSetParser(['one', 'two']), 'one\ntwo');
+assert.equal(injector.get(ApplicationService).apiName, 'OpenIddictPro');
+assert.equal(injector.get(ScopeService).apiName, 'OpenIddictPro');
 assert.equal(injector.get(LanguageService).apiName, 'LanguageManagement');
 assert.equal(injector.get(LanguageTextService).apiName, 'LanguageManagement');
 assert.equal(injector.get(LANGUAGE_MANAGEMENT_FEATURES).value.enable, true);

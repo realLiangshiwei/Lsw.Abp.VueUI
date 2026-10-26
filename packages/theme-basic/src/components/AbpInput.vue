@@ -25,7 +25,10 @@ const nativeType = computed(() =>
 
 function onInput(event: Event): void {
   const value = (event.target as HTMLInputElement).value;
-  emit('update:modelValue', props.type === 'number' ? Number(value) : value);
+  emit(
+    'update:modelValue',
+    props.type === 'number' ? (value === '' ? null : Number(value)) : value,
+  );
 }
 </script>
 
