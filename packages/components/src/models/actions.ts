@@ -1,4 +1,5 @@
 import { LinkedList } from '@lsw-abpvue/utils';
+import type { Component } from 'vue';
 import type { PropData, PropTooltip } from './prop-data.js';
 import { ContributorRegistry, Props, type PropContributorCallback } from './props.js';
 
@@ -64,6 +65,11 @@ export interface EntityActionOptions<R> extends ActionOptions<R> {
   showOnlyIcon?: boolean | undefined;
 }
 
+export interface ToolbarActionOptions<R> extends ActionOptions<R> {
+  /** Renders a component with the toolbar data instead of the default button. */
+  component?: Component | undefined;
+}
+
 /** One button in a row's action column. `R` is the record of that row. */
 export class EntityAction<R = unknown> extends Action<R> {
   readonly showOnlyIcon: boolean;
@@ -92,17 +98,22 @@ export class EntityAction<R = unknown> extends Action<R> {
  * action sees everything the user is looking at.
  */
 export class ToolbarAction<R = unknown> extends Action<R> {
-  constructor(options: ActionOptions<R>) {
+  readonly component: Component | undefined;
+
+  constructor(options: ToolbarActionOptions<R>) {
     super(options);
+    this.component = options.component;
   }
 
   /** @param options What the button is */
-  static create<R = unknown>(options: ActionOptions<R>): ToolbarAction<R> {
+  static create<R = unknown>(options: ToolbarActionOptions<R>): ToolbarAction<R> {
     return new ToolbarAction<R>(options);
   }
 
   /** @param optionsList One entry per button, in order */
-  static createMany<R = unknown>(optionsList: readonly ActionOptions<R>[]): ToolbarAction<R>[] {
+  static createMany<R = unknown>(
+    optionsList: readonly ToolbarActionOptions<R>[],
+  ): ToolbarAction<R>[] {
     return optionsList.map(options => new ToolbarAction<R>(options));
   }
 }

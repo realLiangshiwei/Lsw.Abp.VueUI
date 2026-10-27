@@ -42,6 +42,7 @@ export type {
   ToolbarActionContributorCallback,
   ToolbarActionContributorCallbacks,
   ToolbarActionDefaults,
+  ToolbarActionOptions,
   ToolbarActions,
 } from './models/actions.js';
 export { EntityProp, EntityPropList } from './models/entity-props.js';

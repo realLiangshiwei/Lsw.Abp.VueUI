@@ -91,7 +91,10 @@
       ],
       "@lsw-abpvue/text-template-management/proxy": [
         "./packages/text-template-management/proxy/src/index.ts"
-      ]
+      ],
+      "@lsw-abpvue/gdpr": ["./packages/gdpr/src/index.ts"],
+      "@lsw-abpvue/gdpr/config": ["./packages/gdpr/config/src/index.ts"],
+      "@lsw-abpvue/gdpr/proxy": ["./packages/gdpr/proxy/src/index.ts"]
     }
   }
 }

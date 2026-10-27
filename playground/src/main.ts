@@ -14,6 +14,7 @@ import { provideAbpThemeBasic } from '@lsw-abpvue/theme-basic';
 import { provideManageProfileTabs } from '@lsw-abpvue/account';
 import { provideAccountConfig } from '@lsw-abpvue/account/config';
 import { provideFeatureManagementConfig } from '@lsw-abpvue/feature-management/config';
+import { provideGdprConfig } from '@lsw-abpvue/gdpr/config';
 import { provideIdentityConfig } from '@lsw-abpvue/identity/config';
 import { provideIdentityProConfig } from '@lsw-abpvue/identity-pro/config';
 import { provideAuditLoggingConfig } from '@lsw-abpvue/audit-logging/config';
@@ -60,7 +61,7 @@ const { mount } = await createAbpApp(App, {
     ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? [provideAuditLoggingConfig()] : []),
     ...(import.meta.env.VITE_ABP_EDITION === 'pro' ? [provideLanguageManagementConfig()] : []),
     ...(import.meta.env.VITE_ABP_EDITION === 'pro'
-      ? [provideTextTemplateManagementConfig(), provideOpenIddictProConfig()]
+      ? [provideTextTemplateManagementConfig(), provideOpenIddictProConfig(), provideGdprConfig()]
       : []),
     import.meta.env.VITE_ABP_EDITION === 'pro'
       ? provideSaasConfig()

@@ -1,6 +1,13 @@
 import { describe, expectTypeOf, it } from 'vitest';
 import { PropType } from './enums/prop-type.js';
-import { EntityAction, EntityActionsFactory, type EntityActionList } from './models/actions.js';
+import {
+  EntityAction,
+  EntityActionsFactory,
+  ToolbarAction,
+  type EntityActionList,
+  type ToolbarActionOptions,
+} from './models/actions.js';
+import type { Component } from 'vue';
 import { EntityProp, EntityPropsFactory, type EntityPropList } from './models/entity-props.js';
 import { FormProp, FormPropsFactory } from './models/form-props.js';
 import { unwrapResolvable } from './models/prop-data.js';
@@ -14,6 +21,19 @@ interface Book {
 const USERS = 'Identity.UsersComponent';
 
 describe('the extension point types', () => {
+  it('keeps toolbar component options and callbacks typed to the page records', () => {
+    expectTypeOf<ToolbarActionOptions<readonly Book[]>['component']>().toEqualTypeOf<
+      Component | undefined
+    >();
+    ToolbarAction.create<readonly Book[]>({
+      text: 'Custom',
+      component: { render: () => null },
+      action: data => {
+        expectTypeOf(data.record).toEqualTypeOf<readonly Book[]>();
+      },
+    });
+  });
+
   it('a registry hands back the list of the record type asked for', () => {
     const factory = new EntityPropsFactory();
 

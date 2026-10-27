@@ -17,6 +17,7 @@ const BUSINESS_MODULES = [
   '@lsw-abpvue/account-pro',
   '@lsw-abpvue/audit-logging',
   '@lsw-abpvue/feature-management',
+  '@lsw-abpvue/gdpr',
   '@lsw-abpvue/identity',
   '@lsw-abpvue/identity-pro',
   '@lsw-abpvue/language-management',

@@ -102,6 +102,7 @@ function isOssSource(file: string): boolean {
       'identity-pro',
       'account-pro',
       'audit-logging',
+      'gdpr',
       'saas',
       'language-management',
       'openiddict-pro',

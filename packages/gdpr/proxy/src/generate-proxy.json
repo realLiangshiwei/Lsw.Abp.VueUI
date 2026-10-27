@@ -1,0 +1,23 @@
+{
+  "generated": [
+    "README.md",
+    "gdpr/gdpr-request.service.ts",
+    "gdpr/index.ts",
+    "gdpr/models.ts",
+    "index.ts"
+  ],
+  "removed": [],
+  "modules": {
+    "gdpr": {
+      "rootPath": "gdpr",
+      "remoteServiceName": "Gdpr"
+    }
+  },
+  "source": {
+    "serviceType": "application",
+    "rootNamespace": "Volo.Abp",
+    "index": true,
+    "validators": false,
+    "policyNames": false
+  }
+}

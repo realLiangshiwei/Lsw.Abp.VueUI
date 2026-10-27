@@ -15,6 +15,13 @@ const props = withDefaults(
   { data: () => [] },
 );
 
+defineSlots<{
+  action?: (props: {
+    action: ToolbarAction<readonly R[]>;
+    data: PropData<readonly R[]>;
+  }) => unknown;
+}>();
+
 const { getInjected } = useGetInjected();
 
 const actionData = computed<PropData<readonly R[]>>(() => ({
@@ -33,17 +40,21 @@ function run(action: ToolbarAction<readonly R[]>): void {
 
 <template>
   <div class="abp-page-toolbar">
-    <AbpButton
-      v-for="action in actions"
-      :key="action.text"
-      size="sm"
-      variant="primary"
-      :class="action.btnClass"
-      :style="action.btnStyle"
-      :icon-class="action.icon"
-      @click="run(action)"
-    >
-      {{ $t(action.text) }}
-    </AbpButton>
+    <template v-for="action in actions" :key="action.text">
+      <slot name="action" :action="action" :data="actionData">
+        <component :is="action.component" v-if="action.component" :data="actionData" />
+        <AbpButton
+          v-else
+          size="sm"
+          variant="primary"
+          :class="action.btnClass"
+          :style="action.btnStyle"
+          :icon-class="action.icon"
+          @click="run(action)"
+        >
+          {{ $t(action.text) }}
+        </AbpButton>
+      </slot>
+    </template>
   </div>
 </template>

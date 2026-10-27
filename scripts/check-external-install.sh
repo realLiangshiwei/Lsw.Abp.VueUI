@@ -101,6 +101,22 @@ import { LanguageService, LanguageTextService, type LanguageDto } from '@lsw-abp
 import { AbpTextTemplatesPage, AbpTemplateContentsPage, AbpInlineTemplateContentPage, createTextTemplateManagementRoutes, TextTemplateManagementComponents, type TextTemplateManagementConfigOptions } from '@lsw-abpvue/text-template-management';
 import { provideTextTemplateManagementConfig, TEXT_TEMPLATE_MANAGEMENT_FEATURES } from '@lsw-abpvue/text-template-management/config';
 import { TemplateContentService, type TemplateDefinitionDto } from '@lsw-abpvue/text-template-management/proxy';
+import { AbpGdprPage, createGdprRoutes, GdprComponents, type GdprConfigOptions } from '@lsw-abpvue/gdpr';
+import { AbpGdprCookieConsent, provideGdprConfig, withCookieConsentOptions } from '@lsw-abpvue/gdpr/config';
+import { GdprRequestService, type GdprRequestDto } from '@lsw-abpvue/gdpr/proxy';
+
+export const gdprPageIsTyped: IsAny<typeof AbpGdprPage> extends false ? true : never = true;
+export const gdprConsentIsTyped: IsAny<typeof AbpGdprCookieConsent> extends false ? true : never = true;
+export const gdprOptions: GdprConfigOptions = {
+  createFormPropContributors: {
+    [GdprComponents.PersonalData]: [props => props.addTail(EntityProp.create<GdprRequestDto>({
+      name: 'id', type: PropType.String, valueResolver: data => data.record.id,
+    }))],
+  },
+};
+export const gdprRoutes = createGdprRoutes(gdprOptions);
+export const gdprConfig = provideGdprConfig(withCookieConsentOptions({ isEnabled: false }));
+export const gdprEligibility = (): Promise<boolean> => createInjector([]).get(GdprRequestService).isNewRequestAllowed();
 
 const Greeter = defineService('Greeter', () => {
   const store = new InternalStore<{ template: string }>({ template: 'Hei {0}.' });
@@ -357,6 +373,8 @@ import { TemplateContentService, TemplateDefinitionService } from '@lsw-abpvue/t
 import { TEXT_TEMPLATE_MANAGEMENT_FEATURES as commonFeature } from '@lsw-abpvue/text-template-management/common';
 import { TEXT_TEMPLATE_MANAGEMENT_FEATURES as configFeature } from '@lsw-abpvue/text-template-management/config';
 import { textTemplateManagementExtensionsResolver, TextTemplateManagementComponents } from '@lsw-abpvue/text-template-management';
+import { GdprRequestService } from '@lsw-abpvue/gdpr/proxy';
+import { CookieConsentService } from '@lsw-abpvue/gdpr/config';
 
 assert.equal(consumerEvents.TenantsChanged, SaasEvents.TenantsChanged);
 assert.equal(consumerEvents.EditionsChanged, SaasEvents.EditionsChanged);
@@ -372,6 +390,8 @@ assert.equal(commonFeature, configFeature);
 assert.equal(injector.get(commonFeature).value.enable, true);
 assert.equal(injector.get(TemplateContentService).apiName, 'TextTemplateManagement');
 assert.equal(injector.get(TemplateDefinitionService).apiName, 'TextTemplateManagement');
+assert.equal(injector.get(GdprRequestService).apiName, 'Gdpr');
+assert.notEqual(injector.get(CookieConsentService), createInjector([]).get(CookieConsentService));
 const config = injector.get(ConfigStateService);
 config.setState({
   ...config.snapshot(),

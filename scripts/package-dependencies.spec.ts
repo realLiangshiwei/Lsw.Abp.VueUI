@@ -102,6 +102,13 @@ const ALLOWED = {
     'vue',
     'vue-router',
   ],
+  gdpr: [
+    '@lsw-abpvue/core',
+    '@lsw-abpvue/components',
+    '@lsw-abpvue/theme-shared',
+    'vue',
+    'vue-router',
+  ],
   'text-template-management': [
     '@lsw-abpvue/core',
     '@lsw-abpvue/components',

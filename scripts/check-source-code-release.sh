@@ -33,7 +33,7 @@ import sys
 app = pathlib.Path(sys.argv[1])
 manifest = app / 'package.json'
 data = json.loads(manifest.read_text())
-for package in ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management', 'openiddict-pro']:
+for package in ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management', 'openiddict-pro', 'gdpr']:
     data['dependencies'][f'@lsw-abpvue/{package}'] = 'workspace:*'
 manifest.write_text(json.dumps(data, indent=2) + '\n')
 for name in ['src/main.ts', 'src/routes.ts']:
@@ -54,6 +54,14 @@ declare module '@lsw-abpvue/core' {
   interface AbpKnownPolicyName extends Record<OpenIddictProPolicyName | IdentityProPolicyName | AuditLoggingPolicyName, true> {}
 }
 export const openIddictConsumer = [createOpenIddictProRoutes(), provideOpenIddictProConfig(), OpenIddictProComponents, ApplicationService, ScopeService];
+TS
+
+cat > "$app/src/gdpr-consumer.ts" <<'TS'
+import '@lsw-abpvue/gdpr/style.css';
+import { createGdprRoutes, GdprComponents } from '@lsw-abpvue/gdpr';
+import { provideGdprConfig, withCookieConsentOptions } from '@lsw-abpvue/gdpr/config';
+import { GdprRequestService } from '@lsw-abpvue/gdpr/proxy';
+export const gdprConsumer = [createGdprRoutes(), GdprComponents, provideGdprConfig(withCookieConsentOptions({ isEnabled: false })), GdprRequestService];
 TS
 
 if [ -n "${ABPVUE_CONSUMER_FIXTURES:-}" ]; then
@@ -110,6 +118,8 @@ for entry in packages/identity/src/index.ts packages/identity/config/src/index.t
              packages/text-template-management/config/src/index.ts packages/text-template-management/proxy/src/index.ts \
              packages/openiddict-pro/src/index.ts packages/openiddict-pro/config/src/index.ts \
              packages/openiddict-pro/proxy/src/index.ts \
+             packages/gdpr/src/index.ts packages/gdpr/config/src/index.ts \
+             packages/gdpr/proxy/src/index.ts packages/gdpr/src/styles/style.css \
              packages/tenant-management/proxy/src/index.ts \
              packages/theme-basic/src/styles/style.css .abpvue/source-code.json; do
   [ -f "$app/$entry" ] || { echo "Missing $entry" >&2; exit 1; }
@@ -125,7 +135,7 @@ const record = JSON.parse(readFileSync(`${root}/.abpvue/source-code.json`, 'utf8
 const result = readConfigFile(`${root}/tsconfig.json`, sys.readFile);
 if (result.error) throw new TypeError('The released TypeScript configuration cannot be read.');
 const config = result.config;
-for (const name of ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management', 'openiddict-pro']) {
+for (const name of ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management', 'openiddict-pro', 'gdpr']) {
   if (!record.packages[`@lsw-abpvue/${name}`]) throw new TypeError(`Missing source record for ${name}.`);
   for (const entry of ['', '/config', '/proxy', ...(name === 'text-template-management' ? ['/common'] : [])]) {
     if (!config.compilerOptions.paths[`@lsw-abpvue/${name}${entry}`]) {
