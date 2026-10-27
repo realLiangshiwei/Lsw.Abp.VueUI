@@ -21,7 +21,7 @@
     "lint:fix": "eslint . --fix && prettier --write .",
     "prepare": "lefthook install",
     "release": "node scripts/publish-packages.mjs",
-    "size": "size-limit",
+    "size": "size-limit --config .size-limit.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

@@ -15,10 +15,9 @@ import { extensionCoverage } from './object-extensions.js';
 import type { Check } from './checks.js';
 
 /**
- * The ABP versions this release is tested against -- one per captured fixture set the
- * contract matrix runs against.
+ * The ABP versions covered by OSS fixtures and commercial integration checks.
  */
-const SUPPORTED_ABP = ['10.5', '10.6'];
+const SUPPORTED_ABP = ['10.5', '10.6', '10.7'];
 
 export interface DoctorOptions {
   /** The application root. */

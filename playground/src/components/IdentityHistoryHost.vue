@@ -96,10 +96,11 @@ const host = defineAsyncComponent({
   loader: async () => {
     loading.value = true;
     const module = await import('@lsw-abpvue/audit-logging');
+    const component = await module.loadEntityHistoryHost();
     loading.value = false;
     failed.value = false;
     retryHost.value = undefined;
-    return module.EntityHistoryHost;
+    return component;
   },
   onError(_error, retry) {
     loading.value = false;

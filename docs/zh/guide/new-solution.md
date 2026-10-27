@@ -29,6 +29,8 @@ Acme.BookStore/
 
 默认前端包含欢迎页与模块 UI，添加 `--sample-crud` 才包含 Books 示例。`--port`、`--modules` 等选项见 [new](/zh/cli/new)。
 
+OSS／PRO 由官方 ABP CLI 根据登录和授权状态选择，Vue 跟随生成的后端模块。需要 OSS 时显式添加 `-uost`。
+
 ## 启动后端
 
 ```bash

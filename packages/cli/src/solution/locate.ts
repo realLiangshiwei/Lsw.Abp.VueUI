@@ -20,6 +20,8 @@ export interface Solution {
   authUrl: string;
   /** The OpenIddict client the frontend is meant to use, from the migrator's settings. */
   clientId: string;
+  /** The existing server application used for account mail callbacks. */
+  accountAppName?: string | undefined;
 }
 
 const SOLUTION_FILE = /\.slnx?$/;
@@ -166,6 +168,9 @@ export async function readSolution(root: string): Promise<Solution> {
   }
 
   const authServer = projects['AuthServer'];
+  const authSettings = parse(
+    await readFile(join(authServer ?? host, 'appsettings.json'), 'utf8').catch(() => ''),
+  ) as { App?: { AngularUrl?: string } } | undefined;
 
   return {
     root,
@@ -175,5 +180,6 @@ export async function readSolution(root: string): Promise<Solution> {
     hostUrl,
     authUrl: (authServer ? await launchUrl(authServer) : undefined) ?? hostUrl,
     clientId: await clientIdOf(projects['DbMigrator'], appName),
+    accountAppName: authSettings?.App?.AngularUrl ? 'Angular' : 'MVC',
   };
 }

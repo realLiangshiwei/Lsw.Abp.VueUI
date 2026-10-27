@@ -21,28 +21,16 @@ done
 echo "Creating a project"
 mkdir -p "$work/project"
 (cd "$work/project" && node "$root/packages/cli/dist/bin.js" new Acme.BookStore \
-  --no-backend --backend https://localhost:44335 --skip-install --skip-proxy >/dev/null)
+  --no-backend --backend https://localhost:44335 --skip-install --skip-proxy \
+  --modules account-pro,account-pro-admin,identity-pro,saas,audit-logging,language-management,text-template-management,openiddict-pro,gdpr,setting-management,feature-management >/dev/null)
 
 app="$work/project/Acme.BookStore"
 
-python3 - "$app" <<'PY'
-import json
-import pathlib
-import sys
-
-app = pathlib.Path(sys.argv[1])
-manifest = app / 'package.json'
-data = json.loads(manifest.read_text())
-for package in ['identity-pro', 'account-pro', 'audit-logging', 'saas', 'language-management', 'text-template-management', 'openiddict-pro', 'gdpr']:
-    data['dependencies'][f'@lsw-abpvue/{package}'] = 'workspace:*'
-manifest.write_text(json.dumps(data, indent=2) + '\n')
-for name in ['src/main.ts', 'src/routes.ts']:
-    path = app / name
-    source = path.read_text().replace('@lsw-abpvue/identity', '@lsw-abpvue/identity-pro')
-    source = source.replace('provideIdentityConfig', 'provideIdentityProConfig')
-    source = source.replace('createIdentityRoutes', 'createIdentityProRoutes')
-    path.write_text(source)
-PY
+echo "Checking the default OSS application with installed packages"
+(cd "$work/project" && node "$root/packages/cli/dist/bin.js" new Acme.Oss \
+  --no-backend --skip-install --skip-proxy >/dev/null)
+(cd "$work/project/Acme.Oss" && python3 "$root/scripts/local-tarball-deps.py" "$work/tarballs" && \
+  pnpm install && pnpm typecheck && pnpm build >/dev/null)
 
 cat > "$app/src/openiddict-consumer.ts" <<'TS'
 import { createOpenIddictProRoutes, OpenIddictProComponents } from '@lsw-abpvue/openiddict-pro';
@@ -50,8 +38,10 @@ import { provideOpenIddictProConfig, type OpenIddictProPolicyName } from '@lsw-a
 import { ApplicationService, ScopeService } from '@lsw-abpvue/openiddict-pro/proxy';
 import type { IdentityProPolicyName } from '@lsw-abpvue/identity-pro/config';
 import type { AuditLoggingPolicyName } from '@lsw-abpvue/audit-logging/config';
+import type { LanguageManagementPolicyName } from '@lsw-abpvue/language-management/config';
+import type { TextTemplateManagementPolicyName } from '@lsw-abpvue/text-template-management/config';
 declare module '@lsw-abpvue/core' {
-  interface AbpKnownPolicyName extends Record<OpenIddictProPolicyName | IdentityProPolicyName | AuditLoggingPolicyName, true> {}
+  interface AbpKnownPolicyName extends Record<OpenIddictProPolicyName | IdentityProPolicyName | AuditLoggingPolicyName | LanguageManagementPolicyName | TextTemplateManagementPolicyName, true> {}
 }
 export const openIddictConsumer = [createOpenIddictProRoutes(), provideOpenIddictProConfig(), OpenIddictProComponents, ApplicationService, ScopeService];
 TS
@@ -84,6 +74,9 @@ fi
 
 echo "Installing"
 (cd "$app" && pnpm install)
+
+echo "Checking the generated PRO application before releasing source"
+(cd "$app" && pnpm typecheck && pnpm build >/dev/null)
 
 before="$(cd "$app/src" && find . -type f | sort | xargs shasum | shasum)"
 

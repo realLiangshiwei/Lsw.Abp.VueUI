@@ -139,8 +139,6 @@ export function abpNewArgs(name: string, passthrough: readonly string[]): string
     ...(has(passthrough, '-t', '--template') ? [] : ['-t', 'app']),
     '-u',
     'no-ui',
-    // Without it a machine with a commercial subscription produces the commercial variant.
-    ...(has(passthrough, '-uost', '--use-open-source-template') ? [] : ['-uost']),
     '-o',
     join(directory, BACKEND_DIRECTORY),
     ...forwarded,

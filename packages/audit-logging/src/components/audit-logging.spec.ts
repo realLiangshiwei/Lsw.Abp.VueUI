@@ -51,6 +51,11 @@ import AverageExecutionDurationWidget from './AverageExecutionDurationWidget.vue
 import EntityHistoryHost from './EntityHistoryHost.vue';
 import EntityHistoryDialog from './EntityHistoryDialog.vue';
 import AuditLogSettings from '../../config/src/components/AuditLogSettings.vue';
+import {
+  AuditLogsPage as LazyAuditLogsPage,
+  EntityChangeDetails as LazyEntityChangeDetails,
+  loadEntityHistoryHost,
+} from '../index.js';
 
 const change: EntityChangeDto = {
   id: 'change-a',
@@ -234,9 +239,27 @@ function deferred<T>() {
 }
 
 describe('audit logging pages', () => {
+  it('loads the history host before the application renders its selected entity', async () => {
+    const { wrapper, injector } = await render(await loadEntityHistoryHost());
+    injector.get(EntityHistoryService).show('entity-a', 'Example.Book');
+    await vi.waitFor(() => expect(wrapper.text()).toContain('Example.Book'));
+  });
+  it('renders the public asynchronous component with its original props', async () => {
+    const { wrapper } = await render(
+      defineComponent({
+        setup: () => () => h(LazyEntityChangeDetails, { itemWithUserName: detail }),
+      }),
+    );
+    await vi.waitFor(() => expect(wrapper.text()).toContain('old'));
+    expect(wrapper.text()).toContain('<b>new</b>');
+    expect(wrapper.find('b').exists()).toBe(false);
+    expect(
+      createAuditLoggingRoutes()[0]?.children?.[0]?.meta?.replaceableComponent?.defaultComponent,
+    ).toBe(LazyAuditLogsPage);
+  });
   it('renders the canonical columns, HTTP badges and both audit tabs', async () => {
     const { wrapper, service } = await render();
-    expect(wrapper.text()).toContain('/audited');
+    await vi.waitFor(() => expect(wrapper.text()).toContain('/audited'));
     expect(wrapper.text()).toContain('GET');
     expect(wrapper.text()).not.toContain(log.executionTime);
     expect(wrapper.findAll('[role="tab"]')).toHaveLength(2);

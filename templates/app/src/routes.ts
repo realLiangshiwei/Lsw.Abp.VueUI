@@ -44,4 +44,44 @@ export const routes: RouteRecordRaw[] = [
     import('@lsw-abpvue/setting-management').then(module => module.createSettingManagementRoutes()),
   ),
   // abpv:end setting-management
+  // abpv:begin identity-pro
+  lazyRoutes('/identity', () =>
+    import('@lsw-abpvue/identity-pro').then(module => module.createIdentityProRoutes()),
+  ),
+  // abpv:end identity-pro
+  // abpv:begin account-pro
+  lazyRoutes('/account', () =>
+    import('@lsw-abpvue/account-pro').then(module => module.createAccountProRoutes()),
+  ),
+  // abpv:end account-pro
+  // abpv:begin saas
+  lazyRoutes('/saas', () => import('@lsw-abpvue/saas').then(module => module.createSaasRoutes())),
+  // abpv:end saas
+  // abpv:begin audit-logging
+  lazyRoutes('/audit-logs', () =>
+    import('@lsw-abpvue/audit-logging').then(module => module.createAuditLoggingRoutes()),
+  ),
+  // abpv:end audit-logging
+  // abpv:begin language-management
+  lazyRoutes('/language-management', () =>
+    import('@lsw-abpvue/language-management').then(module =>
+      module.createLanguageManagementRoutes(),
+    ),
+  ),
+  // abpv:end language-management
+  // abpv:begin text-template-management
+  lazyRoutes('/text-template-management', () =>
+    import('@lsw-abpvue/text-template-management').then(module =>
+      module.createTextTemplateManagementRoutes(),
+    ),
+  ),
+  // abpv:end text-template-management
+  // abpv:begin openiddict-pro
+  lazyRoutes('/openiddict', () =>
+    import('@lsw-abpvue/openiddict-pro').then(module => module.createOpenIddictProRoutes()),
+  ),
+  // abpv:end openiddict-pro
+  // abpv:begin gdpr
+  lazyRoutes('/gdpr', () => import('@lsw-abpvue/gdpr').then(module => module.createGdprRoutes())),
+  // abpv:end gdpr
 ];

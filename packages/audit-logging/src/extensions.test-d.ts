@@ -4,11 +4,14 @@ import type {
   ToolbarActionContributorCallback,
 } from '@lsw-abpvue/components';
 import type { AuditLogDto, EntityChangeDto } from '@lsw-abpvue/audit-logging/proxy';
+import type { EntityChangeWithUsernameDto } from '@lsw-abpvue/audit-logging/proxy';
 import { describe, expectTypeOf, it } from 'vitest';
 import type {
   AuditLoggingConfigOptions,
   AuditLogsPageCommands,
   ShowEntityDetails,
+  EntityHistoryDialog,
+  EntityChangeDetails,
 } from './index.js';
 
 describe('audit contributor types', () => {
@@ -30,5 +33,13 @@ describe('audit contributor types', () => {
     >();
     expectTypeOf<AuditLogsPageCommands['openModal']>().toEqualTypeOf<(id: string) => void>();
     expectTypeOf<ShowEntityDetails>().toEqualTypeOf<(entityChangeId: string) => void>();
+  });
+  it('preserves the required props of asynchronously loaded public components', () => {
+    expectTypeOf<
+      InstanceType<typeof EntityHistoryDialog>['$props']['entityId']
+    >().toEqualTypeOf<string>();
+    expectTypeOf<
+      InstanceType<typeof EntityChangeDetails>['$props']['itemWithUserName']
+    >().toEqualTypeOf<EntityChangeWithUsernameDto>();
   });
 });

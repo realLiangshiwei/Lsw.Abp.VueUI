@@ -151,6 +151,9 @@ export async function configureBackend(options: ConfigureOptions): Promise<Backe
     if (!file) continue;
 
     file.set(['App', 'CorsOrigins'], withOrigin(file.value(['App', 'CorsOrigins']), appUrl));
+    if (file.value(['App', 'AngularUrl']) !== undefined) {
+      file.set(['App', 'AngularUrl'], appUrl);
+    }
 
     // Not every template has this one, and creating it would turn an open list into a
     // list of exactly one URL.

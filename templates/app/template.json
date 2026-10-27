@@ -1,11 +1,108 @@
 {
   "$comment": "Read by the CLI when it renders this template; never copied into a project.",
   "blocks": {
-    "account": { "kind": "module" },
-    "identity": { "kind": "module" },
-    "tenant-management": { "kind": "module" },
-    "setting-management": { "kind": "module" },
-    "feature-management": { "kind": "module" },
+    "account": {
+      "kind": "module",
+      "backendPackages": ["Volo.Abp.Account.Application", "Volo.Abp.Account.HttpApi"]
+    },
+    "identity": {
+      "kind": "module",
+      "backendPackages": ["Volo.Abp.Identity.Application", "Volo.Abp.Identity.HttpApi"]
+    },
+    "tenant-management": {
+      "kind": "module",
+      "backendPackages": [
+        "Volo.Abp.TenantManagement.Application",
+        "Volo.Abp.TenantManagement.HttpApi"
+      ]
+    },
+    "setting-management": {
+      "kind": "module",
+      "backendPackages": [
+        "Volo.Abp.SettingManagement.Application",
+        "Volo.Abp.SettingManagement.HttpApi"
+      ]
+    },
+    "feature-management": {
+      "kind": "module",
+      "backendPackages": [
+        "Volo.Abp.FeatureManagement.Application",
+        "Volo.Abp.FeatureManagement.HttpApi"
+      ]
+    },
+    "account-pro": {
+      "kind": "module",
+      "default": false,
+      "replaces": "account",
+      "backendPackages": [
+        "Volo.Abp.Account.Pro.Public.Application",
+        "Volo.Abp.Account.Pro.Public.HttpApi"
+      ]
+    },
+    "account-pro-admin": {
+      "kind": "module",
+      "default": false,
+      "requires": ["setting-management"],
+      "backendPackages": [
+        "Volo.Abp.Account.Pro.Admin.Application",
+        "Volo.Abp.Account.Pro.Admin.HttpApi"
+      ]
+    },
+    "identity-pro": {
+      "kind": "module",
+      "default": false,
+      "replaces": "identity",
+      "backendPackages": ["Volo.Abp.Identity.Pro.Application", "Volo.Abp.Identity.Pro.HttpApi"]
+    },
+    "saas": {
+      "kind": "module",
+      "default": false,
+      "replaces": "tenant-management",
+      "backendPackages": ["Volo.Saas.Host.Application", "Volo.Saas.Host.HttpApi"]
+    },
+    "audit-logging": {
+      "kind": "module",
+      "default": false,
+      "files": ["src/hosts/EntityHistoryHost.vue"],
+      "backendPackages": ["Volo.Abp.AuditLogging.Application", "Volo.Abp.AuditLogging.HttpApi"]
+    },
+    "language-management": {
+      "kind": "module",
+      "default": false,
+      "backendPackages": [
+        "Volo.Abp.LanguageManagement.Application",
+        "Volo.Abp.LanguageManagement.HttpApi"
+      ]
+    },
+    "text-template-management": {
+      "kind": "module",
+      "default": false,
+      "backendPackages": [
+        "Volo.Abp.TextTemplateManagement.Application",
+        "Volo.Abp.TextTemplateManagement.HttpApi"
+      ]
+    },
+    "openiddict-pro": {
+      "kind": "module",
+      "default": false,
+      "backendPackages": ["Volo.Abp.OpenIddict.Pro.Application", "Volo.Abp.OpenIddict.Pro.HttpApi"]
+    },
+    "gdpr": {
+      "kind": "module",
+      "default": false,
+      "backendPackages": ["Volo.Abp.Gdpr.Application", "Volo.Abp.Gdpr.HttpApi"]
+    },
     "sample-crud": { "kind": "feature", "files": ["src/pages/BooksPage.vue"] }
+  },
+  "conditionalDependencies": {
+    "@lsw-abpvue/account-pro": ["account-pro", "account-pro-admin", "identity-pro"],
+    "@lsw-abpvue/identity-pro": ["identity-pro"],
+    "@lsw-abpvue/saas": ["saas"],
+    "@lsw-abpvue/audit-logging": ["audit-logging", "identity-pro", "saas", "openiddict-pro"],
+    "@lsw-abpvue/language-management": ["language-management"],
+    "@lsw-abpvue/text-template-management": ["text-template-management"],
+    "@lsw-abpvue/openiddict-pro": ["openiddict-pro"],
+    "@lsw-abpvue/gdpr": ["gdpr"],
+    "qrcode": ["account-pro", "account-pro-admin", "identity-pro"]
   }
 }

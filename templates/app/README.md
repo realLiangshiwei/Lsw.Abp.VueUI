@@ -32,6 +32,13 @@ page and its route are included only when `--sample-crud` is requested. Applicat
 pages use explicit controls and CRUD methods; module extension contributors belong to
 reusable module UIs. Vue files put the template first, then the script and styles.
 
+`package.json.abpVue.modules` records the selected module UIs. When a backend project is
+available, the CLI follows its application and HTTP module references, including PRO and
+optional modules. OSS/PRO alternatives share one set of routes and menus. Commercial
+account registration follows OAuth, and its administrator settings follow setting management.
+The account application's `appName` uses existing server callbacks (`MVC` for no UI,
+`Angular` when replacing that UI); keep it aligned with the backend's `AppUrlOptions`.
+
 ## Automatic imports
 
 Common Vue, Vue Router and ABP page APIs can be used directly in `src/`:

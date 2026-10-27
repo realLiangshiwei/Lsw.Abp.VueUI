@@ -2,6 +2,7 @@ import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname, join } from 'node:path';
 import { CliError } from '../errors.js';
 import { readTemplateManifest, TEMPLATE_MANIFEST_FILE, type TemplateManifest } from './manifest.js';
+import { selectModules } from './modules.js';
 
 /**
  * What the placeholders in the template stand for. Every key is one `__SCREAMING_SNAKE__`
@@ -17,6 +18,7 @@ export interface TemplateValues {
   apiUrl: string;
   authUrl: string;
   appUrl: string;
+  accountAppName?: string | undefined;
 }
 
 export interface RenderOptions {
@@ -61,6 +63,7 @@ const IGNORED = new Set(['node_modules', 'dist', '.turbo']);
 const BINARY = /\.(png|jpe?g|gif|ico|webp|woff2?|ttf|eot|pdf|zip)$/i;
 
 const MARKER = /^[ \t]*\/\/ abpv:(begin|end) ([a-z0-9-]+)[ \t]*$/;
+const HTML_MARKER = /^[ \t]*<!-- abpv:(begin|end) ([a-z0-9-]+) -->[ \t]*$/;
 const PLACEHOLDER = /__([A-Z0-9_]+)__/g;
 
 /** `projectName` is written `__PROJECT_NAME__` in the files. */
@@ -82,7 +85,7 @@ export function filterBlocks(text: string, keep: ReadonlySet<string>, file: stri
   const open: string[] = [];
 
   for (const line of text.split('\n')) {
-    const marker = MARKER.exec(line);
+    const marker = MARKER.exec(line) ?? HTML_MARKER.exec(line);
 
     if (marker) {
       const name = marker[2] as string;
@@ -136,7 +139,7 @@ export function packageNameOf(projectName: string): string {
  * this repository, which is what keeps it compiling; a project gets its own name and the
  * versions of the CLI that wrote it.
  */
-function renderManifest(text: string, options: RenderOptions): string {
+function renderManifest(text: string, options: RenderOptions, template: TemplateManifest): string {
   const manifest = JSON.parse(text) as {
     name: string;
     description?: string;
@@ -144,17 +147,28 @@ function renderManifest(text: string, options: RenderOptions): string {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
     peerDependencies?: Record<string, string>;
+    abpVue?: { modules?: string[] };
   };
 
   manifest.name =
     options.packageName ?? packageNameOf((options.values as TemplateValues).projectName);
   if (options.description) manifest.description = options.description;
   delete manifest.private;
+  if (manifest.abpVue) {
+    manifest.abpVue.modules = options.blocks.filter(
+      name => template.blocks[name]?.kind === 'module',
+    );
+  }
 
   const groups = [manifest.dependencies, manifest.devDependencies, manifest.peerDependencies];
 
   for (const group of groups) {
     for (const [name, range] of Object.entries(group ?? {})) {
+      const blocks = template.conditionalDependencies?.[name];
+      if (blocks && !blocks.some(block => options.blocks.includes(block))) {
+        delete group?.[name];
+        continue;
+      }
       const rewritten = versionOf(range, options.version);
       if (rewritten) (group as Record<string, string>)[name] = rewritten;
     }
@@ -234,8 +248,16 @@ export async function renderTemplate(options: RenderOptions): Promise<RenderResu
       );
     }
   }
+  selectModules(
+    manifest,
+    undefined,
+    [...keep].filter(name => manifest.blocks[name]?.kind === 'module'),
+  );
 
-  const values = replacements(options.values as Record<string, string>);
+  const values = replacements({
+    ...options.values,
+    accountAppName: options.values.accountAppName ?? 'MVC',
+  } as Record<string, string>);
   const dropped = droppedFiles(manifest, keep);
   const written: string[] = [];
   const contents: Record<string, string> = {};
@@ -260,7 +282,7 @@ export async function renderTemplate(options: RenderOptions): Promise<RenderResu
     const source = await readFile(from, 'utf8');
     const body =
       path === 'package.json'
-        ? renderManifest(source, options)
+        ? renderManifest(source, options, manifest)
         : fill(filterBlocks(source, keep, path), values, path);
 
     contents[output] = renamed(body, options.renames);

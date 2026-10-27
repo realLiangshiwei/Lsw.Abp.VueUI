@@ -43,6 +43,24 @@ describe('abpv switch-ui', () => {
     );
   });
 
+  it('uses the existing commercial modules in both preview and generation', async () => {
+    await writeSolutionFixture(root, {
+      packages: [
+        'Volo.Abp.Account.Pro.Public.HttpApi',
+        'Volo.Abp.Identity.Pro.HttpApi',
+        'Volo.Saas.Host.HttpApi',
+      ],
+    });
+    const preview = await switchUi({ 'dry-run': true });
+    expect(preview.diff.join('\n')).toContain('provideIdentityProConfig()');
+    expect(preview.diff.join('\n')).not.toContain('provideIdentityConfig()');
+    const result = await switchUi();
+    expect(result.files).toEqual(preview.files);
+    expect(await readFile(join(result.frontend, 'src/routes.ts'), 'utf8')).toContain(
+      'createSaasRoutes()',
+    );
+  });
+
   it('previews every new file and backend edit without changing existing files', async () => {
     const path = join(root, 'src/Acme.BookStore.HttpApi.Host/appsettings.json');
     const before = await readFile(path, 'utf8');

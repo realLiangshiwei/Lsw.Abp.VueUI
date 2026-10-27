@@ -68,12 +68,24 @@ describe('abpNewArgs', () => {
       'app',
       '-u',
       'no-ui',
-      '-uost',
       '-o',
       join('Acme.BookStore', 'aspnet-core'),
       '-d',
       'mongodb',
     ]);
+  });
+
+  it('lets the official CLI choose OSS or PRO from its authorization', () => {
+    const args = abpNewArgs('X', []);
+    expect(args).not.toContain('-uost');
+    expect(args).not.toContain('--use-open-source-template');
+    expect(args.slice(2, 6)).toEqual(['-t', 'app', '-u', 'no-ui']);
+  });
+
+  it('passes the long open-source override through unchanged', () => {
+    const args = abpNewArgs('X', ['--use-open-source-template']);
+    expect(args).toContain('--use-open-source-template');
+    expect(args).not.toContain('-uost');
   });
 
   it('leaves the template alone when the caller chose one', () => {

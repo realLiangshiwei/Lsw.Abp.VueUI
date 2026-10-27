@@ -272,7 +272,13 @@
   {
     "name": "@lsw-abpvue/account-pro/admin",
     "path": "packages/account-pro/dist/admin/index.js",
-    "ignore": ["vue", "@lsw-abpvue/core", "@lsw-abpvue/components", "@lsw-abpvue/theme-shared"],
+    "ignore": [
+      "vue",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/account-pro/proxy"
+    ],
     "limit": "6 kB"
   },
   {
@@ -296,13 +302,23 @@
       "vue",
       "vue-router",
       "@lsw-abpvue/audit-logging/config",
-      "@lsw-abpvue/audit-logging/proxy"
+      "@lsw-abpvue/audit-logging/proxy",
+      "./chunks/EntityHistoryDialog-*",
+      "./chunks/EntityHistoryHost-*",
+      "./chunks/AuditLogsPage-*",
+      "./chunks/EntityChangesPage-*",
+      "./chunks/AuditLogDetailsDialog-*",
+      "./chunks/EntityChangeDetails-*",
+      "./chunks/EntityChangeDetailsDialog-*",
+      "./chunks/ErrorRateWidget-*",
+      "./chunks/AverageExecutionDurationWidget-*",
+      "./chunks/HttpRequestCell-*"
     ],
     "limit": "2.5 kB"
   },
   {
-    "name": "@lsw-abpvue/audit-logging/config",
-    "path": "packages/audit-logging/dist/config/index.js",
+    "name": "@lsw-abpvue/audit-logging (complete module)",
+    "path": "packages/audit-logging/dist/index.js",
     "ignore": [
       "@lsw-abpvue/components",
       "@lsw-abpvue/core",
@@ -312,7 +328,38 @@
       "@lsw-abpvue/audit-logging/config",
       "@lsw-abpvue/audit-logging/proxy"
     ],
-    "limit": "500 B"
+    "limit": "11 kB"
+  },
+  {
+    "name": "@lsw-abpvue/audit-logging/config",
+    "path": "packages/audit-logging/dist/config/index.js",
+    "ignore": [
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/setting-management",
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/audit-logging/config",
+      "@lsw-abpvue/audit-logging/proxy",
+      "../chunks/AuditLogSettings-*"
+    ],
+    "limit": "1.1 kB"
+  },
+  {
+    "name": "@lsw-abpvue/audit-logging/config (including settings)",
+    "path": "packages/audit-logging/dist/config/index.js",
+    "ignore": [
+      "@lsw-abpvue/components",
+      "@lsw-abpvue/core",
+      "@lsw-abpvue/theme-shared",
+      "@lsw-abpvue/setting-management",
+      "vue",
+      "vue-router",
+      "@lsw-abpvue/audit-logging/config",
+      "@lsw-abpvue/audit-logging/proxy"
+    ],
+    "limit": "3 kB"
   },
   {
     "name": "@lsw-abpvue/identity-pro/proxy",
@@ -323,13 +370,13 @@
   {
     "name": "@lsw-abpvue/account-pro/proxy",
     "path": "packages/account-pro/dist/proxy/index.js",
-    "ignore": ["@lsw-abpvue/core"],
+    "ignore": ["@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
     "limit": "3.25 kB"
   },
   {
     "name": "@lsw-abpvue/audit-logging/proxy",
     "path": "packages/audit-logging/dist/proxy/index.js",
-    "ignore": ["@lsw-abpvue/core"],
+    "ignore": ["@lsw-abpvue/core", "@lsw-abpvue/theme-shared"],
     "limit": "1.8 kB"
   }
 ]

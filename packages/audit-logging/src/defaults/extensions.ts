@@ -3,7 +3,7 @@ import { SHOW_ENTITY_HISTORY } from '@lsw-abpvue/audit-logging/config';
 import type { AuditLogDto, EntityChangeDto } from '@lsw-abpvue/audit-logging/proxy';
 import { ConfigStateService, LocalizationService } from '@lsw-abpvue/core';
 import { markRaw } from 'vue';
-import HttpRequestCell from '../components/HttpRequestCell.vue';
+import { HttpRequestCell } from '../components/lazy.js';
 import { AuditLoggingComponents } from '../enums/components.js';
 import { AUDIT_LOGS_PAGE, SHOW_ENTITY_DETAILS } from '../tokens/pages.token.js';
 import { formatAuditDate } from '../utils/use-audit-logging.js';

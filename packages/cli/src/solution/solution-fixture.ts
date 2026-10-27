@@ -7,6 +7,7 @@ export interface SolutionFixtureOptions {
   separateAuthServer?: boolean | undefined;
   /** Writes an `angular/` directory, the way `abp new -u angular` does. */
   generatedUi?: string | undefined;
+  packages?: readonly string[] | undefined;
 }
 
 const launchSettings = (name: string, url: string) => ({
@@ -61,6 +62,21 @@ export async function writeSolutionFixture(
     },
     'Properties/launchSettings.json': launchSettings('Acme.BookStore.HttpApi.Host', hostUrl),
   });
+
+  const packages = options.packages ?? [
+    'Volo.Abp.Account.Application',
+    'Volo.Abp.Identity.Application',
+    'Volo.Abp.TenantManagement.Application',
+    'Volo.Abp.SettingManagement.Application',
+    'Volo.Abp.FeatureManagement.Application',
+  ];
+  const application = join(root, 'src', 'Acme.BookStore.Application');
+  await mkdir(application, { recursive: true });
+  await writeFile(
+    join(application, 'Acme.BookStore.Application.csproj'),
+    `<Project><ItemGroup>${packages.map(name => `<PackageReference Include="${name}" />`).join('')}</ItemGroup></Project>\n`,
+    'utf8',
+  );
 
   // The one file the CLI must never touch, whatever else it does (design 08 §4, S4).
   await writeFile(

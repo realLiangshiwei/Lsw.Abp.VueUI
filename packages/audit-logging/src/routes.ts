@@ -5,7 +5,7 @@ import {
   withResolvers,
 } from '@lsw-abpvue/core/router';
 import type { RouteRecordRaw } from 'vue-router';
-import AuditLogsPage from './components/AuditLogsPage.vue';
+import { AuditLogsPage } from './components/lazy.js';
 import { AuditLoggingComponents } from './enums/components.js';
 import { auditLoggingGuard } from './guards/audit-logging.guard.js';
 import { provideAuditLogging } from './providers/audit-logging.provider.js';

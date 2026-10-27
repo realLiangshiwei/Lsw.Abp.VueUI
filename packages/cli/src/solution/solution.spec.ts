@@ -52,6 +52,19 @@ describe('a generated solution', () => {
     expect((await readSolution(root)).authUrl).toBe('https://localhost:44336');
   });
 
+  it('uses the server account application of a no-ui backend', async () => {
+    expect((await readSolution(root)).accountAppName).toBe('MVC');
+  });
+
+  it('retains Angular account callbacks and points them at Vue when replacing that UI', async () => {
+    const path = join(root, 'src/Acme.BookStore.HttpApi.Host/appsettings.json');
+    await writeFile(path, JSON.stringify({ App: { AngularUrl: 'http://localhost:4200' } }));
+    const solution = await readSolution(root);
+    expect(solution.accountAppName).toBe('Angular');
+    await configureBackend({ solution, appUrl: 'http://localhost:5173' });
+    expect((await settings('HttpApi.Host')).App?.AngularUrl).toBe('http://localhost:5173');
+  });
+
   it('gives the client the redirect URIs it was generated without', async () => {
     await configureBackend({
       solution: await readSolution(root),

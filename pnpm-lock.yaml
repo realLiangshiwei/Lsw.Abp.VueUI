@@ -693,6 +693,12 @@ importers:
       '@lsw-abpvue/account-core':
         specifier: workspace:*
         version: link:../../packages/account-core
+      '@lsw-abpvue/account-pro':
+        specifier: workspace:*
+        version: link:../../packages/account-pro
+      '@lsw-abpvue/audit-logging':
+        specifier: workspace:*
+        version: link:../../packages/audit-logging
       '@lsw-abpvue/components':
         specifier: workspace:*
         version: link:../../packages/components
@@ -702,21 +708,39 @@ importers:
       '@lsw-abpvue/feature-management':
         specifier: workspace:*
         version: link:../../packages/feature-management
+      '@lsw-abpvue/gdpr':
+        specifier: workspace:*
+        version: link:../../packages/gdpr
       '@lsw-abpvue/identity':
         specifier: workspace:*
         version: link:../../packages/identity
+      '@lsw-abpvue/identity-pro':
+        specifier: workspace:*
+        version: link:../../packages/identity-pro
+      '@lsw-abpvue/language-management':
+        specifier: workspace:*
+        version: link:../../packages/language-management
       '@lsw-abpvue/oauth':
         specifier: workspace:*
         version: link:../../packages/oauth
+      '@lsw-abpvue/openiddict-pro':
+        specifier: workspace:*
+        version: link:../../packages/openiddict-pro
       '@lsw-abpvue/permission-management':
         specifier: workspace:*
         version: link:../../packages/permission-management
+      '@lsw-abpvue/saas':
+        specifier: workspace:*
+        version: link:../../packages/saas
       '@lsw-abpvue/setting-management':
         specifier: workspace:*
         version: link:../../packages/setting-management
       '@lsw-abpvue/tenant-management':
         specifier: workspace:*
         version: link:../../packages/tenant-management
+      '@lsw-abpvue/text-template-management':
+        specifier: workspace:*
+        version: link:../../packages/text-template-management
       '@lsw-abpvue/theme-basic':
         specifier: workspace:*
         version: link:../../packages/theme-basic
@@ -732,6 +756,9 @@ importers:
       bootstrap-icons:
         specifier: ^1.13.1
         version: 1.13.1
+      qrcode:
+        specifier: 1.5.4
+        version: 1.5.4
       vue:
         specifier: 3.5.41
         version: 3.5.41(typescript@6.0.3)

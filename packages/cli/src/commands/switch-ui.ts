@@ -10,7 +10,9 @@ import { generateProxy, installDependencies, releaseAskedSources } from './front
 import { configureBackend, type BackendEdit } from '../solution/backend-config.js';
 import { findSolutionUpwards, readSolution, type Solution } from '../solution/locate.js';
 import { frontendDirectoryOf, projectRootOf } from '../solution/layout.js';
-import { readTemplateManifest, moduleBlocks } from '../template/manifest.js';
+import { readTemplateManifest } from '../template/manifest.js';
+import { selectModules } from '../template/modules.js';
+import { readModulePackages } from '../solution/modules.js';
 import { templateRoot } from '../template/paths.js';
 import { renderTemplate } from '../template/render.js';
 import { Rollback } from '../system/rollback.js';
@@ -110,22 +112,6 @@ async function moveAside(path: string, rollback: Rollback, dryRun: boolean): Pro
   return { from: path, to: target };
 }
 
-async function chosenBlocks(source: string, args: SwitchUiArgs): Promise<string[]> {
-  const available = moduleBlocks(await readTemplateManifest(source));
-  const asked = args.modules
-    ?.split(',')
-    .map(name => name.trim())
-    .filter(Boolean);
-
-  for (const name of asked ?? []) {
-    if (!available.includes(name)) {
-      throw new CliError(`--modules has no "${name}". The template has: ${available.join(', ')}.`);
-    }
-  }
-
-  return asked ?? available;
-}
-
 /**
  * Adds a Vue frontend to a solution that already exists, and points the backend at it.
  * Everything it does to a file someone already had is reversible: the old UI directory is
@@ -170,7 +156,16 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
       ? args.template
       : resolve(cwd, args.template)
     : templateRoot();
-  const blocks = await chosenBlocks(source, args);
+  const requested = args.modules
+    ?.split(',')
+    .map(name => name.trim())
+    .filter(Boolean);
+  const blocks = selectModules(
+    await readTemplateManifest(source),
+    await readModulePackages(solution),
+    requested,
+  );
+  notes.push(`Selected module UIs: ${blocks.join(', ') || '(none)'}.`);
 
   const rollback = new Rollback();
   rollback.watchInterrupts(undone => prompts.log.warn(['Interrupted.', ...undone].join('\n  ')));
@@ -210,6 +205,7 @@ export async function runSwitchUi(args: SwitchUiArgs): Promise<SwitchUiResult> {
         apiUrl: solution.hostUrl,
         authUrl: solution.authUrl,
         appUrl,
+        accountAppName: solution.accountAppName ?? 'MVC',
       },
     });
 

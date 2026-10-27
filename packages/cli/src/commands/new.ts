@@ -11,7 +11,9 @@ import { abpNewArgs, newProjectDirectory, splitArgs } from '../solution/abp-cli.
 import { configureBackend, type BackendEdit } from '../solution/backend-config.js';
 import { readSolution, type Solution } from '../solution/locate.js';
 import { BACKEND_DIRECTORY, frontendDirectoryOf } from '../solution/layout.js';
-import { moduleBlocks, readTemplateManifest } from '../template/manifest.js';
+import { readTemplateManifest } from '../template/manifest.js';
+import { selectModules } from '../template/modules.js';
+import { readModulePackages } from '../solution/modules.js';
 import { templateRoot } from '../template/paths.js';
 import { renderTemplate } from '../template/render.js';
 import { run } from '../system/run.js';
@@ -61,20 +63,6 @@ function withSampleCrud(passthrough: readonly string[]): string[] {
   const asked = passthrough.some(arg => arg === '-scp' || arg === '--sample-crud-page');
 
   return asked ? [...passthrough] : [...passthrough, '-scp'];
-}
-
-async function chosenBlocks(source: string, flags: Flags): Promise<string[]> {
-  const available = moduleBlocks(await readTemplateManifest(source));
-  const named = listOf(flags.value('modules'));
-  const asked = named.length > 0 ? named : undefined;
-
-  for (const name of asked ?? []) {
-    if (!available.includes(name)) {
-      throw new CliError(`--modules has no "${name}". The template has: ${available.join(', ')}.`);
-    }
-  }
-
-  return [...(asked ?? available), ...(flags.on('sample-crud') ? ['sample-crud'] : [])];
 }
 
 /** Runs the official CLI, and remembers the directory it created so an interrupt can undo it. */
@@ -173,7 +161,10 @@ export async function runNew(
       : resolve(cwd, template)
     : templateRoot();
 
-  const blocks = await chosenBlocks(source, flags);
+  const manifest = await readTemplateManifest(source);
+  const named = listOf(flags.value('modules'));
+  const requested = named.length > 0 ? named : undefined;
+  selectModules(manifest, undefined, requested);
   const rollback = new Rollback();
   rollback.watchInterrupts(undone => prompts.log.warn(['Interrupted.', ...undone].join('\n  ')));
 
@@ -186,6 +177,11 @@ export async function runNew(
       notes.push(
         `Would run: abp ${abpNewArgs(name, flags.on('sample-crud') ? withSampleCrud(passthrough) : passthrough).join(' ')}`,
       );
+      if (!requested)
+        notes.push(
+          'ABP CLI will choose OSS or PRO when it runs. This preview uses the basic module defaults; ' +
+            'the generated backend references determine the final module selection.',
+        );
     } else {
       solution = await generateBackend(
         name,
@@ -197,6 +193,13 @@ export async function runNew(
     }
 
     const appName = solution?.appName ?? (name.split('.').at(-1) as string);
+    const modules = selectModules(
+      manifest,
+      solution ? await readModulePackages(solution) : undefined,
+      requested,
+    );
+    const blocks = [...modules, ...(flags.on('sample-crud') ? ['sample-crud'] : [])];
+    notes.push(`Selected module UIs: ${modules.join(', ') || '(none)'}.`);
     const apiUrl = flags.value('backend') ?? solution?.hostUrl ?? DEFAULT_BACKEND;
 
     const existed = await exists(frontend);
@@ -217,6 +220,7 @@ export async function runNew(
         apiUrl,
         authUrl: solution?.authUrl ?? apiUrl,
         appUrl,
+        accountAppName: solution?.accountAppName ?? 'MVC',
       },
     });
 

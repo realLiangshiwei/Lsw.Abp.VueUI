@@ -142,6 +142,39 @@ describe('abpv new with a backend', () => {
     );
   });
 
+  it('follows the backend chosen by the official CLI without forcing OSS', async () => {
+    vi.mocked(program.run).mockImplementation(async (_command, args) => {
+      const output = args[args.indexOf('-o') + 1] ?? '';
+      await writeSolutionFixture(resolve(cwd, output), {
+        packages: [
+          'Volo.Abp.Account.Pro.Public.Application',
+          'Volo.Abp.Identity.Pro.Application',
+          'Volo.Saas.Host.Application',
+          'Volo.Abp.Gdpr.Application',
+        ],
+      });
+      return { code: 0, output: '' };
+    });
+    const result = await create();
+    const args = vi.mocked(program.run).mock.calls[0]?.[1];
+    expect(args).not.toContain('-uost');
+    const main = await readFile(join(result.frontend, 'src/main.ts'), 'utf8');
+    expect(main).toContain('provideIdentityProConfig()');
+    expect(main).toContain('provideSaasConfig()');
+    expect(main).not.toContain('provideIdentityConfig()');
+    expect(main).not.toContain('provideAuditLoggingConfig()');
+    expect(
+      JSON.parse(await readFile(join(result.frontend, 'package.json'), 'utf8')).abpVue.modules,
+    ).toEqual(['account-pro', 'identity-pro', 'saas', 'gdpr']);
+  });
+
+  it('rejects mutually exclusive module choices before running the official CLI', async () => {
+    await expect(create('--modules', 'identity,identity-pro')).rejects.toThrow(
+      'cannot be registered together',
+    );
+    expect(program.run).not.toHaveBeenCalled();
+  });
+
   it('uses the requested output directory for the entire project', async () => {
     const result = await create('--output-folder', 'output with spaces');
     const root = join(cwd, 'output with spaces');

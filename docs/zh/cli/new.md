@@ -7,7 +7,9 @@ abpv new Acme.BookStore --sample-crud
 abpv new Acme.BookStore --no-backend --backend https://localhost:44305
 ```
 
-后端由官方 abp CLI 使用 `-u no-ui -uost`、`-o Acme.BookStore/aspnet-core` 生成。前端位于 `Acme.BookStore/vue`，保持标准前后端目录结构。
+后端由官方 abp CLI 使用 `-t app -u no-ui`、`-o Acme.BookStore/aspnet-core` 生成。前端位于 `Acme.BookStore/vue`，保持标准前后端目录结构。
+
+OSS／PRO 跟随官方 CLI 的登录与授权状态。需要 OSS 时显式传 `-uost`（`--use-open-source-template`）。Vue 根据实际后端的应用和 HTTP 模块引用选择页面，后端排除的可选模块不会默认接入前端。
 
 `-o`／`--output-folder` 指定整个项目目录，后端进入 aspnet-core/ 子目录；支持分开的值与 `--output-folder=<path>`。`-csf`／`--create-solution-folder` 由此命令处理，避免额外嵌套，其余 ABP 选项原样传递。
 
@@ -18,7 +20,7 @@ abpv new Acme.BookStore --no-backend --backend https://localhost:44305
 | `--port <n>` | 前端端口，同步所有关联配置 |
 | `--dir <path>` | 相对项目根的前端子目录，默认 vue |
 | `-o / --output-folder <path>` | 整个项目输出目录，默认方案名 |
-| `--modules <list>` | 接入哪些模块 UI，默认全部 |
+| `--modules <list>` | 覆盖根据后端选择的模块 UI |
 | `--sample-crud` | ABP Books 后端与页面示例 |
 | `--with-source-code <list>` | 创建时释放选定包的源码 |
 | `--no-backend` | 只生成前端 |
@@ -27,6 +29,14 @@ abpv new Acme.BookStore --no-backend --backend https://localhost:44305
 | `--dry-run` | 预览，不写入 |
 
 前端目录必须位于项目内，并与 aspnet-core/ 分开。不覆盖已有前后端。--no-backend 把前端直接写入项目输出目录。
+
+没有后端工程可读时，默认 `account,identity,tenant-management,setting-management,feature-management`。
+纯前端 PRO 可用 `--modules account-pro,identity-pro,saas,setting-management,feature-management`；
+其它可选模块为 `audit-logging,language-management,text-template-management,openiddict-pro,gdpr`。
+账户管理员设置使用 `account-pro-admin`，同时选择 `setting-management`。对应的 OSS／PRO 入口互斥。
+实际模块清单保存在 `package.json.abpVue.modules`。
+
+`new --dry-run` 不执行官方生成器，也不检查授权；没有显式模块清单时预览基础默认模块，真正生成后再按后端选择。
 
 ## 后端配置修改
 
@@ -37,6 +47,7 @@ abpv new Acme.BookStore --no-backend --backend https://localhost:44305
 | OpenIddict 客户端 RootUrl | 种子据此构造重定向 URI |
 | CorsOrigins | 所有响应前端的宿主允许源 |
 | RedirectAllowedUrls | 身份服务器允许返回的地址 |
+| 已有 AngularUrl | 替换 Angular UI 时的账户回调地址 |
 
 使用 -u no-ui 生成的方案不包含这些前端配置。
 

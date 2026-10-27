@@ -29,6 +29,9 @@ Acme.BookStore/
 
 The default frontend has a welcome page and module UIs. Add `--sample-crud` to include the Books sample. `--port`, `--modules` and other generation options are documented in [new](/cli/new).
 
+The official ABP CLI selects OSS or PRO from its login and license state; Vue follows
+the generated backend modules. Add `-uost` to explicitly request OSS.
+
 ## Start the backend
 
 ```bash

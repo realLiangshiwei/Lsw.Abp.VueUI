@@ -12,10 +12,19 @@ export interface TemplateBlock {
   kind: 'module' | 'feature';
   /** Files that exist for this block alone, relative to the template root. */
   files?: string[] | undefined;
+  /** Backend application or HTTP packages that enable this module by default. */
+  backendPackages?: string[] | undefined;
+  /** Used when no backend project is available; existing templates default to true. */
+  default?: boolean | undefined;
+  /** The alternative registration this module replaces. */
+  replaces?: string | undefined;
+  requires?: string[] | undefined;
 }
 
 export interface TemplateManifest {
   blocks: Record<string, TemplateBlock>;
+  /** Dependencies kept when at least one of the named blocks is selected, including peers. */
+  conditionalDependencies?: Record<string, string[]> | undefined;
 }
 
 /**
@@ -29,7 +38,7 @@ export async function readTemplateManifest(source: string): Promise<TemplateMani
 
   try {
     const parsed = JSON.parse(await readFile(path, 'utf8')) as Partial<TemplateManifest>;
-    return { blocks: parsed.blocks ?? {} };
+    return { blocks: parsed.blocks ?? {}, conditionalDependencies: parsed.conditionalDependencies };
   } catch (error) {
     throw new CliError(`The template at ${source} has no readable ${TEMPLATE_MANIFEST_FILE}.`, {
       cause: error,

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { CliError } from '../errors.js';
 import { moduleBlocks, readTemplateManifest } from './manifest.js';
 import { templateRoot } from './paths.js';
+import { selectModules } from './modules.js';
 import { filterBlocks, packageNameOf, renderTemplate, type RenderOptions } from './render.js';
 
 const source = templateRoot();
@@ -29,6 +30,15 @@ describe('filterBlocks', () => {
 
   it('drops the body of a block nobody asked for', () => {
     expect(filterBlocks(text.join('\n'), new Set(), 'x.ts')).toBe('keep\nkeep too');
+  });
+
+  it('filters Vue template blocks with HTML comments', () => {
+    const template =
+      '<main>\n<!-- abpv:begin gdpr -->\n<Consent />\n<!-- abpv:end gdpr -->\n</main>';
+    expect(filterBlocks(template, new Set(), 'App.vue')).toBe('<main>\n</main>');
+    expect(filterBlocks(template, new Set(['gdpr']), 'App.vue')).toBe(
+      '<main>\n<Consent />\n</main>',
+    );
   });
 
   it('refuses a block that is never closed', () => {
@@ -73,7 +83,7 @@ describe('renderTemplate', () => {
 
   it('leaves no placeholder behind in any file it writes', async () => {
     const manifest = await readTemplateManifest(source);
-    const { written } = await render({ blocks: Object.keys(manifest.blocks) });
+    const { written } = await render({ blocks: [...selectModules(manifest), 'sample-crud'] });
 
     for (const path of written) {
       expect(`${path}: ${await read(path)}`).not.toMatch(/__[A-Z0-9_]+__/);
@@ -92,6 +102,72 @@ describe('renderTemplate', () => {
 
     expect(main).toContain('provideIdentityConfig()');
     expect(main).not.toContain('provideTenantManagementConfig()');
+  });
+
+  it('wires the commercial routes, profile tabs, settings and application hosts', async () => {
+    await render({
+      blocks: [
+        'account-pro',
+        'account-pro-admin',
+        'identity-pro',
+        'saas',
+        'audit-logging',
+        'language-management',
+        'text-template-management',
+        'openiddict-pro',
+        'gdpr',
+        'setting-management',
+        'feature-management',
+      ],
+    });
+    const main = await read('src/main.ts');
+    const routes = await read('src/routes.ts');
+    const app = await read('src/App.vue');
+    expect(main).toContain('provideIdentityProConfig()');
+    expect(main).not.toContain('provideIdentityConfig()');
+    expect(main).not.toContain('provideManageProfileTabs()');
+    expect(main.indexOf('provideSettingManagementConfig()')).toBeLessThan(
+      main.indexOf('provideAccountProAdminConfig()'),
+    );
+    expect(main).toContain("import '@lsw-abpvue/gdpr/style.css'");
+    expect(routes).toContain('createIdentityProRoutes()');
+    expect(routes).toContain('createAccountProRoutes()');
+    expect(routes).toContain('createSaasRoutes()');
+    expect(routes).not.toContain('createIdentityRoutes()');
+    expect(routes).not.toContain('/tenant-management');
+    expect(app).toContain('<EntityHistoryHost');
+    expect(app).toContain('<AbpGdprCookieConsent');
+  });
+
+  it('includes the peer dependencies of a selected commercial module', async () => {
+    await render({ blocks: ['identity-pro'] });
+    const manifest = JSON.parse(await read('package.json'));
+    expect(manifest.dependencies).toMatchObject({
+      '@lsw-abpvue/identity-pro': '1.2.3',
+      '@lsw-abpvue/account-pro': '1.2.3',
+      '@lsw-abpvue/audit-logging': '1.2.3',
+      qrcode: '1.5.4',
+    });
+    expect(manifest.dependencies['@lsw-abpvue/saas']).toBeUndefined();
+    expect(manifest.abpVue.modules).toEqual(['identity-pro']);
+    expect(await read('src/App.vue')).not.toContain('EntityHistoryHost');
+  });
+
+  it('leaves commercial dependencies and hosts out of an OSS application', async () => {
+    await render({ blocks: ['account', 'identity'] });
+    const manifest = JSON.parse(await read('package.json'));
+    expect(manifest.dependencies['@lsw-abpvue/identity-pro']).toBeUndefined();
+    expect(manifest.dependencies.qrcode).toBeUndefined();
+    expect(await read('src/App.vue')).not.toContain('AbpGdprCookieConsent');
+    await expect(read('src/hosts/EntityHistoryHost.vue')).rejects.toThrow();
+  });
+
+  it.each([
+    ['identity', 'identity-pro'],
+    ['account', 'account-pro'],
+    ['tenant-management', 'saas'],
+  ])('rejects simultaneous OSS and PRO registrations: %s and %s', async (base, pro) => {
+    await expect(render({ blocks: [base, pro] })).rejects.toThrow('cannot be registered together');
   });
 
   it('takes the files of a block away with the block', async () => {

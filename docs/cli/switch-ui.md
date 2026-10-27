@@ -30,6 +30,11 @@ and keep their backend in its current location.
 
 `--dir` must stay inside the project and cannot overwrite the backend directory.
 
+Module UIs follow the existing backend's application and HTTP references, including PRO
+modules and optional-module exclusions. This does not depend on the machine's current
+ABP login. `--modules` overrides the detected list; corresponding OSS and PRO modules
+cannot be registered together. See [new](./new) for module names.
+
 ## Seven rules it follows
 
 1. Stop on an uncommitted working tree unless `--force` — your diff is the undo button.

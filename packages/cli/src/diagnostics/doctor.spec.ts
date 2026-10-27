@@ -298,5 +298,6 @@ describe('the checks that need no backend', () => {
     expect(versionCheck('9.0.0', { '@lsw-abpvue/core': '0.1.0' }).status).toBe('warn');
     expect(versionCheck('10.5.0', { '@lsw-abpvue/core': '0.1.0' }).status).toBe('ok');
     expect(versionCheck('10.6.0', { '@lsw-abpvue/core': '0.1.0' }).status).toBe('ok');
+    expect(versionCheck('10.7.0', { '@lsw-abpvue/core': '0.1.0' }).status).toBe('ok');
   });
 });
