@@ -1,3 +1,4 @@
+import { readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vue from '@vitejs/plugin-vue';
@@ -5,6 +6,14 @@ import { defineConfig } from 'vitest/config';
 import { workspaceAliases } from './scripts/workspace-aliases.ts';
 
 const root = dirname(fileURLToPath(import.meta.url));
+const moduleThresholds = Object.fromEntries(
+  readdirSync(resolve(root, 'packages'), { withFileTypes: true })
+    .filter(entry => entry.isDirectory())
+    .map(entry => [
+      `packages/${entry.name}/**`,
+      { lines: 60, functions: 60, branches: 60, statements: 60 },
+    ]),
+);
 
 export default defineConfig({
   test: {
@@ -52,17 +61,16 @@ export default defineConfig({
         'packages/*/proxy/src/**',
         'packages/*/src/proxy/**',
       ],
-      // Targets are core and components/extensible 80%, the DI kernel 95%, everything
-      // else 60% (testing rules). Raised as each package lands, so the gate never blocks
-      // work that has no implementation yet.
+      // Enforce the testing policy per package, including secondary entry points.
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 80,
-        statements: 80,
+        lines: 60,
+        functions: 60,
+        branches: 60,
+        statements: 60,
+        ...moduleThresholds,
+        'packages/core/**': { lines: 80, functions: 80, branches: 80, statements: 80 },
         'packages/core/src/di/**': { lines: 95, functions: 95, branches: 95, statements: 95 },
-        // The extension system carries every module page after it (testing rules).
-        'packages/components/src/**': { lines: 80, functions: 80, branches: 80, statements: 80 },
+        'packages/components/**': { lines: 80, functions: 80, branches: 80, statements: 80 },
       },
     },
   },

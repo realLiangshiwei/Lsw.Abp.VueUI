@@ -223,6 +223,22 @@ describe('TenantsPage', () => {
     expect(remove).toHaveBeenCalledWith('tenant-2');
   });
 
+  it('opens the selected tenant connection settings', async () => {
+    const page = await renderPage(injectorWith([tenantService(), featuresService]));
+    rowAction('AbpTenantManagement::ConnectionStrings')?.click();
+    await settle(page);
+    expect(document.body.textContent).toContain('acme');
+    expect(document.body.querySelector('input[type="checkbox"]')).not.toBeNull();
+  });
+
+  it('opens feature management for the selected tenant', async () => {
+    const page = await renderPage(injectorWith([tenantService(), featuresService]));
+    rowAction('AbpTenantManagement::Permission:ManageFeatures')?.click();
+    await settle(page);
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.body.textContent).toContain('acme');
+  });
+
   it('is accessible with a page of records on it', async () => {
     const wrapper = await renderPage(injectorWith([tenantService()]));
 
